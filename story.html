@@ -4,31 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#17100c">
-  <title>物語</title>
-  <link rel="stylesheet" href="css/story.css?v=20260823-0713">
+  <title>手紙屋の物語</title>
+  <link rel="stylesheet" href="css/story.css?v=20260823-0827">
 </head>
 <body>
   <main class="story-stage" aria-label="物語">
     <header class="story-header">
       <a class="story-back" href="story-menu.html" aria-label="物語選択に戻る">←</a>
-      <h1>物語</h1>
+      <h1>手紙屋の物語</h1>
       <span class="story-header-space" aria-hidden="true"></span>
     </header>
 
     <section class="story-scene" aria-label="場面表示欄">
-      <div class="story-scene-placeholder">物語</div>
+      <div class="story-scene-placeholder">第1話</div>
     </section>
 
     <section class="story-text" aria-label="文章表示欄">
-      <p id="storyText">貴女は手紙屋さんです。
-町には手紙を書くのが苦手な人、字が書けなくて困っている人がいます。
-貴女はこれらの人々の代わりに手紙を書いてあげています。
-さあ、今日も手紙屋を始めましょう。</p>
+      <p id="storyText">物語を読み込んでいます。</p>
 
       <div class="story-choice">
-        <a class="story-choice-button" href="confession.html">店を開く</a>
+        <a class="story-choice-button" href="confession.html">依頼を受ける</a>
       </div>
     </section>
   </main>
+
+  <script src="data/words/grade1/term1.js"></script>
+  <script src="data/words.js"></script>
+  <script src="js/storage.js?v=20260823-0827"></script>
+  <script src="data/letter-story.js?v=20260823-0827"></script>
+  <script src="js/story.js?v=20260823-0827"></script>
 </body>
 </html>
