@@ -1,7 +1,8 @@
 (()=>{
   const data=window.CONFESSION_DATA;
   const wordData=window.WordData;
-  if(!data||!wordData)return;
+  const store=window.GameStore;
+  if(!data||!wordData||!store)return;
 
   const intro=document.getElementById('confessionText');
   const rain=document.getElementById('wordRain');
@@ -30,23 +31,31 @@
     return copy;
   };
   const normalize=value=>String(value).trim().toLowerCase();
-  const dictionary=new Map();
-  wordData.all.forEach(word=>{
-    const key=normalize(word.en);
-    if(!dictionary.has(key))dictionary.set(key,word);
-  });
+
+  const progress=store.state.studyProgress||{grade:1,term:1,step:1};
+  const learnedWords=wordData.getCurrentStudyWords(progress);
+  const learnedSet=new Set(learnedWords.map(word=>normalize(word.en)));
 
   const age=weightedPick(data.ages);
   const gender=weightedPick(data.genders);
   const severity=weightedPick(age.adult?data.sinWeights.adult:data.sinWeights.minor);
-  const sentencePool=data.sentences[severity.id]||data.sentences.small;
-  let target=pick(sentencePool);
 
-  // 必ず英単語JSに存在する単語だけで1文を作る。
-  if(!target.every(word=>dictionary.has(normalize(word)))){
-    const usable=data.sentences.small.filter(sentence=>sentence.every(word=>dictionary.has(normalize(word))));
-    target=pick(usable);
-  }
+  const isUsable=lesson=>
+    lesson.grade===progress.grade&&
+    lesson.term===progress.term&&
+    lesson.step<=progress.step&&
+    lesson.words.every(word=>learnedSet.has(normalize(word)));
+
+  let candidates=data.lessons.filter(lesson=>isUsable(lesson)&&lesson.severity===severity.id);
+  if(!candidates.length)candidates=data.lessons.filter(lesson=>isUsable(lesson)&&lesson.severity==='small');
+  if(!candidates.length)candidates=data.lessons.filter(isUsable);
+  if(!candidates.length)return;
+
+  // 現在の教科書Stepに最も近い英文を優先する。
+  const newestStep=Math.max(...candidates.map(lesson=>lesson.step));
+  candidates=candidates.filter(lesson=>lesson.step===newestStep);
+  const lesson=pick(candidates);
+  const target=[...lesson.words];
 
   intro.textContent=`本日訪れたのは『${age.label}』『${gender.label}』。\n『${gender.pronoun}』は貴女を見ると、頭を垂れ、ポツポツと語り始めました。`;
 
@@ -91,7 +100,7 @@
     feedback.textContent='';
     feedback.className='confession-feedback';
 
-    // この回の正解となる1文の単語だけを、順番を混ぜて一度だけ落とす。
+    // 現在の教科書進度で作れる正解1文の単語だけを、一度だけ落とす。
     const words=shuffle(target);
     words.forEach((word,index)=>rain.appendChild(makeToken(word,index,words.length)));
   };
