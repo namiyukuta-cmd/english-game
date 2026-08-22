@@ -240,6 +240,36 @@
     writeLetterButton.classList.remove('hidden');
   };
 
+  const buildStoryLetter=(chapter,lines,opening,closing)=>{
+    const jp=lines.map(line=>line.jp);
+    const a=jp[0]||'';
+    const b=jp[1]||'';
+    const c=jp[2]||'';
+
+    switch(chapter.id){
+      case 'blue-envelope':
+        return `${opening}\n\n久しぶり。手紙を書こうと思っていたのに、何から話せばいいのか分からなくて、ずっと書けないままでした。離れてから半年もたったのに、話したいことはなくなるどころか、少しずつ増えていたみたいです。\n\nだから今日は、まず今の私のことを書きます。\n\n${a}\n${b}\n${c}\n\nこうして並べてみると、前と変わったところも、変わっていないところもあるんだなと思いました。そっちでは、今どんなものが好きですか。学校ではどんなふうに過ごしていますか。前みたいに一度に全部話せなくても、少しずつ手紙で話せたらうれしいです。\n\n${closing}\n\nミアより`;
+
+      case 'white-reply':
+        return `${opening}\n\n白い封筒を見つけたとき、すぐにソフィーからだと分かりました。返事が来ないかもしれないと思っていたから、何度も読み返しました。新しい町でのことを教えてくれてありがとう。私だけが何を書けばいいか分からなくなっていたんじゃなかったんだね。\n\n最近の私は、こんな感じです。\n\n${a}\n${b}\n${c}\n\nそれから、音楽祭のことを書いてくれたのもうれしかったです。昔の約束をまだ覚えていたんだね。会えたら、昔の話だけじゃなくて、今の私たちのこともたくさん話したいです。\n\n${closing}\n\nミアより`;
+
+      case 'festival-promise':
+        return `${opening}\n\n音楽祭に一緒に出てみたいと書いてくれて、うれしかったです。でも、手紙を読んでからずっと考えていました。昔は簡単に「いつか舞台に立とう」って言えたのに、今は本当に人前に立つことを考えると少し怖いです。\n\nそれでも、何もしないまま断るのは違う気がしました。今の私が好きなことや、できることを書いてみます。\n\n${a}\n${b}\n${c}\n\n完璧にできるかは分かりません。でも、会ったときに二人で考えて、それから決めたいです。昔の約束をそのまま守るんじゃなくて、今の私たちにできる形にできたらいいなと思っています。\n\n${closing}\n\nミアより`;
+
+      case 'misunderstanding':
+        return `${opening}\n\n昨日は、会えたことがうれしくて、前と同じように何でも話せると思っていました。だから私ばかり先に話して、ミアがどう思っているのかをちゃんと聞けていなかったと思います。音楽祭のことも、簡単に「一緒に出よう」と言ってしまってごめんなさい。\n\n今の私の気持ちを、落ち着いて書きます。\n\n${a}\n${b}\n${c}\n\n半年会わなかったから、昔と少し違っているのは当たり前なのかもしれません。それでも、違ってしまったから終わりにしたいわけじゃありません。もう一度、今のミアのことを知りたいです。今度は私がちゃんと聞きます。\n\n${closing}\n\nソフィーより`;
+
+      case 'together-again':
+        return `${opening}\n\n昨日、やっと二人でゆっくり話せました。昔みたいに全部同じ気持ちではないけれど、それでも一緒にやってみたいと思っています。大きな舞台で完璧に演奏することより、二人で最後までやることを大事にしたいです。\n\n忘れないように、今の気持ちを書いておきます。\n\n${a}\n${b}\n${c}\n\nもしまた意見が合わなくなったら、この手紙を読んで、黙ったまま決めないことにします。怖いときは怖いと言うし、やりたいことがあったらちゃんと話します。二人で決めたことだから、二人で少しずつ進みたいです。\n\n${closing}\n\nミアとソフィーより`;
+
+      case 'last-letter':
+        return `${opening}\n\n今日の音楽祭では、途中で間違えました。顔を見合わせて笑ってしまったし、思っていた通りにはできなかったところもありました。でも、最後まで演奏できました。終わったあとに聞こえた拍手を、たぶんずっと忘れないと思います。\n\n今日の私たちのことを、未来の私たちへ残しておきます。\n\n${a}\n${b}\n${c}\n\nまた離れて暮らす日が来るかもしれません。また何を書けばいいのか分からなくなる日もあると思います。そんなときは、立派なことを書こうとしなくていいです。好きなものを一つ、今日あったことを一つ、言えなかった気持ちを一つ。それだけでも手紙は始められると、今日の私たちは知っています。\n\n${closing}\n\nミアとソフィーより`;
+
+      default:
+        return `${opening}\n\n${a}\n${b}\n${c}\n\n${closing}`;
+    }
+  };
+
   submit.addEventListener('click',()=>{
     const line=currentLine();
     const correct=selected.length===line.words.length&&selected.every((word,index)=>normalize(word)===normalize(line.words[index]));
@@ -267,8 +297,12 @@
   writeLetterButton.addEventListener('click',()=>{
     const opening=pick(situation.openings);
     const closing=pick(situation.closings);
-    const body=conversationLines.map(line=>line.jp).join('\n');
-    letterText.textContent=`${opening}\n\n${body}\n\n${closing}`;
+    if(storyChapter){
+      letterText.textContent=buildStoryLetter(storyChapter,conversationLines,opening,closing);
+    }else{
+      const body=conversationLines.map(line=>line.jp).join('\n');
+      letterText.textContent=`${opening}\n\n${body}\n\n${closing}`;
+    }
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
   });
