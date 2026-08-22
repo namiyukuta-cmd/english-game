@@ -1,22 +1,54 @@
-window.WORDS = [
-  {id:'i',en:'I',ja:'私は',level:1},
-  {id:'am',en:'am',ja:'〜です／〜にいる',level:1},
-  {id:'a',en:'a',ja:'1つの／1人の',level:1},
-  {id:'student',en:'student',ja:'生徒',level:1},
-  {id:'cat',en:'cat',ja:'猫',level:1},
-  {id:'dog',en:'dog',ja:'犬',level:1},
-  {id:'book',en:'book',ja:'本',level:1},
-  {id:'apple',en:'apple',ja:'りんご',level:1},
-  {id:'like',en:'like',ja:'好き／好む',level:1},
-  {id:'have',en:'have',ja:'持っている／飼っている',level:1},
-  {id:'you',en:'you',ja:'あなたは／あなたを',level:1},
-  {id:'are',en:'are',ja:'〜です／〜にいる',level:1},
-  {id:'happy',en:'happy',ja:'うれしい',level:1},
-  {id:'she',en:'she',ja:'彼女は',level:2},
-  {id:'he',en:'he',ja:'彼は',level:2},
-  {id:'is',en:'is',ja:'〜です／〜にいる',level:2},
-  {id:'likes',en:'likes',ja:'好き／好む',level:2},
-  {id:'has',en:'has',ja:'持っている／飼っている',level:2},
-  {id:'plays',en:'plays',ja:'する／遊ぶ',level:2},
-  {id:'tennis',en:'tennis',ja:'テニス',level:2}
-];
+(()=>{
+  const sourceSets=[
+    ...(window.WORD_DATA_G1_T1||[])
+  ];
+
+  const sortWords=(a,b)=>(a.grade-b.grade)||(a.term-b.term)||(a.step-b.step)||(a.order-b.order);
+  const keyOf=w=>`${String(w.en).trim().toLowerCase()}\u0000${String(w.ja).trim()}`;
+
+  function uniqueWords(list){
+    const seen=new Set();
+    return list.filter(word=>{
+      const key=keyOf(word);
+      if(seen.has(key))return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function getWords(options={}){
+    const {grade,term,step,minStep,maxStep,section,kind,unique=true}=options;
+    let list=sourceSets.filter(word=>
+      (grade==null||word.grade===grade)&&
+      (term==null||word.term===term)&&
+      (step==null||word.step===step)&&
+      (minStep==null||word.step>=minStep)&&
+      (maxStep==null||word.step<=maxStep)&&
+      (section==null||word.section===section)&&
+      (kind==null||word.kind===kind)
+    ).sort(sortWords);
+    if(unique)list=uniqueWords(list);
+    return list;
+  }
+
+  function getCurrentStudyWords(progress={grade:1,term:1,step:1}){
+    return getWords({grade:progress.grade,term:progress.term,maxStep:progress.step});
+  }
+
+  function getMaxStep(grade,term){
+    return getWords({grade,term,unique:false}).reduce((max,word)=>Math.max(max,word.step),0);
+  }
+
+  function getById(id){return sourceSets.find(word=>word.id===id)||null}
+
+  window.WordData={
+    all:[...sourceSets].sort(sortWords),
+    getWords,
+    getCurrentStudyWords,
+    getMaxStep,
+    getById
+  };
+
+  // Existing game code can continue using WORDS.
+  window.WORDS=getWords();
+})();
