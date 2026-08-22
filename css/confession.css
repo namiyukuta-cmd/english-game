@@ -11,13 +11,14 @@ button{font:inherit}
 .confession-panel,.answer-panel,.word-rain-panel{min-width:0;min-height:0;padding:14px 16px;background:#15110e}
 .confession-panel{display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid #54483d;overflow:auto}
 .confession-label-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.confession-label,.answer-label,.confession-progress{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#b7a48f}
+.confession-label,.confession-progress{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#b7a48f}
+.answer-label{margin:0 0 8px;font-size:17px;font-weight:800;letter-spacing:.08em;color:#b7a48f}
 .confession-progress{letter-spacing:.04em}
-.confession-text{margin:0;white-space:pre-wrap;font-size:clamp(14px,3.8vw,18px);line-height:1.65;color:#d8cab9}
-.speaker-line{margin:12px 0 0;padding:12px 14px;border:1px solid #665748;border-radius:10px;background:#211a15;font-size:clamp(17px,4.5vw,22px);font-weight:800;line-height:1.6;color:#f4eadc}
+.confession-text{margin:0;white-space:pre-wrap;font-size:clamp(17px,4vw,19px);line-height:1.65;color:#d8cab9}
+.speaker-line{margin:12px 0 0;padding:12px 14px;border:1px solid #665748;border-radius:10px;background:#211a15;font-size:clamp(20px,4.8vw,24px);font-weight:800;line-height:1.6;color:#f4eadc}
 .word-rain-panel{display:grid;grid-template-rows:auto 1fr;border-bottom:1px solid #54483d;overflow:hidden}
 .word-bank{min-height:0;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px;padding:14px;border:1px solid #4c4036;border-radius:12px;background:linear-gradient(180deg,#211b17,#120f0d);overflow:auto}
-.word-token{min-width:62px;min-height:42px;padding:8px 12px;border:1px solid #917c68;border-radius:10px;background:#eee3d3;color:#302820;font-weight:800;font-size:15px;box-shadow:0 3px 8px #0004;touch-action:manipulation}
+.word-token{min-width:62px;min-height:42px;padding:8px 12px;border:1px solid #917c68;border-radius:10px;background:#eee3d3;color:#302820;font-weight:800;font-size:20px;box-shadow:0 3px 8px #0004;touch-action:manipulation}
 .word-token:active{transform:scale(.98)}
 .word-token.picked{opacity:.25;pointer-events:none;box-shadow:none}
 .answer-panel{display:flex;flex-direction:column;overflow:auto;padding-bottom:max(14px,env(safe-area-inset-bottom))}
@@ -40,10 +41,11 @@ button{font:inherit}
   .confession-header h1{font-size:18px}
   .confession-back{width:33px;height:33px;font-size:19px}
   .confession-panel,.word-rain-panel,.answer-panel{padding:10px 12px}
-  .confession-text{font-size:15px;line-height:1.6}
-  .speaker-line{margin-top:8px;padding:9px 11px;font-size:17px;line-height:1.55}
+  .confession-text{font-size:17px;line-height:1.6}
+  .speaker-line{margin-top:8px;padding:9px 11px;font-size:20px;line-height:1.55}
   .word-bank{gap:7px;padding:10px}
-  .word-token{min-width:54px;min-height:38px;padding:6px 9px;font-size:13px;border-radius:8px}
+  .word-token{min-width:54px;min-height:38px;padding:6px 9px;font-size:20px;border-radius:8px}
+  .answer-label{font-size:17px}
   .answer-box{min-height:45px;padding:8px;font-size:13px}
   .completed-sentences{margin-top:5px}
   .completed-line{font-size:10px}
