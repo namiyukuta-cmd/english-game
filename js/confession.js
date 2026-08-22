@@ -1,8 +1,9 @@
 (()=>{
-  const data=window.LETTER_REQUESTERS;
+  const requesterData=window.LETTER_REQUESTERS;
+  const contentData=window.LETTER_CONTENT;
   const wordData=window.WordData;
   const store=window.GameStore;
-  if(!data||!wordData||!store)return;
+  if(!requesterData||!contentData||!wordData||!store)return;
 
   const intro=document.getElementById('confessionText');
   const speakerLine=document.getElementById('speakerLine');
@@ -28,19 +29,8 @@
   const normalize=value=>String(value).trim().toLowerCase().replace(/[.!?]$/,'');
 
   const progress=store.state.studyProgress||{grade:1,term:1,step:1};
-  const learnedSet=new Set(
-    wordData.getCurrentStudyWords(progress).map(word=>normalize(word.en))
-  );
+  const learnedSet=new Set(wordData.getCurrentStudyWords(progress).map(word=>normalize(word.en)));
 
-  const isUsableRequester=item=>
-    item&&
-    item.grade===progress.grade&&
-    item.term===progress.term&&
-    item.step<=progress.step&&
-    item.lines.length===3&&
-    item.lines.every(line=>line.words.every(word=>learnedSet.has(normalize(word))));
-
-  // 教科書上のまとまり。学習順は固定し、来店する人物だけをランダムにする。
   const studyGroup=step=>{
     if(step<=6)return 'friends';
     if(step<=9)return 'unit1';
@@ -49,46 +39,74 @@
     return 'unit3';
   };
 
-  const allCandidates=data.requesters.filter(isUsableRequester);
-  if(!allCandidates.length)return;
+  const chooseWithCooldown=(items,recentIds,limit)=>{
+    if(!items.length)return null;
+    const recent=Array.isArray(recentIds)?recentIds:[];
+    const cooldown=Math.min(limit,Math.max(0,items.length-1));
+    const blocked=new Set(recent.slice(-cooldown));
+    let pool=items.filter(item=>!blocked.has(item.id));
+    if(!pool.length){
+      const last=recent[recent.length-1]||'';
+      pool=items.filter(item=>item.id!==last);
+      if(!pool.length)pool=[...items];
+    }
+    return pool[Math.floor(Math.random()*pool.length)];
+  };
 
-  // 一度使った依頼人はすぐ再登場させない。
-  // 候補が十分ある時は直近5人を除外し、全員を一巡するまで同じ内容が出にくいようにする。
-  const recent=Array.isArray(store.state.recentLetterRequesterIds)?store.state.recentLetterRequesterIds:[];
-  const cooldown=Math.min(5,Math.max(0,allCandidates.length-1));
-  const blocked=new Set(recent.slice(-cooldown));
-  let candidates=allCandidates.filter(item=>!blocked.has(item.id));
+  // 依頼人は年齢・性別だけのプロフィール。英単語・英文・手紙内容とは無関係に抽選する。
+  const requester=chooseWithCooldown(
+    requesterData.requesters,
+    store.state.recentLetterRequesterIds,
+    5
+  );
+  if(!requester)return;
 
-  // 既存セーブなどで候補が全て除外された場合も、少なくとも直前の人だけは避ける。
-  if(!candidates.length){
-    const lastId=recent[recent.length-1]||store.state.lastLetterRequesterId||'';
-    candidates=allCandidates.filter(item=>item.id!==lastId);
-    if(!candidates.length)candidates=[...allCandidates];
-  }
+  // 学習済み単語だけで作れる内容を候補にする。
+  const usableCases=contentData.cases.filter(item=>
+    item&&
+    item.grade===progress.grade&&
+    item.term===progress.term&&
+    item.step<=progress.step&&
+    Array.isArray(item.lines)&&item.lines.length===3&&
+    item.lines.every(line=>line.words.every(word=>learnedSet.has(normalize(word))))
+  );
+  if(!usableCases.length)return;
 
+  // 現在の学習範囲を多めにしつつ、以前の内容も復習として残す。
   const currentGroup=studyGroup(progress.step);
-  const weighted=[];
-  for(const item of candidates){
-    // 現在学習中のUnit/範囲を多めに出し、過去範囲も復習として残す。
-    const weight=studyGroup(item.step)===currentGroup?5:1;
-    for(let i=0;i<weight;i++)weighted.push(item);
+  const recentContent=Array.isArray(store.state.recentLetterContentIds)?store.state.recentLetterContentIds:[];
+  const contentCooldown=Math.min(5,Math.max(0,usableCases.length-1));
+  const blockedContent=new Set(recentContent.slice(-contentCooldown));
+  let contentCandidates=usableCases.filter(item=>!blockedContent.has(item.id));
+  if(!contentCandidates.length){
+    const last=recentContent[recentContent.length-1]||'';
+    contentCandidates=usableCases.filter(item=>item.id!==last);
+    if(!contentCandidates.length)contentCandidates=[...usableCases];
   }
-  const requester=weighted[Math.floor(Math.random()*weighted.length)];
 
-  // 今回の依頼人を履歴へ保存。次回以降しばらく候補から外れる。
+  const weightedContent=[];
+  for(const item of contentCandidates){
+    const weight=studyGroup(item.step)===currentGroup?5:1;
+    for(let i=0;i<weight;i++)weightedContent.push(item);
+  }
+  const contentCase=weightedContent[Math.floor(Math.random()*weightedContent.length)];
+
+  // 人物履歴と内容履歴は別々に保存する。
   if(typeof store.rememberLetterRequester==='function')store.rememberLetterRequester(requester.id,5);
   else{
-    store.state.lastLetterRequesterId=requester.id;
-    store.save();
+    const recent=[...(store.state.recentLetterRequesterIds||[]).filter(id=>id!==requester.id),requester.id];
+    store.state.recentLetterRequesterIds=recent.slice(-5);
   }
+  const contentRecent=[...(store.state.recentLetterContentIds||[]).filter(id=>id!==contentCase.id),contentCase.id];
+  store.state.recentLetterContentIds=contentRecent.slice(-5);
+  store.save();
 
   intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は貴女に、手紙を書いてほしいと頼みました。`;
 
   let round=0;
   let selected=[];
   const completed=[];
-
-  const currentLine=()=>requester.lines[round];
+  const currentLine=()=>contentCase.lines[round];
 
   const renderAnswer=()=>{
     answer.textContent=selected.length?selected.join(' '):'';
@@ -132,8 +150,6 @@
     renderCompleted();
     feedback.textContent='';
     feedback.className='confession-feedback';
-
-    // 1文を作る単語だけを表示し、表示順だけ毎回混ぜる。
     shuffle(line.words).forEach(word=>wordBank.appendChild(makeToken(word)));
   };
 
@@ -152,7 +168,6 @@
   submit.addEventListener('click',()=>{
     const line=currentLine();
     const correct=selected.length===line.words.length&&selected.every((word,index)=>normalize(word)===normalize(line.words[index]));
-
     if(!correct){
       feedback.textContent='語順が違います。';
       feedback.className='confession-feedback bad';
@@ -175,7 +190,7 @@
   reset.addEventListener('click',buildRound);
 
   writeLetterButton.addEventListener('click',()=>{
-    letterText.textContent=requester.letter;
+    letterText.textContent=contentCase.letter;
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
   });
