@@ -20,7 +20,8 @@
     hpBox.appendChild(seg);
   }
 
-  const unlocked = WORDS.filter(word => GameStore.state.unlockedWordIds.includes(word.id));
+  const studyPool = WordData.getCurrentStudyWords(GameStore.state.studyProgress);
+  const unlocked = studyPool.filter(word => GameStore.state.unlockedWordIds.includes(word.id));
   const words = shuffle(unlocked).slice(0, 6);
   const tiles = shuffle(words.flatMap(word => [
     { key: word.id, type: 'en', text: word.en },
