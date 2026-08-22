@@ -7,16 +7,25 @@
   <link rel="stylesheet" href="css/tavern.css">
 </head>
 <body>
-  <main id="tavernStage" class="tavern-stage" aria-label="酒場">
-    <nav class="tavern-menu" aria-label="酒場メニュー">
-      <a class="tavern-button main-button" href="index.html">メインに戻る</a>
-      <button class="tavern-button" type="button">依頼</button>
-      <button class="tavern-button" type="button">買物</button>
-      <button class="tavern-button" type="button">セーブ</button>
-      <button class="tavern-button" type="button">ロード</button>
-    </nav>
+  <main class="tavern-stage" aria-label="酒場">
+    <section class="tavern-top">
+      <div id="tavernImage" class="tavern-image" role="img" aria-label="賑やかな酒場"></div>
+
+      <nav class="tavern-menu" aria-label="酒場メニュー">
+        <a class="tavern-button" href="index.html">メインに戻る</a>
+        <button class="tavern-button" id="requestButton" type="button">依頼</button>
+        <button class="tavern-button" id="shopButton" type="button">買物</button>
+        <button class="tavern-button" id="saveButton" type="button">セーブ</button>
+        <button class="tavern-button" id="loadButton" type="button">ロード</button>
+      </nav>
+    </section>
+
+    <section class="tavern-text" aria-label="文章表示欄">
+      <p id="tavernText">酒場は冒険者たちの話し声で賑わっている。</p>
+    </section>
   </main>
 
+  <script src="js/tavern-bg.js"></script>
   <script src="js/tavern.js"></script>
 </body>
 </html>
