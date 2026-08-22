@@ -26,6 +26,7 @@
     }
     return copy;
   };
+  const pick=list=>list[Math.floor(Math.random()*list.length)];
   const normalize=value=>String(value).trim().toLowerCase().replace(/[.!?]$/,'');
 
   const progress=store.state.studyProgress||{grade:1,term:1,step:1};
@@ -38,6 +39,7 @@
     if(step===14)return 'worldtour1';
     return 'unit3';
   };
+  const currentGroup=studyGroup(progress.step);
 
   const chooseWithCooldown=(items,recentIds,limit)=>{
     if(!items.length)return null;
@@ -50,63 +52,100 @@
       pool=items.filter(item=>item.id!==last);
       if(!pool.length)pool=[...items];
     }
-    return pool[Math.floor(Math.random()*pool.length)];
+    return pick(pool);
   };
 
-  // 依頼人は年齢・性別だけのプロフィール。英単語・英文・手紙内容とは無関係に抽選する。
-  const requester=chooseWithCooldown(
-    requesterData.requesters,
-    store.state.recentLetterRequesterIds,
-    5
-  );
+  // 人物は年齢・性別だけ。学習内容とは独立して決める。
+  const requester=chooseWithCooldown(requesterData.requesters,store.state.recentLetterRequesterIds,5);
   if(!requester)return;
 
-  // 学習済み単語だけで作れる内容を候補にする。
-  const usableCases=contentData.cases.filter(item=>
-    item&&
-    item.grade===progress.grade&&
-    item.term===progress.term&&
-    item.step<=progress.step&&
-    Array.isArray(item.lines)&&item.lines.length===3&&
-    item.lines.every(line=>line.words.every(word=>learnedSet.has(normalize(word))))
+  // Step1〜現在のStepまでに習った単語だけで作れる「1文」を全部候補にする。
+  const usableLines=contentData.lines.filter(line=>
+    line&&
+    line.grade===progress.grade&&
+    line.term===progress.term&&
+    line.step<=progress.step&&
+    Array.isArray(line.words)&&
+    line.words.every(word=>learnedSet.has(normalize(word)))
   );
-  if(!usableCases.length)return;
 
-  // 現在の学習範囲を多めにしつつ、以前の内容も復習として残す。
-  const currentGroup=studyGroup(progress.step);
-  const recentContent=Array.isArray(store.state.recentLetterContentIds)?store.state.recentLetterContentIds:[];
-  const contentCooldown=Math.min(5,Math.max(0,usableCases.length-1));
-  const blockedContent=new Set(recentContent.slice(-contentCooldown));
-  let contentCandidates=usableCases.filter(item=>!blockedContent.has(item.id));
-  if(!contentCandidates.length){
-    const last=recentContent[recentContent.length-1]||'';
-    contentCandidates=usableCases.filter(item=>item.id!==last);
-    if(!contentCandidates.length)contentCandidates=[...usableCases];
+  const matchesSlot=(line,slotTags)=>slotTags.some(tag=>line.tags.includes(tag));
+
+  // 同じ英文を重ねず、事情の3つの役割に合う文を1文ずつ選ぶ。
+  const buildLinesForSituation=situation=>{
+    const used=new Set();
+    const result=[];
+    for(const slot of situation.slots){
+      const possible=usableLines.filter(line=>!used.has(line.id)&&matchesSlot(line,slot));
+      if(!possible.length)return null;
+
+      // 今習っている範囲の文は少し出やすくするが、以前の文も常に候補に残す。
+      const weighted=[];
+      for(const line of possible){
+        const weight=studyGroup(line.step)===currentGroup?3:1;
+        for(let i=0;i<weight;i++)weighted.push(line);
+      }
+      const chosen=pick(weighted);
+      used.add(chosen.id);
+      result.push(chosen);
+    }
+    return result;
+  };
+
+  // 現在の学習範囲で成立する事情だけを候補にする。
+  const usableSituations=[];
+  for(const situation of contentData.situations){
+    if(situation.minStep>progress.step)continue;
+    const sample=buildLinesForSituation(situation);
+    if(sample)usableSituations.push(situation);
+  }
+  if(!usableSituations.length)return;
+
+  // 新しく習った表現を使える事情は少し出やすい。それ以外も復習として出る。
+  const weightedSituations=[];
+  for(const situation of usableSituations){
+    const hasCurrent=usableLines.some(line=>
+      studyGroup(line.step)===currentGroup&&situation.slots.some(slot=>matchesSlot(line,slot))
+    );
+    const weight=hasCurrent?3:1;
+    for(let i=0;i<weight;i++)weightedSituations.push(situation);
   }
 
-  const weightedContent=[];
-  for(const item of contentCandidates){
-    const weight=studyGroup(item.step)===currentGroup?5:1;
-    for(let i=0;i<weight;i++)weightedContent.push(item);
-  }
-  const contentCase=weightedContent[Math.floor(Math.random()*weightedContent.length)];
+  const recentCombos=Array.isArray(store.state.recentLetterContentIds)?store.state.recentLetterContentIds:[];
+  let situation=null;
+  let conversationLines=null;
+  let comboId='';
 
-  // 人物履歴と内容履歴は別々に保存する。
+  // 同じ「事情＋3文」の組み合わせをすぐ繰り返さない。
+  for(let attempt=0;attempt<30;attempt++){
+    const candidateSituation=pick(weightedSituations);
+    const candidateLines=buildLinesForSituation(candidateSituation);
+    if(!candidateLines)continue;
+    const candidateId=`${candidateSituation.id}:${candidateLines.map(line=>line.id).join('|')}`;
+    if(!recentCombos.includes(candidateId)||attempt===29){
+      situation=candidateSituation;
+      conversationLines=candidateLines;
+      comboId=candidateId;
+      break;
+    }
+  }
+  if(!situation||!conversationLines)return;
+
+  // 人物・内容の履歴を別々に保存する。
   if(typeof store.rememberLetterRequester==='function')store.rememberLetterRequester(requester.id,5);
   else{
     const recent=[...(store.state.recentLetterRequesterIds||[]).filter(id=>id!==requester.id),requester.id];
     store.state.recentLetterRequesterIds=recent.slice(-5);
   }
-  const contentRecent=[...(store.state.recentLetterContentIds||[]).filter(id=>id!==contentCase.id),contentCase.id];
-  store.state.recentLetterContentIds=contentRecent.slice(-5);
+  store.state.recentLetterContentIds=[...recentCombos.filter(id=>id!==comboId),comboId].slice(-8);
   store.save();
 
-  intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は貴女に、手紙を書いてほしいと頼みました。`;
+  intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は、${situation.label}と話しました。`;
 
   let round=0;
   let selected=[];
   const completed=[];
-  const currentLine=()=>contentCase.lines[round];
+  const currentLine=()=>conversationLines[round];
 
   const renderAnswer=()=>{
     answer.textContent=selected.length?selected.join(' '):'';
@@ -190,7 +229,10 @@
   reset.addEventListener('click',buildRound);
 
   writeLetterButton.addEventListener('click',()=>{
-    letterText.textContent=contentCase.letter;
+    const opening=pick(situation.openings);
+    const closing=pick(situation.closings);
+    const body=conversationLines.map(line=>line.jp).join('');
+    letterText.textContent=`${opening}${body}${closing}`;
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
   });
