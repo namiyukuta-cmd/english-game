@@ -9,7 +9,8 @@ window.GameStore = (()=>{
     seenSentenceIds:[],
     seenGrammarIds:[],
     letterRequesterIndex:0,
-    passedUnitTests:[]
+    passedUnitTests:[],
+    recentLetterRequesterIds:[]
   };
 
   const unitTestKey=(grade,term,unit)=>`g${grade}t${term}_unit${unit}`;
@@ -27,13 +28,15 @@ window.GameStore = (()=>{
     try{
       const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
       const passedUnitTests=Array.isArray(saved.passedUnitTests)?saved.passedUnitTests:[];
-      const state={...initial,...saved,passedUnitTests};
+      const recentLetterRequesterIds=Array.isArray(saved.recentLetterRequesterIds)?saved.recentLetterRequesterIds.filter(Boolean):[];
+      if(!recentLetterRequesterIds.length&&saved.lastLetterRequesterId)recentLetterRequesterIds.push(saved.lastLetterRequesterId);
+      const state={...initial,...saved,passedUnitTests,recentLetterRequesterIds:recentLetterRequesterIds.slice(-5)};
       state.studyProgress=clampLockedProgress(saved.studyProgress||defaultProgress,passedUnitTests);
       const required=WordData.getCurrentStudyWords(state.studyProgress).map(w=>w.id);
       state.unlockedWordIds=[...new Set([...(saved.unlockedWordIds||[]),...required])];
       if(!Number.isInteger(state.letterRequesterIndex)||state.letterRequesterIndex<0)state.letterRequesterIndex=0;
       return state;
-    }catch(e){return {...initial,studyProgress:{...defaultProgress},passedUnitTests:[]}}
+    }catch(e){return {...initial,studyProgress:{...defaultProgress},passedUnitTests:[],recentLetterRequesterIds:[]}}
   }
 
   let state=load();
@@ -75,7 +78,16 @@ window.GameStore = (()=>{
     save();
     return state.letterRequesterIndex;
   }
+  function rememberLetterRequester(id,limit=5){
+    if(!id)return state.recentLetterRequesterIds;
+    const recent=(state.recentLetterRequesterIds||[]).filter(item=>item!==id);
+    recent.push(id);
+    state.recentLetterRequesterIds=recent.slice(-Math.max(1,limit));
+    state.lastLetterRequesterId=id;
+    save();
+    return state.recentLetterRequesterIds;
+  }
   function seeSentence(id){if(!state.seenSentenceIds.includes(id)){state.seenSentenceIds.push(id);save()}}
   function seeGrammar(id){const first=!state.seenGrammarIds.includes(id);if(first){state.seenGrammarIds.push(id);save()}return first}
-  return {get state(){return state},save,addCoins,unlockWords,setStudyProgress,unlockNextStudyStep,hasPassedUnitTest,passUnitTest,advanceLetterRequester,seeSentence,seeGrammar};
+  return {get state(){return state},save,addCoins,unlockWords,setStudyProgress,unlockNextStudyStep,hasPassedUnitTest,passUnitTest,advanceLetterRequester,rememberLetterRequester,seeSentence,seeGrammar};
 })();
