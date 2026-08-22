@@ -49,14 +49,21 @@
     return 'unit3';
   };
 
-  let candidates=data.requesters.filter(isUsableRequester);
-  if(!candidates.length)return;
+  const allCandidates=data.requesters.filter(isUsableRequester);
+  if(!allCandidates.length)return;
 
-  // 同じ人が連続しにくいようにする。ただし候補が1人だけなら反復する。
-  const lastId=store.state.lastLetterRequesterId||'';
-  if(candidates.length>1){
-    const withoutLast=candidates.filter(item=>item.id!==lastId);
-    if(withoutLast.length)candidates=withoutLast;
+  // 一度使った依頼人はすぐ再登場させない。
+  // 候補が十分ある時は直近5人を除外し、全員を一巡するまで同じ内容が出にくいようにする。
+  const recent=Array.isArray(store.state.recentLetterRequesterIds)?store.state.recentLetterRequesterIds:[];
+  const cooldown=Math.min(5,Math.max(0,allCandidates.length-1));
+  const blocked=new Set(recent.slice(-cooldown));
+  let candidates=allCandidates.filter(item=>!blocked.has(item.id));
+
+  // 既存セーブなどで候補が全て除外された場合も、少なくとも直前の人だけは避ける。
+  if(!candidates.length){
+    const lastId=recent[recent.length-1]||store.state.lastLetterRequesterId||'';
+    candidates=allCandidates.filter(item=>item.id!==lastId);
+    if(!candidates.length)candidates=[...allCandidates];
   }
 
   const currentGroup=studyGroup(progress.step);
@@ -68,9 +75,12 @@
   }
   const requester=weighted[Math.floor(Math.random()*weighted.length)];
 
-  // 次回来店時の連続出現を避けるため、今回の依頼人だけ記録する。
-  store.state.lastLetterRequesterId=requester.id;
-  store.save();
+  // 今回の依頼人を履歴へ保存。次回以降しばらく候補から外れる。
+  if(typeof store.rememberLetterRequester==='function')store.rememberLetterRequester(requester.id,5);
+  else{
+    store.state.lastLetterRequesterId=requester.id;
+    store.save();
+  }
 
   intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は貴女に、手紙を書いてほしいと頼みました。`;
 
