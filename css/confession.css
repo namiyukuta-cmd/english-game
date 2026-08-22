@@ -13,9 +13,9 @@ button{font:inherit}
 .confession-text{margin:0;white-space:pre-wrap;font-size:clamp(14px,3.8vw,18px);line-height:1.8;color:#f0e8dc}
 .word-rain-panel{display:grid;grid-template-rows:auto 1fr;border-bottom:1px solid #54483d;overflow:hidden}
 .word-rain{position:relative;min-height:0;overflow:hidden;border:1px solid #4c4036;border-radius:12px;background:linear-gradient(180deg,#211b17,#120f0d)}
-.falling-word{position:absolute;left:var(--x);top:-44px;transform:translateX(-50%);min-width:54px;padding:8px 10px;border:1px solid #917c68;border-radius:10px;background:#eee3d3;color:#302820;font-weight:800;font-size:14px;box-shadow:0 4px 10px #0005;animation:wordFall var(--duration) linear var(--delay) infinite;touch-action:manipulation}
+.falling-word{position:absolute;left:var(--x);top:-44px;transform:translateX(-50%);min-width:54px;padding:8px 10px;border:1px solid #917c68;border-radius:10px;background:#eee3d3;color:#302820;font-weight:800;font-size:14px;box-shadow:0 4px 10px #0005;animation:wordFall var(--duration) ease-out var(--delay) 1 forwards;touch-action:manipulation}
 .falling-word.caught{display:none}
-@keyframes wordFall{from{top:-44px}to{top:calc(100% + 44px)}}
+@keyframes wordFall{from{top:-44px}to{top:var(--y)}}
 .answer-panel{display:flex;flex-direction:column;overflow:auto;padding-bottom:max(14px,env(safe-area-inset-bottom))}
 .answer-box{min-height:58px;border:1px solid #6c5d50;border-radius:10px;background:#201a16;padding:12px;white-space:pre-wrap;line-height:1.7;font-weight:700;color:#f4eadc}
 .confession-feedback{min-height:21px;margin:8px 0 6px;text-align:center;font-size:12px;font-weight:800}
