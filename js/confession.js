@@ -21,6 +21,14 @@
   };
 
   const pick=list=>list[Math.floor(Math.random()*list.length)];
+  const shuffle=list=>{
+    const copy=[...list];
+    for(let i=copy.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [copy[i],copy[j]]=[copy[j],copy[i]];
+    }
+    return copy;
+  };
   const normalize=value=>String(value).trim().toLowerCase();
   const dictionary=new Map();
   wordData.all.forEach(word=>{
@@ -34,9 +42,10 @@
   const sentencePool=data.sentences[severity.id]||data.sentences.small;
   let target=pick(sentencePool);
 
-  // 念のため、英単語JSに存在する単語だけを使う。
+  // 必ず英単語JSに存在する単語だけで1文を作る。
   if(!target.every(word=>dictionary.has(normalize(word)))){
-    target=pick(data.sentences.small.filter(sentence=>sentence.every(word=>dictionary.has(normalize(word)))));
+    const usable=data.sentences.small.filter(sentence=>sentence.every(word=>dictionary.has(normalize(word))));
+    target=pick(usable);
   }
 
   intro.textContent=`本日訪れたのは『${age.label}』『${gender.label}』。\n『${gender.pronoun}』は貴女を見ると、頭を垂れ、ポツポツと語り始めました。`;
@@ -51,15 +60,26 @@
     button.type='button';
     button.className='falling-word';
     button.textContent=word;
-    const lane=(index+Math.random()*.7)/Math.max(total,1);
-    button.style.setProperty('--x',`${Math.min(91,Math.max(2,lane*94))}%`);
-    button.style.setProperty('--delay',`${-(Math.random()*8).toFixed(2)}s`);
-    button.style.setProperty('--duration',`${(7+Math.random()*6).toFixed(2)}s`);
+
+    const columns=Math.min(3,total);
+    const rows=Math.ceil(total/columns);
+    const col=index%columns;
+    const row=Math.floor(index/columns);
+    const x=((col+.5)/columns)*100;
+    const y=12+((row+.5)/rows)*70;
+
+    button.style.setProperty('--x',`${x}%`);
+    button.style.setProperty('--y',`${y}%`);
+    button.style.setProperty('--delay',`${(index*.18).toFixed(2)}s`);
+    button.style.setProperty('--duration',`${(1.7+Math.random()*.7).toFixed(2)}s`);
+
     button.addEventListener('click',()=>{
+      if(button.classList.contains('caught'))return;
       selected.push(word);
       button.classList.add('caught');
       renderAnswer();
       feedback.textContent='';
+      feedback.className='confession-feedback';
     });
     return button;
   };
@@ -69,20 +89,10 @@
     selected.length=0;
     renderAnswer();
     feedback.textContent='';
+    feedback.className='confession-feedback';
 
-    const targetWords=[...target];
-    const targetKeys=new Set(targetWords.map(normalize));
-    const distractorPool=wordData.all
-      .map(word=>word.en)
-      .filter(en=>!targetKeys.has(normalize(en))&&!String(en).includes(' ')&&!/[.!?]/.test(en));
-
-    const distractors=[];
-    while(distractors.length<Math.min(7,distractorPool.length)){
-      const candidate=pick(distractorPool);
-      if(!distractors.includes(candidate))distractors.push(candidate);
-    }
-
-    const words=[...targetWords,...distractors].sort(()=>Math.random()-.5);
+    // この回の正解となる1文の単語だけを、順番を混ぜて一度だけ落とす。
+    const words=shuffle(target);
     words.forEach((word,index)=>rain.appendChild(makeToken(word,index,words.length)));
   };
 
