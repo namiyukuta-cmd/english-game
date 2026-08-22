@@ -17,7 +17,6 @@
   const letterPanel=document.getElementById('letterPanel');
   const letterText=document.getElementById('letterText');
 
-  const pick=list=>list[Math.floor(Math.random()*list.length)];
   const shuffle=list=>{
     const copy=[...list];
     for(let i=copy.length-1;i>0;i--){
@@ -34,23 +33,39 @@
   );
 
   const isUsableRequester=item=>
+    item&&
     item.grade===progress.grade&&
     item.term===progress.term&&
     item.step<=progress.step&&
     item.lines.length===3&&
     item.lines.every(line=>line.words.every(word=>learnedSet.has(normalize(word))));
 
-  let candidates=data.requesters.filter(isUsableRequester);
-  if(!candidates.length)return;
+  // 依頼人は requesters.js に書かれた順番で来る。ランダム抽選はしない。
+  let requesterIndex=store.state.letterRequesterIndex||0;
+  if(requesterIndex>=data.requesters.length)requesterIndex=data.requesters.length-1;
+  if(requesterIndex<0)requesterIndex=0;
 
-  const newestStep=Math.max(...candidates.map(item=>item.step));
-  candidates=candidates.filter(item=>item.step===newestStep);
-  const requester=pick(candidates);
+  let requester=data.requesters[requesterIndex];
+
+  // 次の依頼人がまだ学習範囲外なら、直前の依頼人を反復する。
+  // 新しいStepが解放されたら、そのまま固定順の次の依頼人へ進める。
+  if(!isUsableRequester(requester)){
+    for(let i=Math.min(requesterIndex,data.requesters.length-1);i>=0;i--){
+      if(isUsableRequester(data.requesters[i])){
+        requester=data.requesters[i];
+        requesterIndex=i;
+        break;
+      }
+    }
+  }
+
+  if(!requester||!isUsableRequester(requester))return;
 
   intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は貴女に、手紙を書いてほしいと頼みました。`;
 
   let round=0;
   let selected=[];
+  let requesterAdvanced=false;
   const completed=[];
 
   const currentLine=()=>requester.lines[round];
@@ -98,6 +113,7 @@
     feedback.textContent='';
     feedback.className='confession-feedback';
 
+    // 単語の表示順だけは毎回混ぜる。依頼人と英文の出題順は固定。
     shuffle(line.words).forEach(word=>wordBank.appendChild(makeToken(word)));
   };
 
@@ -142,6 +158,14 @@
     letterText.textContent=requester.letter;
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
+
+    if(!requesterAdvanced){
+      const next=data.requesters[requesterIndex+1];
+      // 次の依頼人が現在の学習範囲に入っている時だけ順番を進める。
+      // まだなら同じ依頼人を反復し、学習範囲が広がった後に次へ進む。
+      if(isUsableRequester(next))store.advanceLetterRequester();
+      requesterAdvanced=true;
+    }
   });
 
   buildRound();
