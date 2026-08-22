@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#17100c">
   <title>手紙屋</title>
-  <link rel="stylesheet" href="css/confession.css?v=20260822-2106">
+  <link rel="stylesheet" href="css/confession.css?v=20260822-2110">
 </head>
 <body>
   <main class="confession-stage" aria-label="手紙屋">
@@ -39,12 +39,18 @@
       </div>
       <button id="writeLetterButton" class="write-letter-button hidden" type="button">手紙を書く</button>
     </section>
+
+    <section id="letterPanel" class="letter-panel hidden" aria-hidden="true" aria-label="完成した手紙">
+      <p class="letter-kicker">完成した手紙</p>
+      <div id="letterText" class="letter-text"></div>
+      <a class="letter-return" href="story.html">店に戻る</a>
+    </section>
   </main>
 
   <script src="data/words/grade1/term1.js"></script>
   <script src="data/words.js"></script>
   <script src="js/storage.js"></script>
-  <script src="data/confessions.js"></script>
-  <script src="js/confession.js?v=20260822-2106"></script>
+  <script src="data/requesters.js"></script>
+  <script src="js/confession.js?v=20260822-2110"></script>
 </body>
 </html>
