@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <title>Battle</title>
+  <link rel="stylesheet" href="css/battle.css">
+</head>
+<body>
+  <main class="battle-shell">
+    <header class="battle-head">
+      <a class="back" href="rpg.html">← RPGへ</a>
+      <div class="coin">🪙 <span id="coinCount">0</span></div>
+    </header>
+
+    <section class="enemy-area" aria-label="敵">
+      <div class="enemy-name" id="enemyName">スライム</div>
+      <div class="enemy-hp" id="enemyHp" aria-label="敵のHP"></div>
+      <div class="slime" id="enemySprite" aria-hidden="true">
+        <span class="eye eye-left"></span>
+        <span class="eye eye-right"></span>
+        <span class="mouth"></span>
+      </div>
+    </section>
+
+    <section class="battle-info">
+      <div class="player-status">あなた　<span class="hp">♥♥♥♥♥</span></div>
+      <div id="battleMessage" class="battle-message" aria-live="polite">英語と日本語のペアで攻撃！</div>
+    </section>
+
+    <section class="word-board" id="wordBoard" aria-label="単語パズル"></section>
+
+    <section class="victory hidden" id="victoryPanel" aria-live="polite">
+      <div class="victory-card">
+        <strong>勝利！</strong>
+        <span>🪙 +12</span>
+        <a href="rpg.html">RPGへ戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="data/words.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/battle.js"></script>
+</body>
+</html>
