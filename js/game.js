@@ -8,7 +8,7 @@ window.EnglishGame = (()=>{
 
   function makeWordRounds(){
     const pool=WORDS.filter(w=>GameStore.state.unlockedWordIds.includes(w.id));
-    return [shuffle(pool).slice(0,6),shuffle(pool).slice(0,7),shuffle(pool).slice(0,8)];
+    return [0,1,2].map(()=>shuffle(pool).slice(0,6));
   }
 
   function makeSentenceRounds(){
@@ -31,7 +31,8 @@ window.EnglishGame = (()=>{
 
   function renderWordRound(){
     $('gameLabel').textContent='WORD PUZZLE';$('gameTitle').textContent='単語パズル';
-    $('promptCard').innerHTML='<div class="jp">英語と日本語のペアを消そう</div><div class="hint">全部消せたらクリア</div>';
+    $('promptCard').innerHTML='<div class="jp">英語と日本語のペアを消そう</div><div class="hint">英語6＋日本語6。全部消せたらクリア</div>';
+    $('selectionArea').classList.add('hidden');
     const words=rounds[round];
     const tiles=shuffle(words.flatMap(w=>[
       {key:w.id,type:'en',main:w.en,sub:'English'},
@@ -52,6 +53,7 @@ window.EnglishGame = (()=>{
 
   function renderSentenceRound(){
     const r=rounds[round],s=r.target;
+    $('selectionArea').classList.remove('hidden');
     $('gameLabel').textContent='SENTENCE PUZZLE';$('gameTitle').textContent='英文パズル';
     $('promptCard').innerHTML=`<div class="jp">「${s.jp}」</div><div class="hint">正しい英文になるように単語を選ぼう</div>`;
     const tokens=shuffle([...s.answer,...r.distractors]);
