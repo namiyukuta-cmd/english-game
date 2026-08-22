@@ -92,10 +92,7 @@
 
     const enemies = this.physics.add.staticGroup();
     map.enemies.forEach(e => {
-      const enemy = this.add.circle(e.x, e.y, 18, 0xe86b79);
-      enemy.setStrokeStyle(3, 0x7a3441);
-      enemy.name = e.name;
-      enemy.enemyId = e.id;
+      const enemy = createEnemySprite(this, e);
       this.physics.add.existing(enemy, true);
       enemies.add(enemy);
     });
@@ -118,20 +115,54 @@
     cursors = this.input.keyboard.createCursorKeys();
     wasd = this.input.keyboard.addKeys('W,A,S,D');
 
-    message = this.add.text(400, 552, '歩いてみよう', {
+    message = this.add.text(map.width / 2, map.height - 48, '歩いてみよう', {
       fontFamily: 'sans-serif',
       fontSize: '20px',
       color: '#4b3440',
       backgroundColor: '#fffaf0',
       padding: { x: 14, y: 9 }
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(20);
 
-    this.add.text(14, 12, 'RPG TEST MAP', {
-      fontFamily: 'sans-serif', fontSize: '18px', color: '#ffffff',
-      backgroundColor: '#493642aa', padding: { x: 8, y: 5 }
-    }).setDepth(10);
+    this.add.text(12, 12, 'RPG TEST MAP', {
+      fontFamily: 'sans-serif',
+      fontSize: '18px',
+      color: '#ffffff',
+      backgroundColor: '#493642aa',
+      padding: { x: 8, y: 5 }
+    }).setDepth(20);
 
     bindTouchControls();
+  }
+
+  function createEnemySprite(scene, e) {
+    const colors = {
+      pink: { fill: 0xe86b79, stroke: 0x7a3441 },
+      blue: { fill: 0x65aee8, stroke: 0x315b83 },
+      green: { fill: 0x65bf72, stroke: 0x326b3b },
+      red: { fill: 0xe25555, stroke: 0x7f2929 },
+      'horn-purple': { fill: 0x9a62d4, stroke: 0x4e2d73 }
+    };
+
+    const palette = colors[e.kind] || colors.pink;
+    const enemy = scene.add.circle(e.x, e.y, 19, palette.fill);
+    enemy.setStrokeStyle(3, palette.stroke);
+    enemy.name = e.name;
+    enemy.enemyId = e.id;
+    enemy.setDepth(8);
+
+    scene.add.circle(e.x - 7, e.y - 3, 2.5, 0x2b1d2c).setDepth(9);
+    scene.add.circle(e.x + 7, e.y - 3, 2.5, 0x2b1d2c).setDepth(9);
+
+    if (e.kind === 'horn-purple') {
+      scene.add.triangle(e.x - 11, e.y - 24, -6, 7, 0, -9, 6, 7, 0xf2dfbd)
+        .setStrokeStyle(2, 0x6d5438)
+        .setDepth(9);
+      scene.add.triangle(e.x + 11, e.y - 24, -6, 7, 0, -9, 6, 7, 0xf2dfbd)
+        .setStrokeStyle(2, 0x6d5438)
+        .setDepth(9);
+    }
+
+    return enemy;
   }
 
   function update() {
