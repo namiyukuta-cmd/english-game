@@ -1,127 +1,130 @@
 (()=>{
-  // 手紙屋の学習内容。依頼人プロフィールとは独立して抽選する。
-  // 1件 = 3つの発言 + その3文から作る手紙。
-  const cases=[
-    {id:'c_s01_01',grade:1,term:1,step:1,lines:[
-      {jp:'私はスポーツが好きです。',words:['I','like','sports'],sentence:'I like sports.'},
-      {jp:'私はサッカーをします。',words:['I','play','soccer'],sentence:'I play soccer.'},
-      {jp:'私はバスケットボールが好きです。',words:['I','like','basketball'],sentence:'I like basketball.'}
-    ],letter:'友達へ。私はスポーツが好きです。サッカーをするのも好きで、バスケットボールも好きです。また一緒に遊びたいです。'},
-    {id:'c_s01_02',grade:1,term:1,step:1,lines:[
-      {jp:'私は音楽が好きです。',words:['I','like','music'],sentence:'I like music.'},
-      {jp:'私はピアノを弾けます。',words:['I','can','play','the','piano'],sentence:'I can play the piano.'},
-      {jp:'私は絵を描けます。',words:['I','can','draw'],sentence:'I can draw.'}
-    ],letter:'あなたへ。私は音楽が好きです。ピアノを弾くこともできます。それから、絵を描くことも好きです。今度、私の好きなものを見てほしいです。'},
-    {id:'c_s01_03',grade:1,term:1,step:1,lines:[
-      {jp:'私は数学が好きです。',words:['I','like','math'],sentence:'I like math.'},
-      {jp:'私は歴史が好きです。',words:['I','like','history'],sentence:'I like history.'},
-      {jp:'私は水泳が好きです。',words:['I','like','swimming'],sentence:'I like swimming.'}
-    ],letter:'友達へ。私は数学と歴史が好きです。勉強だけでなく、水泳も好きです。今度、お互いの好きなことをもっと話したいです。'},
-    {id:'c_s01_04',grade:1,term:1,step:1,lines:[
-      {jp:'私は甘いお菓子が好きです。',words:['I','like','sweets'],sentence:'I like sweets.'},
-      {jp:'私はフライドポテトが好きです。',words:['I','like','French fries'],sentence:'I like French fries.'},
-      {jp:'私はスパゲッティが好きです。',words:['I','like','spaghetti'],sentence:'I like spaghetti.'}
-    ],letter:'家族へ。私は甘いお菓子が好きです。フライドポテトもスパゲッティも好きです。また一緒に食事をしたいです。'},
+  // 手紙屋の学習内容。
+  // 英文は1文ずつ独立した部品として持ち、人物・事情・3文を毎回来店時に組み合わせる。
+  const lines=[
+    {id:'s01_sports',grade:1,term:1,step:1,jp:'私はスポーツが好きです。',words:['I','like','sports'],sentence:'I like sports.',tags:['interest','sports']},
+    {id:'s01_soccer_like',grade:1,term:1,step:1,jp:'私はサッカーが好きです。',words:['I','like','soccer'],sentence:'I like soccer.',tags:['interest','sports']},
+    {id:'s01_soccer_play',grade:1,term:1,step:1,jp:'私はサッカーをします。',words:['I','play','soccer'],sentence:'I play soccer.',tags:['activity','sports']},
+    {id:'s01_basket_like',grade:1,term:1,step:1,jp:'私はバスケットボールが好きです。',words:['I','like','basketball'],sentence:'I like basketball.',tags:['interest','sports']},
+    {id:'s01_basket_play',grade:1,term:1,step:1,jp:'私はバスケットボールをします。',words:['I','play','basketball'],sentence:'I play basketball.',tags:['activity','sports']},
+    {id:'s01_music',grade:1,term:1,step:1,jp:'私は音楽が好きです。',words:['I','like','music'],sentence:'I like music.',tags:['interest','music']},
+    {id:'s01_piano',grade:1,term:1,step:1,jp:'私はピアノを弾けます。',words:['I','can','play','the','piano'],sentence:'I can play the piano.',tags:['ability','music']},
+    {id:'s01_draw',grade:1,term:1,step:1,jp:'私は絵を描けます。',words:['I','can','draw'],sentence:'I can draw.',tags:['ability','art']},
+    {id:'s01_math',grade:1,term:1,step:1,jp:'私は数学が好きです。',words:['I','like','math'],sentence:'I like math.',tags:['interest','school']},
+    {id:'s01_history',grade:1,term:1,step:1,jp:'私は歴史が好きです。',words:['I','like','history'],sentence:'I like history.',tags:['interest','school']},
+    {id:'s01_swimming',grade:1,term:1,step:1,jp:'私は水泳が好きです。',words:['I','like','swimming'],sentence:'I like swimming.',tags:['interest','sports']},
+    {id:'s01_sweets',grade:1,term:1,step:1,jp:'私は甘いお菓子が好きです。',words:['I','like','sweets'],sentence:'I like sweets.',tags:['interest','food']},
+    {id:'s01_fries',grade:1,term:1,step:1,jp:'私はフライドポテトが好きです。',words:['I','like','French fries'],sentence:'I like French fries.',tags:['interest','food']},
+    {id:'s01_spaghetti',grade:1,term:1,step:1,jp:'私はスパゲッティが好きです。',words:['I','like','spaghetti'],sentence:'I like spaghetti.',tags:['interest','food']},
 
-    {id:'c_s02_01',grade:1,term:1,step:2,lines:[
-      {jp:'私は疲れています。',words:["I'm",'tired'],sentence:"I'm tired."},
-      {jp:'私は悲しいです。',words:["I'm",'sad'],sentence:"I'm sad."},
-      {jp:'私はあなたのことが分かります。',words:['I','understand','you'],sentence:'I understand you.'}
-    ],letter:'あなたへ。今の私は少し疲れていて、悲しい気持ちです。それでも、あなたの気持ちは分かっているつもりです。うまく話せないので、手紙にしました。'},
-    {id:'c_s02_02',grade:1,term:1,step:2,lines:[
-      {jp:'私は幸せです。',words:["I'm",'happy'],sentence:"I'm happy."},
-      {jp:'私は元気です。',words:["I'm",'fine'],sentence:"I'm fine."},
-      {jp:'ありがとう。',words:['Thank you.'],sentence:'Thank you.'}
-    ],letter:'あなたへ。私は元気にしています。今はとても幸せです。いつも気にかけてくれてありがとう。'},
+    {id:'s02_happy',grade:1,term:1,step:2,jp:'私は幸せです。',words:["I'm",'happy'],sentence:"I'm happy.",tags:['feeling','positive']},
+    {id:'s02_fine',grade:1,term:1,step:2,jp:'私は元気です。',words:["I'm",'fine'],sentence:"I'm fine.",tags:['feeling','positive']},
+    {id:'s02_great',grade:1,term:1,step:2,jp:'私はとても元気です。',words:["I'm",'great'],sentence:"I'm great.",tags:['feeling','positive']},
+    {id:'s02_tired',grade:1,term:1,step:2,jp:'私は疲れています。',words:["I'm",'tired'],sentence:"I'm tired.",tags:['feeling','negative']},
+    {id:'s02_sad',grade:1,term:1,step:2,jp:'私は悲しいです。',words:["I'm",'sad'],sentence:"I'm sad.",tags:['feeling','negative']},
+    {id:'s02_hungry',grade:1,term:1,step:2,jp:'私はお腹がすいています。',words:["I'm",'hungry'],sentence:"I'm hungry.",tags:['feeling','food']},
+    {id:'s02_sleepy',grade:1,term:1,step:2,jp:'私は眠いです。',words:["I'm",'sleepy'],sentence:"I'm sleepy.",tags:['feeling','negative']},
+    {id:'s02_understand',grade:1,term:1,step:2,jp:'私はあなたのことが分かります。',words:['I','understand','you'],sentence:'I understand you.',tags:['social','kind']},
+    {id:'s02_thanks',grade:1,term:1,step:2,jp:'ありがとう。',words:['Thank you.'],sentence:'Thank you.',tags:['gratitude','social']},
+    {id:'s02_me_too',grade:1,term:1,step:2,jp:'私もです。',words:['Me too.'],sentence:'Me too.',tags:['social','agreement']},
+    {id:'s02_i_see',grade:1,term:1,step:2,jp:'分かりました。',words:['I see.'],sentence:'I see.',tags:['social','agreement']},
 
-    {id:'c_s03_01',grade:1,term:1,step:3,lines:[
-      {jp:'私は夏が好きです。',words:['I','like','summer'],sentence:'I like summer.'},
-      {jp:'私は青が好きです。',words:['I','like','blue'],sentence:'I like blue.'},
-      {jp:'私は自分の絵が好きです。',words:['I','like','my','picture'],sentence:'I like my picture.'}
-    ],letter:'おばあちゃんへ。私は夏が好きです。青い色も好きです。今日は自分で絵を描きました。今度この絵を見てほしいです。'},
+    {id:'s03_blue',grade:1,term:1,step:3,jp:'私は青が好きです。',words:['I','like','blue'],sentence:'I like blue.',tags:['interest','color']},
+    {id:'s03_red',grade:1,term:1,step:3,jp:'私は赤が好きです。',words:['I','like','red'],sentence:'I like red.',tags:['interest','color']},
+    {id:'s03_picture',grade:1,term:1,step:3,jp:'私は自分の絵が好きです。',words:['I','like','my','picture'],sentence:'I like my picture.',tags:['interest','art']},
 
-    {id:'c_s04_01',grade:1,term:1,step:4,lines:[
-      {jp:'私は釣りに行きました。',words:['I','went','fishing'],sentence:'I went fishing.'},
-      {jp:'私は疲れていました。',words:['I','was','tired'],sentence:'I was tired.'},
-      {jp:'私は友達が好きです。',words:['I','like','my','friend'],sentence:'I like my friend.'}
-    ],letter:'友へ。この前は一緒に釣りへ行ってくれてありがとう。私はとても疲れてしまいましたが、一緒に過ごせてうれしかったです。また出かけましょう。'},
+    {id:'s04_fishing',grade:1,term:1,step:4,jp:'私は釣りに行きました。',words:['I','went','fishing'],sentence:'I went fishing.',tags:['past_activity','activity','outdoor']},
+    {id:'s04_tired_past',grade:1,term:1,step:4,jp:'私は疲れていました。',words:['I','was','tired'],sentence:'I was tired.',tags:['past_feeling','negative']},
+    {id:'s04_friend',grade:1,term:1,step:4,jp:'私は友達が好きです。',words:['I','like','my','friend'],sentence:'I like my friend.',tags:['friendship','social']},
+    {id:'s04_hiking',grade:1,term:1,step:4,jp:'私はハイキングが好きです。',words:['I','like','hiking'],sentence:'I like hiking.',tags:['interest','outdoor']},
+    {id:'s04_guitar',grade:1,term:1,step:4,jp:'私はギターが好きです。',words:['I','like','guitar'],sentence:'I like guitar.',tags:['interest','music']},
 
-    {id:'c_s05_01',grade:1,term:1,step:5,lines:[
-      {jp:'私は食べ物がほしいです。',words:['I','want','food'],sentence:'I want food.'},
-      {jp:'私は果物がほしいです。',words:['I','want','fruit'],sentence:'I want fruit.'},
-      {jp:'私は甘いお菓子がほしいです。',words:['I','want','sweets'],sentence:'I want sweets.'}
-    ],letter:'家族へ。食べ物を少し送ってください。できれば果物がほしいです。それから、甘いお菓子も少し入っていたらうれしいです。'},
+    {id:'s05_food_want',grade:1,term:1,step:5,jp:'私は食べ物がほしいです。',words:['I','want','food'],sentence:'I want food.',tags:['request','food']},
+    {id:'s05_fruit_want',grade:1,term:1,step:5,jp:'私は果物がほしいです。',words:['I','want','fruit'],sentence:'I want fruit.',tags:['request','food']},
+    {id:'s05_sweets_want',grade:1,term:1,step:5,jp:'私は甘いお菓子がほしいです。',words:['I','want','sweets'],sentence:'I want sweets.',tags:['request','food']},
+    {id:'s05_baseball',grade:1,term:1,step:5,jp:'私は野球が好きです。',words:['I','like','baseball'],sentence:'I like baseball.',tags:['interest','sports']},
+    {id:'s05_together',grade:1,term:1,step:5,jp:'一緒に遊びましょう。',words:["Let's",'play','together'],sentence:"Let's play together.",tags:['invitation','friendship']},
 
-    {id:'c_s06_01',grade:1,term:1,step:6,lines:[
-      {jp:'私は牛乳が好きです。',words:['I','like','milk'],sentence:'I like milk.'},
-      {jp:'私は魚が好きです。',words:['I','like','fish'],sentence:'I like fish.'},
-      {jp:'私は甘いお菓子が好きです。',words:['I','like','sweets'],sentence:'I like sweets.'}
-    ],letter:'お母さんへ。私は牛乳が好きです。魚も好きです。それから甘いお菓子も好きです。今度帰ったら、いっしょに食べたいです。'},
+    {id:'s06_milk',grade:1,term:1,step:6,jp:'私は牛乳が好きです。',words:['I','like','milk'],sentence:'I like milk.',tags:['interest','food']},
+    {id:'s06_fish',grade:1,term:1,step:6,jp:'私は魚が好きです。',words:['I','like','fish'],sentence:'I like fish.',tags:['interest','food']},
+    {id:'s06_volleyball',grade:1,term:1,step:6,jp:'私はバレーボールが好きです。',words:['I','like','volleyball'],sentence:'I like volleyball.',tags:['interest','sports']},
+    {id:'s06_jump',grade:1,term:1,step:6,jp:'私はジャンプできます。',words:['I','can','jump'],sentence:'I can jump.',tags:['ability','sports']},
 
-    {id:'c_s07_01',grade:1,term:1,step:7,lines:[
-      {jp:'私は学生です。',words:["I'm",'a','student'],sentence:"I'm a student."},
-      {jp:'私は日本出身です。',words:["I'm",'from','Japan'],sentence:"I'm from Japan."},
-      {jp:'私は友達が好きです。',words:['I','like','my','friend'],sentence:'I like my friend.'}
-    ],letter:'新しい友達へ。私は日本から来た学生です。まだ慣れないことも多いですが、あなたと友達になれてうれしいです。これからも仲良くしてください。'},
-    {id:'c_s07_02',grade:1,term:1,step:7,lines:[
-      {jp:'私は学生です。',words:["I'm",'a','student'],sentence:"I'm a student."},
-      {jp:'私は音楽が好きです。',words:['I','like','music'],sentence:'I like music.'},
-      {jp:'私を友達と呼んでください。',words:['Call','me','friend'],sentence:'Call me friend.'}
-    ],letter:'あなたへ。私は学生です。音楽が好きです。これからもっと話して、友達になれたらうれしいです。'},
+    {id:'s07_student',grade:1,term:1,step:7,jp:'私は学生です。',words:["I'm",'a','student'],sentence:"I'm a student.",tags:['identity','school']},
+    {id:'s07_japan',grade:1,term:1,step:7,jp:'私は日本出身です。',words:["I'm",'from','Japan'],sentence:"I'm from Japan.",tags:['origin','identity']},
 
-    {id:'c_s08_01',grade:1,term:1,step:8,lines:[
-      {jp:'私は冬が好きではありません。',words:['I',"don't",'like','winter'],sentence:"I don't like winter."},
-      {jp:'私は疲れています。',words:["I'm",'tired'],sentence:"I'm tired."},
-      {jp:'私は幸せではありません。',words:["I'm",'not','happy'],sentence:"I'm not happy."}
-    ],letter:'家族へ。私は冬があまり好きではありません。最近は疲れていて、あまり元気でもありません。少しだけ家が恋しいです。'},
+    {id:'s08_winter',grade:1,term:1,step:8,jp:'私は冬が好きではありません。',words:['I',"don't",'like','winter'],sentence:"I don't like winter.",tags:['dislike','season']},
+    {id:'s08_not_happy',grade:1,term:1,step:8,jp:'私は幸せではありません。',words:["I'm",'not','happy'],sentence:"I'm not happy.",tags:['feeling','negative']},
 
-    {id:'c_s09_01',grade:1,term:1,step:9,lines:[
-      {jp:'私は音楽が好きです。',words:['I','like','music'],sentence:'I like music.'},
-      {jp:'私はフルートを演奏できません。',words:['I',"can't",'play','the','flute'],sentence:"I can't play the flute."},
-      {jp:'私は悲しいです。',words:["I'm",'sad'],sentence:"I'm sad."}
-    ],letter:'先生へ。私は音楽が好きです。でも、まだフルートをうまく演奏できません。それが少し悲しいです。もっと練習したいです。'},
+    {id:'s09_flute_no',grade:1,term:1,step:9,jp:'私はフルートを演奏できません。',words:['I',"can't",'play','the','flute'],sentence:"I can't play the flute.",tags:['difficulty','music']},
+    {id:'s09_rugby',grade:1,term:1,step:9,jp:'私はラグビーが好きです。',words:['I','like','rugby'],sentence:'I like rugby.',tags:['interest','sports']},
 
-    {id:'c_s10_01',grade:1,term:1,step:10,lines:[
-      {jp:'私は学生です。',words:["I'm",'a','student'],sentence:"I'm a student."},
-      {jp:'私はアニメに興味があります。',words:["I'm",'interested','in','anime'],sentence:"I'm interested in anime."},
-      {jp:'私は学校が好きではありません。',words:['I',"don't",'like','school'],sentence:"I don't like school."}
-    ],letter:'先生へ。私は学校の生徒ですが、学校を好きになれずにいます。でも、アニメにはとても興味があります。好きなことをきっかけに楽しく学びたいです。'},
+    {id:'s10_anime_interest',grade:1,term:1,step:10,jp:'私はアニメに興味があります。',words:["I'm",'interested','in','anime'],sentence:"I'm interested in anime.",tags:['interest','school']},
+    {id:'s10_school_dislike',grade:1,term:1,step:10,jp:'私は学校が好きではありません。',words:['I',"don't",'like','school'],sentence:"I don't like school.",tags:['dislike','school']},
 
-    {id:'c_s11_01',grade:1,term:1,step:11,lines:[
-      {jp:'私はまったく練習しません。',words:['I','never','practice'],sentence:'I never practice.'},
-      {jp:'私は雑誌を読みます。',words:['I','read','a','magazine'],sentence:'I read a magazine.'},
-      {jp:'私はラジオを聞きます。',words:['I','listen','to','the','radio'],sentence:'I listen to the radio.'}
-    ],letter:'先生へ。私は練習をさぼって、雑誌を読んだりラジオを聞いたりしています。これからは少しずつ練習します。'},
+    {id:'s11_never_practice',grade:1,term:1,step:11,jp:'私はまったく練習しません。',words:['I','never','practice'],sentence:'I never practice.',tags:['difficulty','practice']},
+    {id:'s11_magazine',grade:1,term:1,step:11,jp:'私は雑誌を読みます。',words:['I','read','a','magazine'],sentence:'I read a magazine.',tags:['activity','hobby']},
+    {id:'s11_radio',grade:1,term:1,step:11,jp:'私はラジオを聞きます。',words:['I','listen','to','the','radio'],sentence:'I listen to the radio.',tags:['activity','hobby']},
 
-    {id:'c_s12_01',grade:1,term:1,step:12,lines:[
-      {jp:'私は雑誌を読みます。',words:['I','read','a','magazine'],sentence:'I read a magazine.'},
-      {jp:'私は鉛筆で書きます。',words:['I','write','with','a','pencil'],sentence:'I write with a pencil.'},
-      {jp:'私はもう一度やってみます。',words:['I','try','again'],sentence:'I try again.'}
-    ],letter:'友人へ。あなたにもらった雑誌を読んでいます。返事は鉛筆で何度も書き直しました。うまく書けなくても、もう一度やってみます。'},
-
-    {id:'c_s13_01',grade:1,term:1,step:13,lines:[
-      {jp:'私は自分のチームが好きです。',words:['I','like','my','team'],sentence:'I like my team.'},
-      {jp:'私はバスケットボールをします。',words:['I','play','basketball'],sentence:'I play basketball.'},
-      {jp:'私はスポーツを楽しみます。',words:['I','enjoy','sports'],sentence:'I enjoy sports.'}
-    ],letter:'チームのみんなへ。私はこのチームが好きです。みんなとバスケットボールをする時間も、スポーツを楽しむ時間も大切です。'},
-
-    {id:'c_s14_01',grade:1,term:1,step:14,lines:[
-      {jp:'私はオーストラリア出身です。',words:["I'm",'from','Australia'],sentence:"I'm from Australia."},
-      {jp:'私はラグビーが好きです。',words:['I','like','rugby'],sentence:'I like rugby.'},
-      {jp:'私は音楽が好きです。',words:['I','like','music'],sentence:'I like music.'}
-    ],letter:'新しい友人へ。私はオーストラリアから来ました。ラグビーが好きで、音楽も好きです。こちらでも同じ趣味の友達ができたらうれしいです。'},
-
-    {id:'c_s15_01',grade:1,term:1,step:15,lines:[
-      {jp:'私は遅く起きます。',words:['I','get','up','late'],sentence:'I get up late.'},
-      {jp:'私は家にいます。',words:['I','stay','home'],sentence:'I stay home.'},
-      {jp:'私は犬を散歩させます。',words:['I','walk','my','dog'],sentence:'I walk my dog.'}
-    ],letter:'妹へ。最近は朝遅く起きて、家で過ごすことが多いです。それでも毎日、犬の散歩には出ています。落ち着いたら会いに行きたいです。'},
-
-    {id:'c_s16_01',grade:1,term:1,step:16,lines:[
-      {jp:'私はコンピュータを使います。',words:['I','use','computer'],sentence:'I use computer.'},
-      {jp:'私はアニメが好きです。',words:['I','like','anime'],sentence:'I like anime.'},
-      {jp:'私は英語を勉強します。',words:['I','study','English'],sentence:'I study English.'}
-    ],letter:'友達へ。私は最近コンピュータをよく使っています。アニメを見るのも好きです。それから英語の勉強も始めました。今度会ったときに話したいです。'}
+    {id:'s12_try_again',grade:1,term:1,step:12,jp:'私はもう一度やってみます。',words:['I','try','again'],sentence:'I try again.',tags:['effort','positive']},
+    {id:'s13_team',grade:1,term:1,step:13,jp:'私は自分のチームが好きです。',words:['I','like','my','team'],sentence:'I like my team.',tags:['friendship','sports']},
+    {id:'s15_late',grade:1,term:1,step:15,jp:'私は遅く起きます。',words:['I','get','up','late'],sentence:'I get up late.',tags:['daily','activity']},
+    {id:'s15_home',grade:1,term:1,step:15,jp:'私は家にいます。',words:['I','stay','home'],sentence:'I stay home.',tags:['daily','activity']},
+    {id:'s15_dog',grade:1,term:1,step:15,jp:'私は犬を散歩させます。',words:['I','walk','my','dog'],sentence:'I walk my dog.',tags:['daily','activity']}
   ];
-  window.LETTER_CONTENT={cases};
+
+  const situations=[
+    {
+      id:'hobby_friend',minStep:1,label:'友達に、自分の好きなことをもっと知ってほしい',
+      recipient:'友達',slots:[['interest'],['interest'],['activity','ability','interest']],
+      openings:['友達へ。','あなたへ。'],closings:['今度、あなたの好きなことも教えてください。','また会ったときに、もっと話したいです。']
+    },
+    {
+      id:'good_news',minStep:2,label:'親しい人に、最近の気持ちや好きなことを伝えたい',
+      recipient:'親しい人',slots:[['positive'],['interest'],['gratitude','social','interest']],
+      openings:['あなたへ。','元気ですか。'],closings:['また話せるのを楽しみにしています。','こちらのことをまた知らせます。']
+    },
+    {
+      id:'rough_day',minStep:2,label:'親しい人に、少し元気がないことを伝えたい',
+      recipient:'親しい人',slots:[['negative'],['negative','feeling'],['social','kind','gratitude']],
+      openings:['あなたへ。','少し聞いてほしいことがあります。'],closings:['うまく話せないので、手紙にしました。','また元気になったら話したいです。']
+    },
+    {
+      id:'friend_thanks',minStep:2,label:'友達に感謝の気持ちを伝えたい',
+      recipient:'友達',slots:[['friendship','social'],['positive','interest'],['gratitude']],
+      openings:['友達へ。','大切な友達へ。'],closings:['これからも仲良くしてください。','また一緒に過ごせたらうれしいです。']
+    },
+    {
+      id:'outing_memory',minStep:4,label:'友達に、この前の出来事について書きたい',
+      recipient:'友達',slots:[['past_activity'],['past_feeling','feeling'],['friendship','interest']],
+      openings:['友達へ。','この前のことを思い出しています。'],closings:['また一緒に出かけましょう。','今度会ったときに、また話しましょう。']
+    },
+    {
+      id:'food_request',minStep:5,label:'家族に、送ってほしいものを頼みたい',
+      recipient:'家族',slots:[['request'],['request'],['food']],
+      openings:['家族へ。','みんなへ。'],closings:['送ってもらえたらうれしいです。','よろしくお願いします。']
+    },
+    {
+      id:'play_invitation',minStep:5,label:'友達を遊びに誘いたい',
+      recipient:'友達',slots:[['sports','interest'],['activity','ability','sports'],['invitation']],
+      openings:['友達へ。','今度のことですが。'],closings:['一緒に楽しい時間を過ごしましょう。','返事を待っています。']
+    },
+    {
+      id:'self_intro',minStep:7,label:'新しく知り合った人に自己紹介の手紙を書きたい',
+      recipient:'新しい友達',slots:[['identity'],['origin'],['interest']],
+      openings:['新しい友達へ。','はじめまして。'],closings:['これから仲良くしてください。','あなたのことももっと知りたいです。']
+    },
+    {
+      id:'school_worry',minStep:8,label:'学校のことで困っている気持ちを伝えたい',
+      recipient:'先生',slots:[['school','dislike','difficulty'],['negative','difficulty'],['effort','gratitude','social']],
+      openings:['先生へ。','相談したいことがあります。'],closings:['少しずつ頑張りたいです。','これからもよろしくお願いします。']
+    },
+    {
+      id:'club_note',minStep:9,label:'友達に、音楽やスポーツのことを書きたい',
+      recipient:'友達',slots:[['music','sports','interest'],['difficulty','ability','activity'],['positive','friendship','effort']],
+      openings:['友達へ。','最近のことを書きます。'],closings:['また一緒に練習したいです。','今度会ったら話しましょう。']
+    }
+  ];
+
+  window.LETTER_CONTENT={lines,situations};
 })();
