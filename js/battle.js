@@ -3,7 +3,22 @@
   const shuffle = list => [...list].sort(() => Math.random() - 0.5);
   const params = new URLSearchParams(location.search);
   const enemyName = params.get('enemy') || 'スライム';
+  const enemyId = params.get('id') || '';
   const reward = 12;
+
+  const enemyImages = {
+    red: 'assets/enemies/slime_red.png',
+    blue: 'assets/enemies/slime_blue.png',
+    green: 'assets/enemies/slime_green.png',
+    purple: 'assets/enemies/slime_purple.png'
+  };
+
+  function getEnemyImage() {
+    if (enemyId.startsWith('blue_') || enemyName.includes('青')) return enemyImages.blue;
+    if (enemyId.startsWith('green_') || enemyName.includes('緑')) return enemyImages.green;
+    if (enemyId.startsWith('horn_') || enemyName.includes('ツノ') || enemyName.includes('紫')) return enemyImages.purple;
+    return enemyImages.red;
+  }
 
   let firstPick = null;
   let locked = false;
@@ -12,6 +27,10 @@
 
   $('enemyName').textContent = enemyName;
   $('coinCount').textContent = GameStore.state.coins;
+
+  const enemySprite = $('enemySprite');
+  enemySprite.src = getEnemyImage();
+  enemySprite.alt = enemyName;
 
   const hpBox = $('enemyHp');
   for (let i = 0; i < 6; i++) {
