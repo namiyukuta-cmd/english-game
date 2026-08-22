@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff7fb">
+  <title>English Puzzle</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ENGLISH PUZZLE</p>
+        <h1>ことばのおみせ</h1>
+      </div>
+      <div class="wallet" aria-label="所持金">
+        <span>🪙</span>
+        <strong id="coinCount">0</strong>
+      </div>
+    </header>
+
+    <section id="homeScreen" class="screen active" aria-label="ホーム">
+      <div class="hero-card">
+        <div class="hero-face" aria-hidden="true">🐰</div>
+        <div>
+          <p class="hero-kicker">きょうのことばあそび</p>
+          <h2>ブロックを消して<br>お金を集めよう</h2>
+          <p>英語にはいつも日本語訳つき。覚えた単語と文は、あとから何度でも見返せます。</p>
+        </div>
+      </div>
+
+      <div class="mode-grid">
+        <button class="mode-card" data-open="word">
+          <span class="mode-icon">Aa</span>
+          <span class="mode-copy"><strong>単語パズル</strong><small>英語と日本語をペアにして消す</small></span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="mode-card" data-open="sentence">
+          <span class="mode-icon">✦</span>
+          <span class="mode-copy"><strong>英文パズル</strong><small>日本語どおりに英文を作って消す</small></span>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+
+      <div class="collection-row">
+        <button class="mini-card" data-open="words"><span>📖</span><strong>単語帳</strong><small id="wordBookCount">0語</small></button>
+        <button class="mini-card" data-open="sentences"><span>📜</span><strong>英文帳</strong><small id="sentenceBookCount">0文</small></button>
+        <button class="mini-card" data-open="shop"><span>🛍️</span><strong>おみせ</strong><small>準備中</small></button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen" aria-label="ゲーム">
+      <div class="screen-head">
+        <button class="icon-btn" data-back aria-label="戻る">←</button>
+        <div><p id="gameLabel" class="eyebrow"></p><h2 id="gameTitle"></h2></div>
+        <div class="progress-pill"><span id="roundNow">1</span>/<span id="roundTotal">1</span></div>
+      </div>
+
+      <div id="promptCard" class="prompt-card"></div>
+      <div id="selectionArea" class="selection-area" aria-live="polite"></div>
+      <div id="board" class="board"></div>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+      <button id="resetSelection" class="ghost-btn hidden">選びなおす</button>
+    </section>
+
+    <section id="bookScreen" class="screen" aria-label="コレクション">
+      <div class="screen-head">
+        <button class="icon-btn" data-back aria-label="戻る">←</button>
+        <div><p class="eyebrow">COLLECTION</p><h2 id="bookTitle">単語帳</h2></div>
+      </div>
+      <div id="bookList" class="book-list"></div>
+    </section>
+  </main>
+
+  <div id="grammarModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeGrammar" class="modal-close" aria-label="閉じる">×</button>
+      <p class="eyebrow">GRAMMAR NOTE</p>
+      <h3 id="grammarTitle"></h3>
+      <p id="grammarText"></p>
+      <div id="grammarExample" class="grammar-example"></div>
+    </div>
+  </div>
+
+  <script src="data/words.js"></script>
+  <script src="data/grammar.js"></script>
+  <script src="data/sentences.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

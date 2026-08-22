@@ -1,0 +1,22 @@
+window.WORDS = [
+  {id:'i',en:'I',ja:'私は',level:1},
+  {id:'am',en:'am',ja:'〜です／〜にいる',level:1},
+  {id:'a',en:'a',ja:'1つの／1人の',level:1},
+  {id:'student',en:'student',ja:'生徒',level:1},
+  {id:'cat',en:'cat',ja:'猫',level:1},
+  {id:'dog',en:'dog',ja:'犬',level:1},
+  {id:'book',en:'book',ja:'本',level:1},
+  {id:'apple',en:'apple',ja:'りんご',level:1},
+  {id:'like',en:'like',ja:'好き／好む',level:1},
+  {id:'have',en:'have',ja:'持っている／飼っている',level:1},
+  {id:'you',en:'you',ja:'あなたは／あなたを',level:1},
+  {id:'are',en:'are',ja:'〜です／〜にいる',level:1},
+  {id:'happy',en:'happy',ja:'うれしい',level:1},
+  {id:'she',en:'she',ja:'彼女は',level:2},
+  {id:'he',en:'he',ja:'彼は',level:2},
+  {id:'is',en:'is',ja:'〜です／〜にいる',level:2},
+  {id:'likes',en:'likes',ja:'好き／好む',level:2},
+  {id:'has',en:'has',ja:'持っている／飼っている',level:2},
+  {id:'plays',en:'plays',ja:'する／遊ぶ',level:2},
+  {id:'tennis',en:'tennis',ja:'テニス',level:2}
+];

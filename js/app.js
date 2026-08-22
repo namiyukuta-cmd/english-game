@@ -1,0 +1,10 @@
+window.AppUI=(()=>{
+  const $=id=>document.getElementById(id);
+  const screens=['homeScreen','gameScreen','bookScreen'];
+  function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));window.scrollTo(0,0)}
+  function refreshHeader(){$('coinCount').textContent=GameStore.state.coins;$('wordBookCount').textContent=`${GameStore.state.unlockedWordIds.length}語`;$('sentenceBookCount').textContent=`${GameStore.state.seenSentenceIds.length}文`}
+  function openBook(kind){show('bookScreen');const list=$('bookList');list.innerHTML='';if(kind==='words'){$('bookTitle').textContent='単語帳 A–Z';const words=WORDS.filter(w=>GameStore.state.unlockedWordIds.includes(w.id)).sort((a,b)=>a.en.localeCompare(b.en));for(const w of words){list.insertAdjacentHTML('beforeend',`<div class="book-item"><strong>${w.en}</strong><span>${w.ja}</span></div>`)}}else{$('bookTitle').textContent='英文帳';const seen=SENTENCES.filter(s=>GameStore.state.seenSentenceIds.includes(s.id));if(!seen.length){list.innerHTML='<div class="empty">まだ英文がありません。<br>英文パズルで作った文がここに残ります。</div>'}for(const s of seen){list.insertAdjacentHTML('beforeend',`<div class="book-item"><strong class="sentence-en">${s.answer.join(' ')}.</strong><span>${s.jp}</span><button class="ghost-btn grammar-open" data-grammar="${s.grammar}">文法を見る</button></div>`)}}}
+  document.addEventListener('click',e=>{const open=e.target.closest('[data-open]');if(open){const mode=open.dataset.open;if(mode==='word'||mode==='sentence'){show('gameScreen');EnglishGame.start(mode)}else if(mode==='words'||mode==='sentences')openBook(mode);else if(mode==='shop')alert('おみせは次の段階で追加します。');return}if(e.target.closest('[data-back]')){show('homeScreen');refreshHeader()}const g=e.target.closest('.grammar-open');if(g)EnglishGame.showGrammar(g.dataset.grammar)});
+  $('resetSelection').addEventListener('click',EnglishGame.resetSentence);$('closeGrammar').addEventListener('click',EnglishGame.closeGrammar);$('grammarModal').addEventListener('click',e=>{if(e.target===$('grammarModal'))EnglishGame.closeGrammar()});
+  refreshHeader();return{refreshHeader,show};
+})();
