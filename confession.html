@@ -4,44 +4,40 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#17100c">
-  <title>懺悔</title>
-  <link rel="stylesheet" href="css/confession.css?v=20260822-2055">
+  <title>手紙屋</title>
+  <link rel="stylesheet" href="css/confession.css?v=20260822-2106">
 </head>
 <body>
-  <main class="confession-stage" aria-label="懺悔">
+  <main class="confession-stage" aria-label="手紙屋">
     <header class="confession-header">
       <a class="confession-back" href="story.html" aria-label="物語に戻る">←</a>
-      <h1>懺悔</h1>
+      <h1>手紙屋</h1>
       <span class="confession-header-space" aria-hidden="true"></span>
     </header>
 
-    <section class="confession-panel" aria-label="訪問者">
+    <section class="confession-panel" aria-label="依頼人">
       <p id="confessionText" class="confession-text"></p>
+      <p id="speakerLine" class="speaker-line"></p>
     </section>
 
-    <section class="word-rain-panel" aria-label="語られる言葉">
+    <section class="word-rain-panel" aria-label="単語">
       <div class="confession-label-row">
-        <p class="confession-label">語られる言葉</p>
-        <p id="confessionProgress" class="confession-progress">懺悔 1 / 3</p>
+        <p class="confession-label">単語</p>
+        <p id="confessionProgress" class="confession-progress">会話 1 / 3</p>
       </div>
-      <div id="wordRain" class="word-rain"></div>
+      <div id="wordRain" class="word-bank" aria-label="並び替える単語"></div>
     </section>
 
-    <section class="answer-panel" aria-label="聞き取り欄">
-      <p class="answer-label">聞き取った言葉</p>
+    <section class="answer-panel" aria-label="英文作成欄">
+      <p class="answer-label">英文を作る</p>
       <div id="confessionAnswer" class="answer-box"></div>
+      <div id="completedSentences" class="completed-sentences" aria-label="完成した英文"></div>
       <p id="confessionFeedback" class="confession-feedback" aria-live="polite"></p>
       <div class="confession-actions">
-        <button id="resetConfession" class="confession-button secondary" type="button">やり直す</button>
-        <button id="submitConfession" class="confession-button" type="button">神に渡す</button>
+        <button id="resetConfession" class="confession-button secondary" type="button">選びなおす</button>
+        <button id="submitConfession" class="confession-button" type="button">決定</button>
       </div>
-    </section>
-
-    <section id="confessionStoryPanel" class="confession-story-panel hidden" aria-hidden="true" aria-label="告白者の物語">
-      <p class="story-kicker">3つの懺悔を聞き取りました</p>
-      <h2>この人の物語</h2>
-      <p id="confessionStoryText" class="confession-story-text"></p>
-      <a class="story-return" href="story.html">物語へ戻る</a>
+      <button id="writeLetterButton" class="write-letter-button hidden" type="button">手紙を書く</button>
     </section>
   </main>
 
@@ -49,6 +45,6 @@
   <script src="data/words.js"></script>
   <script src="js/storage.js"></script>
   <script src="data/confessions.js"></script>
-  <script src="js/confession.js"></script>
+  <script src="js/confession.js?v=20260822-2106"></script>
 </body>
 </html>
