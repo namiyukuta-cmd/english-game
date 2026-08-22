@@ -2,14 +2,17 @@
 html,body{margin:0;width:100%;height:100%;background:#0e0c0b;font-family:system-ui,"Yu Gothic",sans-serif;color:#eee6da;overflow:hidden}
 body{display:grid;place-items:center}
 button{font:inherit}
-.confession-stage{width:min(100vw,680px);height:100dvh;display:grid;grid-template-rows:54px minmax(0,25fr) minmax(0,39fr) minmax(0,36fr);background:#17130f;overflow:hidden}
+.hidden{display:none!important}
+.confession-stage{position:relative;width:min(100vw,680px);height:100dvh;display:grid;grid-template-rows:54px minmax(0,25fr) minmax(0,39fr) minmax(0,36fr);background:#17130f;overflow:hidden}
 .confession-header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;padding:max(6px,env(safe-area-inset-top)) 10px 6px;background:#17130f;border-bottom:1px solid #54483d}
 .confession-header h1{margin:0;text-align:center;font-size:20px;line-height:1;font-weight:800}
 .confession-back{width:36px;height:36px;border:1px solid #766555;border-radius:8px;background:#e9dfcf;color:#302820;font-size:21px;font-weight:900;text-decoration:none;display:flex;align-items:center;justify-content:center}
 .confession-header-space{display:block}
 .confession-panel,.answer-panel,.word-rain-panel{min-width:0;min-height:0;padding:14px 16px;background:#15110e}
 .confession-panel{display:flex;align-items:center;border-bottom:1px solid #54483d;overflow:auto}
-.confession-label,.answer-label{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#b7a48f}
+.confession-label-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.confession-label,.answer-label,.confession-progress{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#b7a48f}
+.confession-progress{letter-spacing:.04em}
 .confession-text{margin:0;white-space:pre-wrap;font-size:clamp(14px,3.8vw,18px);line-height:1.8;color:#f0e8dc}
 .word-rain-panel{display:grid;grid-template-rows:auto 1fr;border-bottom:1px solid #54483d;overflow:hidden}
 .word-rain{position:relative;min-height:0;overflow:hidden;border:1px solid #4c4036;border-radius:12px;background:linear-gradient(180deg,#211b17,#120f0d)}
@@ -23,6 +26,11 @@ button{font:inherit}
 .confession-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:auto}
 .confession-button{min-height:42px;border:1px solid #806b56;border-radius:10px;background:linear-gradient(#efe2cc,#cdb895);color:#33291f;font-weight:900}
 .confession-button.secondary{background:#28211c;color:#dfd2c0;border-color:#655547}
+.confession-story-panel{position:absolute;inset:54px 0 0;z-index:10;display:flex;flex-direction:column;padding:28px 22px max(24px,env(safe-area-inset-bottom));background:linear-gradient(180deg,#211a15,#100d0b);overflow:auto}
+.story-kicker{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.12em;color:#b7a48f}
+.confession-story-panel h2{margin:0 0 20px;font-family:serif;font-size:28px;color:#f3e9dc}
+.confession-story-text{margin:0;white-space:pre-wrap;font-family:serif;font-size:clamp(16px,4vw,20px);line-height:2;color:#f0e8dc}
+.story-return{margin-top:auto;display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid #806b56;border-radius:10px;background:linear-gradient(#efe2cc,#cdb895);color:#33291f;font-weight:900;text-decoration:none}
 @media(max-width:430px){
   .confession-stage{width:100vw;height:100dvh;grid-template-rows:50px minmax(0,25fr) minmax(0,39fr) minmax(0,36fr)}
   .confession-header{padding:max(5px,env(safe-area-inset-top)) 8px 5px}
@@ -33,4 +41,7 @@ button{font:inherit}
   .falling-word{min-width:48px;padding:7px 8px;font-size:12px;border-radius:8px}
   .answer-box{min-height:50px;padding:9px;font-size:13px}
   .confession-button{min-height:38px;font-size:13px}
+  .confession-story-panel{inset:50px 0 0;padding:22px 18px max(18px,env(safe-area-inset-bottom))}
+  .confession-story-panel h2{font-size:24px;margin-bottom:16px}
+  .confession-story-text{font-size:15px;line-height:1.9}
 }
