@@ -7,7 +7,8 @@ window.EnglishGame = (()=>{
   function start(nextMode){mode=nextMode;round=0;firstPick=null;picked=[];rounds=mode==='word'?makeWordRounds():makeSentenceRounds();renderRound()}
 
   function makeWordRounds(){
-    const pool=WORDS.filter(w=>GameStore.state.unlockedWordIds.includes(w.id));
+    const studyPool=WordData.getCurrentStudyWords(GameStore.state.studyProgress);
+    const pool=studyPool.filter(w=>GameStore.state.unlockedWordIds.includes(w.id));
     return [0,1,2].map(()=>shuffle(pool).slice(0,6));
   }
 
@@ -62,7 +63,11 @@ window.EnglishGame = (()=>{
     $('resetSelection').classList.remove('hidden');
   }
 
-  function lookupJa(word){const found=WORDS.find(w=>norm(w.en)===norm(word)||((norm(word)==='cats')&&w.id==='cat'));return found?found.ja:'—'}
+  function lookupJa(word){
+    const target=norm(word)==='cats'?'cat':norm(word);
+    const found=WORDS.find(w=>norm(w.en)===target);
+    return found?found.ja:'—';
+  }
   function pickSentence(el,word,index){if(picked.some(p=>p.index===index))return;picked.push({word,index,el});el.classList.add('matched');updatePicked();const target=rounds[round].target;if(picked.length===target.answer.length)checkSentence()}
   function updatePicked(){$('selectionArea').innerHTML=picked.length?picked.map(p=>`<span class="picked">${p.word}</span>`).join(''):'<span class="hint">ここに英文ができます</span>'}
   function resetSentence(){for(const p of picked)p.el.classList.remove('matched');picked=[];updatePicked();$('feedback').textContent='';}
@@ -71,7 +76,7 @@ window.EnglishGame = (()=>{
   function showGrammar(id){const g=GRAMMAR[id];if(!g)return;$('grammarTitle').textContent=g.title;$('grammarText').textContent=g.text;$('grammarExample').innerHTML=g.example.split('\n').map(x=>`<div>${x}</div>`).join('');$('grammarModal').classList.add('open');$('grammarModal').setAttribute('aria-hidden','false')}
   function closeGrammar(){$('grammarModal').classList.remove('open');$('grammarModal').setAttribute('aria-hidden','true')}
 
-  function winRound(coins){GameStore.addCoins(coins);if(mode==='sentence'&&round===1)GameStore.unlockWords(['she','he','is','likes','has','plays','tennis']);window.AppUI.refreshHeader();setTimeout(()=>{round++;if(round>=rounds.length){$('promptCard').innerHTML='<div class="jp">クリア！</div><div class="hint">お金を手に入れました</div>';$('board').innerHTML='';$('selectionArea').innerHTML='';$('resetSelection').classList.add('hidden');$('feedback').textContent=`🪙 +${coins}　ホームへ戻れます`;return}renderRound()},500)}
+  function winRound(coins){GameStore.addCoins(coins);window.AppUI.refreshHeader();setTimeout(()=>{round++;if(round>=rounds.length){$('promptCard').innerHTML='<div class="jp">クリア！</div><div class="hint">お金を手に入れました</div>';$('board').innerHTML='';$('selectionArea').innerHTML='';$('resetSelection').classList.add('hidden');$('feedback').textContent=`🪙 +${coins}　ホームへ戻れます`;return}renderRound()},500)}
 
   return {start,resetSentence,showGrammar,closeGrammar};
 })();
