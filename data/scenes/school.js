@@ -36,6 +36,63 @@
       sentence:"I'm a student."
     },
 
+    // 主人公の返答は、その時点までに習った単語だけで作る。
+    // NPC側は必ず英語＋日本語訳で表示する。
+    conversations:[
+      {
+        id:'school_first_day_step1',
+        grade:1,term:1,requiredStep:1,
+        title:'留学初日・教室',
+        place:'classroom',
+        turns:[
+          {
+            speaker:'teacher',speakerName:'Teacher',
+            en:'Hello. Welcome to our class.',
+            ja:'こんにちは。私たちのクラスへようこそ。',
+            response:{jp:'私は音楽が好きです。',words:['I','like','music'],answer:['I','like','music'],sentence:'I like music.'}
+          },
+          {
+            speaker:'classmate',speakerName:'Classmate',
+            en:'I like sports. How about you?',
+            ja:'私はスポーツが好きです。あなたは？',
+            response:{jp:'私はスポーツが好きです。',words:['I','like','sports'],answer:['I','like','sports'],sentence:'I like sports.'}
+          },
+          {
+            speaker:'classmate',speakerName:'Classmate',
+            en:'Do you play soccer?',
+            ja:'サッカーをしますか？',
+            response:{jp:'私はサッカーをします。',words:['I','play','soccer'],answer:['I','play','soccer'],sentence:'I play soccer.'}
+          }
+        ]
+      },
+      {
+        id:'school_introduction_step7',
+        grade:1,term:1,requiredStep:7,
+        title:'自己紹介',
+        place:'classroom',
+        turns:[
+          {
+            speaker:'teacher',speakerName:'Teacher',
+            en:'Hello. I am your teacher.',
+            ja:'こんにちは。私はあなたの先生です。',
+            response:{jp:'私は学生です。',words:["I'm",'a','student'],answer:["I'm",'a','student'],sentence:"I'm a student."}
+          },
+          {
+            speaker:'teacher',speakerName:'Teacher',
+            en:'Where are you from?',
+            ja:'どこの出身ですか？',
+            response:{jp:'私は日本出身です。',words:["I'm",'from','Japan'],answer:["I'm",'from','Japan'],sentence:"I'm from Japan."}
+          },
+          {
+            speaker:'classmate',speakerName:'Classmate',
+            en:'Nice to meet you.',
+            ja:'はじめまして。',
+            response:{jp:'私は友達が好きです。',words:['I','like','my','friend'],answer:['I','like','my','friend'],sentence:'I like my friend.'}
+          }
+        ]
+      }
+    ],
+
     places:[
       {id:'school_gate',name:'校門'},
       {id:'classroom',name:'教室'},
