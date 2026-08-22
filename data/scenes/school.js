@@ -1,6 +1,6 @@
 (()=>{
   // 場面データ：学校
-  // 依頼人・会話・手紙の内容を作るときに参照するための固定データ。
+  // 手紙屋とは別の独立した「学校」場面用データ。
   const school={
     id:'school',
     name:'学校',
@@ -44,34 +44,21 @@
       {id:'introduction',name:'自己紹介',tags:['初対面','転校','新学期']},
       {id:'favorite_subject',name:'好きな教科の話',tags:['教科','好み']},
       {id:'dislike_subject',name:'苦手な教科の話',tags:['教科','悩み']},
-      {id:'late_for_school',name:'遅刻した',tags:['遅刻','謝罪']},
+      {id:'late_for_school',name:'遅刻した',tags:['遅刻']},
       {id:'forgot_something',name:'忘れ物をした',tags:['忘れ物','困りごと']},
-      {id:'missed_class',name:'授業を休んだ',tags:['欠席','連絡']},
+      {id:'missed_class',name:'授業を休んだ',tags:['欠席']},
       {id:'class_problem',name:'授業中に困った',tags:['授業','悩み']},
       {id:'friendship',name:'友達について話す',tags:['友達','人間関係']},
-      {id:'argument',name:'友達とけんかした',tags:['友達','謝罪']},
+      {id:'argument',name:'友達とけんかした',tags:['友達','人間関係']},
       {id:'club_join',name:'部活に入りたい',tags:['部活動','希望']},
       {id:'club_practice',name:'部活の練習について話す',tags:['部活動','練習']},
       {id:'cannot_do',name:'できないことを相談する',tags:['悩み','練習']},
       {id:'good_job',name:'できるようになったことを伝える',tags:['成長','報告']},
       {id:'school_event',name:'学校行事について話す',tags:['行事','予定']},
       {id:'after_school_plan',name:'放課後の約束をする',tags:['放課後','友達']},
-      {id:'thank_teacher',name:'先生に感謝を伝える',tags:['先生','感謝']},
-      {id:'ask_teacher',name:'先生にお願いをする',tags:['先生','お願い']},
-      {id:'transfer',name:'転校・別れを伝える',tags:['別れ','友達']},
-      {id:'encouragement',name:'友達を励ます',tags:['友達','励まし']},
-      {id:'apology',name:'学校でのことを謝る',tags:['謝罪','学校生活']}
-    ],
-
-    letterPurposes:[
-      {id:'to_friend',name:'友達への手紙'},
-      {id:'to_teacher',name:'先生への手紙'},
-      {id:'to_classmate',name:'クラスメイトへの手紙'},
-      {id:'to_family',name:'家族への学校生活の報告'},
-      {id:'apology_letter',name:'謝罪の手紙'},
-      {id:'thank_you_letter',name:'感謝の手紙'},
-      {id:'invitation_letter',name:'誘いの手紙'},
-      {id:'encouragement_letter',name:'励ましの手紙'}
+      {id:'ask_teacher',name:'先生に相談する',tags:['先生','相談']},
+      {id:'transfer',name:'転校・別れ',tags:['別れ','友達']},
+      {id:'encouragement',name:'友達を励ます',tags:['友達','励まし']}
     ]
   };
 
