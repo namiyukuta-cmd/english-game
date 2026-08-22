@@ -1,19 +1,18 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;background:#100b08;font-family:system-ui,"Yu Gothic",sans-serif;overflow:hidden}
 body{display:grid;place-items:center;color:#f4e7d1}
-.tavern-stage{width:min(100vw,calc(100dvh * 4 / 3));aspect-ratio:4/3;max-height:100dvh;display:grid;grid-template-rows:1fr 1fr;background:#17100c;border:1px solid #3a291f;overflow:hidden}
-.tavern-top{display:grid;grid-template-columns:1fr 1fr;min-height:0;border-bottom:2px solid #4a3427}
-.tavern-image{min-width:0;min-height:0;background:#27160e center/cover no-repeat;border-right:2px solid #4a3427}
-.tavern-menu{min-width:0;min-height:0;padding:clamp(6px,1.8vw,18px);display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:clamp(3px,1vw,9px);background:#17100c}
-.tavern-button{width:100%;min-height:0;border:2px solid #765038;border-radius:clamp(6px,1.5vw,12px);background:linear-gradient(#f1ddb4,#d7b984);box-shadow:0 2px 0 #5a3822;color:#3d2618;font-size:clamp(10px,2.2vw,17px);font-weight:800;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:2px 6px;-webkit-tap-highlight-color:transparent}
-.tavern-button:active{transform:translateY(1px);box-shadow:0 1px 0 #5a3822}
-.tavern-text{min-height:0;padding:clamp(12px,3vw,28px);background:linear-gradient(180deg,#1b120d,#120c09);overflow:auto}
+.tavern-stage{width:min(100vw,calc(100dvh * 4 / 3));aspect-ratio:4/3;max-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) clamp(92px,19%,145px);grid-template-rows:58% 42%;background:#17100c;border:1px solid #3a291f;overflow:hidden}
+.tavern-image{grid-column:1;grid-row:1;min-width:0;min-height:0;background:#27160e center/cover no-repeat;border-right:2px solid #4a3427;border-bottom:2px solid #4a3427}
+.tavern-text{grid-column:1;grid-row:2;min-width:0;min-height:0;padding:clamp(12px,3vw,28px);background:linear-gradient(180deg,#1b120d,#120c09);border-right:2px solid #4a3427;overflow:auto}
 .tavern-text p{margin:0;white-space:pre-wrap;line-height:1.8;font-size:clamp(13px,2.5vw,20px);color:#f0dfc5}
+.tavern-menu{grid-column:2;grid-row:1/3;min-width:0;min-height:0;padding:clamp(5px,1.2vw,10px);display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:clamp(3px,.7vw,7px);background:#17100c}
+.tavern-button{width:100%;min-height:0;border:2px solid #765038;border-radius:clamp(5px,1.2vw,10px);background:linear-gradient(#f1ddb4,#d7b984);box-shadow:0 2px 0 #5a3822;color:#3d2618;font-size:clamp(9px,1.8vw,15px);font-weight:800;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 4px;line-height:1.25;-webkit-tap-highlight-color:transparent}
+.tavern-button:active{transform:translateY(1px);box-shadow:0 1px 0 #5a3822}
 @media(max-width:430px){
-  .tavern-menu{padding:6px;gap:4px}
-  .tavern-button{border-width:1px;border-radius:6px;box-shadow:0 1px 0 #5a3822;font-size:11px;padding:1px 3px}
-  .tavern-top{border-bottom-width:1px}
-  .tavern-image{border-right-width:1px}
-  .tavern-text{padding:12px 14px}
+  .tavern-stage{grid-template-columns:minmax(0,1fr) 86px;grid-template-rows:58% 42%}
+  .tavern-menu{padding:4px;gap:3px}
+  .tavern-button{border-width:1px;border-radius:5px;box-shadow:0 1px 0 #5a3822;font-size:10px;padding:2px}
+  .tavern-image{border-right-width:1px;border-bottom-width:1px}
+  .tavern-text{border-right-width:1px;padding:12px 14px}
   .tavern-text p{font-size:13px;line-height:1.65}
 }
