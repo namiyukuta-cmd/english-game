@@ -40,32 +40,42 @@
     item.lines.length===3&&
     item.lines.every(line=>line.words.every(word=>learnedSet.has(normalize(word))));
 
-  // 依頼人は requesters.js に書かれた順番で来る。ランダム抽選はしない。
-  let requesterIndex=store.state.letterRequesterIndex||0;
-  if(requesterIndex>=data.requesters.length)requesterIndex=data.requesters.length-1;
-  if(requesterIndex<0)requesterIndex=0;
+  // 教科書上のまとまり。学習順は固定し、来店する人物だけをランダムにする。
+  const studyGroup=step=>{
+    if(step<=6)return 'friends';
+    if(step<=9)return 'unit1';
+    if(step<=13)return 'unit2';
+    if(step===14)return 'worldtour1';
+    return 'unit3';
+  };
 
-  let requester=data.requesters[requesterIndex];
+  let candidates=data.requesters.filter(isUsableRequester);
+  if(!candidates.length)return;
 
-  // 次の依頼人がまだ学習範囲外なら、直前の依頼人を反復する。
-  // 新しいStepが解放されたら、そのまま固定順の次の依頼人へ進める。
-  if(!isUsableRequester(requester)){
-    for(let i=Math.min(requesterIndex,data.requesters.length-1);i>=0;i--){
-      if(isUsableRequester(data.requesters[i])){
-        requester=data.requesters[i];
-        requesterIndex=i;
-        break;
-      }
-    }
+  // 同じ人が連続しにくいようにする。ただし候補が1人だけなら反復する。
+  const lastId=store.state.lastLetterRequesterId||'';
+  if(candidates.length>1){
+    const withoutLast=candidates.filter(item=>item.id!==lastId);
+    if(withoutLast.length)candidates=withoutLast;
   }
 
-  if(!requester||!isUsableRequester(requester))return;
+  const currentGroup=studyGroup(progress.step);
+  const weighted=[];
+  for(const item of candidates){
+    // 現在学習中のUnit/範囲を多めに出し、過去範囲も復習として残す。
+    const weight=studyGroup(item.step)===currentGroup?5:1;
+    for(let i=0;i<weight;i++)weighted.push(item);
+  }
+  const requester=weighted[Math.floor(Math.random()*weighted.length)];
+
+  // 次回来店時の連続出現を避けるため、今回の依頼人だけ記録する。
+  store.state.lastLetterRequesterId=requester.id;
+  store.save();
 
   intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は貴女に、手紙を書いてほしいと頼みました。`;
 
   let round=0;
   let selected=[];
-  let requesterAdvanced=false;
   const completed=[];
 
   const currentLine=()=>requester.lines[round];
@@ -113,7 +123,7 @@
     feedback.textContent='';
     feedback.className='confession-feedback';
 
-    // 単語の表示順だけは毎回混ぜる。依頼人と英文の出題順は固定。
+    // 1文を作る単語だけを表示し、表示順だけ毎回混ぜる。
     shuffle(line.words).forEach(word=>wordBank.appendChild(makeToken(word)));
   };
 
@@ -158,14 +168,6 @@
     letterText.textContent=requester.letter;
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
-
-    if(!requesterAdvanced){
-      const next=data.requesters[requesterIndex+1];
-      // 次の依頼人が現在の学習範囲に入っている時だけ順番を進める。
-      // まだなら同じ依頼人を反復し、学習範囲が広がった後に次へ進む。
-      if(isUsableRequester(next))store.advanceLetterRequester();
-      requesterAdvanced=true;
-    }
   });
 
   buildRound();
