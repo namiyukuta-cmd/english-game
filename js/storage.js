@@ -7,7 +7,8 @@ window.GameStore = (()=>{
     unlockedWordIds:defaultWordIds(),
     studyProgress:{...defaultProgress},
     seenSentenceIds:[],
-    seenGrammarIds:[]
+    seenGrammarIds:[],
+    letterRequesterIndex:0
   };
 
   function load(){
@@ -17,6 +18,7 @@ window.GameStore = (()=>{
       state.studyProgress={...defaultProgress,...(saved.studyProgress||{})};
       const required=WordData.getCurrentStudyWords(state.studyProgress).map(w=>w.id);
       state.unlockedWordIds=[...new Set([...(saved.unlockedWordIds||[]),...required])];
+      if(!Number.isInteger(state.letterRequesterIndex)||state.letterRequesterIndex<0)state.letterRequesterIndex=0;
       return state;
     }catch(e){return {...initial,studyProgress:{...defaultProgress}}}
   }
@@ -36,7 +38,12 @@ window.GameStore = (()=>{
     if(p.step<max)setStudyProgress({step:p.step+1});
     return state.studyProgress.step;
   }
+  function advanceLetterRequester(){
+    state.letterRequesterIndex=(state.letterRequesterIndex||0)+1;
+    save();
+    return state.letterRequesterIndex;
+  }
   function seeSentence(id){if(!state.seenSentenceIds.includes(id)){state.seenSentenceIds.push(id);save()}}
   function seeGrammar(id){const first=!state.seenGrammarIds.includes(id);if(first){state.seenGrammarIds.push(id);save()}return first}
-  return {get state(){return state},save,addCoins,unlockWords,setStudyProgress,unlockNextStudyStep,seeSentence,seeGrammar};
+  return {get state(){return state},save,addCoins,unlockWords,setStudyProgress,unlockNextStudyStep,advanceLetterRequester,seeSentence,seeGrammar};
 })();
