@@ -1,0 +1,32 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;font-family:system-ui,"Yu Gothic",sans-serif;background:#eef6ff;color:#253248}
+body{display:grid;place-items:center}
+button{font:inherit}
+.hidden{display:none!important}
+.school-stage{width:min(100vw,680px);min-height:100dvh;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;background:linear-gradient(180deg,#f8fbff,#eef6ff);overflow:hidden}
+.school-header{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:max(8px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid #cddced;background:#fff}
+.back-button{width:36px;height:36px;border:1px solid #b8cbe0;border-radius:10px;background:#f4f8fc;color:#2e4058;text-decoration:none;display:grid;place-items:center;font-size:20px;font-weight:900}
+.school-kicker{margin:0 0 2px;font-size:10px;font-weight:900;letter-spacing:.12em;color:#6d88a7}
+.school-header h1{margin:0;font-size:20px}
+.school-progress{padding:6px 10px;border-radius:999px;background:#edf4fb;border:1px solid #c7d8e8;font-size:12px;font-weight:800}
+.scene-panel{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 16px;background:#e4eef9;border-bottom:1px solid #cddced}
+.scene-title,.scene-place{margin:0}.scene-title{font-weight:900}.scene-place{font-size:12px;color:#61778f}
+.conversation-panel{min-height:0;display:flex;flex-direction:column;padding:14px;overflow:auto}
+.conversation-history{display:grid;gap:8px;margin-bottom:10px}
+.history-line{padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #d5e1ee;font-size:12px;line-height:1.5}
+.history-line .en{display:block;font-weight:800;color:#26364a}.history-line .ja{display:block;color:#6d7f93;margin-top:2px}.history-line.player{background:#edf7ed;border-color:#c7dfc8}
+.speech-card{margin-top:auto;padding:16px;border:1px solid #bdcee0;border-radius:16px;background:#fff;box-shadow:0 8px 24px #61778f18}
+.speaker-name{margin:0 0 8px;font-size:11px;font-weight:900;letter-spacing:.08em;color:#6d88a7}
+.npc-english{margin:0;font-size:clamp(20px,5vw,28px);line-height:1.35;font-weight:900;color:#223148}
+.npc-japanese{margin:8px 0 0;padding-top:8px;border-top:1px solid #e2eaf2;font-size:14px;line-height:1.55;color:#65788c}
+.response-panel{padding:12px 14px max(14px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #cddced}
+.response-label{margin:0 0 4px;font-size:11px;font-weight:900;letter-spacing:.08em;color:#70879f}
+.response-prompt{margin:0 0 8px;font-size:15px;font-weight:800}
+.selected-words{min-height:46px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;padding:8px;border:2px dashed #c7d8e8;border-radius:12px;background:#f7fbff}
+.selected-token{padding:6px 9px;border-radius:9px;background:#dceafb;font-weight:900}
+.word-bank{min-height:62px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:9px;padding:10px;border:1px solid #d0deeb;border-radius:12px;background:#f3f8fd}
+.word-token{min-width:54px;min-height:38px;padding:7px 10px;border:1px solid #9fb6cf;border-radius:10px;background:#fff;color:#24354a;font-weight:900;box-shadow:0 3px 8px #526b8515}
+.word-token.picked{opacity:.28;pointer-events:none}
+.school-feedback{min-height:19px;margin:7px 0 4px;text-align:center;font-size:12px;font-weight:800}.school-feedback.good{color:#56825a}.school-feedback.bad{color:#b35f67}
+.school-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.school-button,.school-finish{min-height:40px;border:1px solid #89a7c4;border-radius:10px;background:#dbeafb;color:#26384d;font-weight:900}.school-button.secondary{background:#f7f9fb;color:#60748a}.school-finish{display:grid;place-items:center;margin-top:8px;text-decoration:none;background:#dcefdc;border-color:#a6c6a7}
+@media(max-width:430px){.school-stage{height:100dvh}.school-header{padding:max(6px,env(safe-area-inset-top)) 10px 7px}.school-header h1{font-size:18px}.conversation-panel{padding:10px}.speech-card{padding:13px}.npc-english{font-size:19px}.npc-japanese{font-size:12px}.response-panel{padding:9px 10px max(10px,env(safe-area-inset-bottom))}.response-prompt{font-size:13px}.selected-words{min-height:40px;padding:6px}.word-bank{min-height:54px;padding:7px;gap:6px}.word-token{min-width:48px;min-height:34px;padding:5px 8px;font-size:13px}.school-button,.school-finish{min-height:36px;font-size:13px}}
