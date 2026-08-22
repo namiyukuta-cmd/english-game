@@ -65,11 +65,21 @@
       obstacles.add(block);
     });
 
-    player = this.add.rectangle(map.playerStart.x, map.playerStart.y, 26, 32, 0xf8f6ef);
+    const returnPos = readReturnPosition();
+    const start = returnPos || map.playerStart;
+    player = this.add.rectangle(start.x, start.y, 26, 32, 0xf8f6ef);
     player.setStrokeStyle(3, 0x5b4050);
     this.physics.add.existing(player);
     player.body.setCollideWorldBounds(true);
     this.physics.add.collider(player, obstacles);
+
+    const cooldownUntil = Number(localStorage.getItem('rpgEncounterCooldownUntil') || 0);
+    if (Date.now() < cooldownUntil) {
+      state.encounterLock = true;
+      this.time.delayedCall(Math.max(200, cooldownUntil - Date.now()), () => {
+        state.encounterLock = false;
+      });
+    }
 
     const npcs = this.physics.add.staticGroup();
     map.npcs.forEach(n => {
@@ -85,6 +95,7 @@
       const enemy = this.add.circle(e.x, e.y, 18, 0xe86b79);
       enemy.setStrokeStyle(3, 0x7a3441);
       enemy.name = e.name;
+      enemy.enemyId = e.id;
       this.physics.add.existing(enemy, true);
       enemies.add(enemy);
     });
@@ -96,8 +107,12 @@
     this.physics.add.overlap(player, enemies, (_p, enemy) => {
       if (state.encounterLock) return;
       state.encounterLock = true;
-      showMessage(`${enemy.name}に遭遇！　ここから英語戦闘画面へ`);
-      this.time.delayedCall(1200, () => { state.encounterLock = false; });
+      player.body.setVelocity(0);
+      saveReturnPosition(player.x, player.y);
+      showMessage(`${enemy.name}に遭遇！`);
+      this.time.delayedCall(450, () => {
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}`;
+      });
     });
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -124,6 +139,11 @@
     let x = 0;
     let y = 0;
 
+    if (state.encounterLock && Number(localStorage.getItem('rpgEncounterCooldownUntil') || 0) <= Date.now()) {
+      player.body.setVelocity(0);
+      return;
+    }
+
     if (cursors.left.isDown || wasd.A.isDown || state.touch.left) x -= 1;
     if (cursors.right.isDown || wasd.D.isDown || state.touch.right) x += 1;
     if (cursors.up.isDown || wasd.W.isDown || state.touch.up) y -= 1;
@@ -139,6 +159,24 @@
 
   function showMessage(text) {
     if (message) message.setText(text);
+  }
+
+  function saveReturnPosition(x, y) {
+    localStorage.setItem('rpgReturnPositionV1', JSON.stringify({ x, y }));
+  }
+
+  function readReturnPosition() {
+    try {
+      const raw = localStorage.getItem('rpgReturnPositionV1');
+      if (!raw) return null;
+      localStorage.removeItem('rpgReturnPositionV1');
+      const pos = JSON.parse(raw);
+      if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return null;
+      return { x: pos.x, y: pos.y };
+    } catch (_error) {
+      localStorage.removeItem('rpgReturnPositionV1');
+      return null;
+    }
   }
 
   function bindTouchControls() {
