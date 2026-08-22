@@ -28,26 +28,27 @@
     ]
   };
 
-  // 現在の英単語JSに収録されている単語だけで組める初期懺悔。
-  const sentences={
-    small:[
-      ['I','was','late','for','class'],
-      ['I','read','a','magazine','during','class'],
-      ['I','went','to','the','park','during','class'],
-      ['I','went','home','during','class'],
-      ['I','was','not','at','school'],
-      ['I','was','at','the','park','during','class']
-    ],
-    ordinary:[
-      ['I','was','not','with','my','family'],
-      ['I','went','home','during','class']
-    ],
-    // 大罪用の語彙は後から英単語JS側に追加できる。
-    // 現段階では抽選ルールだけ保持し、文章はordinaryから代用する。
-    grave:[
-      ['I','was','not','with','my','family']
-    ]
-  };
+  // 英文は教科書の学習順に紐づける。
+  // そのStepまでに英単語JSで習った語だけを使う。
+  // 後のStepの英文が先に出ることはない。
+  const lessons=[
+    {grade:1,term:1,step:1,severity:'small',words:['I','like','sweets']},
+    {grade:1,term:1,step:2,severity:'small',words:["I'm",'hungry']},
+    {grade:1,term:1,step:3,severity:'small',words:['I','like','red']},
+    {grade:1,term:1,step:4,severity:'small',words:['I','went','fishing']},
+    {grade:1,term:1,step:5,severity:'small',words:['I','want','food']},
+    {grade:1,term:1,step:6,severity:'small',words:['I','like','milk']},
+    {grade:1,term:1,step:7,severity:'small',words:["I'm",'a','student']},
+    {grade:1,term:1,step:8,severity:'small',words:['I',"don't",'like','winter']},
+    {grade:1,term:1,step:9,severity:'small',words:['I',"can't",'swim']},
+    {grade:1,term:1,step:10,severity:'small',words:["I'm",'interested','in','K-pop']},
+    {grade:1,term:1,step:11,severity:'small',words:['I','never','practice']},
+    {grade:1,term:1,step:12,severity:'small',words:['I','write','with','a','pencil']},
+    {grade:1,term:1,step:13,severity:'small',words:['I','like','my','team']},
+    {grade:1,term:1,step:14,severity:'small',words:['I','like','Australia']},
+    {grade:1,term:1,step:15,severity:'small',words:['I','get','up','late']},
+    {grade:1,term:1,step:16,severity:'small',words:['I','use','computer']}
+  ];
 
-  window.CONFESSION_DATA={ages,genders,sinWeights,sentences};
+  window.CONFESSION_DATA={ages,genders,sinWeights,lessons};
 })();
