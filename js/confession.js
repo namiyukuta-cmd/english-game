@@ -1,6 +1,7 @@
 (()=>{
   const requesterData=window.LETTER_REQUESTERS;
   const contentData=window.LETTER_CONTENT;
+  const storyData=window.LETTER_STORY;
   const wordData=window.WordData;
   const store=window.GameStore;
   if(!requesterData||!contentData||!wordData||!store)return;
@@ -17,6 +18,7 @@
   const writeLetterButton=document.getElementById('writeLetterButton');
   const letterPanel=document.getElementById('letterPanel');
   const letterText=document.getElementById('letterText');
+  const letterReturn=document.querySelector('.letter-return');
 
   const shuffle=list=>{
     const copy=[...list];
@@ -28,6 +30,12 @@
   };
   const pick=list=>list[Math.floor(Math.random()*list.length)];
   const normalize=value=>String(value).trim().toLowerCase().replace(/[.!?]$/,'');
+
+  const params=new URLSearchParams(location.search);
+  const storyId=params.get('story');
+  const storyChapter=storyData&&Array.isArray(storyData.chapters)
+    ?storyData.chapters.find(chapter=>chapter.id===storyId)||null
+    :null;
 
   const progress=store.state.studyProgress||{grade:1,term:1,step:1};
   const learnedSet=new Set(wordData.getCurrentStudyWords(progress).map(word=>normalize(word.en)));
@@ -55,11 +63,11 @@
     return pick(pool);
   };
 
-  // 人物は年齢・性別だけ。学習内容とは独立して決める。
-  const requester=chooseWithCooldown(requesterData.requesters,store.state.recentLetterRequesterIds,5);
+  const requester=storyChapter
+    ?storyChapter.requester
+    :chooseWithCooldown(requesterData.requesters,store.state.recentLetterRequesterIds,5);
   if(!requester)return;
 
-  // Step1〜現在のStepまでに習った単語だけで作れる「1文」を全部候補にする。
   const usableLines=contentData.lines.filter(line=>
     line&&
     line.grade===progress.grade&&
@@ -71,7 +79,6 @@
 
   const matchesSlot=(line,slotTags)=>slotTags.some(tag=>line.tags.includes(tag));
 
-  // 同じ英文を重ねず、事情の3つの役割に合う文を1文ずつ選ぶ。
   const buildLinesForSituation=situation=>{
     const used=new Set();
     const result=[];
@@ -79,7 +86,6 @@
       const possible=usableLines.filter(line=>!used.has(line.id)&&matchesSlot(line,slot));
       if(!possible.length)return null;
 
-      // 今習っている範囲の文は少し出やすくするが、以前の文も常に候補に残す。
       const weighted=[];
       for(const line of possible){
         const weight=studyGroup(line.step)===currentGroup?3:1;
@@ -92,55 +98,85 @@
     return result;
   };
 
-  // 現在の学習範囲で成立する事情だけを候補にする。
-  const usableSituations=[];
-  for(const situation of contentData.situations){
-    if(situation.minStep>progress.step)continue;
-    const sample=buildLinesForSituation(situation);
-    if(sample)usableSituations.push(situation);
-  }
-  if(!usableSituations.length)return;
-
-  // 新しく習った表現を使える事情は少し出やすい。それ以外も復習として出る。
-  const weightedSituations=[];
-  for(const situation of usableSituations){
-    const hasCurrent=usableLines.some(line=>
-      studyGroup(line.step)===currentGroup&&situation.slots.some(slot=>matchesSlot(line,slot))
-    );
-    const weight=hasCurrent?3:1;
-    for(let i=0;i<weight;i++)weightedSituations.push(situation);
-  }
-
   const recentCombos=Array.isArray(store.state.recentLetterContentIds)?store.state.recentLetterContentIds:[];
   let situation=null;
   let conversationLines=null;
   let comboId='';
 
-  // 同じ「事情＋3文」の組み合わせをすぐ繰り返さない。
-  for(let attempt=0;attempt<30;attempt++){
-    const candidateSituation=pick(weightedSituations);
-    const candidateLines=buildLinesForSituation(candidateSituation);
-    if(!candidateLines)continue;
-    const candidateId=`${candidateSituation.id}:${candidateLines.map(line=>line.id).join('|')}`;
-    if(!recentCombos.includes(candidateId)||attempt===29){
-      situation=candidateSituation;
-      conversationLines=candidateLines;
-      comboId=candidateId;
-      break;
+  if(storyChapter){
+    const storySituation={
+      id:`story_${storyChapter.id}`,
+      minStep:1,
+      label:storyChapter.requestLabel,
+      recipient:'大切な人',
+      slots:storyChapter.slots,
+      openings:storyChapter.openings,
+      closings:storyChapter.closings
+    };
+
+    for(let attempt=0;attempt<30;attempt++){
+      const candidateLines=buildLinesForSituation(storySituation);
+      if(!candidateLines)break;
+      const candidateId=`${storySituation.id}:${candidateLines.map(line=>line.id).join('|')}`;
+      if(!recentCombos.includes(candidateId)||attempt===29){
+        situation=storySituation;
+        conversationLines=candidateLines;
+        comboId=candidateId;
+        break;
+      }
     }
   }
+
+  if(!situation){
+    const usableSituations=[];
+    for(const candidate of contentData.situations){
+      if(candidate.minStep>progress.step)continue;
+      const sample=buildLinesForSituation(candidate);
+      if(sample)usableSituations.push(candidate);
+    }
+    if(!usableSituations.length)return;
+
+    const weightedSituations=[];
+    for(const candidate of usableSituations){
+      const hasCurrent=usableLines.some(line=>
+        studyGroup(line.step)===currentGroup&&candidate.slots.some(slot=>matchesSlot(line,slot))
+      );
+      const weight=hasCurrent?3:1;
+      for(let i=0;i<weight;i++)weightedSituations.push(candidate);
+    }
+
+    for(let attempt=0;attempt<30;attempt++){
+      const candidateSituation=pick(weightedSituations);
+      const candidateLines=buildLinesForSituation(candidateSituation);
+      if(!candidateLines)continue;
+      const candidateId=`${candidateSituation.id}:${candidateLines.map(line=>line.id).join('|')}`;
+      if(!recentCombos.includes(candidateId)||attempt===29){
+        situation=candidateSituation;
+        conversationLines=candidateLines;
+        comboId=candidateId;
+        break;
+      }
+    }
+  }
+
   if(!situation||!conversationLines)return;
 
-  // 人物・内容の履歴を別々に保存する。
-  if(typeof store.rememberLetterRequester==='function')store.rememberLetterRequester(requester.id,5);
-  else{
-    const recent=[...(store.state.recentLetterRequesterIds||[]).filter(id=>id!==requester.id),requester.id];
-    store.state.recentLetterRequesterIds=recent.slice(-5);
+  if(!storyChapter){
+    if(typeof store.rememberLetterRequester==='function')store.rememberLetterRequester(requester.id,5);
+    else{
+      const recent=[...(store.state.recentLetterRequesterIds||[]).filter(id=>id!==requester.id),requester.id];
+      store.state.recentLetterRequesterIds=recent.slice(-5);
+    }
   }
   store.state.recentLetterContentIds=[...recentCombos.filter(id=>id!==comboId),comboId].slice(-8);
   store.save();
 
-  intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は、${situation.label}と話しました。`;
+  if(storyChapter){
+    intro.textContent=`本日訪れたのは『${requester.name}』『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は、${storyChapter.requestLabel}と話しました。`;
+    if(letterReturn)letterReturn.href=`story.html?completed=${encodeURIComponent(storyChapter.id)}`;
+  }else{
+    intro.textContent=`本日訪れたのは『${requester.age}』『${requester.gender}』。\n『${requester.pronoun}』は、${situation.label}と話しました。`;
+  }
 
   let round=0;
   let selected=[];
@@ -231,8 +267,8 @@
   writeLetterButton.addEventListener('click',()=>{
     const opening=pick(situation.openings);
     const closing=pick(situation.closings);
-    const body=conversationLines.map(line=>line.jp).join('');
-    letterText.textContent=`${opening}${body}${closing}`;
+    const body=conversationLines.map(line=>line.jp).join('\n');
+    letterText.textContent=`${opening}\n\n${body}\n\n${closing}`;
     letterPanel.classList.remove('hidden');
     letterPanel.setAttribute('aria-hidden','false');
   });
