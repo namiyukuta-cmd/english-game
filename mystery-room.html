@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜部屋</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2104">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2104">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
 </head>
 <body>
   <main class="mystery-app">
@@ -14,7 +14,7 @@
       <a class="mystery-back" href="mystery-start.html" aria-label="推理トップへ戻る">←</a>
       <h1>掃除婦は朝寝る</h1><span></span>
     </header>
-    <p class="chapter-label">DAILY LIFE / 日常</p>
+    <p class="chapter-label" id="chapterLabel">DAILY LIFE / 日常</p>
     <section class="story-card">
       <div class="room-food">🍲</div>
       <div class="en" id="roomEn"></div>
@@ -23,8 +23,8 @@
     <div id="studyArea"></div>
     <button class="mystery-action" id="workBtn" type="button">Go to work. / 出勤する</button>
   </main>
-  <script src="data/mystery_cases.js?v=20260823-2104"></script>
-  <script src="js/mystery-common.js?v=20260823-2104"></script>
+  <script src="data/mystery_cases.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2111"></script>
   <script>
     const params=new URLSearchParams(location.search);
     if(params.get('mode')==='new') MysteryGame.startNew();
@@ -34,6 +34,7 @@
     }
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
+    document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / DAILY LIFE / 日常`;
     document.getElementById('roomEn').textContent=c.room.storyEn;
     document.getElementById('roomJa').textContent=c.room.storyJa;
     document.getElementById('studyArea').innerHTML=c.room.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
