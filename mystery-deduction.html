@@ -5,24 +5,81 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜推理</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2155">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2155">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2210">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2210">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-questioning.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
     <p class="chapter-label">DEDUCTION / 推理</p>
-    <section class="story-card"><div class="en" id="qEn"></div><div class="ja" id="qJa"></div></section>
-    <section class="story-card"><div class="en">Clue</div><div class="ja" id="clueJa"></div></section>
-    <div class="choice-list" id="choices"></div>
-    <div class="result-box" id="result"></div>
-    <button class="mystery-action hidden" id="nextBtn" type="button">Tell the detective. / 刑事に伝える</button>
+
+    <section id="contradictionPhase">
+      <section class="story-card"><div class="en">Find the contradiction.</div><div class="ja">証拠と証言を1つずつ選んで、矛盾を見つけよう。</div></section>
+      <div class="deduction-columns">
+        <section class="deduction-box">
+          <h2>EVIDENCE / 証拠</h2>
+          <div id="evidenceChoices" class="deduction-list"></div>
+        </section>
+        <section class="deduction-box">
+          <h2>TESTIMONY / 証言</h2>
+          <div id="testimonyChoices" class="deduction-list"></div>
+        </section>
+      </div>
+      <button class="mystery-action" id="compareBtn" type="button" disabled>Compare / 比べる</button>
+      <div class="result-box" id="compareResult"></div>
+    </section>
+
+    <section id="culpritPhase" class="hidden">
+      <section class="story-card"><div class="en" id="qEn"></div><div class="ja" id="qJa"></div></section>
+      <section class="contradiction-found"><strong>CONTRADICTION / 矛盾</strong><div id="clueJa"></div></section>
+      <div class="choice-list" id="choices"></div>
+      <div class="result-box" id="result"></div>
+      <button class="mystery-action hidden" id="nextBtn" type="button">Tell the detective. / 刑事に伝える</button>
+    </section>
   </main>
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
   <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
+    const evidence=(c.questioning.evidence||[]).slice(0,2);
+    const evidenceChoices=document.getElementById('evidenceChoices');
+    const testimonyChoices=document.getElementById('testimonyChoices');
+    const compareBtn=document.getElementById('compareBtn');
+    const compareResult=document.getElementById('compareResult');
+    const culpritPhase=document.getElementById('culpritPhase');
+    let selectedEvidence=-1;
+    let selectedSuspect='';
+
+    evidenceChoices.innerHTML=evidence.map((x,i)=>`<button type="button" data-evidence="${i}"><strong>${MysteryGame.escapeHtml(x.en)}</strong><span>${MysteryGame.escapeHtml(x.ja)}</span></button>`).join('');
+    testimonyChoices.innerHTML=c.suspects.map(s=>`<button type="button" data-suspect="${MysteryGame.escapeHtml(s.name)}"><strong>${MysteryGame.escapeHtml(s.name)}</strong><span>${MysteryGame.escapeHtml(s.statementJa)}</span></button>`).join('');
+
+    evidenceChoices.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-evidence]');if(!btn)return;
+      selectedEvidence=Number(btn.dataset.evidence);
+      evidenceChoices.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===btn));
+      updateCompare();
+    });
+    testimonyChoices.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-suspect]');if(!btn)return;
+      selectedSuspect=btn.dataset.suspect;
+      testimonyChoices.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===btn));
+      updateCompare();
+    });
+    function updateCompare(){compareBtn.disabled=selectedEvidence<0||!selectedSuspect;}
+
+    compareBtn.addEventListener('click',()=>{
+      if(compareBtn.disabled)return;
+      if(selectedEvidence===0&&selectedSuspect===c.deduction.correctName){
+        compareResult.textContent='矛盾を見つけた！';
+        document.getElementById('contradictionPhase').classList.add('hidden');
+        culpritPhase.classList.remove('hidden');
+        MysteryGame.setStage('deduction',{contradictionFound:true});
+      }else{
+        compareResult.textContent='この組み合わせでは決め手にならない。別の組み合わせを試そう。';
+      }
+    });
+
     document.getElementById('qEn').textContent=c.deduction.questionEn;
     document.getElementById('qJa').textContent=c.deduction.questionJa;
     document.getElementById('clueJa').textContent=c.deduction.clueJa;
@@ -35,14 +92,17 @@
       btn.addEventListener('click',()=>{
         choices.querySelectorAll('button').forEach(b=>b.classList.remove('correct','wrong'));
         if(s.name===c.deduction.correctName){
-          btn.classList.add('correct');result.textContent='正解。刑事に伝えよう。';next.classList.remove('hidden');
+          btn.classList.add('correct');result.textContent='正解。刑事にヒントを伝えよう。';next.classList.remove('hidden');
         }else{
-          btn.classList.add('wrong');result.textContent='違うようだ。もう一度考えよう。';next.classList.add('hidden');
+          btn.classList.add('wrong');result.textContent='違うようだ。証拠と証言を見直そう。';next.classList.add('hidden');
         }
       });
       choices.appendChild(btn);
     });
     next.addEventListener('click',()=>{MysteryGame.setStage('hint');location.href='mystery-scene.html?phase=hint';});
+
+    const state=MysteryGame.loadState()||{};
+    if(state.contradictionFound){document.getElementById('contradictionPhase').classList.add('hidden');culpritPhase.classList.remove('hidden');}
   </script>
 </body>
 </html>
