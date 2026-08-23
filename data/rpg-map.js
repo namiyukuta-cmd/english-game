@@ -1,4 +1,8 @@
 window.RPG_MAP = {
+  id: 'village',
+  page: 'rpg.html',
+  title: '村',
+  returnKey: 'rpgReturnPositionV1',
   width: 540,
   height: 960,
   playerStart: { x: 270, y: 500 },
@@ -32,6 +36,21 @@ window.RPG_MAP = {
   npcs: [
     { id: 'villager_01', x: 185, y: 475, name: '村人' },
     { id: 'villager_02', x: 350, y: 475, name: '旅人' }
+  ],
+  exits: [
+    {
+      id: 'to_north_field',
+      x: 270,
+      y: 12,
+      width: 90,
+      height: 24,
+      name: '北の草原',
+      label: '北の草原 ↑',
+      labelPosition: { x: 270, y: 36 },
+      destination: 'rpg_field.html',
+      destinationReturnKey: 'rpgFieldReturnPositionV1',
+      destinationPosition: { x: 270, y: 875 }
+    }
   ],
   enemies: [
     { id: 'slime_01', x: 120, y: 395, name: 'スライム', kind: 'pink' },
