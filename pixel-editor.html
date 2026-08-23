@@ -11,7 +11,7 @@
     body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
     .wrap{max-width:720px;margin:0 auto;padding:12px 12px 28px}
     .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-    .back{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:22px;color:var(--ink)}
+    .back{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:22px;color:var(--ink);flex:0 0 auto}
     h1{margin:0;font-size:20px}
     .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
     .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px}
@@ -22,9 +22,14 @@
     button{font:inherit}
     .toolbtn,.action{min-height:42px;border:1px solid #cdbfc6;border-radius:10px;background:#fff;color:var(--ink);font-weight:700;padding:8px 12px}
     .toolbtn.active{background:#3e3037;color:#fff;border-color:#3e3037}
-    .canvas-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:10px;overflow:hidden}
-    #grid{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(24,1fr);touch-action:none;user-select:none;-webkit-user-select:none;border-top:1px solid rgba(65,52,58,.25);border-left:1px solid rgba(65,52,58,.25);background-image:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
-    .cell{padding:0;margin:0;border:0;border-right:1px solid rgba(65,52,58,.22);border-bottom:1px solid rgba(65,52,58,.22);background:transparent;min-width:0;min-height:0;touch-action:none}
+    .zoomrow{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .zoomrow .toolbtn{min-width:48px}
+    #zoomLabel{min-width:64px;text-align:center;font-weight:800}
+    .canvas-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:10px;overflow:auto;max-height:min(78vw,620px);-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+    #grid{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(24,1fr);user-select:none;-webkit-user-select:none;border-top:1px solid rgba(65,52,58,.3);border-left:1px solid rgba(65,52,58,.3);background-image:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;transform-origin:top left}
+    #grid.tap-mode{touch-action:pan-x pan-y}
+    #grid.draw-mode{touch-action:none}
+    .cell{padding:0;margin:0;border:0;border-right:1px solid rgba(65,52,58,.26);border-bottom:1px solid rgba(65,52,58,.26);background:transparent;min-width:0;min-height:0}
     .palette{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}
     .swatch{aspect-ratio:1/1;border:2px solid #d3c6cc;border-radius:8px;padding:0;min-width:0}
     .swatch.active{outline:3px solid #3e3037;outline-offset:1px}
@@ -34,23 +39,31 @@
     .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     .action.primary{background:#3e3037;color:#fff;border-color:#3e3037}
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
-    @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(4,1fr)}}
+    @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(4,1fr)}.canvas-shell{max-height:620px}}
   </style>
 </head>
 <body>
   <main class="wrap">
     <div class="top">
       <button class="back" type="button" id="backBtn" aria-label="戻る">←</button>
-      <div><h1>24×24 ドット絵メーカー</h1><p class="sub">色を選んで、マスをタップ／なぞって描きます</p></div>
+      <div><h1>24×24 ドット絵メーカー</h1><p class="sub">基本は1マスずつタップ。拡大すると細かく描けます</p></div>
     </div>
 
     <section class="panel toolrow">
       <div id="currentColor" class="current" aria-hidden="true"></div>
       <div class="status"><strong id="currentLabel">#2B2118</strong><span>選択中の色</span></div>
       <button id="eraserBtn" class="toolbtn" type="button">消しゴム</button>
+      <button id="drawModeBtn" class="toolbtn" type="button">なぞり塗り：OFF</button>
     </section>
 
-    <section class="canvas-shell"><div id="grid" aria-label="24×24キャンバス"></div></section>
+    <div class="zoomrow" aria-label="拡大縮小">
+      <button id="zoomOutBtn" class="toolbtn" type="button" aria-label="縮小">−</button>
+      <span id="zoomLabel">100%</span>
+      <button id="zoomInBtn" class="toolbtn" type="button" aria-label="拡大">＋</button>
+      <button id="zoomResetBtn" class="toolbtn" type="button">100%</button>
+    </div>
+
+    <section class="canvas-shell" id="canvasShell"><div id="grid" class="tap-mode" aria-label="24×24キャンバス"></div></section>
 
     <section class="panel">
       <div id="palette" class="palette"></div>
@@ -74,17 +87,24 @@
 (() => {
   const SIZE=24;
   const COLORS=["#2B2118","#5A3825","#8B5A3C","#B97A56","#F3C9A7","#FFF3E6","#FFFFFF","#E34B45","#E98DA1","#F0C84B","#4A8FD8","#4FAE68","#6A4FC2","#222222","#8D8D8D"];
+  const ZOOMS=[100,150,200,300,400];
   const grid=document.getElementById('grid');
+  const canvasShell=document.getElementById('canvasShell');
   const palette=document.getElementById('palette');
   const currentColor=document.getElementById('currentColor');
   const currentLabel=document.getElementById('currentLabel');
   const eraserBtn=document.getElementById('eraserBtn');
+  const drawModeBtn=document.getElementById('drawModeBtn');
+  const zoomLabel=document.getElementById('zoomLabel');
   const message=document.getElementById('message');
   let selected=COLORS[0];
   let pixels=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
   let history=[];
   let drawing=false;
   let beforeStroke=null;
+  let drawMode=false;
+  let zoomIndex=0;
+  let pointerStart=null;
 
   function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1500)}
   function clone(){return pixels.map(r=>r.slice())}
@@ -95,29 +115,68 @@
     else{currentColor.className='current';currentColor.style.background=selected;currentLabel.textContent=selected;eraserBtn.classList.remove('active')}
     document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===(selected===null?'transparent':selected)));
   }
+  function updateDrawMode(){
+    drawModeBtn.textContent=`なぞり塗り：${drawMode?'ON':'OFF'}`;
+    drawModeBtn.classList.toggle('active',drawMode);
+    grid.classList.toggle('draw-mode',drawMode);
+    grid.classList.toggle('tap-mode',!drawMode);
+  }
+  function updateZoom(keepCenter=true){
+    const oldW=grid.getBoundingClientRect().width||1;
+    const cx=(canvasShell.scrollLeft+canvasShell.clientWidth/2)/oldW;
+    const cy=(canvasShell.scrollTop+canvasShell.clientHeight/2)/oldW;
+    const z=ZOOMS[zoomIndex];
+    grid.style.width=z+'%';
+    zoomLabel.textContent=z+'%';
+    requestAnimationFrame(()=>{
+      if(!keepCenter)return;
+      const newW=grid.getBoundingClientRect().width||1;
+      canvasShell.scrollLeft=Math.max(0,cx*newW-canvasShell.clientWidth/2);
+      canvasShell.scrollTop=Math.max(0,cy*newW-canvasShell.clientHeight/2);
+    });
+  }
   function renderCell(x,y){const c=grid.children[y*SIZE+x];c.style.background=pixels[y][x]||'transparent'}
   function render(){for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)renderCell(x,y)}
-  function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return;pixels[y][x]=selected;renderCell(x,y)}
-  function start(cell){drawing=true;beforeStroke=clone();paint(cell)}
-  function end(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){history.push(beforeStroke);if(history.length>100)history.shift();saveLocal()}beforeStroke=null}
+  function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return false;pixels[y][x]=selected;renderCell(x,y);return true}
+  function commitSingle(cell){const before=clone();if(!paint(cell))return;history.push(before);if(history.length>100)history.shift();saveLocal()}
+  function startDraw(cell){drawing=true;beforeStroke=clone();paint(cell)}
+  function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){history.push(beforeStroke);if(history.length>100)history.shift();saveLocal()}beforeStroke=null}
 
   for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-    const b=document.createElement('button');b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',`${x},${y}`);
-    b.addEventListener('pointerdown',e=>{e.preventDefault();start(b)});
-    b.addEventListener('pointerenter',e=>{if(drawing&&(e.buttons||e.pointerType==='touch'))paint(b)});
-    b.addEventListener('click',e=>{e.preventDefault()});
+    const b=document.createElement('button');
+    b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',`${x},${y}`);
+    b.addEventListener('pointerdown',e=>{
+      pointerStart={x:e.clientX,y:e.clientY,cell:b};
+      if(drawMode){e.preventDefault();startDraw(b)}
+    });
+    b.addEventListener('pointerenter',e=>{if(drawMode&&drawing&&(e.buttons||e.pointerType==='touch'))paint(b)});
+    b.addEventListener('pointerup',e=>{
+      if(drawMode)return;
+      if(!pointerStart)return;
+      const dx=e.clientX-pointerStart.x,dy=e.clientY-pointerStart.y;
+      const moved=Math.hypot(dx,dy);
+      if(moved<8 && pointerStart.cell===b){e.preventDefault();commitSingle(b)}
+      pointerStart=null;
+    });
+    b.addEventListener('click',e=>e.preventDefault());
     grid.appendChild(b);
   }
-  window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);
+  window.addEventListener('pointerup',()=>{if(drawMode)endDraw();else pointerStart=null});
+  window.addEventListener('pointercancel',()=>{if(drawMode)endDraw();else pointerStart=null});
 
   const erase=document.createElement('button');erase.type='button';erase.className='swatch transparent';erase.dataset.color='transparent';erase.title='透明';erase.addEventListener('click',()=>{selected=null;updateTool()});palette.appendChild(erase);
   COLORS.forEach(color=>{const b=document.createElement('button');b.type='button';b.className='swatch';b.dataset.color=color;b.style.background=color;b.title=color;b.addEventListener('click',()=>{selected=color;updateTool()});palette.appendChild(b)});
 
   eraserBtn.addEventListener('click',()=>{selected=null;updateTool()});
+  drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;updateDrawMode();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
   document.getElementById('useCustom').addEventListener('click',()=>{selected=document.getElementById('customColor').value.toUpperCase();updateTool()});
   document.getElementById('undoBtn').addEventListener('click',()=>{if(!history.length){note('戻せる操作がありません');return}pixels=history.pop();render();saveLocal()});
   document.getElementById('clearBtn').addEventListener('click',()=>{history.push(clone());pixels=Array.from({length:SIZE},()=>Array(SIZE).fill(null));render();saveLocal()});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href='index.html'});
+
+  document.getElementById('zoomInBtn').addEventListener('click',()=>{if(zoomIndex<ZOOMS.length-1){zoomIndex++;updateZoom()}else note('これ以上拡大できません')});
+  document.getElementById('zoomOutBtn').addEventListener('click',()=>{if(zoomIndex>0){zoomIndex--;updateZoom()}else note('これ以上縮小できません')});
+  document.getElementById('zoomResetBtn').addEventListener('click',()=>{zoomIndex=0;updateZoom(false);canvasShell.scrollLeft=0;canvasShell.scrollTop=0});
 
   function makeCanvas(scale){const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}return c}
   function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
@@ -128,7 +187,7 @@
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,'pixel_24x24.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')
   });
 
-  loadLocal();render();updateTool();
+  loadLocal();render();updateTool();updateDrawMode();updateZoom(false);
 })();
 </script>
 </body>
