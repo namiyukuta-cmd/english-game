@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#241d1c">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>ダンジョン戦闘</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#241d1c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    body{min-height:100dvh}
+    button,a{font:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .app{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+    .head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center}.head h1{margin:0;text-align:center;font-size:24px}.back{width:46px;height:46px;border:1px solid #6b5752;border-radius:14px;background:#332927;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+    .status{display:grid;grid-template-columns:1fr 1fr;gap:10px}.status-box{border:1px solid #6e5752;border-radius:15px;background:#302725;padding:10px;text-align:center}.status-box small{display:block;font-size:15px;color:#d0bdb7;margin-bottom:3px}.status-box strong{font-size:20px}
+    .enemy-card{flex:1;min-height:330px;border:2px solid #744842;border-radius:24px;background:radial-gradient(circle at 50% 36%,#54332f 0,#302321 48%,#1d1716 100%);padding:24px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 18px 45px rgba(0,0,0,.28)}
+    .enemy-icon{font-size:92px;line-height:1;margin-bottom:14px}.enemy-card h2{margin:0 0 8px;font-size:30px}.enemy-card p{margin:0;font-size:18px;line-height:1.6;color:#e5d4cf}.enemy-hp{margin-top:18px;width:100%;max-width:330px}.hp-line{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-bottom:7px}.hp-track{height:18px;border:1px solid #6d5751;border-radius:999px;background:#1b1615;overflow:hidden}.hp-fill{height:100%;width:100%;background:#a95349;transition:width .2s}
+    .dice{min-height:56px;border:1px solid #65514c;border-radius:14px;background:#302725;padding:12px;text-align:center;font-size:19px;font-weight:800}.message{min-height:58px;margin:0;font-size:18px;line-height:1.55;text-align:center;color:#f0dfda}
+    .attack{min-height:66px;border:1px solid #d58e84;border-radius:17px;background:#914e47;color:#fff;font-size:21px;font-weight:900}.attack:active{transform:translateY(1px);background:#7e403a}.attack[disabled]{opacity:.45}
+    .modal{position:fixed;inset:0;background:rgba(15,11,10,.82);display:flex;align-items:center;justify-content:center;padding:20px}.modal[hidden]{display:none}.modal-card{width:min(100%,420px);border-radius:22px;background:#fff;color:#3d312d;padding:25px 20px;text-align:center}.modal-card h2{margin:0 0 10px;font-size:29px}.modal-card p{margin:0 0 18px;font-size:18px;line-height:1.6;color:#6c5750}.go{min-height:60px;width:100%;border:0;border-radius:15px;background:#5a463d;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header class="head">
+    <a class="back" href="dungeon.html?v=20260823-2330" aria-label="ダンジョンへ戻る">←</a>
+    <h1>戦闘</h1><span></span>
+  </header>
+
+  <section class="status">
+    <div class="status-box"><small>あなたのHP</small><strong id="playerHp">—</strong></div>
+    <div class="status-box"><small>敵HP</small><strong id="enemyHpText">—</strong></div>
+  </section>
+
+  <section class="enemy-card">
+    <div id="enemyIcon" class="enemy-icon">👹</div>
+    <h2 id="enemyName">敵</h2>
+    <p id="enemyText">敵が立ちはだかっている。</p>
+    <div class="enemy-hp">
+      <div class="hp-line"><span>ENEMY HP</span><span id="enemyHpLine">0 / 0</span></div>
+      <div class="hp-track"><div id="enemyHpFill" class="hp-fill"></div></div>
+    </div>
+  </section>
+
+  <div id="dice" class="dice">🎲 —</div>
+  <p id="message" class="message">サイコロを振って攻撃します。4〜6で攻撃成功です。</p>
+  <button id="attackBtn" class="attack" type="button">サイコロを振って攻撃</button>
+</main>
+
+<div id="resultModal" class="modal" hidden>
+  <div class="modal-card">
+    <h2 id="resultTitle">勝利！</h2>
+    <p id="resultText"></p>
+    <a id="resultLink" class="go" href="dungeon.html?v=20260823-2330">ダンジョンへ戻る</a>
+  </div>
+</div>
+
+<script>
+(()=>{
+  'use strict';
+  const SAVE_KEY='englishGameDungeonSaveV1';
+  const MAX_HP=6;
+  const $=id=>document.getElementById(id);
+  const roll=()=>Math.floor(Math.random()*6)+1;
+  let state=null;
+
+  function load(){
+    try{const raw=localStorage.getItem(SAVE_KEY);state=raw?JSON.parse(raw):null;}catch(e){state=null;}
+    if(!state||!state.encounter){location.replace('dungeon.html?v=20260823-2330');return false;}
+    return true;
+  }
+  function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
+  function addLog(text){if(!Array.isArray(state.logs))state.logs=[];state.logs.push(text);if(state.logs.length>14)state.logs=state.logs.slice(-14);}
+
+  function render(){
+    const e=state.encounter;if(!e)return;
+    $('playerHp').textContent=`${state.hp} / ${MAX_HP}`;
+    $('enemyHpText').textContent=`${e.hp} / ${e.maxHp}`;
+    $('enemyHpLine').textContent=`${e.hp} / ${e.maxHp}`;
+    $('enemyHpFill').style.width=`${Math.max(0,e.hp/e.maxHp*100)}%`;
+    $('enemyIcon').textContent=e.icon||'👹';
+    $('enemyName').textContent=e.name;
+    $('enemyText').textContent=e.text||'敵が立ちはだかっている。';
+  }
+
+  function finishVictory(){
+    const e=state.encounter;
+    const reward=e.reward;
+    const name=e.name;
+    if(!Array.isArray(state.inventory))state.inventory=[];
+    state.inventory.push(reward);
+    state.encounter=null;
+    addLog(`${name}を倒しました。「${reward}」を入手。`);
+    save();
+    $('attackBtn').disabled=true;
+    $('resultTitle').textContent='勝利！';
+    $('resultText').textContent=`${name}を倒した。報酬「${reward}」を手に入れました。`;
+    $('resultLink').textContent='探索に戻る';
+    $('resultLink').href='dungeon.html?v=20260823-2330';
+    $('resultModal').hidden=false;
+  }
+
+  function finishGameOver(){
+    state.hp=0;state.gameOver=true;state.encounter=null;save();
+    $('attackBtn').disabled=true;
+    $('resultTitle').textContent='GAME OVER';
+    $('resultText').textContent='HPが0になりました。';
+    $('resultLink').textContent='宿へ戻る';
+    $('resultLink').href='dungeon_inn.html?v=20260823-2330';
+    $('resultModal').hidden=false;
+  }
+
+  function attack(){
+    if(!state||!state.encounter)return;
+    const r=roll();
+    $('dice').textContent=`🎲 ${r}`;
+    state.lastDice=`戦闘 ${r}`;
+    if(r>=4){
+      state.encounter.hp--;
+      addLog(`戦闘🎲${r}：攻撃成功。敵HP-1。`);
+      $('message').textContent=`🎲 ${r}！ 攻撃成功。${state.encounter.name}に1ダメージ。`;
+      if(state.encounter.hp<=0){finishVictory();return;}
+    }else{
+      state.hp=Math.max(0,state.hp-1);
+      addLog(`戦闘🎲${r}：攻撃を受けHP-1。`);
+      $('message').textContent=`🎲 ${r}。攻撃失敗。敵の攻撃を受けてHP-1。`;
+      if(state.hp<=0){finishGameOver();return;}
+    }
+    save();render();
+  }
+
+  $('attackBtn').addEventListener('click',attack);
+  if(load()){state.encounter.intro=false;save();render();}
+})();
+</script>
+</body>
+</html>
