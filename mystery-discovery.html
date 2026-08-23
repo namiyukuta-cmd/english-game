@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事件発見</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2155">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2155">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2210">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2210">
 </head>
 <body>
   <main class="mystery-app">
@@ -23,49 +23,152 @@
 
     <section id="discoveryScreen" class="incident-screen hidden">
       <p class="chapter-label" id="discoveryChapter"></p>
-      <div id="storyArea"></div>
-      <div id="studyArea"></div>
-      <button class="mystery-action" id="nextBtn" type="button">Call the police. / 警察を呼ぶ</button>
+      <section class="story-card compact-story"><div class="en" id="storyEn"></div><div class="ja" id="storyJa"></div></section>
+
+      <section class="investigation-board">
+        <div class="investigation-head"><strong>SEARCH / 現場を調べる</strong><span id="foundCount"></span></div>
+        <div class="hotspot-grid" id="hotspots"></div>
+      </section>
+
+      <section class="evidence-tray">
+        <div class="tray-title">EVIDENCE / 証拠</div>
+        <div id="evidenceTray" class="evidence-list"></div>
+      </section>
+
+      <button class="mystery-action" id="nextBtn" type="button" disabled>Call the police. / 警察を呼ぶ</button>
     </section>
   </main>
+
+  <div class="mini-modal hidden" id="wordModal">
+    <div class="mini-modal-card">
+      <button class="mini-close" id="closeWord" type="button">×</button>
+      <div class="mini-label">MAKE THE SENTENCE / 英文を作る</div>
+      <div class="mini-ja" id="wordJa"></div>
+      <div class="word-answer" id="wordAnswer"></div>
+      <div class="word-bank" id="wordBank"></div>
+      <div class="word-result" id="wordResult"></div>
+      <button class="mystery-action secondary" id="resetWords" type="button">Reset / やり直す</button>
+    </div>
+  </div>
 
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
   <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
-    const state=MysteryGame.loadState()||{};
+    const initialState=MysteryGame.loadState()||{};
     const dateScreen=document.getElementById('dateScreen');
     const discoveryScreen=document.getElementById('discoveryScreen');
+    const hotspots=document.getElementById('hotspots');
+    const tray=document.getElementById('evidenceTray');
+    const nextBtn=document.getElementById('nextBtn');
+    const modal=document.getElementById('wordModal');
+    const wordJa=document.getElementById('wordJa');
+    const wordAnswer=document.getElementById('wordAnswer');
+    const wordBank=document.getElementById('wordBank');
+    const wordResult=document.getElementById('wordResult');
+    const foundCount=document.getElementById('foundCount');
 
     document.getElementById('dateChapter').textContent=`UNIT ${c.unit} / DATE / 日時`;
     document.getElementById('discoveryChapter').textContent=`UNIT ${c.unit} / DISCOVERY / 発見`;
     document.getElementById('dateEn').textContent=c.discoveryDate.en;
     document.getElementById('dateJa').textContent=c.discoveryDate.ja;
-    document.getElementById('storyArea').innerHTML=MysteryGame.storyCard(c.discovery.storyEn,c.discovery.storyJa);
-    document.getElementById('studyArea').innerHTML=c.discovery.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
-    MysteryGame.bindGrammar();
+    document.getElementById('storyEn').textContent=c.discovery.storyEn;
+    document.getElementById('storyJa').textContent=c.discovery.storyJa;
 
-    function showDate(){
-      dateScreen.classList.remove('hidden');
-      discoveryScreen.classList.add('hidden');
-    }
-    function showDiscovery(){
-      dateScreen.classList.add('hidden');
-      discoveryScreen.classList.remove('hidden');
+    const clueItems=(c.questioning.evidence||[]).slice(0,2);
+    const found=new Set(Array.isArray(initialState.investigationFound)?initialState.investigationFound:[]);
+    let activeClue=-1;
+    let picked=[];
+
+    const spotData=[
+      {icon:'🧍',en:'Around the victim',ja:'被害者の周囲',clue:0},
+      {icon:'🔎',en:'Nearby objects',ja:'近くの物',clue:1},
+      {icon:'🚪',en:'Entrance',ja:'入口',decoy:'特に変わったものは見つからない。'},
+      {icon:'🧹',en:'Floor',ja:'床',decoy:'清掃道具以外に気になるものはない。'}
+    ];
+
+    function showDate(){dateScreen.classList.remove('hidden');discoveryScreen.classList.add('hidden');}
+    function showDiscovery(){dateScreen.classList.add('hidden');discoveryScreen.classList.remove('hidden');renderInvestigation();}
+
+    function renderInvestigation(){
+      hotspots.innerHTML=spotData.map((s,i)=>{
+        const done=s.clue!=null&&found.has(s.clue);
+        return `<button class="hotspot ${done?'found':''}" type="button" data-spot="${i}"><b>${s.icon}</b><strong>${s.en}</strong><span>${s.ja}</span>${done?'<em>✓ FOUND</em>':''}</button>`;
+      }).join('');
+      tray.innerHTML=clueItems.map((item,i)=>found.has(i)?`<div class="evidence-chip"><b>✓</b><span><strong>${MysteryGame.escapeHtml(item.en)}</strong><small>${MysteryGame.escapeHtml(item.ja)}</small></span></div>`:'').join('') || '<div class="empty-evidence">まだ証拠はありません。</div>';
+      foundCount.textContent=`${found.size} / ${clueItems.length}`;
+      nextBtn.disabled=found.size<clueItems.length;
     }
 
-    document.getElementById('discoverBtn').addEventListener('click',()=>{
-      MysteryGame.setStage('discovery',{discoveryPhase:'found'});
-      showDiscovery();
+    hotspots.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-spot]');
+      if(!btn)return;
+      const spot=spotData[Number(btn.dataset.spot)];
+      if(spot.clue==null){
+        btn.classList.add('checked');
+        const old=btn.querySelector('em');
+        if(!old)btn.insertAdjacentHTML('beforeend',`<em>${spot.decoy}</em>`);
+        return;
+      }
+      if(found.has(spot.clue))return;
+      openWordGame(spot.clue);
     });
 
-    document.getElementById('nextBtn').addEventListener('click',()=>{
-      MysteryGame.setStage('questioning',{discoveryPhase:'found'});
-      location.href='mystery-questioning.html';
-    });
+    function openWordGame(index){
+      activeClue=index;
+      picked=[];
+      const item=clueItems[index];
+      wordJa.textContent=item.ja;
+      wordResult.textContent='';
+      modal.classList.remove('hidden');
+      renderWords();
+    }
 
-    if(state.discoveryPhase==='found') showDiscovery(); else showDate();
+    function tokensFor(item){return String(item.en||'').trim().split(/\s+/);}
+    function shuffled(tokens){
+      const a=tokens.map((t,i)=>({t,i}));
+      for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+      if(a.every((x,i)=>x.i===i)&&a.length>1)[a[0],a[1]]=[a[1],a[0]];
+      return a;
+    }
+    let bank=[];
+    function renderWords(resetBank=true){
+      const item=clueItems[activeClue];
+      if(resetBank)bank=shuffled(tokensFor(item));
+      wordAnswer.innerHTML=picked.length?picked.map((x,i)=>`<button type="button" data-picked="${i}">${MysteryGame.escapeHtml(x.t)}</button>`).join(''):'<span>ここに英文を作ります</span>';
+      wordBank.innerHTML=bank.filter(x=>!picked.some(p=>p.i===x.i)).map(x=>`<button type="button" data-token="${x.i}">${MysteryGame.escapeHtml(x.t)}</button>`).join('');
+      checkSentence();
+    }
+    wordBank.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-token]'); if(!btn)return;
+      const x=bank.find(v=>v.i===Number(btn.dataset.token)); if(!x)return;
+      picked.push(x); renderWords(false);
+    });
+    wordAnswer.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-picked]'); if(!btn)return;
+      picked.splice(Number(btn.dataset.picked),1); renderWords(false);
+    });
+    function checkSentence(){
+      const target=tokensFor(clueItems[activeClue]);
+      if(picked.length!==target.length)return;
+      const answer=picked.map(x=>x.t);
+      if(answer.every((x,i)=>x===target[i])){
+        wordResult.textContent='Correct! / 正解';
+        found.add(activeClue);
+        MysteryGame.setStage('discovery',{discoveryPhase:'found',investigationFound:[...found]});
+        setTimeout(()=>{modal.classList.add('hidden');renderInvestigation();},250);
+      }else{
+        wordResult.textContent='順番が違います。';
+      }
+    }
+    document.getElementById('resetWords').addEventListener('click',()=>{picked=[];renderWords(true);wordResult.textContent='';});
+    document.getElementById('closeWord').addEventListener('click',()=>modal.classList.add('hidden'));
+
+    document.getElementById('discoverBtn').addEventListener('click',()=>{MysteryGame.setStage('discovery',{discoveryPhase:'found'});showDiscovery();});
+    nextBtn.addEventListener('click',()=>{if(nextBtn.disabled)return;MysteryGame.setStage('questioning',{discoveryPhase:'found',investigationFound:[...found]});location.href='mystery-questioning.html';});
+
+    if(initialState.discoveryPhase==='found')showDiscovery();else showDate();
   </script>
 </body>
 </html>
