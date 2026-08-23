@@ -9,26 +9,29 @@
   <style>
     *{box-sizing:border-box}
     :root{--bg:#eee8e2;--paper:#fffdfb;--ink:#332c28;--line:#cfc2b7;--floor:#cdbcaa;--brown:#5b4739}
-    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
-    body{min-height:100dvh;overflow-x:hidden}
+    html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;overflow:hidden}
+    body{height:100dvh;overscroll-behavior:none}
+    @supports(height:100svh){body{height:100svh}}
     button,a{font:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-    .app{width:min(100%,560px);min-height:100dvh;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px}
 
-    .topbar{height:46px;display:grid;grid-template-columns:46px 1fr 46px;align-items:center;gap:6px}
-    .topbar h1{margin:0;text-align:center;font-size:21px;line-height:1.2}
-    .icon-btn{width:44px;height:44px;border:1px solid var(--line);border-radius:13px;background:var(--paper);color:var(--ink);font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;text-decoration:none}
+    .app{
+      width:min(100%,560px);height:100%;margin:0 auto;
+      padding:calc(5px + env(safe-area-inset-top)) 8px calc(5px + env(safe-area-inset-bottom));
+      display:grid;grid-template-rows:42px 42px minmax(0,1fr) 205px 44px;gap:5px;overflow:hidden;
+    }
 
-    .status{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-    .status-box{min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:4px 6px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
+    .topbar{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:5px;min-height:0}
+    .topbar h1{margin:0;text-align:center;font-size:20px;line-height:1.1;white-space:nowrap}
+    .icon-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font-size:21px;font-weight:900;display:flex;align-items:center;justify-content:center;text-decoration:none}
+
+    .status{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;min-height:0}
+    .status-box{height:42px;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:2px 4px;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}
     .status-box small{font-size:17px;color:#74645b;font-weight:800}.status-box strong{font-size:18px;white-space:nowrap}
 
-    .complete-banner{display:none;border:2px solid #b78a49;border-radius:13px;background:#fff8e8;padding:7px 10px;text-align:center;font-size:17px;font-weight:800;line-height:1.35;color:#624a28}
-    .complete-banner.show{display:block}
-
-    .map-card{border:1px solid var(--line);border-radius:17px;background:#d8cec4;padding:8px}
-    .map-head{height:28px;display:flex;justify-content:space-between;align-items:center;padding:0 2px 5px}
-    .map-head strong,.map-head span{font-size:17px}.map-head span{color:#6d5e55;font-weight:700}
-    .map-wrap{height:min(43dvh,365px);min-height:285px;border-radius:12px;background:#282523;overflow:auto;display:flex;align-items:center;justify-content:center;padding:12px;-webkit-overflow-scrolling:touch}
+    .map-card{position:relative;min-height:0;border:1px solid var(--line);border-radius:15px;background:#d8cec4;padding:6px;display:grid;grid-template-rows:27px minmax(0,1fr);overflow:hidden}
+    .map-head{display:flex;justify-content:space-between;align-items:center;padding:0 2px 4px;min-width:0}
+    .map-head strong,.map-head span{font-size:17px}.map-head span{color:#6d5e55;font-weight:700;white-space:nowrap}
+    .map-wrap{min-height:0;height:100%;border-radius:11px;background:#282523;overflow:auto;display:flex;align-items:center;justify-content:center;padding:9px;-webkit-overflow-scrolling:touch}
     .map{display:grid;gap:4px;align-items:center;justify-items:center;margin:auto}
     .tile{position:relative;width:var(--tile-size);height:var(--tile-size);border-radius:9px;background:#5a5350;border:2px solid #272321;box-shadow:inset 0 0 0 4px #494340;overflow:hidden}
     .tile::after{content:"";position:absolute;inset:24%;border-radius:5px;background:var(--floor);box-shadow:inset 0 0 0 2px #ad9987;z-index:1}
@@ -36,41 +39,47 @@
     .tile.current{outline:4px solid #f6ca68;outline-offset:1px}.tile.start::before{content:"S";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:20px;font-weight:900;color:#614c3e}.tile.locked::before{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:17px}
     .tile-roll{position:absolute;right:2px;bottom:1px;z-index:4;font-size:17px;line-height:1;font-weight:900;color:#3d332d;background:rgba(255,255,255,.82);border-radius:5px;padding:1px 3px}
 
-    .control-card{border:1px solid var(--line);border-radius:17px;background:var(--paper);padding:9px 10px;display:grid;gap:7px}
-    .info-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:28px}
-    .place-name{font-size:19px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dice-result{font-size:17px;font-weight:900;color:#705849;white-space:nowrap}
-    .message{margin:0;font-size:17px;line-height:1.4;color:#4f433c;min-height:24px}
+    .complete-banner{display:none;position:absolute;z-index:8;left:12px;right:12px;top:35px;border:2px solid #b78a49;border-radius:12px;background:#fff8e8;padding:5px 8px;text-align:center;font-size:17px;font-weight:800;line-height:1.25;color:#624a28;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .complete-banner.show{display:block}
 
-    .play-row{display:grid;grid-template-columns:minmax(0,1fr) 126px;gap:10px;align-items:center}
-    .direction-area{width:190px;height:142px;max-width:100%;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px}
-    .dir-btn{border:1px solid #ac9b8e;border-radius:13px;background:#fff;color:#3f352f;font-size:25px;font-weight:900;min-width:0;min-height:44px}
+    .control-card{min-height:0;border:1px solid var(--line);border-radius:15px;background:var(--paper);padding:6px 8px;display:grid;grid-template-rows:25px 42px 98px 26px;gap:4px;overflow:hidden}
+    .info-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+    .place-name{font-size:19px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dice-result{font-size:17px;font-weight:900;color:#705849;white-space:nowrap}
+    .message{margin:0;font-size:17px;line-height:1.22;color:#4f433c;height:42px;overflow:hidden;display:flex;align-items:center}
+
+    .play-row{display:grid;grid-template-columns:minmax(0,1fr) 118px;gap:7px;align-items:center;min-height:0}
+    .direction-area{width:158px;height:98px;max-width:100%;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px}
+    .dir-btn{border:1px solid #ac9b8e;border-radius:11px;background:#fff;color:#3f352f;font-size:23px;font-weight:900;min-width:0;min-height:0;padding:0}
     .dir-btn:active{transform:translateY(1px);background:#eee6df}.dir-btn[hidden]{visibility:hidden;display:block}
     .dir-btn.up{grid-column:2;grid-row:1}.dir-btn.left{grid-column:1;grid-row:2}.dir-btn.right{grid-column:3;grid-row:2}.dir-btn.down{grid-column:2;grid-row:3}
-    .center-dot{grid-column:2;grid-row:2;border-radius:12px;background:#eee7e1;border:1px solid #d7cbc1;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#8a796e}
+    .center-dot{grid-column:2;grid-row:2;border-radius:10px;background:#eee7e1;border:1px solid #d7cbc1;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#8a796e}
 
-    .side-actions{display:grid;gap:7px;align-content:center}
-    .return-btn,.main-btn{min-height:48px;border:1px solid #b7a79b;border-radius:13px;background:#fff;color:#43372f;font-size:17px;font-weight:900}
-    .return-btn{background:var(--brown);color:#fff;border-color:var(--brown);padding:6px}
-    .mini-label{font-size:17px;line-height:1.3;text-align:center;color:#78675e;font-weight:700}
+    .return-btn,.main-btn{border:1px solid #b7a79b;border-radius:11px;background:#fff;color:#43372f;font-size:17px;font-weight:900}
+    .return-btn{width:100%;min-height:50px;background:var(--brown);color:#fff;border-color:var(--brown);padding:4px 7px;line-height:1.25}
 
-    .log{height:70px;overflow:auto;padding-top:6px;border-top:1px solid #e2d9d2;-webkit-overflow-scrolling:touch}
-    .log p{margin:0 0 3px;font-size:17px;line-height:1.35;color:#76665c}
+    .log{height:26px;overflow:auto;border-top:1px solid #e2d9d2;padding-top:3px;-webkit-overflow-scrolling:touch}
+    .log p{margin:0;font-size:17px;line-height:1.25;color:#76665c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .log p:nth-child(n+2){display:none}
 
-    .bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-    .main-btn{text-decoration:none;display:flex;align-items:center;justify-content:center;min-height:48px;background:#fff}
+    .bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;min-height:0}
+    .main-btn{text-decoration:none;display:flex;align-items:center;justify-content:center;height:44px;background:#fff}
 
     .modal{position:fixed;inset:0;z-index:30;background:rgba(25,19,18,.78);display:flex;align-items:center;justify-content:center;padding:20px}.modal[hidden]{display:none}
     .modal-card{width:min(100%,430px);border-radius:22px;background:#fff;padding:24px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.28)}.modal-card h2{margin:0 0 10px;font-size:27px}.modal-card p{margin:0 0 18px;font-size:18px;line-height:1.65;color:#6c5c53}
     .encounter-card{position:relative;overflow:hidden;border:3px solid #5e3734;background:linear-gradient(#2f2625,#1f1919);color:#fff}.encounter-kicker{margin:0 0 8px;font-size:18px;font-weight:900;letter-spacing:.12em;color:#f0aaa2}.enemy-icon{font-size:72px;line-height:1.1;margin:8px 0}.encounter-card h2{font-size:30px}.encounter-card p{color:#f1dedb}.encounter-start{width:100%;min-height:58px;border:1px solid #d69991;border-radius:14px;background:#8c4944;color:#fff;font-size:20px;font-weight:900}
 
-    @media(max-width:370px){.play-row{grid-template-columns:minmax(0,1fr) 112px}.direction-area{width:174px}.map-wrap{min-height:265px}}
-    @media(max-height:760px){.app{gap:5px}.map-wrap{height:38dvh;min-height:240px}.log{height:58px}.direction-area{height:126px}.status-box{min-height:42px}}
+    @media(max-height:740px){
+      .app{grid-template-rows:40px 40px minmax(0,1fr) 185px 42px;gap:4px;padding-top:calc(3px + env(safe-area-inset-top));padding-bottom:calc(3px + env(safe-area-inset-bottom))}
+      .topbar,.icon-btn{height:40px}.icon-btn{width:40px}.status-box{height:40px}
+      .control-card{grid-template-rows:23px 36px 94px 24px;padding:5px 7px;gap:3px}.message{height:36px}.direction-area{height:94px}.log{height:24px}.main-btn{height:42px}
+    }
+    @media(max-width:370px){.play-row{grid-template-columns:minmax(0,1fr) 108px}.direction-area{width:148px}.map-head span{font-size:17px}}
   </style>
 </head>
 <body>
 <main class="app">
   <header class="topbar">
-    <a class="icon-btn" href="dungeon_inn.html?v=20260823-2355" aria-label="宿へ戻る">←</a>
+    <a class="icon-btn" href="dungeon_inn.html?v=20260823-2358" aria-label="宿へ戻る">←</a>
     <h1>ダンジョン探索</h1>
     <button id="saveBtn" class="icon-btn" type="button" aria-label="セーブ">💾</button>
   </header>
@@ -81,17 +90,15 @@
     <div class="status-box"><small>MAP</small><strong><span id="tileCount">1</span> / 8</strong></div>
   </section>
 
-  <div id="completeBanner" class="complete-banner">全マス開放！ LEVEL 1 CLEAR　まだ探索できます。</div>
-
   <section class="map-card">
     <div class="map-head"><strong>MAP</strong><span>黄色の枠＝現在地</span></div>
+    <div id="completeBanner" class="complete-banner">全マス開放！ LEVEL 1 CLEAR　まだ探索できます。</div>
     <div class="map-wrap"><div id="map" class="map" aria-label="ダンジョンマップ"></div></div>
   </section>
 
   <section class="control-card">
     <div class="info-row"><strong id="placeName" class="place-name">スタート</strong><span id="diceResult" class="dice-result">🎲 —</span></div>
     <p id="message" class="message">進みたい方向を選んでください。</p>
-
     <div class="play-row">
       <div class="direction-area" aria-label="進む方向">
         <button class="dir-btn up" data-dir="up" type="button" aria-label="上へ">↑</button>
@@ -100,18 +107,14 @@
         <button class="dir-btn right" data-dir="right" type="button" aria-label="右へ">→</button>
         <button class="dir-btn down" data-dir="down" type="button" aria-label="下へ">↓</button>
       </div>
-      <div class="side-actions">
-        <button id="returnBtn" class="return-btn" type="button">ダンジョンから帰る</button>
-        <div class="mini-label">いつでも宿へ<br>帰れます</div>
-      </div>
+      <button id="returnBtn" class="return-btn" type="button">ダンジョンから<br>帰る</button>
     </div>
-
     <div id="log" class="log" aria-label="探索記録"></div>
   </section>
 
   <nav class="bottom-actions" aria-label="施設">
-    <a class="main-btn" href="dungeon_inn.html?v=20260823-2355">宿</a>
-    <a class="main-btn" href="dungeon_tavern.html?v=20260823-2355">酒場</a>
+    <a class="main-btn" href="dungeon_inn.html?v=20260823-2358">宿</a>
+    <a class="main-btn" href="dungeon_tavern.html?v=20260823-2358">酒場</a>
   </nav>
 </main>
 
@@ -125,7 +128,7 @@
   </div>
 </div>
 <div id="gameOverModal" class="modal" hidden>
-  <div class="modal-card"><h2>GAME OVER</h2><p>HPが0になりました。</p><a class="main-btn" href="dungeon_inn.html?v=20260823-2355">宿へ戻る</a></div>
+  <div class="modal-card"><h2>GAME OVER</h2><p>HPが0になりました。</p><a class="main-btn" href="dungeon_inn.html?v=20260823-2358">宿へ戻る</a></div>
 </div>
 
 <script>
@@ -152,9 +155,9 @@ function startEnemy(strong=false){const er=roll(),base=enemies[er-1];state.encou
 function damage(n){state.hp=Math.max(0,state.hp-n);if(state.hp<=0)state.gameOver=true;}
 function renderMap(){const tiles=Object.values(state.tiles);let minX=Math.min(...tiles.map(t=>t.x)),maxX=Math.max(...tiles.map(t=>t.x)),minY=Math.min(...tiles.map(t=>t.y)),maxY=Math.max(...tiles.map(t=>t.y));if(maxX-minX+1<3){minX--;maxX++;}if(maxY-minY+1<3){minY--;maxY++;}const cols=maxX-minX+1,rows=maxY-minY+1,size=Math.max(38,Math.min(58,Math.floor((window.innerWidth-70)/Math.max(cols,3))));const map=$('map');map.style.setProperty('--tile-size',size+'px');map.style.gridTemplateColumns=`repeat(${cols},${size}px)`;map.style.gridTemplateRows=`repeat(${rows},${size}px)`;map.innerHTML='';for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const t=getTile(x,y),cell=document.createElement('div');if(!t){cell.style.width=size+'px';cell.style.height=size+'px';map.appendChild(cell);continue;}cell.className='tile';if(t.type==='start')cell.classList.add('start');if(t.type==='locked')cell.classList.add('locked');if(x===state.current.x&&y===state.current.y)cell.classList.add('current');t.exits.filter(d=>canUseExit(t,d)).forEach(d=>{const p=document.createElement('span');p.className=`path ${d}`;cell.appendChild(p);});if(t.roll){const rr=document.createElement('span');rr.className='tile-roll';rr.textContent=t.roll;cell.appendChild(rr);}map.appendChild(cell);}}
 function showEncounter(){if(!state.encounter){$('encounterModal').hidden=true;return;}$('encounterIcon').textContent=state.encounter.icon||'👹';$('encounterName').textContent=`${state.encounter.name}が現れた！`;$('encounterText').textContent=(state.encounter.strong?'ここは魔物の巣だった。 ':'')+(state.encounter.text||'敵が襲いかかってきた！');$('encounterModal').hidden=false;}
-function render(){checkMapComplete();$('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';$('message').textContent=state.encounter?`${state.encounter.name}が立ちはだかっています。`:state.mapComplete?'全マス開放済み。開いた通路を自由に探索できます。':'道がある方向へ進めます。未探索の先ではサイコロを振ります。';$('completeBanner').classList.toggle('show',state.mapComplete&&!state.gameOver);$('returnBtn').disabled=!!state.encounter||state.gameOver;document.querySelectorAll('.dir-btn').forEach(btn=>{btn.hidden=!canUseExit(t,btn.dataset.dir);btn.disabled=!!state.encounter||state.gameOver;});$('log').innerHTML=(state.logs||[]).slice(-3).reverse().map(x=>`<p>${String(x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</p>`).join('');renderMap();showEncounter();}
+function render(){checkMapComplete();$('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';$('message').textContent=state.encounter?`${state.encounter.name}が立ちはだかっています。`:state.mapComplete?'全マス開放済み。開いた通路を自由に探索できます。':'道がある方向へ進めます。未探索の先ではサイコロを振ります。';$('completeBanner').classList.toggle('show',state.mapComplete&&!state.gameOver);$('returnBtn').disabled=!!state.encounter||state.gameOver;document.querySelectorAll('.dir-btn').forEach(btn=>{btn.hidden=!canUseExit(t,btn.dataset.dir);btn.disabled=!!state.encounter||state.gameOver;});$('log').innerHTML=(state.logs||[]).slice(-2).reverse().map(x=>`<p>${String(x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</p>`).join('');renderMap();showEncounter();}
 function showGameOver(){state.encounter=null;state.gameOver=true;save();$('encounterModal').hidden=true;$('gameOverModal').hidden=false;render();}
-document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));$('saveBtn').addEventListener('click',()=>save(true));$('encounterStart').addEventListener('click',()=>{if(!state.encounter)return;save();location.href='dungeon_battle.html?v=20260823-2355';});$('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260823-2355';});window.addEventListener('resize',renderMap);load();render();if(state.gameOver||state.hp<=0)showGameOver();
+document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));$('saveBtn').addEventListener('click',()=>save(true));$('encounterStart').addEventListener('click',()=>{if(!state.encounter)return;save();location.href='dungeon_battle.html?v=20260823-2358';});$('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260823-2358';});window.addEventListener('resize',renderMap);load();render();if(state.gameOver||state.hp<=0)showGameOver();
 })();
 </script>
 </body>
