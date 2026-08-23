@@ -1,4 +1,9 @@
 (()=>{
+  const touchCss=document.createElement('link');
+  touchCss.rel='stylesheet';
+  touchCss.href='css/mystery-touch.css?v=20260823-2224';
+  document.head.appendChild(touchCss);
+
   const SAVE_KEY='mystery_cleaner_save_v1';
   const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-questioning.html',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-start.html'};
 
