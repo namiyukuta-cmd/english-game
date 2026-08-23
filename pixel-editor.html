@@ -7,13 +7,14 @@
   <title>24×24 ドット絵メーカー</title>
   <style>
     *{box-sizing:border-box}
-    :root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--accent:#e98aa8;--muted:#7d6e75}
+    :root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--muted:#7d6e75}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
     .wrap{max-width:720px;margin:0 auto;padding:12px 12px 28px}
     .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .back{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:22px;color:var(--ink);flex:0 0 auto}
     h1{margin:0;font-size:20px}
     .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .save-name{margin:3px 0 0;font-size:12px;font-weight:800;color:#a06479}
     .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px}
     .toolrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
     .current{width:34px;height:34px;border:2px solid #4b3e44;border-radius:8px;background:#2b2118;flex:0 0 auto}
@@ -38,15 +39,20 @@
     #customColor{width:48px;height:42px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:2px}
     .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     .action.primary{background:#3e3037;color:#fff;border-color:#3e3037}
+    .action.save{background:#d97898;color:#fff;border-color:#d97898}
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
-    @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(4,1fr)}.canvas-shell{max-height:620px}}
+    @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(3,1fr)}.canvas-shell{max-height:620px}}
   </style>
 </head>
 <body>
   <main class="wrap">
     <div class="top">
       <button class="back" type="button" id="backBtn" aria-label="戻る">←</button>
-      <div><h1>24×24 ドット絵メーカー</h1><p class="sub">基本は1マスずつタップ。拡大すると細かく描けます</p></div>
+      <div>
+        <h1>24×24 ドット絵メーカー</h1>
+        <p class="sub">基本は1マスずつタップ。拡大すると細かく描けます</p>
+        <p id="projectLabel" class="save-name">新しいドット絵</p>
+      </div>
     </div>
 
     <section class="panel toolrow">
@@ -75,10 +81,12 @@
     </section>
 
     <section class="panel actions">
+      <button id="gameSaveBtn" class="action save" type="button">セーブ</button>
       <button id="undoBtn" class="action" type="button">1つ戻る</button>
       <button id="clearBtn" class="action" type="button">全消去</button>
       <button id="savePngBtn" class="action primary" type="button">PNG保存</button>
       <button id="saveJsonBtn" class="action" type="button">座標保存</button>
+      <button id="saveListBtn" class="action" type="button">セーブ一覧</button>
     </section>
     <div id="message" class="message" aria-live="polite"></div>
   </main>
@@ -86,6 +94,8 @@
 <script>
 (() => {
   const SIZE=24;
+  const SAVE_KEY='englishGamePixelSavesV1';
+  const WORK_KEY='englishGamePixel24';
   const COLORS=["#2B2118","#5A3825","#8B5A3C","#B97A56","#F3C9A7","#FFF3E6","#FFFFFF","#E34B45","#E98DA1","#F0C84B","#4A8FD8","#4FAE68","#6A4FC2","#222222","#8D8D8D"];
   const ZOOMS=[100,150,200,300,400];
   const grid=document.getElementById('grid');
@@ -97,26 +107,99 @@
   const drawModeBtn=document.getElementById('drawModeBtn');
   const zoomLabel=document.getElementById('zoomLabel');
   const message=document.getElementById('message');
+  const projectLabel=document.getElementById('projectLabel');
+
   let selected=COLORS[0];
-  let pixels=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
+  let pixels=blankPixels();
   let history=[];
   let drawing=false;
   let beforeStroke=null;
   let drawMode=false;
   let zoomIndex=0;
   let pointerStart=null;
+  let currentSaveId=null;
 
-  function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1500)}
+  function blankPixels(){return Array.from({length:SIZE},()=>Array(SIZE).fill(null))}
+  function validPixels(p){return Array.isArray(p)&&p.length===SIZE&&p.every(r=>Array.isArray(r)&&r.length===SIZE)}
   function clone(){return pixels.map(r=>r.slice())}
-  function saveLocal(){try{localStorage.setItem('englishGamePixel24',JSON.stringify(pixels))}catch(e){}}
-  function loadLocal(){try{const p=JSON.parse(localStorage.getItem('englishGamePixel24'));if(Array.isArray(p)&&p.length===SIZE&&p.every(r=>Array.isArray(r)&&r.length===SIZE))pixels=p}catch(e){}}
+  function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1800)}
+
+  function readSaveData(){
+    try{
+      const d=JSON.parse(localStorage.getItem(SAVE_KEY));
+      if(d&&d.slots&&typeof d.slots==='object')return {next:Number(d.next)||1,slots:d.slots};
+    }catch(e){}
+    return {next:1,slots:{}};
+  }
+  function writeSaveData(d){localStorage.setItem(SAVE_KEY,JSON.stringify(d))}
+  function saveWorking(){try{localStorage.setItem(WORK_KEY,JSON.stringify(pixels))}catch(e){}}
+  function updateProjectLabel(){projectLabel.textContent=currentSaveId?'ドット絵セーブ'+currentSaveId:'新しいドット絵'}
+
+  function loadInitial(){
+    const q=new URLSearchParams(location.search);
+    const requested=q.get('save');
+    const mode=q.get('mode');
+    if(requested){
+      const data=readSaveData();
+      const slot=data.slots[requested];
+      if(slot&&validPixels(slot.pixels)){
+        currentSaveId=requested;
+        pixels=slot.pixels.map(r=>r.slice());
+        saveWorking();
+        updateProjectLabel();
+        return;
+      }
+      pixels=blankPixels();
+      currentSaveId=null;
+      updateProjectLabel();
+      setTimeout(()=>note('セーブデータが見つかりませんでした'),50);
+      return;
+    }
+    if(mode==='new'){
+      pixels=blankPixels();
+      currentSaveId=null;
+      saveWorking();
+      updateProjectLabel();
+      return;
+    }
+    try{
+      const old=JSON.parse(localStorage.getItem(WORK_KEY));
+      if(validPixels(old))pixels=old;
+    }catch(e){}
+    updateProjectLabel();
+  }
+
+  function saveGame(){
+    const data=readSaveData();
+    if(!currentSaveId){
+      let n=Math.max(1,Number(data.next)||1);
+      let id=String(n).padStart(3,'0');
+      while(data.slots[id]){n++;id=String(n).padStart(3,'0')}
+      currentSaveId=id;
+      data.next=n+1;
+    }
+    data.slots[currentSaveId]={
+      id:currentSaveId,
+      name:'ドット絵セーブ'+currentSaveId,
+      width:SIZE,
+      height:SIZE,
+      pixels:clone(),
+      updatedAt:new Date().toISOString()
+    };
+    writeSaveData(data);
+    saveWorking();
+    updateProjectLabel();
+    history.replaceState(null,'','pixel-editor.html?save='+encodeURIComponent(currentSaveId));
+    note('ドット絵セーブ'+currentSaveId+'に保存しました');
+  }
+
   function updateTool(){
     if(selected===null){currentColor.className='current transparent';currentColor.style.background='';currentLabel.textContent='消しゴム';eraserBtn.classList.add('active')}
     else{currentColor.className='current';currentColor.style.background=selected;currentLabel.textContent=selected;eraserBtn.classList.remove('active')}
     document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===(selected===null?'transparent':selected)));
   }
   function updateDrawMode(){
-    drawModeBtn.textContent=`なぞり塗り：${drawMode?'ON':'OFF'}`;
+    drawModeBtn.textContent='なぞり塗り：'+(drawMode?'ON':'OFF');
     drawModeBtn.classList.toggle('active',drawMode);
     grid.classList.toggle('draw-mode',drawMode);
     grid.classList.toggle('tap-mode',!drawMode);
@@ -135,16 +218,16 @@
       canvasShell.scrollTop=Math.max(0,cy*newW-canvasShell.clientHeight/2);
     });
   }
-  function renderCell(x,y){const c=grid.children[y*SIZE+x];c.style.background=pixels[y][x]||'transparent'}
+  function renderCell(x,y){grid.children[y*SIZE+x].style.background=pixels[y][x]||'transparent'}
   function render(){for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)renderCell(x,y)}
   function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return false;pixels[y][x]=selected;renderCell(x,y);return true}
-  function commitSingle(cell){const before=clone();if(!paint(cell))return;history.push(before);if(history.length>100)history.shift();saveLocal()}
+  function commitSingle(cell){const before=clone();if(!paint(cell))return;history.push(before);if(history.length>100)history.shift();saveWorking()}
   function startDraw(cell){drawing=true;beforeStroke=clone();paint(cell)}
-  function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){history.push(beforeStroke);if(history.length>100)history.shift();saveLocal()}beforeStroke=null}
+  function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){history.push(beforeStroke);if(history.length>100)history.shift();saveWorking()}beforeStroke=null}
 
   for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
     const b=document.createElement('button');
-    b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',`${x},${y}`);
+    b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',x+','+y);
     b.addEventListener('pointerdown',e=>{
       pointerStart={x:e.clientX,y:e.clientY,cell:b};
       if(drawMode){e.preventDefault();startDraw(b)}
@@ -153,9 +236,8 @@
     b.addEventListener('pointerup',e=>{
       if(drawMode)return;
       if(!pointerStart)return;
-      const dx=e.clientX-pointerStart.x,dy=e.clientY-pointerStart.y;
-      const moved=Math.hypot(dx,dy);
-      if(moved<8 && pointerStart.cell===b){e.preventDefault();commitSingle(b)}
+      const moved=Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y);
+      if(moved<8&&pointerStart.cell===b){e.preventDefault();commitSingle(b)}
       pointerStart=null;
     });
     b.addEventListener('click',e=>e.preventDefault());
@@ -164,30 +246,50 @@
   window.addEventListener('pointerup',()=>{if(drawMode)endDraw();else pointerStart=null});
   window.addEventListener('pointercancel',()=>{if(drawMode)endDraw();else pointerStart=null});
 
-  const erase=document.createElement('button');erase.type='button';erase.className='swatch transparent';erase.dataset.color='transparent';erase.title='透明';erase.addEventListener('click',()=>{selected=null;updateTool()});palette.appendChild(erase);
-  COLORS.forEach(color=>{const b=document.createElement('button');b.type='button';b.className='swatch';b.dataset.color=color;b.style.background=color;b.title=color;b.addEventListener('click',()=>{selected=color;updateTool()});palette.appendChild(b)});
+  const erase=document.createElement('button');
+  erase.type='button';erase.className='swatch transparent';erase.dataset.color='transparent';erase.title='透明';
+  erase.addEventListener('click',()=>{selected=null;updateTool()});palette.appendChild(erase);
+  COLORS.forEach(color=>{
+    const b=document.createElement('button');b.type='button';b.className='swatch';b.dataset.color=color;b.style.background=color;b.title=color;
+    b.addEventListener('click',()=>{selected=color;updateTool()});palette.appendChild(b);
+  });
 
   eraserBtn.addEventListener('click',()=>{selected=null;updateTool()});
   drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;updateDrawMode();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
   document.getElementById('useCustom').addEventListener('click',()=>{selected=document.getElementById('customColor').value.toUpperCase();updateTool()});
-  document.getElementById('undoBtn').addEventListener('click',()=>{if(!history.length){note('戻せる操作がありません');return}pixels=history.pop();render();saveLocal()});
-  document.getElementById('clearBtn').addEventListener('click',()=>{history.push(clone());pixels=Array.from({length:SIZE},()=>Array(SIZE).fill(null));render();saveLocal()});
-  document.getElementById('backBtn').addEventListener('click',()=>{location.href='index.html'});
+  document.getElementById('gameSaveBtn').addEventListener('click',saveGame);
+  document.getElementById('undoBtn').addEventListener('click',()=>{if(!history.length){note('戻せる操作がありません');return}pixels=history.pop();render();saveWorking()});
+  document.getElementById('clearBtn').addEventListener('click',()=>{history.push(clone());pixels=blankPixels();render();saveWorking()});
+  document.getElementById('backBtn').addEventListener('click',()=>{location.href='pixel-start.html'});
+  document.getElementById('saveListBtn').addEventListener('click',()=>{location.href='pixel-saves.html'});
 
   document.getElementById('zoomInBtn').addEventListener('click',()=>{if(zoomIndex<ZOOMS.length-1){zoomIndex++;updateZoom()}else note('これ以上拡大できません')});
   document.getElementById('zoomOutBtn').addEventListener('click',()=>{if(zoomIndex>0){zoomIndex--;updateZoom()}else note('これ以上縮小できません')});
   document.getElementById('zoomResetBtn').addEventListener('click',()=>{zoomIndex=0;updateZoom(false);canvasShell.scrollLeft=0;canvasShell.scrollTop=0});
 
-  function makeCanvas(scale){const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}return c}
+  function makeCanvas(scale){
+    const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;
+    const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;
+    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}
+    return c;
+  }
   function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
-  document.getElementById('savePngBtn').addEventListener('click',()=>{download(makeCanvas(20).toDataURL('image/png'),'pixel_24x24.png');note('PNGを保存しました')});
+  document.getElementById('savePngBtn').addEventListener('click',()=>{download(makeCanvas(20).toDataURL('image/png'),(currentSaveId?'pixel_'+currentSaveId:'pixel_24x24')+'.png');note('PNGを保存しました')});
   document.getElementById('saveJsonBtn').addEventListener('click',()=>{
-    const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});
+    const coordinates=[];
+    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});
     const data={width:SIZE,height:SIZE,pixels,coordinates};
-    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,'pixel_24x24.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_24x24')+'.json');
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    note('座標データを保存しました');
   });
 
-  loadLocal();render();updateTool();updateDrawMode();updateZoom(false);
+  loadInitial();
+  render();
+  updateTool();
+  updateDrawMode();
+  updateZoom(false);
 })();
 </script>
 </body>
