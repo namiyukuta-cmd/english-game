@@ -3,39 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#fff7fb">
-  <title>推理ゲーム</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-1401">
-  <style>
-    .mystery-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
-    .mystery-head h1{margin:0;text-align:center;font-size:22px}
-    .back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--brown);font-size:21px;font-weight:900;text-decoration:none}
-    .mystery-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 22px rgba(98,63,77,.08)}
-    .mystery-box h2{margin:0 0 10px;font-size:19px;color:var(--brown)}
-    .mystery-box p{margin:0;font-size:14px;line-height:1.8;color:#765c66}
-    .mode-label{margin-top:14px;text-align:center;font-size:13px;color:#977582}
-  </style>
+  <title>掃除婦は朝寝る</title>
 </head>
 <body>
-  <main class="app-shell">
-    <header class="mystery-head">
-      <a class="back" href="mystery-start.html" aria-label="推理トップへ戻る">←</a>
-      <h1>推理ゲーム</h1>
-      <span aria-hidden="true"></span>
-    </header>
-
-    <section class="mystery-box">
-      <h2>事件ファイル</h2>
-      <p>ここに推理ゲーム本編を作っていきます。</p>
-    </section>
-
-    <p class="mode-label" id="modeLabel"></p>
-  </main>
-
   <script>
-    const params = new URLSearchParams(location.search);
-    const mode = params.get('mode') === 'continue' ? 'continue' : 'new';
-    document.getElementById('modeLabel').textContent = mode === 'continue' ? '続きから開始' : '始めから開始';
+    const mode=new URLSearchParams(location.search).get('mode')==='continue'?'continue':'new';
+    location.replace('mystery-room.html?mode='+mode);
   </script>
 </body>
 </html>
