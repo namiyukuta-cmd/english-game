@@ -1,8 +1,9 @@
 (()=>{
   const SAVE_KEY='mystery_cleaner_save_v1';
-  const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-scene.html?phase=questioning',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-room.html'};
+  const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-scene.html?phase=questioning',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-start.html'};
 
-  function firstCase(){return (window.MYSTERY_CASES&&window.MYSTERY_CASES[0])||null;}
+  function listCases(){return (window.MYSTERY_CASES||[]).slice().sort((a,b)=>(a.unit||0)-(b.unit||0));}
+  function firstCase(){return listCases()[0]||null;}
   function loadState(){
     try{return JSON.parse(localStorage.getItem(SAVE_KEY))||null;}catch(e){return null;}
   }
@@ -10,17 +11,31 @@
   function startNew(){
     const c=firstCase();
     if(!c)return null;
-    return saveState({caseId:c.id,stage:'room',completed:false});
+    return saveState({caseId:c.id,stage:'room',completed:false,completedAll:false});
   }
   function currentCase(){
     const state=loadState();
-    const list=window.MYSTERY_CASES||[];
+    const list=listCases();
     return list.find(c=>c.id===(state&&state.caseId))||firstCase();
+  }
+  function nextCase(caseId){
+    const list=listCases();
+    const i=list.findIndex(c=>c.id===caseId);
+    return i>=0&&i<list.length-1?list[i+1]:null;
   }
   function setStage(stage,extra){
     const c=currentCase();
     const prev=loadState()||{caseId:c?c.id:null};
     return saveState(Object.assign({},prev,{caseId:c?c.id:prev.caseId,stage},extra||{}));
+  }
+  function finishCurrentCase(){
+    const c=currentCase();
+    if(!c)return null;
+    const n=nextCase(c.id);
+    if(n){
+      return saveState({caseId:n.id,stage:'room',completed:false,completedAll:false,lastCompletedCaseId:c.id,lastCompletedUnit:c.unit});
+    }
+    return saveState({caseId:c.id,stage:'complete',completed:true,completedAll:true,lastCompletedCaseId:c.id,lastCompletedUnit:c.unit});
   }
   function stageUrl(stage){return STAGE_URLS[stage]||STAGE_URLS.room;}
   function continueUrl(){const s=loadState();return stageUrl(s&&s.stage?s.stage:'room');}
@@ -36,7 +51,7 @@
       btn.textContent=card.classList.contains('open')?'文法を閉じる':'文法を見る';
     }));
   }
-  function escapeHtml(value){return String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
+  function escapeHtml(value){return String(value==null?'':value).replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));}
 
-  window.MysteryGame={SAVE_KEY,loadState,saveState,startNew,currentCase,setStage,stageUrl,continueUrl,sentenceCard,storyCard,bindGrammar,escapeHtml};
+  window.MysteryGame={SAVE_KEY,loadState,saveState,startNew,currentCase,nextCase,setStage,finishCurrentCase,stageUrl,continueUrl,sentenceCard,storyCard,bindGrammar,escapeHtml,listCases};
 })();
