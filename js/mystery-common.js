@@ -51,7 +51,7 @@
       btn.textContent=card.classList.contains('open')?'文法を閉じる':'文法を見る';
     }));
   }
-  function escapeHtml(value){return String(value==null?'':value).replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]));}
+  function escapeHtml(value){return String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
 
   window.MysteryGame={SAVE_KEY,loadState,saveState,startNew,currentCase,nextCase,setStage,finishCurrentCase,stageUrl,continueUrl,sentenceCard,storyCard,bindGrammar,escapeHtml,listCases};
 })();
