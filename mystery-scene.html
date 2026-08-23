@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜ヒント</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2230">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2230">
 </head>
 <body>
   <main class="mystery-app">
@@ -28,28 +28,39 @@
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
     const state=MysteryGame.loadState()||{};
-    let page=Math.min(Number(state.hintPage||0),2);
     const body=document.getElementById('pageBody');
     const next=document.getElementById('nextBtn');
     document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / HINT / ヒントを伝える`;
 
-    function studyHtml(){
-      return c.hint.study.map(x=>`<div class="short-line"><div class="speaker">主人公</div><div class="en">${MysteryGame.escapeHtml(x.en)}</div><div class="ja">${MysteryGame.escapeHtml(x.ja)}</div>${x.grammar?`<button class="grammar-toggle" type="button">文法を見る</button><div class="grammar-card"><div class="grammar-title">${MysteryGame.escapeHtml(x.grammar)}</div><div class="grammar-text">${MysteryGame.escapeHtml(x.explain||'')}</div></div>`:''}</div>`).join('');
+    function splitSentences(text,ja){
+      const re=ja?/[^。！？]+[。！？]?/g:/[^.!?]+[.!?]?/g;
+      return (String(text||'').match(re)||[String(text||'')]).map(x=>x.trim()).filter(Boolean);
     }
+    function pairedPages(en,ja,speaker,extra){
+      const e=splitSentences(en,false),j=splitSentences(ja,true);
+      return Array.from({length:Math.max(e.length,j.length)},(_,i)=>Object.assign({speaker,en:e[i]||'',ja:j[i]||''},extra||{}));
+    }
+
+    const pages=[];
+    pages.push(...pairedPages(c.hint.detective.en,c.hint.detective.ja,'刑事'));
+    (c.hint.study||[]).forEach(x=>{
+      const ps=pairedPages(x.en,x.ja,'主人公',{grammar:x.grammar||'',explain:x.explain||''});
+      pages.push(...ps);
+    });
+    pages.push(...pairedPages(c.hint.storyEn,c.hint.storyJa,'SCENE / 状況'));
+
+    let page=Math.min(Number(state.hintPage||0),Math.max(0,pages.length-1));
+
     function render(){
-      if(page===0){
-        body.innerHTML=`<div class="speaker">刑事</div><div class="en">${MysteryGame.escapeHtml(c.hint.detective.en)}</div><div class="ja">${MysteryGame.escapeHtml(c.hint.detective.ja)}</div>`;
-      }else if(page===1){
-        body.innerHTML=studyHtml();
-        MysteryGame.bindGrammar(body);
-      }else{
-        body.innerHTML=`<div class="speaker">SCENE / 状況</div><div class="en">${MysteryGame.escapeHtml(c.hint.storyEn)}</div><div class="ja">${MysteryGame.escapeHtml(c.hint.storyJa)}</div>`;
-      }
-      document.getElementById('pageCount').textContent=`${page+1} / 3`;
-      next.textContent=page<2?'Next / 次へ':'A few days later... / 数日後';
+      const p=pages[page]||{speaker:'',en:'',ja:''};
+      const grammar=p.grammar?`<button class="grammar-toggle" type="button">文法を見る</button><div class="grammar-card"><div class="grammar-title">${MysteryGame.escapeHtml(p.grammar)}</div><div class="grammar-text">${MysteryGame.escapeHtml(p.explain||'')}</div></div>`:'';
+      body.innerHTML=`<div class="speaker">${MysteryGame.escapeHtml(p.speaker)}</div><div class="en">${MysteryGame.escapeHtml(p.en)}</div><div class="ja">${MysteryGame.escapeHtml(p.ja)}</div>${grammar}`;
+      MysteryGame.bindGrammar(body);
+      document.getElementById('pageCount').textContent=`${page+1} / ${pages.length}`;
+      next.textContent=page<pages.length-1?'Next / 次へ':'A few days later... / 数日後';
     }
     next.addEventListener('click',()=>{
-      if(page<2){page++;MysteryGame.setStage('hint',{hintPage:page});render();}
+      if(page<pages.length-1){page++;MysteryGame.setStage('hint',{hintPage:page});render();}
       else{MysteryGame.setStage('later',{laterPage:0});location.href='mystery-later.html';}
     });
     render();
