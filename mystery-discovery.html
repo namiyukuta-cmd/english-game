@@ -5,30 +5,67 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事件発見</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2155">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2155">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-room.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
-    <p class="chapter-label" id="chapterLabel">INCIDENT / 事件発見</p>
-    <section class="date-card"><div class="date-en" id="dateEn"></div><div class="date-ja" id="dateJa"></div></section>
-    <div id="storyArea"></div>
-    <div id="studyArea"></div>
-    <button class="mystery-action" id="nextBtn" type="button">Call the police. / 警察を呼ぶ</button>
+
+    <section id="dateScreen" class="incident-screen">
+      <p class="chapter-label" id="dateChapter"></p>
+      <div class="incident-date-only">
+        <div class="date-en" id="dateEn"></div>
+        <div class="date-ja" id="dateJa"></div>
+      </div>
+      <button class="mystery-action" id="discoverBtn" type="button">Start work. / 仕事を始める</button>
+    </section>
+
+    <section id="discoveryScreen" class="incident-screen hidden">
+      <p class="chapter-label" id="discoveryChapter"></p>
+      <div id="storyArea"></div>
+      <div id="studyArea"></div>
+      <button class="mystery-action" id="nextBtn" type="button">Call the police. / 警察を呼ぶ</button>
+    </section>
   </main>
+
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
-  <script src="js/mystery-common.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
-    document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / INCIDENT / 事件発見`;
+    const state=MysteryGame.loadState()||{};
+    const dateScreen=document.getElementById('dateScreen');
+    const discoveryScreen=document.getElementById('discoveryScreen');
+
+    document.getElementById('dateChapter').textContent=`UNIT ${c.unit} / DATE / 日時`;
+    document.getElementById('discoveryChapter').textContent=`UNIT ${c.unit} / DISCOVERY / 発見`;
     document.getElementById('dateEn').textContent=c.discoveryDate.en;
     document.getElementById('dateJa').textContent=c.discoveryDate.ja;
     document.getElementById('storyArea').innerHTML=MysteryGame.storyCard(c.discovery.storyEn,c.discovery.storyJa);
     document.getElementById('studyArea').innerHTML=c.discovery.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
     MysteryGame.bindGrammar();
-    document.getElementById('nextBtn').addEventListener('click',()=>{MysteryGame.setStage('questioning');location.href='mystery-scene.html?phase=questioning';});
+
+    function showDate(){
+      dateScreen.classList.remove('hidden');
+      discoveryScreen.classList.add('hidden');
+    }
+    function showDiscovery(){
+      dateScreen.classList.add('hidden');
+      discoveryScreen.classList.remove('hidden');
+    }
+
+    document.getElementById('discoverBtn').addEventListener('click',()=>{
+      MysteryGame.setStage('discovery',{discoveryPhase:'found'});
+      showDiscovery();
+    });
+
+    document.getElementById('nextBtn').addEventListener('click',()=>{
+      MysteryGame.setStage('questioning',{discoveryPhase:'found'});
+      location.href='mystery-questioning.html';
+    });
+
+    if(state.discoveryPhase==='found') showDiscovery(); else showDate();
   </script>
 </body>
 </html>
