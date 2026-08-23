@@ -5,25 +5,57 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事情聴取</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2210">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2210">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-discovery.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
     <p class="chapter-label" id="chapterLabel">QUESTIONING / 事情聴取</p>
-    <section class="dialogue-card"><div class="speaker">刑事</div><div class="en" id="detectiveEn"></div><div class="ja" id="detectiveJa"></div></section>
-    <div class="interview-status" id="status"></div>
-    <div class="suspect-list" id="suspects"></div>
-    <section class="interview-panel hidden" id="panel">
-      <div class="interview-name" id="personName"></div>
-      <div class="en interview-statement" id="statementEn"></div>
-      <div class="mini-label">Which meaning? / 意味を選ぶ</div>
-      <div class="translation-choices" id="translations"></div>
-      <div class="result-box" id="result"></div>
+
+    <section id="introStage" class="reading-stage">
+      <div class="reading-page">
+        <div class="speaker" id="introSpeaker"></div>
+        <div class="en" id="introEn"></div>
+        <div class="ja" id="introJa"></div>
+      </div>
+      <div class="page-footer">
+        <div class="page-count" id="introCount"></div>
+        <button class="mystery-action reading-next" id="introNext" type="button">Next / 次へ</button>
+      </div>
     </section>
-    <button class="mystery-action" id="nextBtn" type="button" disabled>Think about it. / 推理する</button>
+
+    <section id="menuStage" class="hidden">
+      <div class="scene-menu-title">Who do you ask? / 誰に話を聞く？</div>
+      <div class="interview-status" id="status"></div>
+      <div class="suspect-list" id="suspects"></div>
+      <button class="mystery-action" id="nextBtn" type="button" disabled>Think about it. / 推理する</button>
+    </section>
+
+    <section id="statementStage" class="reading-stage hidden">
+      <div class="reading-page">
+        <div class="speaker" id="personName"></div>
+        <div class="en" id="statementEn"></div>
+      </div>
+      <div class="page-footer">
+        <div class="page-count">TESTIMONY / 証言</div>
+        <button class="mystery-action reading-next" id="meaningBtn" type="button">What does it mean? / 意味を考える</button>
+      </div>
+    </section>
+
+    <section id="translationStage" class="reading-stage translation-screen hidden">
+      <div class="reading-page">
+        <div class="speaker" id="translationName"></div>
+        <div class="mini-label">Which meaning? / 正しい意味を選ぶ</div>
+        <div class="translation-choices" id="translations"></div>
+        <div class="result-box" id="result"></div>
+      </div>
+      <div class="page-footer">
+        <button class="mystery-action reading-next hidden" id="backToPeople" type="button">Next person / 次の人へ</button>
+      </div>
+    </section>
   </main>
+
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
   <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
@@ -31,56 +63,76 @@
     const c=MysteryGame.currentCase();
     const state=MysteryGame.loadState()||{};
     const questioned=new Set(Array.isArray(state.questionedSuspects)?state.questionedSuspects:[]);
+    const introStage=document.getElementById('introStage');
+    const menuStage=document.getElementById('menuStage');
+    const statementStage=document.getElementById('statementStage');
+    const translationStage=document.getElementById('translationStage');
     const suspectsEl=document.getElementById('suspects');
-    const panel=document.getElementById('panel');
     const translations=document.getElementById('translations');
     const result=document.getElementById('result');
     const nextBtn=document.getElementById('nextBtn');
+    const backToPeople=document.getElementById('backToPeople');
     let active=-1;
+    let introIndex=Math.min(Number(state.questioningIntroPage||0),1);
 
     document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / QUESTIONING / 事情聴取`;
-    document.getElementById('detectiveEn').textContent=c.questioning.detective.en;
-    document.getElementById('detectiveJa').textContent=c.questioning.detective.ja;
+    const introPages=[
+      {speaker:'刑事',en:c.questioning.detective.en,ja:c.questioning.detective.ja},
+      {speaker:'SCENE / 状況',en:c.questioning.storyEn,ja:c.questioning.storyJa}
+    ];
 
+    function hideStages(){introStage.classList.add('hidden');menuStage.classList.add('hidden');statementStage.classList.add('hidden');translationStage.classList.add('hidden');}
+    function showIntro(){hideStages();introStage.classList.remove('hidden');renderIntro();}
+    function renderIntro(){
+      const p=introPages[introIndex];
+      document.getElementById('introSpeaker').textContent=p.speaker;
+      document.getElementById('introEn').textContent=p.en;
+      document.getElementById('introJa').textContent=p.ja;
+      document.getElementById('introCount').textContent=`${introIndex+1} / ${introPages.length}`;
+      document.getElementById('introNext').textContent=introIndex<introPages.length-1?'Next / 次へ':'Talk to them. / 話を聞く';
+    }
+    function showMenu(){hideStages();menuStage.classList.remove('hidden');renderSuspects();}
     function renderSuspects(){
       suspectsEl.innerHTML=c.suspects.map((s,i)=>`<button class="suspect-select ${questioned.has(s.name)?'done':''}" type="button" data-i="${i}"><strong>${MysteryGame.escapeHtml(s.name)}</strong><span>${MysteryGame.escapeHtml(s.metaJa)}</span><em>${questioned.has(s.name)?'✓ 記録済み':'話を聞く'}</em></button>`).join('');
       document.getElementById('status').textContent=`証言 ${questioned.size} / ${c.suspects.length}`;
       nextBtn.disabled=questioned.size<c.suspects.length;
     }
 
-    suspectsEl.addEventListener('click',e=>{
-      const btn=e.target.closest('[data-i]'); if(!btn)return;
-      active=Number(btn.dataset.i); openInterview(active);
+    document.getElementById('introNext').addEventListener('click',()=>{
+      if(introIndex<introPages.length-1){introIndex++;MysteryGame.setStage('questioning',{questioningIntroPage:introIndex});renderIntro();}
+      else{MysteryGame.setStage('questioning',{questioningIntroDone:true,questioningIntroPage:introIndex});showMenu();}
     });
 
-    function openInterview(i){
-      const s=c.suspects[i];
-      panel.classList.remove('hidden');
+    suspectsEl.addEventListener('click',e=>{const btn=e.target.closest('[data-i]');if(!btn)return;active=Number(btn.dataset.i);openStatement(active);});
+    function openStatement(i){
+      const s=c.suspects[i];hideStages();statementStage.classList.remove('hidden');
       document.getElementById('personName').textContent=s.name+' / '+s.metaJa;
       document.getElementById('statementEn').textContent=s.statementEn;
+    }
+    document.getElementById('meaningBtn').addEventListener('click',()=>{if(active<0)return;openTranslation(active);});
+    function openTranslation(i){
+      const s=c.suspects[i];hideStages();translationStage.classList.remove('hidden');
+      document.getElementById('translationName').textContent=s.name;
       result.textContent=questioned.has(s.name)?'この証言は記録済みです。':'';
+      backToPeople.classList.toggle('hidden',!questioned.has(s.name));
       const other=c.suspects[(i+1)%c.suspects.length].statementJa;
       const options=i%2===0?[s.statementJa,other]:[other,s.statementJa];
-      translations.innerHTML=options.map((x,n)=>`<button type="button" data-text="${encodeURIComponent(x)}">${MysteryGame.escapeHtml(x)}</button>`).join('');
+      translations.innerHTML=options.map(x=>`<button type="button" data-text="${encodeURIComponent(x)}">${MysteryGame.escapeHtml(x)}</button>`).join('');
     }
 
     translations.addEventListener('click',e=>{
-      const btn=e.target.closest('button'); if(!btn||active<0)return;
-      const s=c.suspects[active];
-      const chosen=decodeURIComponent(btn.dataset.text);
+      const btn=e.target.closest('button');if(!btn||active<0)return;
+      const s=c.suspects[active];const chosen=decodeURIComponent(btn.dataset.text);
       translations.querySelectorAll('button').forEach(x=>x.classList.remove('correct','wrong'));
       if(chosen===s.statementJa){
-        btn.classList.add('correct'); result.textContent='Correct! / 証言を記録しました。';
-        questioned.add(s.name);
-        MysteryGame.setStage('questioning',{questionedSuspects:[...questioned]});
-        renderSuspects();
-      }else{
-        btn.classList.add('wrong'); result.textContent='意味が違います。もう一度。';
-      }
+        btn.classList.add('correct');result.textContent='Correct! / 証言を記録しました。';questioned.add(s.name);
+        MysteryGame.setStage('questioning',{questioningIntroDone:true,questionedSuspects:[...questioned]});backToPeople.classList.remove('hidden');
+      }else{btn.classList.add('wrong');result.textContent='意味が違います。もう一度。';}
     });
-
+    backToPeople.addEventListener('click',showMenu);
     nextBtn.addEventListener('click',()=>{if(nextBtn.disabled)return;MysteryGame.setStage('deduction',{questionedSuspects:[...questioned]});location.href='mystery-deduction.html';});
-    renderSuspects();
+
+    if(state.questioningIntroDone)showMenu();else showIntro();
   </script>
 </body>
 </html>
