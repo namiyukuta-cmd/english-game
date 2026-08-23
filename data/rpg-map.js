@@ -47,12 +47,15 @@ window.RPG_MAP = {
       name: '北の草原',
       label: '北の草原 ↑',
       labelPosition: { x: 270, y: 36 },
+      requiredDefeatedEnemyId: 'boss_black_slime_01',
+      blockedMessage: '黒スライムが北の道を塞いでいる！',
       destination: 'rpg_field.html',
       destinationReturnKey: 'rpgFieldReturnPositionV1',
       destinationPosition: { x: 270, y: 875 }
     }
   ],
   enemies: [
+    { id: 'boss_black_slime_01', x: 270, y: 105, name: 'ボス・黒スライム', kind: 'black', boss: true },
     { id: 'slime_01', x: 120, y: 395, name: 'スライム', kind: 'pink' },
     { id: 'slime_02', x: 420, y: 395, name: 'スライム', kind: 'pink' },
     { id: 'blue_slime_01', x: 420, y: 285, name: '青スライム', kind: 'blue' },
