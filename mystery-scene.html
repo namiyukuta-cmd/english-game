@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事件現場</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2104">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2104">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
 </head>
 <body>
   <main class="mystery-app">
@@ -15,8 +15,8 @@
     <div id="content"></div>
     <button class="mystery-action" id="nextBtn" type="button"></button>
   </main>
-  <script src="data/mystery_cases.js?v=20260823-2104"></script>
-  <script src="js/mystery-common.js?v=20260823-2104"></script>
+  <script src="data/mystery_cases.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2111"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
@@ -24,7 +24,7 @@
     const content=document.getElementById('content');
     const next=document.getElementById('nextBtn');
     if(phase==='questioning'){
-      document.getElementById('chapterLabel').textContent='QUESTIONING / 事情聴取';
+      document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / QUESTIONING / 事情聴取`;
       let html=MysteryGame.sentenceCard(c.questioning.detective,'刑事');
       html+=MysteryGame.storyCard(c.questioning.storyEn,c.questioning.storyJa);
       html+=c.questioning.evidence.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
@@ -34,7 +34,7 @@
       next.addEventListener('click',()=>{MysteryGame.setStage('deduction');location.href='mystery-deduction.html';});
     }else{
       document.querySelector('.mystery-back').href='mystery-deduction.html';
-      document.getElementById('chapterLabel').textContent='HINT / ヒントを伝える';
+      document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / HINT / ヒントを伝える`;
       let html=MysteryGame.sentenceCard(c.hint.detective,'刑事');
       html+=c.hint.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
       html+=MysteryGame.storyCard(c.hint.storyEn,c.hint.storyJa);
