@@ -138,12 +138,32 @@
     }
   }
 
+  function advanceQuestAfterVictory() {
+    const quest = window.RPG_QUESTS && window.RPG_QUESTS.tavernSlime01;
+    if (!quest || !enemyName.includes(quest.targetNameIncludes)) return false;
+
+    try {
+      const state = JSON.parse(localStorage.getItem('rpgQuestSaveV1') || '{}');
+      if (state.id !== quest.id || state.status !== 'active') return false;
+
+      state.progress = Math.min(quest.required, (Number(state.progress) || 0) + 1);
+      if (state.progress >= quest.required) state.status = 'ready';
+      localStorage.setItem('rpgQuestSaveV1', JSON.stringify(state));
+      return state.status === 'ready';
+    } catch (_error) {
+      return false;
+    }
+  }
+
   function win() {
     victory = true;
     rememberDefeatedEnemy();
+    const questCompleted = advanceQuestAfterVictory();
     GameStore.addCoins(reward);
     $('coinCount').textContent = GameStore.state.coins;
-    $('battleMessage').textContent = `${enemyName}を倒した！`;
+    $('battleMessage').textContent = questCompleted
+      ? `${enemyName}を倒した！ 依頼達成！`
+      : `${enemyName}を倒した！`;
     localStorage.setItem('rpgEncounterCooldownUntil', String(Date.now() + 2200));
     setTimeout(() => $('victoryPanel').classList.remove('hidden'), 500);
   }
