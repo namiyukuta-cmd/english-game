@@ -1,6 +1,10 @@
 (() => {
   const map = window.RPG_MAP;
-  const state = { touch: { left:false, right:false, up:false, down:false }, encounterLock:false };
+  const state = {
+    touch: { left:false, right:false, up:false, down:false },
+    encounterLock:false,
+    enteringBuilding:false
+  };
 
   const config = {
     type: Phaser.AUTO,
@@ -41,6 +45,16 @@
       g.fillStyle(0xe8d0aa, 1).fillRect(h.x, h.y + 28, h.width, h.height - 28);
       g.fillStyle(0x9d5549, 1).fillTriangle(h.x - 8, h.y + 30, h.x + h.width / 2, h.y - 10, h.x + h.width + 8, h.y + 30);
       g.fillStyle(0x6e4634, 1).fillRect(h.x + h.width / 2 - 14, h.y + h.height - 32, 28, 32);
+      if (h.name) {
+        this.add.text(h.x + h.width / 2, h.y + 40, h.name, {
+          fontFamily: 'sans-serif',
+          fontSize: '18px',
+          fontStyle: 'bold',
+          color: '#4b2f22',
+          backgroundColor: '#fff3d6dd',
+          padding: { x: 7, y: 3 }
+        }).setOrigin(0.5).setDepth(12);
+      }
     });
 
     map.trees.forEach(t => {
@@ -81,6 +95,37 @@
       });
     }
 
+    const entrances = this.physics.add.staticGroup();
+    map.houses
+      .filter(h => h.href && h.entrance)
+      .forEach(h => {
+        const door = this.add.rectangle(
+          h.entrance.x,
+          h.entrance.y,
+          h.entrance.width,
+          h.entrance.height,
+          0xf5d58a,
+          0.18
+        );
+        door.destination = h.href;
+        door.buildingName = h.name || '建物';
+        door.returnPosition = h.returnPosition;
+        this.physics.add.existing(door, true);
+        entrances.add(door);
+      });
+
+    this.physics.add.overlap(player, entrances, (_p, door) => {
+      if (state.enteringBuilding) return;
+      state.enteringBuilding = true;
+      player.body.setVelocity(0);
+      const returnPosition = door.returnPosition || { x: player.x, y: player.y + 40 };
+      saveReturnPosition(returnPosition.x, returnPosition.y);
+      showMessage(`${door.buildingName}に入る`);
+      this.time.delayedCall(250, () => {
+        location.href = `${door.destination}?v=20260823-3`;
+      });
+    });
+
     const npcs = this.physics.add.staticGroup();
     map.npcs.forEach(n => {
       const npc = this.add.rectangle(n.x, n.y, 28, 32, 0xffd36f);
@@ -111,7 +156,7 @@
       saveReturnPosition(player.x, player.y);
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-2`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-3`;
       });
     });
 
@@ -172,6 +217,11 @@
     const speed = 165;
     let x = 0;
     let y = 0;
+
+    if (state.enteringBuilding) {
+      player.body.setVelocity(0);
+      return;
+    }
 
     if (state.encounterLock && Number(localStorage.getItem('rpgEncounterCooldownUntil') || 0) <= Date.now()) {
       player.body.setVelocity(0);
