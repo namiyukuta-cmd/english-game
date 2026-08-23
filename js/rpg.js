@@ -22,7 +22,7 @@
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: { create, update }
+    scene: { preload, create, update }
   };
 
   new Phaser.Game(config);
@@ -31,6 +31,10 @@
   let cursors;
   let wasd;
   let message;
+
+  function preload() {
+    this.load.image('enemy-black-boss', 'assets/enemies/slime_black.png');
+  }
 
   function create() {
     const g = this.add.graphics();
@@ -149,7 +153,7 @@
       );
       showMessage(`${exit.exitName}へ移動`);
       this.time.delayedCall(250, () => {
-        location.href = `${exit.destination}?v=20260824-3`;
+        location.href = `${exit.destination}?v=20260824-4`;
       });
     });
 
@@ -180,7 +184,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260824-3`;
+        location.href = `${door.destination}?v=20260824-4`;
       });
     });
 
@@ -215,7 +219,7 @@
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
         const returnPage = map.page || 'rpg.html';
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-3`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-4`;
       });
     });
 
@@ -242,6 +246,25 @@
   }
 
   function createEnemySprite(scene, e) {
+    if (e.boss && e.kind === 'black') {
+      const enemy = scene.add.image(e.x, e.y, 'enemy-black-boss');
+      enemy.setDisplaySize(92, 92);
+      enemy.setDepth(8);
+      enemy.name = e.name;
+      enemy.enemyId = e.id;
+
+      scene.add.text(e.x, e.y - 56, 'BOSS', {
+        fontFamily: 'sans-serif',
+        fontSize: '15px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        backgroundColor: '#17141add',
+        padding: { x:6, y:2 }
+      }).setOrigin(0.5).setDepth(10);
+
+      return enemy;
+    }
+
     const colors = {
       pink: { fill: 0xe86b79, stroke: 0x7a3441 },
       blue: { fill: 0x65aee8, stroke: 0x315b83 },
