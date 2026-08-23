@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜推理</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2155">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2155">
 </head>
 <body>
   <main class="mystery-app">
-    <header class="mystery-titlebar"><a class="mystery-back" href="mystery-scene.html?phase=questioning">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
-    <p class="chapter-label" id="chapterLabel">DEDUCTION / 推理</p>
+    <header class="mystery-titlebar"><a class="mystery-back" href="mystery-questioning.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
+    <p class="chapter-label">DEDUCTION / 推理</p>
     <section class="story-card"><div class="en" id="qEn"></div><div class="ja" id="qJa"></div></section>
     <section class="story-card"><div class="en">Clue</div><div class="ja" id="clueJa"></div></section>
     <div class="choice-list" id="choices"></div>
@@ -19,11 +19,10 @@
     <button class="mystery-action hidden" id="nextBtn" type="button">Tell the detective. / 刑事に伝える</button>
   </main>
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
-  <script src="js/mystery-common.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
-    document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / DEDUCTION / 推理`;
     document.getElementById('qEn').textContent=c.deduction.questionEn;
     document.getElementById('qJa').textContent=c.deduction.questionJa;
     document.getElementById('clueJa').textContent=c.deduction.clueJa;
