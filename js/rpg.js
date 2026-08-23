@@ -91,11 +91,14 @@
     });
 
     const enemies = this.physics.add.staticGroup();
-    map.enemies.forEach(e => {
-      const enemy = createEnemySprite(this, e);
-      this.physics.add.existing(enemy, true);
-      enemies.add(enemy);
-    });
+    const defeatedEnemyIds = readDefeatedEnemyIds();
+    map.enemies
+      .filter(e => !defeatedEnemyIds.has(e.id))
+      .forEach(e => {
+        const enemy = createEnemySprite(this, e);
+        this.physics.add.existing(enemy, true);
+        enemies.add(enemy);
+      });
 
     this.physics.add.overlap(player, npcs, (_p, npc) => {
       showMessage(`${npc.name}「こんにちは」`);
@@ -207,6 +210,15 @@
     } catch (_error) {
       localStorage.removeItem('rpgReturnPositionV1');
       return null;
+    }
+  }
+
+  function readDefeatedEnemyIds() {
+    try {
+      const ids = JSON.parse(localStorage.getItem('rpgDefeatedEnemyIdsV1') || '[]');
+      return new Set(Array.isArray(ids) ? ids.filter(Boolean) : []);
+    } catch (_error) {
+      return new Set();
     }
   }
 
