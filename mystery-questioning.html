@@ -5,35 +5,82 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事情聴取</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2155">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2155">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2210">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2210">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-discovery.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
     <p class="chapter-label" id="chapterLabel">QUESTIONING / 事情聴取</p>
-    <div id="content"></div>
-    <button class="mystery-action" id="nextBtn" type="button">Think about it. / 推理する</button>
+    <section class="dialogue-card"><div class="speaker">刑事</div><div class="en" id="detectiveEn"></div><div class="ja" id="detectiveJa"></div></section>
+    <div class="interview-status" id="status"></div>
+    <div class="suspect-list" id="suspects"></div>
+    <section class="interview-panel hidden" id="panel">
+      <div class="interview-name" id="personName"></div>
+      <div class="en interview-statement" id="statementEn"></div>
+      <div class="mini-label">Which meaning? / 意味を選ぶ</div>
+      <div class="translation-choices" id="translations"></div>
+      <div class="result-box" id="result"></div>
+    </section>
+    <button class="mystery-action" id="nextBtn" type="button" disabled>Think about it. / 推理する</button>
   </main>
-
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
   <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
+    const state=MysteryGame.loadState()||{};
+    const questioned=new Set(Array.isArray(state.questionedSuspects)?state.questionedSuspects:[]);
+    const suspectsEl=document.getElementById('suspects');
+    const panel=document.getElementById('panel');
+    const translations=document.getElementById('translations');
+    const result=document.getElementById('result');
+    const nextBtn=document.getElementById('nextBtn');
+    let active=-1;
+
     document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / QUESTIONING / 事情聴取`;
+    document.getElementById('detectiveEn').textContent=c.questioning.detective.en;
+    document.getElementById('detectiveJa').textContent=c.questioning.detective.ja;
 
-    let html=MysteryGame.sentenceCard(c.questioning.detective,'刑事');
-    html+=MysteryGame.storyCard(c.questioning.storyEn,c.questioning.storyJa);
-    html+=c.questioning.evidence.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
-    html+='<div class="suspect-list">'+c.suspects.map(s=>`<section class="suspect-card"><div class="suspect-name">${MysteryGame.escapeHtml(s.name)}</div><div class="suspect-meta">${MysteryGame.escapeHtml(s.metaJa)}</div><div class="en">${MysteryGame.escapeHtml(s.statementEn)}</div><div class="ja">${MysteryGame.escapeHtml(s.statementJa)}</div></section>`).join('')+'</div>';
-    document.getElementById('content').innerHTML=html;
-    MysteryGame.bindGrammar();
+    function renderSuspects(){
+      suspectsEl.innerHTML=c.suspects.map((s,i)=>`<button class="suspect-select ${questioned.has(s.name)?'done':''}" type="button" data-i="${i}"><strong>${MysteryGame.escapeHtml(s.name)}</strong><span>${MysteryGame.escapeHtml(s.metaJa)}</span><em>${questioned.has(s.name)?'✓ 記録済み':'話を聞く'}</em></button>`).join('');
+      document.getElementById('status').textContent=`証言 ${questioned.size} / ${c.suspects.length}`;
+      nextBtn.disabled=questioned.size<c.suspects.length;
+    }
 
-    document.getElementById('nextBtn').addEventListener('click',()=>{
-      MysteryGame.setStage('deduction');
-      location.href='mystery-deduction.html';
+    suspectsEl.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-i]'); if(!btn)return;
+      active=Number(btn.dataset.i); openInterview(active);
     });
+
+    function openInterview(i){
+      const s=c.suspects[i];
+      panel.classList.remove('hidden');
+      document.getElementById('personName').textContent=s.name+' / '+s.metaJa;
+      document.getElementById('statementEn').textContent=s.statementEn;
+      result.textContent=questioned.has(s.name)?'この証言は記録済みです。':'';
+      const other=c.suspects[(i+1)%c.suspects.length].statementJa;
+      const options=i%2===0?[s.statementJa,other]:[other,s.statementJa];
+      translations.innerHTML=options.map((x,n)=>`<button type="button" data-text="${encodeURIComponent(x)}">${MysteryGame.escapeHtml(x)}</button>`).join('');
+    }
+
+    translations.addEventListener('click',e=>{
+      const btn=e.target.closest('button'); if(!btn||active<0)return;
+      const s=c.suspects[active];
+      const chosen=decodeURIComponent(btn.dataset.text);
+      translations.querySelectorAll('button').forEach(x=>x.classList.remove('correct','wrong'));
+      if(chosen===s.statementJa){
+        btn.classList.add('correct'); result.textContent='Correct! / 証言を記録しました。';
+        questioned.add(s.name);
+        MysteryGame.setStage('questioning',{questionedSuspects:[...questioned]});
+        renderSuspects();
+      }else{
+        btn.classList.add('wrong'); result.textContent='意味が違います。もう一度。';
+      }
+    });
+
+    nextBtn.addEventListener('click',()=>{if(nextBtn.disabled)return;MysteryGame.setStage('deduction',{questionedSuspects:[...questioned]});location.href='mystery-deduction.html';});
+    renderSuspects();
   </script>
 </body>
 </html>
