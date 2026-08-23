@@ -4,12 +4,17 @@
   const params = new URLSearchParams(location.search);
   const enemyName = params.get('enemy') || 'スライム';
   const enemyId = params.get('id') || '';
+  const allowedReturnPages = new Set(['rpg.html', 'rpg_field.html']);
+  const requestedReturnPage = params.get('return') || 'rpg.html';
+  const returnPage = allowedReturnPages.has(requestedReturnPage)
+    ? requestedReturnPage
+    : 'rpg.html';
   const reward = 12;
 
-  document.querySelectorAll('a[href^="rpg.html"]').forEach(link => {
+  document.querySelectorAll('.back, .victory-card a').forEach(link => {
     link.addEventListener('click', event => {
       event.preventDefault();
-      location.href = `rpg.html?v=${Date.now()}`;
+      location.href = `${returnPage}?v=${Date.now()}`;
     });
   });
 
