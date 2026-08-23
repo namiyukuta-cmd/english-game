@@ -32,7 +32,7 @@
     .tile.current{outline:4px solid #f6ca68;outline-offset:1px}.tile.start::before{content:"S";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:20px;font-weight:900;color:#614c3e}.tile.locked::before{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:17px}
     .tile-roll{position:absolute;right:3px;bottom:1px;z-index:4;font-size:11px;font-weight:900;color:#3d332d;background:rgba(255,255,255,.72);border-radius:5px;padding:0 3px}
     .panel{border:1px solid var(--line);border-radius:17px;background:var(--paper);padding:12px}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.panel-title strong{font-size:18px}.dice-result{font-size:17px;font-weight:800;color:#705849}.message{min-height:54px;margin:0;font-size:18px;line-height:1.55;color:#4f433c}
-    .direction-area{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:56px 56px;gap:8px;margin-top:10px}.dir-btn,.backtrack-btn,.battle-btn,.return-btn,.main-btn{min-height:54px;border:1px solid #ac9b8e;border-radius:14px;background:#fff;color:#3f352f;font-size:19px;font-weight:900}.dir-btn:active,.backtrack-btn:active,.battle-btn:active,.return-btn:active,.main-btn:active{transform:translateY(1px);background:#eee6df}.dir-btn.up{grid-column:2;grid-row:1}.dir-btn.left{grid-column:1;grid-row:2}.dir-btn.right{grid-column:3;grid-row:2}.dir-btn.down{grid-column:2;grid-row:2}.dir-btn[hidden]{display:none}.backtrack-btn{width:100%;margin-top:8px;background:#eee6df}.backtrack-btn[hidden]{display:none}
+    .direction-area{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:56px 56px;gap:8px;margin-top:10px}.dir-btn,.battle-btn,.return-btn,.main-btn{min-height:54px;border:1px solid #ac9b8e;border-radius:14px;background:#fff;color:#3f352f;font-size:19px;font-weight:900}.dir-btn:active,.battle-btn:active,.return-btn:active,.main-btn:active{transform:translateY(1px);background:#eee6df}.dir-btn.up{grid-column:2;grid-row:1}.dir-btn.left{grid-column:1;grid-row:2}.dir-btn.right{grid-column:3;grid-row:2}.dir-btn.down{grid-column:2;grid-row:2}.dir-btn[hidden]{display:none}
     .battle{margin-top:10px;padding:12px;border:2px solid #b8726d;border-radius:14px;background:#fff7f6}.battle[hidden]{display:none}.battle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:18px;margin-bottom:8px}.battle-btn{width:100%;background:#7f504b;color:#fff;border-color:#7f504b}
     .return-btn{display:block;width:100%;margin-top:10px;background:#5b4739;color:#fff;border-color:#5b4739}
     .log{max-height:112px;overflow:auto;margin-top:8px;padding-top:8px;border-top:1px solid #e2d9d2}.log p{margin:0 0 5px;font-size:16px;line-height:1.45;color:#76665c}.bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.main-btn{text-decoration:none;display:flex;align-items:center;justify-content:center;background:#fff}
@@ -47,7 +47,7 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <a class="icon-btn" href="dungeon_inn.html?v=20260823-2324" aria-label="宿へ戻る">←</a>
+      <a class="icon-btn" href="dungeon_inn.html?v=20260823-2328" aria-label="宿へ戻る">←</a>
       <h1>ダンジョン探索</h1>
       <button id="saveBtn" class="icon-btn" type="button" aria-label="セーブ">💾</button>
     </header>
@@ -74,7 +74,6 @@
         <button class="dir-btn right" data-dir="right" type="button">→</button>
         <button class="dir-btn down" data-dir="down" type="button">↓</button>
       </div>
-      <button id="backtrackBtn" class="backtrack-btn" type="button">ひとつ戻る</button>
 
       <div id="battleBox" class="battle" hidden>
         <div class="battle-row"><strong id="enemyName">敵</strong><span>敵HP <b id="enemyHp">1</b></span></div>
@@ -86,8 +85,8 @@
     </section>
 
     <div class="bottom-actions">
-      <a class="main-btn" href="dungeon_inn.html?v=20260823-2324">宿</a>
-      <a class="main-btn" href="dungeon_tavern.html?v=20260823-2324">酒場</a>
+      <a class="main-btn" href="dungeon_inn.html?v=20260823-2328">宿</a>
+      <a class="main-btn" href="dungeon_tavern.html?v=20260823-2328">酒場</a>
     </div>
   </main>
 
@@ -105,7 +104,7 @@
     <div class="modal-card">
       <h2>GAME OVER</h2>
       <p>HPが0になりました。宿から新しくやり直せます。</p>
-      <a class="main-btn" href="dungeon_inn.html?v=20260823-2324">宿へ戻る</a>
+      <a class="main-btn" href="dungeon_inn.html?v=20260823-2328">宿へ戻る</a>
     </div>
   </div>
 
@@ -187,9 +186,6 @@
     return !state.mapComplete&&tileCount()<MAX_TILES;
   }
 
-  function previousCoord(){return state.history.length>1?state.history[state.history.length-2]:null;}
-  function dirToPrevious(){const p=previousCoord();if(!p)return null;const dx=p.x-state.current.x,dy=p.y-state.current.y;return Object.keys(DIRS).find(d=>DIRS[d].dx===dx&&DIRS[d].dy===dy)||null;}
-
   function move(dir){
     if(state.encounter||state.gameOver)return;
     const tile=getTile();if(!canUseExit(tile,dir))return;
@@ -210,8 +206,6 @@
     if(!target.eventDone){resolveEvent(target);target.eventDone=true;}
     save();render();if(state.hp<=0)showGameOver();
   }
-
-  function backtrack(){if(state.encounter||state.gameOver||state.history.length<=1)return;state.history.pop();const p=state.history[state.history.length-1];state.current={x:p.x,y:p.y};state.lastDice=null;addLog('ひとつ前のマスへ戻りました。');save();render();}
 
   function resolveEvent(tile){
     const r=roll();
@@ -243,7 +237,14 @@
     for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const t=getTile(x,y),cell=document.createElement('div');if(!t){cell.style.width=size+'px';cell.style.height=size+'px';map.appendChild(cell);continue;}cell.className='tile';if(t.type==='start')cell.classList.add('start');if(t.type==='locked')cell.classList.add('locked');if(x===state.current.x&&y===state.current.y)cell.classList.add('current');t.exits.forEach(d=>{const p=document.createElement('span');p.className=`path ${d}`;cell.appendChild(p);});if(t.roll){const rr=document.createElement('span');rr.className='tile-roll';rr.textContent=t.roll;cell.appendChild(rr);}cell.title=t.label;map.appendChild(cell);}
   }
 
-  function renderDirections(){const current=getTile(),backDir=dirToPrevious();document.querySelectorAll('.dir-btn').forEach(btn=>{const dir=btn.dataset.dir;btn.hidden=!(dir!==backDir&&canUseExit(current,dir));btn.disabled=!!state.encounter||state.gameOver;});$('backtrackBtn').hidden=state.history.length<=1||!!state.encounter||state.gameOver;}
+  function renderDirections(){
+    const current=getTile();
+    document.querySelectorAll('.dir-btn').forEach(btn=>{
+      const dir=btn.dataset.dir;
+      btn.hidden=!canUseExit(current,dir);
+      btn.disabled=!!state.encounter||state.gameOver;
+    });
+  }
   function renderLog(){$('log').innerHTML=state.logs.slice().reverse().map(x=>`<p>${escapeHtml(x)}</p>`).join('');}
 
   function render(){
@@ -263,11 +264,10 @@
   function escapeHtml(s){return String(s).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));}
 
   document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));
-  $('backtrackBtn').addEventListener('click',backtrack);
   $('battleBtn').addEventListener('click',battle);
   $('saveBtn').addEventListener('click',()=>{save(true);renderLog();});
   $('encounterStart').addEventListener('click',()=>{if(!state.encounter)return;state.encounter.intro=false;$('encounterModal').hidden=true;save();render();});
-  $('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260823-2324';});
+  $('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260823-2328';});
   window.addEventListener('resize',renderMap);
 
   load();render();if(state.gameOver||state.hp<=0)showGameOver();
