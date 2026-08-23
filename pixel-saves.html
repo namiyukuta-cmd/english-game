@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff7fb">
+  <title>ドット絵セーブ</title>
+  <link rel="stylesheet" href="css/style.css?v=20260823-1401">
+  <style>
+    .menu-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
+    .menu-head h1{margin:0;text-align:center;font-size:22px}
+    .back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--brown);font-size:21px;font-weight:900;text-decoration:none}
+    .note{margin:4px 4px 16px;text-align:center;font-size:13px;line-height:1.7;color:#977582}
+    .save-list{display:grid;gap:10px}
+    .save-card{display:grid;grid-template-columns:78px 1fr 28px;gap:12px;align-items:center;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+    .preview{width:72px;height:72px;border:1px solid #d8ccd2;border-radius:10px;background:#f2eef0;image-rendering:pixelated}
+    .save-copy{min-width:0}
+    .save-copy strong{display:block;font-size:16px;margin-bottom:4px}
+    .save-copy small{display:block;color:#977582;font-size:12px}
+    .arrow{font-size:24px;color:#b68798}
+    .empty{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 16px;text-align:center;color:#977582}
+    .new-link{display:inline-flex;margin-top:14px;min-height:44px;align-items:center;justify-content:center;padding:0 18px;border-radius:12px;background:#3e3037;color:#fff;text-decoration:none;font-weight:800}
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="menu-head">
+      <a class="back" href="pixel-start.html" aria-label="戻る">←</a>
+      <h1>続きから</h1>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <p class="note">保存したドット絵を選んでください。</p>
+    <div id="saveList" class="save-list"></div>
+  </main>
+
+<script>
+(() => {
+  const KEY='englishGamePixelSavesV1';
+  const list=document.getElementById('saveList');
+  function readData(){
+    try{
+      const d=JSON.parse(localStorage.getItem(KEY));
+      if(d&&d.slots&&typeof d.slots==='object')return d;
+    }catch(e){}
+    return {next:1,slots:{}};
+  }
+  function drawPreview(canvas,pixels){
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,72,72);
+    const s=3;
+    if(!Array.isArray(pixels))return;
+    for(let y=0;y<24;y++)for(let x=0;x<24;x++){
+      const c=pixels[y]&&pixels[y][x];
+      if(c){ctx.fillStyle=c;ctx.fillRect(x*s,y*s,s,s);}
+    }
+  }
+  const data=readData();
+  const ids=Object.keys(data.slots).sort((a,b)=>Number(a)-Number(b));
+  if(!ids.length){
+    list.innerHTML='<div class="empty">まだセーブデータがありません。<br><a class="new-link" href="pixel-editor.html?mode=new">初めから描く</a></div>';
+    return;
+  }
+  ids.forEach(id=>{
+    const save=data.slots[id];
+    const a=document.createElement('a');
+    a.className='save-card';
+    a.href='pixel-editor.html?save='+encodeURIComponent(id);
+    const canvas=document.createElement('canvas');
+    canvas.width=72;canvas.height=72;canvas.className='preview';
+    drawPreview(canvas,save.pixels);
+    const copy=document.createElement('div');copy.className='save-copy';
+    const strong=document.createElement('strong');strong.textContent=save.name||('ドット絵セーブ'+id);
+    const small=document.createElement('small');
+    if(save.updatedAt){
+      const d=new Date(save.updatedAt);
+      small.textContent='最終セーブ '+d.toLocaleString('ja-JP');
+    }else small.textContent='保存データ';
+    copy.append(strong,small);
+    const arrow=document.createElement('span');arrow.className='arrow';arrow.textContent='›';
+    a.append(canvas,copy,arrow);
+    list.appendChild(a);
+  });
+})();
+</script>
+</body>
+</html>
