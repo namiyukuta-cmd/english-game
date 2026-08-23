@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5eee5">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>ダンジョンの宿</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;background:#f5eee5;color:#3f342d;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    a,button{font:inherit;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+    .app{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+    .head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center}.head h1{margin:0;text-align:center;font-size:24px}.back{width:46px;height:46px;border:1px solid #d3c4b6;border-radius:14px;background:#fff;color:#493d36;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+    .scene{min-height:210px;border:1px solid #d3c4b6;border-radius:22px;background:linear-gradient(#fffaf4,#ead9c7);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;box-shadow:0 7px 20px rgba(76,55,41,.07)}
+    .icon{font-size:64px;line-height:1;margin-bottom:14px}.scene h2{margin:0 0 8px;font-size:25px}.scene p{margin:0;font-size:18px;line-height:1.65;color:#756055}
+    .status{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.box{background:#fff;border:1px solid #d8cabe;border-radius:14px;padding:10px 6px;text-align:center}.box small{display:block;font-size:13px;color:#8a7569}.box strong{font-size:18px}
+    .menu{display:grid;gap:11px}.btn{min-height:62px;border:1px solid #bba899;border-radius:16px;background:#fff;color:#42362f;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900}.btn.primary{background:#5b4739;color:#fff;border-color:#5b4739}.btn:active{transform:translateY(1px)}
+    .note{text-align:center;font-size:16px;line-height:1.6;color:#806b60;margin:0}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <a class="back" href="dungeon-top.html?v=20260823-2324" aria-label="ダンジョントップへ戻る">←</a>
+      <h1>宿</h1>
+      <span></span>
+    </header>
+
+    <section class="scene">
+      <div class="icon">🛏️</div>
+      <h2>冒険者の宿</h2>
+      <p>ダンジョンから戻ってきました。<br>ここから再び探索へ向かえます。</p>
+    </section>
+
+    <section class="status">
+      <div class="box"><small>HP</small><strong id="hp">—</strong></div>
+      <div class="box"><small>MAP</small><strong id="map">—</strong></div>
+      <div class="box"><small>状態</small><strong id="clear">—</strong></div>
+    </section>
+
+    <nav class="menu">
+      <a id="dungeonBtn" class="btn primary" href="dungeon.html?v=20260823-2324">ダンジョンへ行く</a>
+      <a class="btn" href="dungeon_tavern.html?v=20260823-2324">酒場へ行く</a>
+      <a class="btn" href="dungeon-top.html?v=20260823-2324">ダンジョントップへ</a>
+    </nav>
+    <p id="note" class="note"></p>
+  </main>
+
+<script>
+(()=>{
+  const SAVE_KEY='englishGameDungeonSaveV1';
+  let s=null;
+  try{const raw=localStorage.getItem(SAVE_KEY);s=raw?JSON.parse(raw):null;}catch(e){}
+  if(!s||!s.tiles){
+    document.getElementById('hp').textContent='—';
+    document.getElementById('map').textContent='0 / 8';
+    document.getElementById('clear').textContent='未開始';
+    document.getElementById('dungeonBtn').href='dungeon.html?new=1&v=20260823-2324';
+    document.getElementById('note').textContent='まだ探索データがありません。';
+    return;
+  }
+  const count=Object.keys(s.tiles).length;
+  document.getElementById('hp').textContent=`${s.hp ?? 6} / 6`;
+  document.getElementById('map').textContent=`${count} / 8`;
+  document.getElementById('clear').textContent=count>=8?'CLEAR':'探索中';
+  document.getElementById('note').textContent=count>=8?'全マス開放済みです。まだダンジョン内を歩けます。':'前回の探索の続きから入れます。';
+})();
+</script>
+</body>
+</html>
