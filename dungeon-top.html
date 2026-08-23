@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ee">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>ダンジョン</title>
+  <link rel="stylesheet" href="css/style.css?v=20260823-2255">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;background:#f7f3ee;color:#3f352f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    .dungeon-shell{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+    .dungeon-head{display:grid;grid-template-columns:52px 1fr 52px;align-items:center;margin-bottom:28px}
+    .dungeon-head h1{margin:0;text-align:center;font-size:26px;line-height:1.25}
+    .back-btn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid #d8cec5;border-radius:14px;background:#fff;color:#56473f;font-size:24px;font-weight:800;text-decoration:none;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .hero{padding:24px 20px;margin-bottom:22px;border:1px solid #d8cec5;border-radius:22px;background:#fff;text-align:center;box-shadow:0 8px 24px rgba(69,54,45,.07)}
+    .hero-icon{font-size:52px;line-height:1;margin-bottom:12px}
+    .hero h2{margin:0 0 10px;font-size:24px}
+    .hero p{margin:0;font-size:18px;line-height:1.7;color:#76655b}
+    .menu{display:grid;gap:14px;margin-top:auto;margin-bottom:auto}
+    .menu-btn{width:100%;min-height:68px;border:1px solid #bdaea2;border-radius:18px;background:#fff;color:#40352f;font-size:20px;font-weight:800;letter-spacing:.02em;box-shadow:0 5px 14px rgba(69,54,45,.06);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .menu-btn:active{transform:translateY(1px);background:#f2ece7}
+    .menu-btn.primary{background:#56473f;color:#fff;border-color:#56473f}
+    .menu-btn[disabled]{opacity:.42;box-shadow:none}
+    .save-note{min-height:28px;margin:12px 4px 0;text-align:center;font-size:17px;line-height:1.6;color:#856f62}
+    .rule-note{margin:26px 4px 0;padding-top:18px;border-top:1px solid #ddd3cb;font-size:17px;line-height:1.7;color:#75645a;text-align:center}
+  </style>
+</head>
+<body>
+  <main class="dungeon-shell">
+    <header class="dungeon-head">
+      <a class="back-btn" href="story-menu.html?v=20260823-2255" aria-label="物語選択へ戻る">←</a>
+      <h1>ダンジョン</h1>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true">🎲</div>
+      <h2>サイコロで道を作る</h2>
+      <p>進む方向を選ぶと、新しい1マスが開きます。<br>どんな道になるかはサイコロ次第。</p>
+    </section>
+
+    <section class="menu" aria-label="ダンジョンメニュー">
+      <button id="newGame" class="menu-btn primary" type="button">新しく始める</button>
+      <button id="continueGame" class="menu-btn" type="button">続きから</button>
+      <p id="saveNote" class="save-note" aria-live="polite"></p>
+    </section>
+
+    <p class="rule-note">レベル1は最大8マス。<br>未探索のマスへ進む時だけサイコロを振ります。</p>
+  </main>
+
+  <script>
+    const SAVE_KEY='englishGameDungeonSaveV1';
+    const NEW_KEY='englishGameDungeonStartNew';
+    const continueBtn=document.getElementById('continueGame');
+    const saveNote=document.getElementById('saveNote');
+
+    function hasSave(){
+      try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
+    }
+
+    function refreshSaveState(){
+      const exists=hasSave();
+      continueBtn.disabled=!exists;
+      saveNote.textContent=exists?'セーブデータがあります。':'まだセーブデータはありません。';
+    }
+
+    document.getElementById('newGame').addEventListener('click',()=>{
+      try{
+        localStorage.removeItem(SAVE_KEY);
+        sessionStorage.setItem(NEW_KEY,'1');
+      }catch(e){}
+      location.href='dungeon.html?new=1&v=20260823-2255';
+    });
+
+    continueBtn.addEventListener('click',()=>{
+      if(!hasSave())return;
+      location.href='dungeon.html?v=20260823-2255';
+    });
+
+    refreshSaveState();
+  </script>
+</body>
+</html>
