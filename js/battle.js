@@ -26,10 +26,12 @@
     red: 'assets/enemies/slime_red.png',
     blue: 'assets/enemies/slime_blue.png',
     green: 'assets/enemies/slime_green.png',
-    purple: 'assets/enemies/slime_purple.png'
+    purple: 'assets/enemies/slime_purple.png',
+    black: 'assets/enemies/slime_black.png'
   };
 
   function getEnemyImage() {
+    if (isBlackBoss) return enemyImages.black;
     if (enemyId.startsWith('blue_') || enemyName.includes('青')) return enemyImages.blue;
     if (enemyId.startsWith('green_') || enemyName.includes('緑')) return enemyImages.green;
     if (enemyId.startsWith('horn_') || enemyName.includes('ツノ') || enemyName.includes('紫')) return enemyImages.purple;
