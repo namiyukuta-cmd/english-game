@@ -5,25 +5,55 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜部屋</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2131">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2131">
 </head>
 <body>
-  <main class="mystery-app">
+  <main class="mystery-app cooking-app">
     <header class="mystery-titlebar">
       <a class="mystery-back" href="mystery-start.html" aria-label="推理トップへ戻る">←</a>
       <h1>掃除婦は朝寝る</h1><span></span>
     </header>
+
     <p class="chapter-label" id="chapterLabel">DAILY LIFE / 日常</p>
-    <section class="story-card">
-      <div class="room-food">🍲</div>
-      <div class="en" id="roomEn"></div>
-      <div class="ja" id="roomJa"></div>
+
+    <section class="cook-head">
+      <div class="cook-dish-emoji" id="dishEmoji">🍲</div>
+      <div>
+        <div class="cook-kicker">DINNER / 出勤前のご飯</div>
+        <div class="cook-dish" id="dishName"></div>
+        <div class="cook-progress-text" id="progressText"></div>
+      </div>
     </section>
-    <div id="studyArea"></div>
-    <button class="mystery-action" id="workBtn" type="button">Go to work. / 出勤する</button>
+
+    <div class="cook-progress" id="progressBar"></div>
+
+    <section class="cook-task" id="taskCard">
+      <div class="cook-task-label">NEXT / 次にすること</div>
+      <div class="cook-task-ja" id="taskJa"></div>
+    </section>
+
+    <section class="cook-panel">
+      <h2>ACTION / 動作</h2>
+      <div class="cook-choice-grid" id="actionChoices"></div>
+    </section>
+
+    <section class="cook-panel">
+      <h2>INGREDIENT / 食材</h2>
+      <div class="cook-choice-grid ingredient-grid" id="ingredientChoices"></div>
+    </section>
+
+    <button class="mystery-action cook-do" id="cookBtn" type="button" disabled>Cook / 調理する</button>
+
+    <section class="cook-feedback" id="feedback" aria-live="polite">
+      <div class="cook-feedback-main">動作と食材を選んでください。</div>
+    </section>
+
+    <button class="mystery-action hidden" id="workBtn" type="button">Go to work. / 出勤する</button>
   </main>
+
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
+  <script src="data/mystery_cooking.js?v=20260823-2131"></script>
   <script src="js/mystery-common.js?v=20260823-2111"></script>
   <script>
     const params=new URLSearchParams(location.search);
@@ -33,13 +63,124 @@
       if(!target.startsWith('mystery-room.html')) location.replace(target);
     }
     if(!MysteryGame.loadState()) MysteryGame.startNew();
+
     const c=MysteryGame.currentCase();
-    document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / DAILY LIFE / 日常`;
-    document.getElementById('roomEn').textContent=c.room.storyEn;
-    document.getElementById('roomJa').textContent=c.room.storyJa;
-    document.getElementById('studyArea').innerHTML=c.room.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
-    MysteryGame.bindGrammar();
-    document.getElementById('workBtn').addEventListener('click',()=>{MysteryGame.setStage('discovery');location.href='mystery-discovery.html';});
+    const cooking=(window.MYSTERY_COOKING||{})[c.id];
+    if(!cooking){
+      document.body.innerHTML='<main class="mystery-app"><section class="story-card">料理データがありません。</section></main>';
+      throw new Error('Missing cooking data: '+c.id);
+    }
+
+    const ACTIONS=[
+      {id:'wash',en:'wash',ja:'洗う'},
+      {id:'cut',en:'cut',ja:'切る'},
+      {id:'boil',en:'boil',ja:'ゆでる・煮る'},
+      {id:'fry',en:'fry',ja:'焼く・炒める'},
+      {id:'mix',en:'mix',ja:'混ぜる'}
+    ];
+
+    const ingredientMap=new Map();
+    cooking.steps.forEach(s=>ingredientMap.set(s.ingredient,{id:s.ingredient,en:s.ingredient,ja:s.ingredientJa,icon:s.icon||'🍴'}));
+    const ingredients=[...ingredientMap.values()];
+
+    let state=MysteryGame.loadState()||{};
+    let step=Math.min(Number(state.cookingStep||0),cooking.steps.length);
+    let selectedAction='';
+    let selectedIngredient='';
+
+    const chapterLabel=document.getElementById('chapterLabel');
+    const dishEmoji=document.getElementById('dishEmoji');
+    const dishName=document.getElementById('dishName');
+    const progressText=document.getElementById('progressText');
+    const progressBar=document.getElementById('progressBar');
+    const taskCard=document.getElementById('taskCard');
+    const taskJa=document.getElementById('taskJa');
+    const actionChoices=document.getElementById('actionChoices');
+    const ingredientChoices=document.getElementById('ingredientChoices');
+    const cookBtn=document.getElementById('cookBtn');
+    const feedback=document.getElementById('feedback');
+    const workBtn=document.getElementById('workBtn');
+
+    chapterLabel.textContent=`UNIT ${c.unit} / DAILY LIFE / 日常`;
+    dishEmoji.textContent=cooking.emoji;
+    dishName.textContent=`${cooking.dish} / ${cooking.dishJa}`;
+
+    actionChoices.innerHTML=ACTIONS.map(a=>`<button class="cook-choice" type="button" data-action="${a.id}"><strong>${a.en}</strong><span>${a.ja}</span></button>`).join('');
+    ingredientChoices.innerHTML=ingredients.map(i=>`<button class="cook-choice ingredient" type="button" data-ingredient="${i.id}"><b>${i.icon}</b><strong>${i.en}</strong><span>${i.ja}</span></button>`).join('');
+
+    actionChoices.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-action]');
+      if(!btn||step>=cooking.steps.length)return;
+      selectedAction=btn.dataset.action;
+      actionChoices.querySelectorAll('.cook-choice').forEach(x=>x.classList.toggle('selected',x===btn));
+      updateCookButton();
+    });
+
+    ingredientChoices.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-ingredient]');
+      if(!btn||step>=cooking.steps.length)return;
+      selectedIngredient=btn.dataset.ingredient;
+      ingredientChoices.querySelectorAll('.cook-choice').forEach(x=>x.classList.toggle('selected',x===btn));
+      updateCookButton();
+    });
+
+    cookBtn.addEventListener('click',()=>{
+      if(step>=cooking.steps.length)return;
+      const target=cooking.steps[step];
+      if(selectedAction===target.action&&selectedIngredient===target.ingredient){
+        feedback.className='cook-feedback good';
+        feedback.innerHTML=`<div class="cook-feedback-main">OK! ${target.actionJa}：${target.ingredientJa}</div><div class="cook-english">${target.sentence}</div><div class="cook-japanese">${target.ja}</div><div class="cook-pattern">${target.pattern}</div>`;
+        step++;
+        MysteryGame.setStage('room',{cookingStep:step});
+        selectedAction='';
+        selectedIngredient='';
+        actionChoices.querySelectorAll('.cook-choice').forEach(x=>x.classList.remove('selected'));
+        ingredientChoices.querySelectorAll('.cook-choice').forEach(x=>x.classList.remove('selected'));
+        renderStep(false);
+      }else{
+        feedback.className='cook-feedback bad';
+        feedback.innerHTML='<div class="cook-feedback-main">違う組み合わせです。</div><div class="cook-japanese">次の手順をもう一度見て選んでください。</div>';
+      }
+    });
+
+    workBtn.addEventListener('click',()=>{
+      MysteryGame.setStage('discovery',{cookingStep:step});
+      location.href='mystery-discovery.html';
+    });
+
+    function updateCookButton(){cookBtn.disabled=!(selectedAction&&selectedIngredient);}
+
+    function renderStep(resetFeedback=true){
+      progressText.textContent=`${Math.min(step,cooking.steps.length)} / ${cooking.steps.length}`;
+      progressBar.innerHTML=cooking.steps.map((_,i)=>`<span class="${i<step?'done':''}"></span>`).join('');
+
+      if(step>=cooking.steps.length){
+        taskCard.classList.add('done');
+        taskJa.textContent=`${cooking.dishJa}ができた！`;
+        actionChoices.closest('.cook-panel').classList.add('cooked');
+        ingredientChoices.closest('.cook-panel').classList.add('cooked');
+        cookBtn.classList.add('hidden');
+        workBtn.classList.remove('hidden');
+        if(resetFeedback){
+          feedback.className='cook-feedback good';
+          feedback.innerHTML=`<div class="cook-feedback-main">Dinner is ready!</div><div class="cook-japanese">ご飯が完成しました。食べたら出勤します。</div>`;
+        }
+        return;
+      }
+
+      const target=cooking.steps[step];
+      taskCard.classList.remove('done');
+      taskJa.textContent=`${target.ingredientJa}を${target.actionJa}`;
+      cookBtn.classList.remove('hidden');
+      workBtn.classList.add('hidden');
+      updateCookButton();
+      if(resetFeedback){
+        feedback.className='cook-feedback';
+        feedback.innerHTML='<div class="cook-feedback-main">英語の動作と食材を選んでください。</div>';
+      }
+    }
+
+    renderStep();
   </script>
 </body>
 </html>
