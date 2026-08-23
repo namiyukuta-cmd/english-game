@@ -111,6 +111,8 @@
       exit.destinationReturnKey = exitData.destinationReturnKey;
       exit.destinationPosition = exitData.destinationPosition;
       exit.exitName = exitData.name || '次の場所';
+      exit.requiredDefeatedEnemyId = exitData.requiredDefeatedEnemyId || '';
+      exit.blockedMessage = exitData.blockedMessage || '道が塞がれている。';
       this.physics.add.existing(exit, true);
       exits.add(exit);
 
@@ -129,6 +131,14 @@
 
     this.physics.add.overlap(player, exits, (_p, exit) => {
       if (state.changingMap) return;
+      if (
+        exit.requiredDefeatedEnemyId &&
+        !readDefeatedEnemyIds().has(exit.requiredDefeatedEnemyId)
+      ) {
+        player.body.setVelocity(0);
+        showMessage(exit.blockedMessage);
+        return;
+      }
       state.changingMap = true;
       player.body.setVelocity(0);
       const nextPosition = exit.destinationPosition || map.playerStart;
@@ -139,7 +149,7 @@
       );
       showMessage(`${exit.exitName}へ移動`);
       this.time.delayedCall(250, () => {
-        location.href = `${exit.destination}?v=20260824-1`;
+        location.href = `${exit.destination}?v=20260824-2`;
       });
     });
 
@@ -170,7 +180,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260824-1`;
+        location.href = `${door.destination}?v=20260824-2`;
       });
     });
 
@@ -205,7 +215,7 @@
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
         const returnPage = map.page || 'rpg.html';
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-1`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-2`;
       });
     });
 
@@ -237,18 +247,35 @@
       blue: { fill: 0x65aee8, stroke: 0x315b83 },
       green: { fill: 0x65bf72, stroke: 0x326b3b },
       red: { fill: 0xe25555, stroke: 0x7f2929 },
+      black: { fill: 0x17141a, stroke: 0x050405 },
       'horn-purple': { fill: 0x9a62d4, stroke: 0x4e2d73 }
     };
 
     const palette = colors[e.kind] || colors.pink;
-    const enemy = scene.add.circle(e.x, e.y, 19, palette.fill);
-    enemy.setStrokeStyle(3, palette.stroke);
+    const radius = e.boss ? 32 : 19;
+    const enemy = scene.add.circle(e.x, e.y, radius, palette.fill);
+    enemy.setStrokeStyle(e.boss ? 5 : 3, palette.stroke);
     enemy.name = e.name;
     enemy.enemyId = e.id;
     enemy.setDepth(8);
 
-    scene.add.circle(e.x - 7, e.y - 3, 2.5, 0x2b1d2c).setDepth(9);
-    scene.add.circle(e.x + 7, e.y - 3, 2.5, 0x2b1d2c).setDepth(9);
+    const eyeOffset = e.boss ? 11 : 7;
+    const eyeY = e.y - (e.boss ? 5 : 3);
+    const eyeRadius = e.boss ? 3.5 : 2.5;
+    const eyeColor = e.kind === 'black' ? 0xffdc55 : 0x2b1d2c;
+    scene.add.circle(e.x - eyeOffset, eyeY, eyeRadius, eyeColor).setDepth(9);
+    scene.add.circle(e.x + eyeOffset, eyeY, eyeRadius, eyeColor).setDepth(9);
+
+    if (e.boss) {
+      scene.add.text(e.x, e.y - radius - 17, 'BOSS', {
+        fontFamily: 'sans-serif',
+        fontSize: '15px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        backgroundColor: '#17141add',
+        padding: { x:6, y:2 }
+      }).setOrigin(0.5).setDepth(10);
+    }
 
     if (e.kind === 'horn-purple') {
       scene.add.triangle(e.x - 11, e.y - 24, -6, 7, 0, -9, 6, 7, 0xf2dfbd)
