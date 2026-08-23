@@ -9,7 +9,10 @@
   const returnPage = allowedReturnPages.has(requestedReturnPage)
     ? requestedReturnPage
     : 'rpg.html';
-  const reward = 12;
+  const isBlackBoss =
+    enemyId === 'boss_black_slime_01' ||
+    enemyName.includes('黒スライム');
+  const reward = isBlackBoss ? 50 : 12;
 
   document.querySelectorAll('.back, .victory-card a').forEach(link => {
     link.addEventListener('click', event => {
@@ -43,6 +46,8 @@
   const enemySprite = $('enemySprite');
   enemySprite.src = getEnemyImage();
   enemySprite.alt = enemyName;
+  enemySprite.classList.toggle('black-boss', isBlackBoss);
+  $('rewardAmount').textContent = reward;
 
   const hpBox = $('enemyHp');
   for (let i = 0; i < 6; i++) {
