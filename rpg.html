@@ -11,8 +11,8 @@
     .rpg-shell{position:relative;width:min(100vw,540px);height:100dvh;max-width:540px;background:#000;overflow:hidden}
     .game{width:100%;height:100%}
     .back{position:absolute;z-index:20;left:10px;top:max(10px,env(safe-area-inset-top));border:0;border-radius:999px;padding:8px 12px;background:#fffdf0dd;color:#4b3440;font-weight:800;text-decoration:none}
-    .dpad{position:absolute;z-index:20;right:14px;bottom:max(18px,env(safe-area-inset-bottom));display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px 50px;gap:5px;touch-action:none}
-    .dpad button{border:2px solid #fff8;background:#2d2330bb;color:#fff;border-radius:14px;font-size:23px;font-weight:900;touch-action:none}
+    .dpad{position:absolute;z-index:20;right:14px;bottom:max(18px,env(safe-area-inset-bottom));display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px 50px;gap:5px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+    .dpad button{border:2px solid #fff8;background:#2d2330bb;color:#fff;border-radius:14px;font-size:23px;font-weight:900;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
     .up{grid-column:2;grid-row:1}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}
     .help{position:absolute;z-index:20;left:10px;bottom:max(18px,env(safe-area-inset-bottom));padding:8px 10px;border-radius:12px;background:#2d2330b8;color:#fff;font-size:11px;text-align:left}
     @media(min-width:700px){.dpad{opacity:.8}.help{font-size:13px}}
@@ -32,7 +32,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
-  <script src="data/rpg-map.js?v=20260823-4"></script>
-  <script src="js/rpg.js?v=20260823-4"></script>
+  <script src="data/rpg-map.js?v=20260823-5"></script>
+  <script src="js/rpg.js?v=20260823-5"></script>
 </body>
 </html>
