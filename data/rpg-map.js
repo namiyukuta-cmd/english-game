@@ -17,7 +17,7 @@ window.RPG_MAP = {
       y: 145,
       width: 120,
       height: 95,
-      href: 'tavern.html',
+      href: 'rpg_tavarn.html',
       entrance: { x: 115, y: 252, width: 52, height: 24 },
       returnPosition: { x: 115, y: 286 }
     },
