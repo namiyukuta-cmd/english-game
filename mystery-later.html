@@ -5,34 +5,66 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜後日</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-scene.html?phase=hint">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
     <p class="chapter-label" id="chapterLabel">LATER / 後日</p>
-    <section class="story-card"><div class="speaker">NEWS / ニュース</div><div class="en" id="newsEn"></div><div class="ja" id="newsJa"></div></section>
-    <section class="story-card"><div class="en" id="closeEn"></div><div class="ja" id="closeJa"></div></section>
-    <button class="mystery-action" id="finishBtn" type="button"></button>
+    <section class="reading-stage">
+      <div class="reading-page">
+        <div class="speaker" id="speaker"></div>
+        <div class="en" id="pageEn"></div>
+        <div class="ja" id="pageJa"></div>
+      </div>
+      <div class="page-footer">
+        <div class="page-count" id="pageCount"></div>
+        <button class="mystery-action reading-next" id="nextBtn" type="button"></button>
+      </div>
+    </section>
   </main>
   <script src="data/mystery_cases.js?v=20260823-2111"></script>
-  <script src="js/mystery-common.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2155"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
-    const next=MysteryGame.nextCase(c.id);
+    const nextCase=MysteryGame.nextCase(c.id);
+    const state=MysteryGame.loadState()||{};
     document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / LATER / 後日`;
-    document.getElementById('newsEn').textContent=c.later.newsEn;
-    document.getElementById('newsJa').textContent=c.later.newsJa;
-    document.getElementById('closeEn').textContent=c.later.closingEn;
-    document.getElementById('closeJa').textContent=c.later.closingJa;
-    const btn=document.getElementById('finishBtn');
-    btn.textContent=next?'Next month. / 次の月へ':'All cases complete. / 推理トップへ';
-    btn.addEventListener('click',()=>{
+
+    function splitSentences(text,ja){
+      const re=ja?/[^。！？]+[。！？]?/g:/[^.!?]+[.!?]?/g;
+      return (String(text||'').match(re)||[String(text||'')]).map(x=>x.trim()).filter(Boolean);
+    }
+    function twoChunks(parts,ja){
+      if(parts.length<=1)return parts;
+      const cut=Math.ceil(parts.length/2);
+      const joiner=ja?'':' ';
+      return [parts.slice(0,cut).join(joiner),parts.slice(cut).join(joiner)].filter(Boolean);
+    }
+    const newsEn=twoChunks(splitSentences(c.later.newsEn,false),false);
+    const newsJa=twoChunks(splitSentences(c.later.newsJa,true),true);
+    const newsCount=Math.max(newsEn.length,newsJa.length);
+    const pages=[];
+    for(let i=0;i<newsCount;i++)pages.push({speaker:'NEWS / ニュース',en:newsEn[i]||'',ja:newsJa[i]||''});
+    pages.push({speaker:'',en:c.later.closingEn,ja:c.later.closingJa});
+    let page=Math.min(Number(state.laterPage||0),pages.length-1);
+
+    function render(){
+      const p=pages[page];
+      document.getElementById('speaker').textContent=p.speaker;
+      document.getElementById('pageEn').textContent=p.en;
+      document.getElementById('pageJa').textContent=p.ja;
+      document.getElementById('pageCount').textContent=`${page+1} / ${pages.length}`;
+      document.getElementById('nextBtn').textContent=page<pages.length-1?'Next / 次へ':(nextCase?'Next month. / 次の月へ':'All cases complete. / 推理トップへ');
+    }
+    document.getElementById('nextBtn').addEventListener('click',()=>{
+      if(page<pages.length-1){page++;MysteryGame.setStage('later',{laterPage:page});render();return;}
       MysteryGame.finishCurrentCase();
-      location.href=next?'mystery-room.html':'mystery-start.html';
+      location.href=nextCase?'mystery-room.html':'mystery-start.html';
     });
+    render();
   </script>
 </body>
 </html>
