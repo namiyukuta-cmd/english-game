@@ -122,7 +122,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260823-4`;
+        location.href = `${door.destination}?v=20260823-5`;
       });
     });
 
@@ -156,7 +156,7 @@
       saveReturnPosition(player.x, player.y);
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-4`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-5`;
       });
     });
 
@@ -214,7 +214,8 @@
   }
 
   function update() {
-    const speed = 165;
+    const touchMoving = Object.values(state.touch).some(Boolean);
+    const speed = touchMoving ? 105 : 165;
     let x = 0;
     let y = 0;
 
@@ -275,12 +276,23 @@
   function bindTouchControls() {
     document.querySelectorAll('[data-dir]').forEach(button => {
       const dir = button.dataset.dir;
-      const on = event => { event.preventDefault(); state.touch[dir] = true; };
-      const off = event => { event.preventDefault(); state.touch[dir] = false; };
+      const on = event => {
+        event.preventDefault();
+        if (button.setPointerCapture) button.setPointerCapture(event.pointerId);
+        state.touch[dir] = true;
+      };
+      const off = event => {
+        event.preventDefault();
+        state.touch[dir] = false;
+      };
+
       button.addEventListener('pointerdown', on);
       button.addEventListener('pointerup', off);
       button.addEventListener('pointercancel', off);
       button.addEventListener('pointerleave', off);
+      button.addEventListener('contextmenu', event => event.preventDefault());
+      button.addEventListener('selectstart', event => event.preventDefault());
+      button.addEventListener('dragstart', event => event.preventDefault());
     });
   }
 })();
