@@ -1,6 +1,6 @@
 (()=>{
   const SAVE_KEY='mystery_cleaner_save_v1';
-  const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-scene.html?phase=questioning',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-start.html'};
+  const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-questioning.html',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-start.html'};
 
   function listCases(){return (window.MYSTERY_CASES||[]).slice().sort((a,b)=>(a.unit||0)-(b.unit||0));}
   function firstCase(){return listCases()[0]||null;}
