@@ -24,7 +24,7 @@
 <body>
 <main class="app">
   <header class="head">
-    <a class="back" href="dungeon.html?v=20260823-2330" aria-label="ダンジョンへ戻る">←</a>
+    <a id="backLink" class="back" href="dungeon.html" aria-label="ダンジョンへ戻る">←</a>
     <h1>戦闘</h1><span></span>
   </header>
 
@@ -52,7 +52,7 @@
   <div class="modal-card">
     <h2 id="resultTitle">勝利！</h2>
     <p id="resultText"></p>
-    <a id="resultLink" class="go" href="dungeon.html?v=20260823-2330">ダンジョンへ戻る</a>
+    <a id="resultLink" class="go" href="dungeon.html">ダンジョンへ戻る</a>
   </div>
 </div>
 
@@ -63,11 +63,16 @@
   const MAX_HP=6;
   const $=id=>document.getElementById(id);
   const roll=()=>Math.floor(Math.random()*6)+1;
+  const dungeonUrl=()=>`dungeon.html?v=${Date.now()}`;
+  const innUrl=()=>`dungeon_inn.html?v=${Date.now()}`;
   let state=null;
+
+  $('backLink').href=dungeonUrl();
+  $('resultLink').href=dungeonUrl();
 
   function load(){
     try{const raw=localStorage.getItem(SAVE_KEY);state=raw?JSON.parse(raw):null;}catch(e){state=null;}
-    if(!state||!state.encounter){location.replace('dungeon.html?v=20260823-2330');return false;}
+    if(!state||!state.encounter){location.replace(dungeonUrl());return false;}
     return true;
   }
   function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}}
@@ -97,7 +102,7 @@
     $('resultTitle').textContent='勝利！';
     $('resultText').textContent=`${name}を倒した。報酬「${reward}」を手に入れました。`;
     $('resultLink').textContent='探索に戻る';
-    $('resultLink').href='dungeon.html?v=20260823-2330';
+    $('resultLink').href=dungeonUrl();
     $('resultModal').hidden=false;
   }
 
@@ -107,7 +112,7 @@
     $('resultTitle').textContent='GAME OVER';
     $('resultText').textContent='HPが0になりました。';
     $('resultLink').textContent='宿へ戻る';
-    $('resultLink').href='dungeon_inn.html?v=20260823-2330';
+    $('resultLink').href=innUrl();
     $('resultModal').hidden=false;
   }
 
