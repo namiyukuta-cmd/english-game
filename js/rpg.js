@@ -1,9 +1,11 @@
 (() => {
   const map = window.RPG_MAP;
+  const returnKey = map.returnKey || 'rpgReturnPositionV1';
   const state = {
     touch: { left:false, right:false, up:false, down:false },
     encounterLock:false,
-    enteringBuilding:false
+    enteringBuilding:false,
+    changingMap:false
   };
 
   const config = {
@@ -11,7 +13,7 @@
     parent: 'game',
     width: map.width,
     height: map.height,
-    backgroundColor: '#78b86b',
+    backgroundColor: map.backgroundColor || '#78b86b',
     physics: {
       default: 'arcade',
       arcade: { gravity: { y: 0 }, debug: false }
@@ -33,9 +35,9 @@
   function create() {
     const g = this.add.graphics();
 
-    g.fillStyle(0x78b86b, 1).fillRect(0, 0, map.width, map.height);
+    g.fillStyle(map.groundColor || 0x78b86b, 1).fillRect(0, 0, map.width, map.height);
 
-    g.fillStyle(0xd8c08a, 1);
+    g.fillStyle(map.roadColor || 0xd8c08a, 1);
     map.roads.forEach(r => g.fillRect(r.x, r.y, r.width, r.height));
 
     g.fillStyle(0x70b8df, 1);
@@ -95,6 +97,52 @@
       });
     }
 
+    const exits = this.physics.add.staticGroup();
+    (map.exits || []).forEach(exitData => {
+      const exit = this.add.rectangle(
+        exitData.x,
+        exitData.y,
+        exitData.width,
+        exitData.height,
+        0xffef9a,
+        0.12
+      );
+      exit.destination = exitData.destination;
+      exit.destinationReturnKey = exitData.destinationReturnKey;
+      exit.destinationPosition = exitData.destinationPosition;
+      exit.exitName = exitData.name || '次の場所';
+      this.physics.add.existing(exit, true);
+      exits.add(exit);
+
+      if (exitData.label) {
+        const labelPos = exitData.labelPosition || { x:exitData.x, y:exitData.y };
+        this.add.text(labelPos.x, labelPos.y, exitData.label, {
+          fontFamily: 'sans-serif',
+          fontSize: '17px',
+          fontStyle: 'bold',
+          color: '#4b3440',
+          backgroundColor: '#fffaf0dd',
+          padding: { x:8, y:4 }
+        }).setOrigin(0.5).setDepth(15);
+      }
+    });
+
+    this.physics.add.overlap(player, exits, (_p, exit) => {
+      if (state.changingMap) return;
+      state.changingMap = true;
+      player.body.setVelocity(0);
+      const nextPosition = exit.destinationPosition || map.playerStart;
+      savePosition(
+        exit.destinationReturnKey || 'rpgReturnPositionV1',
+        nextPosition.x,
+        nextPosition.y
+      );
+      showMessage(`${exit.exitName}へ移動`);
+      this.time.delayedCall(250, () => {
+        location.href = `${exit.destination}?v=20260824-1`;
+      });
+    });
+
     const entrances = this.physics.add.staticGroup();
     map.houses
       .filter(h => h.href && h.entrance)
@@ -122,7 +170,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260823-8`;
+        location.href = `${door.destination}?v=20260824-1`;
       });
     });
 
@@ -156,7 +204,8 @@
       saveReturnPosition(player.x, player.y);
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-8`;
+        const returnPage = map.page || 'rpg.html';
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-1`;
       });
     });
 
@@ -171,7 +220,7 @@
       padding: { x: 14, y: 9 }
     }).setOrigin(0.5).setDepth(20);
 
-    this.add.text(12, 12, 'RPG TEST MAP', {
+    this.add.text(12, 12, map.title || 'RPG MAP', {
       fontFamily: 'sans-serif',
       fontSize: '18px',
       color: '#ffffff',
@@ -219,7 +268,7 @@
     let x = 0;
     let y = 0;
 
-    if (state.enteringBuilding) {
+    if (state.enteringBuilding || state.changingMap) {
       player.body.setVelocity(0);
       return;
     }
@@ -246,20 +295,24 @@
     if (message) message.setText(text);
   }
 
+  function savePosition(key, x, y) {
+    localStorage.setItem(key, JSON.stringify({ x, y }));
+  }
+
   function saveReturnPosition(x, y) {
-    localStorage.setItem('rpgReturnPositionV1', JSON.stringify({ x, y }));
+    savePosition(returnKey, x, y);
   }
 
   function readReturnPosition() {
     try {
-      const raw = localStorage.getItem('rpgReturnPositionV1');
+      const raw = localStorage.getItem(returnKey);
       if (!raw) return null;
-      localStorage.removeItem('rpgReturnPositionV1');
+      localStorage.removeItem(returnKey);
       const pos = JSON.parse(raw);
       if (!Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return null;
       return { x: pos.x, y: pos.y };
     } catch (_error) {
-      localStorage.removeItem('rpgReturnPositionV1');
+      localStorage.removeItem(returnKey);
       return null;
     }
   }
