@@ -122,7 +122,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260823-6`;
+        location.href = `${door.destination}?v=20260823-7`;
       });
     });
 
@@ -156,7 +156,7 @@
       saveReturnPosition(player.x, player.y);
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-6`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-7`;
       });
     });
 
@@ -274,11 +274,24 @@
   }
 
   function bindTouchControls() {
+    const dpad = document.querySelector('.dpad');
+    const blockBrowserGesture = event => event.preventDefault();
+
+    if (dpad) {
+      dpad.addEventListener('contextmenu', blockBrowserGesture, { capture:true });
+      dpad.addEventListener('selectstart', blockBrowserGesture, { capture:true });
+      dpad.addEventListener('dragstart', blockBrowserGesture, { capture:true });
+      dpad.addEventListener('touchstart', blockBrowserGesture, { passive:false, capture:true });
+      dpad.addEventListener('touchmove', blockBrowserGesture, { passive:false, capture:true });
+    }
+
     document.querySelectorAll('[data-dir]').forEach(button => {
       const dir = button.dataset.dir;
       const on = event => {
         event.preventDefault();
-        if (button.setPointerCapture) button.setPointerCapture(event.pointerId);
+        if (event.pointerId !== undefined && button.setPointerCapture) {
+          button.setPointerCapture(event.pointerId);
+        }
         state.touch[dir] = true;
       };
       const off = event => {
@@ -286,13 +299,14 @@
         state.touch[dir] = false;
       };
 
+      button.draggable = false;
       button.addEventListener('pointerdown', on);
       button.addEventListener('pointerup', off);
       button.addEventListener('pointercancel', off);
       button.addEventListener('pointerleave', off);
-      button.addEventListener('contextmenu', event => event.preventDefault());
-      button.addEventListener('selectstart', event => event.preventDefault());
-      button.addEventListener('dragstart', event => event.preventDefault());
+      button.addEventListener('touchstart', on, { passive:false });
+      button.addEventListener('touchend', off, { passive:false });
+      button.addEventListener('touchcancel', off, { passive:false });
     });
   }
 })();
