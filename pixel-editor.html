@@ -111,7 +111,7 @@
 
   let selected=COLORS[0];
   let pixels=blankPixels();
-  let history=[];
+  let undoHistory=[];
   let drawing=false;
   let beforeStroke=null;
   let drawMode=false;
@@ -189,7 +189,7 @@
     writeSaveData(data);
     saveWorking();
     updateProjectLabel();
-    history.replaceState(null,'','pixel-editor.html?save='+encodeURIComponent(currentSaveId));
+    window.history.replaceState(null,'','pixel-editor.html?save='+encodeURIComponent(currentSaveId));
     note('ドット絵セーブ'+currentSaveId+'に保存しました');
   }
 
@@ -221,9 +221,9 @@
   function renderCell(x,y){grid.children[y*SIZE+x].style.background=pixels[y][x]||'transparent'}
   function render(){for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)renderCell(x,y)}
   function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return false;pixels[y][x]=selected;renderCell(x,y);return true}
-  function commitSingle(cell){const before=clone();if(!paint(cell))return;history.push(before);if(history.length>100)history.shift();saveWorking()}
+  function commitSingle(cell){const before=clone();if(!paint(cell))return;undoHistory.push(before);if(undoHistory.length>100)undoHistory.shift();saveWorking()}
   function startDraw(cell){drawing=true;beforeStroke=clone();paint(cell)}
-  function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){history.push(beforeStroke);if(history.length>100)history.shift();saveWorking()}beforeStroke=null}
+  function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){undoHistory.push(beforeStroke);if(undoHistory.length>100)undoHistory.shift();saveWorking()}beforeStroke=null}
 
   for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
     const b=document.createElement('button');
@@ -258,8 +258,8 @@
   drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;updateDrawMode();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
   document.getElementById('useCustom').addEventListener('click',()=>{selected=document.getElementById('customColor').value.toUpperCase();updateTool()});
   document.getElementById('gameSaveBtn').addEventListener('click',saveGame);
-  document.getElementById('undoBtn').addEventListener('click',()=>{if(!history.length){note('戻せる操作がありません');return}pixels=history.pop();render();saveWorking()});
-  document.getElementById('clearBtn').addEventListener('click',()=>{history.push(clone());pixels=blankPixels();render();saveWorking()});
+  document.getElementById('undoBtn').addEventListener('click',()=>{if(!undoHistory.length){note('戻せる操作がありません');return}pixels=undoHistory.pop();render();saveWorking()});
+  document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());pixels=blankPixels();render();saveWorking()});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href='pixel-start.html'});
   document.getElementById('saveListBtn').addEventListener('click',()=>{location.href='pixel-saves.html'});
 
