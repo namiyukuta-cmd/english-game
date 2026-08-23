@@ -111,7 +111,7 @@
       saveReturnPosition(player.x, player.y);
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&v=20260823-2`;
       });
     });
 
