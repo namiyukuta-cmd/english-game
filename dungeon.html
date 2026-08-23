@@ -34,7 +34,7 @@
     .tile.current{outline:4px solid #f6ca68;outline-offset:1px}.tile.start::before{content:"S";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:20px;font-weight:900;color:#614c3e}.tile.locked::before{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:17px}
     .tile-roll{position:absolute;right:2px;bottom:1px;z-index:4;font-size:17px;line-height:1;font-weight:900;color:#3d332d;background:rgba(255,255,255,.82);border-radius:5px;padding:1px 3px}
 
-    .complete-banner{display:none;position:absolute;z-index:8;left:12px;right:12px;top:35px;border:2px solid #b78a49;border-radius:12px;background:#fff8e8;padding:5px 8px;text-align:center;font-size:17px;font-weight:800;line-height:1.25;color:#624a28;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .complete-banner{display:none;position:absolute;z-index:8;left:12px;right:12px;top:35px;border:2px solid #b78a49;border-radius:12px;background:#fff8e8;padding:8px;text-align:center;font-size:18px;font-weight:900;line-height:1.25;color:#624a28;box-shadow:0 4px 12px rgba(0,0,0,.12)}
     .complete-banner.show{display:block}
 
     .control-card{min-height:0;border:1px solid var(--line);border-radius:15px;background:var(--paper);padding:6px 8px;display:grid;grid-template-rows:25px 42px 98px 26px;gap:4px;overflow:hidden}
@@ -74,7 +74,7 @@
 <body>
 <main class="app">
   <header class="topbar">
-    <a class="icon-btn" href="dungeon_inn.html?v=20260823-2359" aria-label="宿へ戻る">←</a>
+    <a class="icon-btn" href="dungeon_inn.html?v=20260824-0006" aria-label="宿へ戻る">←</a>
     <h1>ダンジョン探索</h1>
     <button id="saveBtn" class="icon-btn" type="button" aria-label="セーブ">💾</button>
   </header>
@@ -87,7 +87,7 @@
 
   <section class="map-card">
     <div class="map-head"><strong>MAP</strong><span>黄色の枠＝現在地</span></div>
-    <div id="completeBanner" class="complete-banner">全マス開放！ LEVEL 1 CLEAR　まだ探索できます。</div>
+    <div id="completeBanner" class="complete-banner">全マス開放！ LEVEL 1 CLEAR</div>
     <div class="map-wrap"><div id="map" class="map" aria-label="ダンジョンマップ"></div></div>
   </section>
 
@@ -95,6 +95,7 @@
     <div class="info-row"><strong id="placeName" class="place-name">スタート</strong><span id="diceResult" class="dice-result">🎲 —</span></div>
     <p id="message" class="message">進みたい方向を選んでください。</p>
     <div class="play-row">
+      <button id="returnBtn" class="return-btn" type="button">ダンジョンから<br>帰る</button>
       <div class="direction-area" aria-label="進む方向">
         <button class="dir-btn up" data-dir="up" type="button" aria-label="上へ">↑</button>
         <button class="dir-btn left" data-dir="left" type="button" aria-label="左へ">←</button>
@@ -102,14 +103,13 @@
         <button class="dir-btn right" data-dir="right" type="button" aria-label="右へ">→</button>
         <button class="dir-btn down" data-dir="down" type="button" aria-label="下へ">↓</button>
       </div>
-      <button id="returnBtn" class="return-btn" type="button">ダンジョンから<br>帰る</button>
     </div>
     <div id="log" class="log" aria-label="探索記録"></div>
   </section>
 
   <nav class="bottom-actions" aria-label="施設">
-    <a class="main-btn" href="dungeon_inn.html?v=20260823-2359">宿</a>
-    <a class="main-btn" href="dungeon_tavern.html?v=20260823-2359">酒場</a>
+    <a class="main-btn" href="dungeon_inn.html?v=20260824-0006">宿</a>
+    <a class="main-btn" href="dungeon_tavern.html?v=20260824-0006">酒場</a>
   </nav>
 </main>
 
@@ -123,7 +123,7 @@
   </div>
 </div>
 <div id="gameOverModal" class="modal" hidden>
-  <div class="modal-card"><h2>GAME OVER</h2><p>HPが0になりました。</p><a class="main-btn" href="dungeon_inn.html?v=20260823-2359">宿へ戻る</a></div>
+  <div class="modal-card"><h2>GAME OVER</h2><p>HPが0になりました。</p><a class="main-btn" href="dungeon_inn.html?v=20260824-0006">宿へ戻る</a></div>
 </div>
 
 <script>
@@ -134,14 +134,17 @@ const DIRS={up:{dx:0,dy:-1},down:{dx:0,dy:1},left:{dx:-1,dy:0},right:{dx:1,dy:0}
 const shapeNames={start:'スタート',straight:'直進通路',leftTurn:'左曲がり',rightTurn:'右曲がり',tJunction:'T字路',cross:'十字路',deadend:'行き止まり',door:'扉',locked:'鍵のかかった扉',room:'大広間',hidden:'隠し通路',chamber:'小部屋'};
 const enemies=[{name:'大ネズミ',icon:'🐀',hp:1,reward:'食料',text:'物陰から大きなネズミが飛びかかってきた！'},{name:'スライム',icon:'🟢',hp:1,reward:'回復薬',text:'足元の液体がうごめき、スライムが姿を現した！'},{name:'ゴブリン',icon:'👺',hp:2,reward:'鍵',text:'曲がり角の向こうからゴブリンが武器を構えて現れた！'},{name:'骸骨兵',icon:'💀',hp:2,reward:'銅貨',text:'散らばった骨が組み上がり、骸骨兵が立ちふさがった！'},{name:'オーク',icon:'👹',hp:3,reward:'良い装備',text:'重い足音が響く。大きなオークがこちらを睨んでいる！'},{name:'ダンジョンの守護者',icon:'🗿',hp:4,reward:'地図の断片',text:'石壁の一部が動き出した。ダンジョンの守護者だ！'}];
 const finds=['銅貨','食料','回復薬','鍵','良い装備','地図の断片'];
-let state=null;const $=id=>document.getElementById(id),roll=()=>Math.floor(Math.random()*6)+1,key=(x,y)=>`${x},${y}`;
+let state=null;
+let completeNoticeVisible=false;
+const $=id=>document.getElementById(id),roll=()=>Math.floor(Math.random()*6)+1,key=(x,y)=>`${x},${y}`;
 function freshState(){return{version:4,level:1,hp:MAX_HP,tiles:{},current:{x:0,y:0},history:[{x:0,y:0}],inventory:[],logs:[],encounter:null,mapComplete:false,gameOver:false,lastDice:null};}
 function initNew(){state=freshState();state.tiles[key(0,0)]={x:0,y:0,type:'start',label:'スタート',roll:0,exits:['up','down','left','right'],eventDone:true};addLog('ダンジョンに入りました。');save();}
 function load(){const forceNew=new URLSearchParams(location.search).get('new')==='1';if(forceNew){initNew();return;}try{const raw=localStorage.getItem(SAVE_KEY);state=raw?JSON.parse(raw):null;}catch(e){state=null;}if(!state||!state.tiles)initNew();else{Object.values(state.tiles).forEach(t=>{if(t.type==='stairs'){t.type='chamber';t.label='小部屋';}});state.mapComplete=Object.keys(state.tiles).length>=MAX_TILES;state.gameOver=state.hp<=0;state.version=4;}}
 function save(show=false){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}if(show)$('message').textContent='セーブしました。';}
 function addLog(text){state.logs=state.logs||[];state.logs.push(text);if(state.logs.length>14)state.logs=state.logs.slice(-14);}
 function getTile(x=state.current.x,y=state.current.y){return state.tiles[key(x,y)];}function tileCount(){return Object.keys(state.tiles).length;}
-function checkMapComplete(){if(!state.mapComplete&&tileCount()>=MAX_TILES){state.mapComplete=true;addLog('全8マスを開放しました。LEVEL 1 CLEAR！');}}
+function checkMapComplete(){if(!state.mapComplete&&tileCount()>=MAX_TILES){state.mapComplete=true;completeNoticeVisible=true;addLog('全8マスを開放しました。LEVEL 1 CLEAR！');}}
+function dismissCompleteNotice(){if(!completeNoticeVisible)return;completeNoticeVisible=false;const banner=$('completeBanner');if(banner)banner.classList.remove('show');}
 function buildTileForMove(dir){const back=OPP[dir],r=roll();let type='straight',exits=[],specialRoll=null;if(r===1){type='straight';exits=[back,dir];}if(r===2){type='leftTurn';exits=[back,LEFT[dir]];}if(r===3){type='rightTurn';exits=[back,RIGHT[dir]];}if(r===4){type='tJunction';exits=[back,LEFT[dir],RIGHT[dir]];}if(r===5){type='cross';exits=['up','down','left','right'];}if(r===6){specialRoll=roll();if(specialRoll===1){type='deadend';exits=[back];}if(specialRoll===2){type='door';exits=[back,dir];}if(specialRoll===3){type='locked';exits=[back];}if(specialRoll===4){type='room';exits=['up','down','left','right'];}if(specialRoll===5){type='hidden';exits=[back,dir,Math.random()<.5?LEFT[dir]:RIGHT[dir]];}if(specialRoll===6){type='chamber';exits=[back];}}return{type,label:shapeNames[type],exits:[...new Set(exits)],roll:r,specialRoll,forward:dir};}
 function canUseExit(tile,dir){if(!tile||!tile.exits.includes(dir))return false;const d=DIRS[dir],neighbor=getTile(tile.x+d.dx,tile.y+d.dy);if(neighbor)return neighbor.exits.includes(OPP[dir]);return !state.mapComplete&&tileCount()<MAX_TILES;}
 function move(dir){if(state.encounter||state.gameOver)return;const tile=getTile();if(!canUseExit(tile,dir))return;const d=DIRS[dir],nx=state.current.x+d.dx,ny=state.current.y+d.dy;let target=getTile(nx,ny);if(!target){if(tileCount()>=MAX_TILES)return;const made=buildTileForMove(dir);target={x:nx,y:ny,type:made.type,label:made.label,roll:made.roll,specialRoll:made.specialRoll,exits:made.exits,eventDone:false,forward:made.forward};state.tiles[key(nx,ny)]=target;state.lastDice=made.specialRoll?`${made.roll} → 特殊 ${made.specialRoll}`:`${made.roll}`;addLog(`🎲 ${made.roll}：${made.label}`+(made.specialRoll?`（特殊${made.specialRoll}）`:''));checkMapComplete();}else{state.lastDice=null;addLog(`${DIR_LABEL[dir]}の通路へ移動しました。`);}state.current={x:nx,y:ny};state.history.push({x:nx,y:ny});if(target.type==='locked'){const i=state.inventory.indexOf('鍵');if(i>=0){state.inventory.splice(i,1);if(target.forward&&!target.exits.includes(target.forward))target.exits.push(target.forward);target.type='door';target.label='鍵を開けた扉';addLog('鍵を使って扉を開けました。');}else addLog('鍵のかかった扉です。鍵がありません。');}if(!target.eventDone){resolveEvent();target.eventDone=true;}save();render();if(state.hp<=0)showGameOver();}
@@ -150,9 +153,15 @@ function startEnemy(strong=false){const er=roll(),base=enemies[er-1];state.encou
 function damage(n){state.hp=Math.max(0,state.hp-n);if(state.hp<=0)state.gameOver=true;}
 function renderMap(){const tiles=Object.values(state.tiles);let minX=Math.min(...tiles.map(t=>t.x)),maxX=Math.max(...tiles.map(t=>t.x)),minY=Math.min(...tiles.map(t=>t.y)),maxY=Math.max(...tiles.map(t=>t.y));if(maxX-minX+1<3){minX--;maxX++;}if(maxY-minY+1<3){minY--;maxY++;}const cols=maxX-minX+1,rows=maxY-minY+1,size=Math.max(38,Math.min(58,Math.floor((window.innerWidth-70)/Math.max(cols,3))));const map=$('map');map.style.setProperty('--tile-size',size+'px');map.style.gridTemplateColumns=`repeat(${cols},${size}px)`;map.style.gridTemplateRows=`repeat(${rows},${size}px)`;map.innerHTML='';for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const t=getTile(x,y),cell=document.createElement('div');if(!t){cell.style.width=size+'px';cell.style.height=size+'px';map.appendChild(cell);continue;}cell.className='tile';if(t.type==='start')cell.classList.add('start');if(t.type==='locked')cell.classList.add('locked');if(x===state.current.x&&y===state.current.y)cell.classList.add('current');t.exits.filter(d=>canUseExit(t,d)).forEach(d=>{const p=document.createElement('span');p.className=`path ${d}`;cell.appendChild(p);});if(t.roll){const rr=document.createElement('span');rr.className='tile-roll';rr.textContent=t.roll;cell.appendChild(rr);}map.appendChild(cell);}}
 function showEncounter(){if(!state.encounter){$('encounterModal').hidden=true;return;}$('encounterIcon').textContent=state.encounter.icon||'👹';$('encounterName').textContent=`${state.encounter.name}が現れた！`;$('encounterText').textContent=(state.encounter.strong?'ここは魔物の巣だった。 ':'')+(state.encounter.text||'敵が襲いかかってきた！');$('encounterModal').hidden=false;}
-function render(){checkMapComplete();$('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';$('message').textContent=state.encounter?`${state.encounter.name}が立ちはだかっています。`:state.mapComplete?'全マス開放済み。開いた通路を自由に探索できます。':'道がある方向へ進めます。未探索の先ではサイコロを振ります。';$('completeBanner').classList.toggle('show',state.mapComplete&&!state.gameOver);$('returnBtn').disabled=!!state.encounter||state.gameOver;document.querySelectorAll('.dir-btn').forEach(btn=>{btn.hidden=!canUseExit(t,btn.dataset.dir);btn.disabled=!!state.encounter||state.gameOver;});$('log').innerHTML=(state.logs||[]).slice(-2).reverse().map(x=>`<p>${String(x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</p>`).join('');renderMap();showEncounter();}
+function render(){checkMapComplete();$('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';$('message').textContent=state.encounter?`${state.encounter.name}が立ちはだかっています。`:state.mapComplete?'全マス開放済み。開いた通路を自由に探索できます。':'道がある方向へ進めます。未探索の先ではサイコロを振ります。';$('completeBanner').classList.toggle('show',completeNoticeVisible&&!state.gameOver);$('returnBtn').disabled=!!state.encounter||state.gameOver;document.querySelectorAll('.dir-btn').forEach(btn=>{btn.hidden=!canUseExit(t,btn.dataset.dir);btn.disabled=!!state.encounter||state.gameOver;});$('log').innerHTML=(state.logs||[]).slice(-2).reverse().map(x=>`<p>${String(x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</p>`).join('');renderMap();showEncounter();}
 function showGameOver(){state.encounter=null;state.gameOver=true;save();$('encounterModal').hidden=true;$('gameOverModal').hidden=false;render();}
-document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));$('saveBtn').addEventListener('click',()=>save(true));$('encounterStart').addEventListener('click',()=>{if(!state.encounter)return;save();location.href='dungeon_battle.html?v=20260823-2359';});$('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260823-2359';});window.addEventListener('resize',renderMap);load();render();if(state.gameOver||state.hp<=0)showGameOver();
+document.addEventListener('pointerdown',dismissCompleteNotice,{passive:true});
+document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));
+$('saveBtn').addEventListener('click',()=>save(true));
+$('encounterStart').addEventListener('click',()=>{if(!state.encounter)return;save();location.href='dungeon_battle.html?v=20260824-0006';});
+$('returnBtn').addEventListener('click',()=>{if(state.encounter||state.gameOver)return;addLog('探索を切り上げ、宿へ帰還しました。');save();location.href='dungeon_inn.html?v=20260824-0006';});
+window.addEventListener('resize',renderMap);
+load();render();if(state.gameOver||state.hp<=0)showGameOver();
 })();
 </script>
 </body>
