@@ -28,7 +28,7 @@ window.MYSTERY_CASES=[
       storyEn:'At 11:42 PM, you open the seventh-floor conference room. A man is lying beside the table. You stop at the doorway and call for help.',
       storyJa:'午後11時42分。7階の会議室を開けると、机のそばに男性が倒れていた。あなたは入口で止まり、助けを呼ぶ。',
       study:[
-        {en:'A man is there.',ja:'男の人がそこにいます。',grammar:'A + 名詞 + is',explain:'be動詞 is を使って「〜がいます」と表しています。主人公が覚える中心は am / are ですが、ここでは場面理解用の表現です。'},
+        {en:'I see a man.',ja:'男の人が見えます。',grammar:'I + see + 名詞',explain:'I のあとに一般動詞 see を置く肯定文です。'},
         {en:"I don't know him.",ja:'私は彼を知りません。',grammar:"I + don't + 一般動詞",explain:'一般動詞の否定文です。I のあとに don’t を置き、動詞は原形 know を使います。'}
       ]
     },
@@ -38,7 +38,7 @@ window.MYSTERY_CASES=[
       storyJa:'来た刑事は、以前の現場でも会った顔見知りだった。何にも触れず、気づいたことがないか見てほしいと言う。',
       evidence:[
         {en:'I see a red umbrella.',ja:'赤い傘が見えます。',grammar:'I + see + 名詞',explain:'see は「見る・見える」。I のあとにそのまま動詞を置きます。'},
-        {en:'It is not my umbrella.',ja:'それは私の傘ではありません。',grammar:'be動詞 + not',explain:'be動詞のあとに not を置く否定文です。'}
+        {en:"I don't have a red umbrella.",ja:'私は赤い傘を持っていません。',grammar:"I + don't + have",explain:'一般動詞 have の否定文です。I のあとに don’t を置きます。'}
       ]
     },
     deduction:{
