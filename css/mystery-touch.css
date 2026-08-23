@@ -1,0 +1,76 @@
+/* Touch-target overrides for iPhone and other touch devices. */
+.mystery-app button,
+.mini-modal button{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.word-answer,.word-bank{
+  gap:12px!important;
+  min-height:88px!important;
+  padding:14px!important;
+}
+.word-answer button,.word-bank button{
+  min-width:60px!important;
+  min-height:60px!important;
+  padding:12px 16px!important;
+  font-size:20px!important;
+  line-height:1.2!important;
+  border-radius:14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.word-answer span{font-size:17px!important;line-height:1.5!important}
+
+.mini-close{
+  width:56px!important;
+  height:56px!important;
+  min-width:56px!important;
+  min-height:56px!important;
+  font-size:26px!important;
+}
+.mini-modal-card{width:min(640px,calc(100vw - 20px))!important;padding:20px!important}
+.mini-ja{font-size:22px!important;line-height:1.5!important;padding-right:64px!important}
+.word-result{min-height:28px!important;font-size:17px!important;line-height:1.5!important}
+
+.hotspot{
+  min-height:136px!important;
+  padding:14px 10px!important;
+}
+.hotspot strong,.hotspot span,.hotspot em{
+  font-size:17px!important;
+  line-height:1.4!important;
+}
+.hotspot b{font-size:36px!important;margin-bottom:8px!important}
+
+.suspect-select{
+  min-height:88px!important;
+  padding:16px!important;
+}
+.suspect-select strong,.suspect-select span,.suspect-select em{
+  font-size:17px!important;
+  line-height:1.4!important;
+}
+
+.translation-choices button,.deduction-list button,.choice-btn{
+  min-height:60px!important;
+  padding:14px 16px!important;
+  font-size:17px!important;
+  line-height:1.5!important;
+}
+
+.mystery-action{
+  min-height:60px!important;
+  padding:12px 16px!important;
+  font-size:18px!important;
+}
+
+.evidence-chip{min-height:64px!important;padding:12px!important}
+.evidence-chip strong,.evidence-chip small{font-size:17px!important;line-height:1.4!important}
+
+@media(max-width:559px){
+  .word-answer,.word-bank{gap:14px!important;padding:16px!important}
+  .word-answer button,.word-bank button{min-width:64px!important;min-height:64px!important}
+  .hotspot{min-height:128px!important}
+}
