@@ -10,8 +10,18 @@ window.RPG_MAP = {
     { x: 370, y: 115, width: 120, height: 145 }
   ],
   houses: [
-    { x: 55, y: 145, width: 120, height: 95 },
-    { x: 350, y: 655, width: 135, height: 105 }
+    {
+      id: 'tavern',
+      name: '酒場',
+      x: 55,
+      y: 145,
+      width: 120,
+      height: 95,
+      href: 'tavern.html',
+      entrance: { x: 115, y: 252, width: 52, height: 24 },
+      returnPosition: { x: 115, y: 286 }
+    },
+    { id: 'house_02', x: 350, y: 655, width: 135, height: 105 }
   ],
   trees: [
     { x: 70, y: 315 }, { x: 145, y: 350 }, { x: 95, y: 590 },
