@@ -96,7 +96,19 @@
   const SIZE=24;
   const SAVE_KEY='englishGamePixelSavesV1';
   const WORK_KEY='englishGamePixel24';
-  const COLORS=["#2B2118","#5A3825","#8B5A3C","#B97A56","#F3C9A7","#FFF3E6","#FFFFFF","#E34B45","#E98DA1","#F0C84B","#4A8FD8","#4FAE68","#6A4FC2","#222222","#8D8D8D"];
+  const COLORS=[
+    "#111111","#222222","#444444","#666666","#8D8D8D","#B8B8B8","#D9D9D9","#FFFFFF",
+    "#2B2118","#4A2F21","#5A3825","#70452E","#8B5A3C","#A86F4C","#B97A56","#D09A73",
+    "#9A5E43","#C98762","#E7AF87","#F3C9A7","#F7E0C2","#FFF3E6",
+    "#7E2929","#A93333","#C93F3F","#E34B45","#F06A60",
+    "#8A3656","#B84F73","#D66A8D","#E98DA1","#F4B3C5",
+    "#A84A1F","#C95F25","#E57B32","#F0A04B",
+    "#9A741E","#C79A27","#F0C84B","#FFE27A",
+    "#24452F","#2D5A3A","#3F7A4A","#4FAE68","#7BC47F","#A8D99B",
+    "#245E5E","#378888","#4FA6A6","#79C9C9",
+    "#223D63","#244B76","#356D9E","#4A8FD8","#77B6EA","#A8D8F0",
+    "#40305F","#4B3A71","#6A4FC2","#8A70D6","#B09AE8"
+  ];
   const ZOOMS=[100,150,200,300,400];
   const grid=document.getElementById('grid');
   const canvasShell=document.getElementById('canvasShell');
@@ -109,7 +121,7 @@
   const message=document.getElementById('message');
   const projectLabel=document.getElementById('projectLabel');
 
-  let selected=COLORS[0];
+  let selected=COLORS[8];
   let pixels=blankPixels();
   let undoHistory=[];
   let drawing=false;
@@ -123,74 +135,28 @@
   function validPixels(p){return Array.isArray(p)&&p.length===SIZE&&p.every(r=>Array.isArray(r)&&r.length===SIZE)}
   function clone(){return pixels.map(r=>r.slice())}
   function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1800)}
-
-  function readSaveData(){
-    try{
-      const d=JSON.parse(localStorage.getItem(SAVE_KEY));
-      if(d&&d.slots&&typeof d.slots==='object')return {next:Number(d.next)||1,slots:d.slots};
-    }catch(e){}
-    return {next:1,slots:{}};
-  }
+  function readSaveData(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.slots&&typeof d.slots==='object')return {next:Number(d.next)||1,slots:d.slots}}catch(e){}return {next:1,slots:{}}}
   function writeSaveData(d){localStorage.setItem(SAVE_KEY,JSON.stringify(d))}
   function saveWorking(){try{localStorage.setItem(WORK_KEY,JSON.stringify(pixels))}catch(e){}}
   function updateProjectLabel(){projectLabel.textContent=currentSaveId?'ドット絵セーブ'+currentSaveId:'新しいドット絵'}
 
   function loadInitial(){
-    const q=new URLSearchParams(location.search);
-    const requested=q.get('save');
-    const mode=q.get('mode');
+    const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode');
     if(requested){
-      const data=readSaveData();
-      const slot=data.slots[requested];
-      if(slot&&validPixels(slot.pixels)){
-        currentSaveId=requested;
-        pixels=slot.pixels.map(r=>r.slice());
-        saveWorking();
-        updateProjectLabel();
-        return;
-      }
-      pixels=blankPixels();
-      currentSaveId=null;
-      updateProjectLabel();
-      setTimeout(()=>note('セーブデータが見つかりませんでした'),50);
-      return;
+      const data=readSaveData(),slot=data.slots[requested];
+      if(slot&&validPixels(slot.pixels)){currentSaveId=requested;pixels=slot.pixels.map(r=>r.slice());saveWorking();updateProjectLabel();return}
+      pixels=blankPixels();currentSaveId=null;updateProjectLabel();setTimeout(()=>note('セーブデータが見つかりませんでした'),50);return;
     }
-    if(mode==='new'){
-      pixels=blankPixels();
-      currentSaveId=null;
-      saveWorking();
-      updateProjectLabel();
-      return;
-    }
-    try{
-      const old=JSON.parse(localStorage.getItem(WORK_KEY));
-      if(validPixels(old))pixels=old;
-    }catch(e){}
+    if(mode==='new'){pixels=blankPixels();currentSaveId=null;saveWorking();updateProjectLabel();return}
+    try{const old=JSON.parse(localStorage.getItem(WORK_KEY));if(validPixels(old))pixels=old}catch(e){}
     updateProjectLabel();
   }
 
   function saveGame(){
     const data=readSaveData();
-    if(!currentSaveId){
-      let n=Math.max(1,Number(data.next)||1);
-      let id=String(n).padStart(3,'0');
-      while(data.slots[id]){n++;id=String(n).padStart(3,'0')}
-      currentSaveId=id;
-      data.next=n+1;
-    }
-    data.slots[currentSaveId]={
-      id:currentSaveId,
-      name:'ドット絵セーブ'+currentSaveId,
-      width:SIZE,
-      height:SIZE,
-      pixels:clone(),
-      updatedAt:new Date().toISOString()
-    };
-    writeSaveData(data);
-    saveWorking();
-    updateProjectLabel();
-    window.history.replaceState(null,'','pixel-editor.html?save='+encodeURIComponent(currentSaveId));
-    note('ドット絵セーブ'+currentSaveId+'に保存しました');
+    if(!currentSaveId){let n=Math.max(1,Number(data.next)||1),id=String(n).padStart(3,'0');while(data.slots[id]){n++;id=String(n).padStart(3,'0')}currentSaveId=id;data.next=n+1}
+    data.slots[currentSaveId]={id:currentSaveId,name:'ドット絵セーブ'+currentSaveId,width:SIZE,height:SIZE,pixels:clone(),updatedAt:new Date().toISOString()};
+    writeSaveData(data);saveWorking();updateProjectLabel();window.history.replaceState(null,'','pixel-editor.html?save='+encodeURIComponent(currentSaveId));note('ドット絵セーブ'+currentSaveId+'に保存しました');
   }
 
   function updateTool(){
@@ -198,25 +164,11 @@
     else{currentColor.className='current';currentColor.style.background=selected;currentLabel.textContent=selected;eraserBtn.classList.remove('active')}
     document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===(selected===null?'transparent':selected)));
   }
-  function updateDrawMode(){
-    drawModeBtn.textContent='なぞり塗り：'+(drawMode?'ON':'OFF');
-    drawModeBtn.classList.toggle('active',drawMode);
-    grid.classList.toggle('draw-mode',drawMode);
-    grid.classList.toggle('tap-mode',!drawMode);
-  }
+  function updateDrawMode(){drawModeBtn.textContent='なぞり塗り：'+(drawMode?'ON':'OFF');drawModeBtn.classList.toggle('active',drawMode);grid.classList.toggle('draw-mode',drawMode);grid.classList.toggle('tap-mode',!drawMode)}
   function updateZoom(keepCenter=true){
-    const oldW=grid.getBoundingClientRect().width||1;
-    const cx=(canvasShell.scrollLeft+canvasShell.clientWidth/2)/oldW;
-    const cy=(canvasShell.scrollTop+canvasShell.clientHeight/2)/oldW;
-    const z=ZOOMS[zoomIndex];
-    grid.style.width=z+'%';
-    zoomLabel.textContent=z+'%';
-    requestAnimationFrame(()=>{
-      if(!keepCenter)return;
-      const newW=grid.getBoundingClientRect().width||1;
-      canvasShell.scrollLeft=Math.max(0,cx*newW-canvasShell.clientWidth/2);
-      canvasShell.scrollTop=Math.max(0,cy*newW-canvasShell.clientHeight/2);
-    });
+    const oldW=grid.getBoundingClientRect().width||1,cx=(canvasShell.scrollLeft+canvasShell.clientWidth/2)/oldW,cy=(canvasShell.scrollTop+canvasShell.clientHeight/2)/oldW,z=ZOOMS[zoomIndex];
+    grid.style.width=z+'%';zoomLabel.textContent=z+'%';
+    requestAnimationFrame(()=>{if(!keepCenter)return;const newW=grid.getBoundingClientRect().width||1;canvasShell.scrollLeft=Math.max(0,cx*newW-canvasShell.clientWidth/2);canvasShell.scrollTop=Math.max(0,cy*newW-canvasShell.clientHeight/2)});
   }
   function renderCell(x,y){grid.children[y*SIZE+x].style.background=pixels[y][x]||'transparent'}
   function render(){for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)renderCell(x,y)}
@@ -226,33 +178,17 @@
   function endDraw(){if(!drawing)return;drawing=false;if(JSON.stringify(beforeStroke)!==JSON.stringify(pixels)){undoHistory.push(beforeStroke);if(undoHistory.length>100)undoHistory.shift();saveWorking()}beforeStroke=null}
 
   for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
-    const b=document.createElement('button');
-    b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',x+','+y);
-    b.addEventListener('pointerdown',e=>{
-      pointerStart={x:e.clientX,y:e.clientY,cell:b};
-      if(drawMode){e.preventDefault();startDraw(b)}
-    });
+    const b=document.createElement('button');b.type='button';b.className='cell';b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',x+','+y);
+    b.addEventListener('pointerdown',e=>{pointerStart={x:e.clientX,y:e.clientY,cell:b};if(drawMode){e.preventDefault();startDraw(b)}});
     b.addEventListener('pointerenter',e=>{if(drawMode&&drawing&&(e.buttons||e.pointerType==='touch'))paint(b)});
-    b.addEventListener('pointerup',e=>{
-      if(drawMode)return;
-      if(!pointerStart)return;
-      const moved=Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y);
-      if(moved<8&&pointerStart.cell===b){e.preventDefault();commitSingle(b)}
-      pointerStart=null;
-    });
-    b.addEventListener('click',e=>e.preventDefault());
-    grid.appendChild(b);
+    b.addEventListener('pointerup',e=>{if(drawMode)return;if(!pointerStart)return;const moved=Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y);if(moved<8&&pointerStart.cell===b){e.preventDefault();commitSingle(b)}pointerStart=null});
+    b.addEventListener('click',e=>e.preventDefault());grid.appendChild(b);
   }
   window.addEventListener('pointerup',()=>{if(drawMode)endDraw();else pointerStart=null});
   window.addEventListener('pointercancel',()=>{if(drawMode)endDraw();else pointerStart=null});
 
-  const erase=document.createElement('button');
-  erase.type='button';erase.className='swatch transparent';erase.dataset.color='transparent';erase.title='透明';
-  erase.addEventListener('click',()=>{selected=null;updateTool()});palette.appendChild(erase);
-  COLORS.forEach(color=>{
-    const b=document.createElement('button');b.type='button';b.className='swatch';b.dataset.color=color;b.style.background=color;b.title=color;
-    b.addEventListener('click',()=>{selected=color;updateTool()});palette.appendChild(b);
-  });
+  const erase=document.createElement('button');erase.type='button';erase.className='swatch transparent';erase.dataset.color='transparent';erase.title='透明';erase.addEventListener('click',()=>{selected=null;updateTool()});palette.appendChild(erase);
+  COLORS.forEach(color=>{const b=document.createElement('button');b.type='button';b.className='swatch';b.dataset.color=color;b.style.background=color;b.title=color;b.addEventListener('click',()=>{selected=color;updateTool()});palette.appendChild(b)});
 
   eraserBtn.addEventListener('click',()=>{selected=null;updateTool()});
   drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;updateDrawMode();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
@@ -262,34 +198,16 @@
   document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());pixels=blankPixels();render();saveWorking()});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href='pixel-start.html'});
   document.getElementById('saveListBtn').addEventListener('click',()=>{location.href='pixel-saves.html'});
-
   document.getElementById('zoomInBtn').addEventListener('click',()=>{if(zoomIndex<ZOOMS.length-1){zoomIndex++;updateZoom()}else note('これ以上拡大できません')});
   document.getElementById('zoomOutBtn').addEventListener('click',()=>{if(zoomIndex>0){zoomIndex--;updateZoom()}else note('これ以上縮小できません')});
   document.getElementById('zoomResetBtn').addEventListener('click',()=>{zoomIndex=0;updateZoom(false);canvasShell.scrollLeft=0;canvasShell.scrollTop=0});
 
-  function makeCanvas(scale){
-    const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;
-    const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;
-    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}
-    return c;
-  }
+  function makeCanvas(scale){const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}return c}
   function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
   document.getElementById('savePngBtn').addEventListener('click',()=>{download(makeCanvas(20).toDataURL('image/png'),(currentSaveId?'pixel_'+currentSaveId:'pixel_24x24')+'.png');note('PNGを保存しました')});
-  document.getElementById('saveJsonBtn').addEventListener('click',()=>{
-    const coordinates=[];
-    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});
-    const data={width:SIZE,height:SIZE,pixels,coordinates};
-    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
-    download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_24x24')+'.json');
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    note('座標データを保存しました');
-  });
+  document.getElementById('saveJsonBtn').addEventListener('click',()=>{const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});const data={width:SIZE,height:SIZE,pixels,coordinates};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_24x24')+'.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')});
 
-  loadInitial();
-  render();
-  updateTool();
-  updateDrawMode();
-  updateZoom(false);
+  loadInitial();render();updateTool();updateDrawMode();updateZoom(false);
 })();
 </script>
 </body>
