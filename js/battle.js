@@ -119,8 +119,21 @@
     win();
   }
 
+  function rememberDefeatedEnemy() {
+    if (!enemyId) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem('rpgDefeatedEnemyIdsV1') || '[]');
+      const ids = Array.isArray(saved) ? saved.filter(Boolean) : [];
+      if (!ids.includes(enemyId)) ids.push(enemyId);
+      localStorage.setItem('rpgDefeatedEnemyIdsV1', JSON.stringify(ids));
+    } catch (_error) {
+      localStorage.setItem('rpgDefeatedEnemyIdsV1', JSON.stringify([enemyId]));
+    }
+  }
+
   function win() {
     victory = true;
+    rememberDefeatedEnemy();
     GameStore.addCoins(reward);
     $('coinCount').textContent = GameStore.state.coins;
     $('battleMessage').textContent = `${enemyName}を倒した！`;
