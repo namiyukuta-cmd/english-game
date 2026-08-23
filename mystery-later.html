@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜後日</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2230">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2230">
 </head>
 <body>
   <main class="mystery-app">
@@ -37,22 +37,19 @@
       const re=ja?/[^。！？]+[。！？]?/g:/[^.!?]+[.!?]?/g;
       return (String(text||'').match(re)||[String(text||'')]).map(x=>x.trim()).filter(Boolean);
     }
-    function twoChunks(parts,ja){
-      if(parts.length<=1)return parts;
-      const cut=Math.ceil(parts.length/2);
-      const joiner=ja?'':' ';
-      return [parts.slice(0,cut).join(joiner),parts.slice(cut).join(joiner)].filter(Boolean);
+    function pairedPages(en,ja,speaker){
+      const e=splitSentences(en,false),j=splitSentences(ja,true);
+      return Array.from({length:Math.max(e.length,j.length)},(_,i)=>({speaker,en:e[i]||'',ja:j[i]||''}));
     }
-    const newsEn=twoChunks(splitSentences(c.later.newsEn,false),false);
-    const newsJa=twoChunks(splitSentences(c.later.newsJa,true),true);
-    const newsCount=Math.max(newsEn.length,newsJa.length);
-    const pages=[];
-    for(let i=0;i<newsCount;i++)pages.push({speaker:'NEWS / ニュース',en:newsEn[i]||'',ja:newsJa[i]||''});
-    pages.push({speaker:'',en:c.later.closingEn,ja:c.later.closingJa});
-    let page=Math.min(Number(state.laterPage||0),pages.length-1);
+
+    const pages=[
+      ...pairedPages(c.later.newsEn,c.later.newsJa,'NEWS / ニュース'),
+      ...pairedPages(c.later.closingEn,c.later.closingJa,'')
+    ];
+    let page=Math.min(Number(state.laterPage||0),Math.max(0,pages.length-1));
 
     function render(){
-      const p=pages[page];
+      const p=pages[page]||{speaker:'',en:'',ja:''};
       document.getElementById('speaker').textContent=p.speaker;
       document.getElementById('pageEn').textContent=p.en;
       document.getElementById('pageJa').textContent=p.ja;
