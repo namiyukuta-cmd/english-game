@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <title>Battle</title>
-  <link rel="stylesheet" href="css/battle.css?v=20260824-2">
+  <link rel="stylesheet" href="css/battle.css?v=20260824-3">
 </head>
 <body>
   <main class="battle-shell">
     <header class="battle-head">
-      <a class="back" href="rpg.html?v=20260824-2">← RPGへ</a>
+      <a class="back" href="rpg.html?v=20260824-3">← RPGへ</a>
       <div class="coin">🪙 <span id="coinCount">0</span></div>
     </header>
 
@@ -27,6 +27,11 @@
     <section class="battle-info">
       <div class="player-status">あなた　<span class="hp">♥♥♥♥♥</span></div>
       <div id="battleMessage" class="battle-message" aria-live="polite">英語と日本語のペアで攻撃！</div>
+      <div id="bossSentenceBattle" class="boss-sentence-battle hidden">
+        <div id="bossSentencePrompt" class="boss-sentence-prompt"></div>
+        <div id="bossSentenceAnswer" class="boss-sentence-answer">ここに英文ができます</div>
+        <button id="bossSentenceReset" class="boss-sentence-reset" type="button">選びなおす</button>
+      </div>
     </section>
 
     <section class="word-board" id="wordBoard" aria-label="単語パズル"></section>
@@ -35,15 +40,16 @@
       <div class="victory-card">
         <strong>勝利！</strong>
         <span>🪙 +<span id="rewardAmount">12</span></span>
-        <a href="rpg.html?v=20260824-2">RPGへ戻る</a>
+        <a href="rpg.html?v=20260824-3">RPGへ戻る</a>
       </div>
     </section>
   </main>
 
   <script src="data/words/grade1/term1.js"></script>
   <script src="data/words.js"></script>
-  <script src="js/storage.js?v=20260824-2"></script>
-  <script src="data/rpg-quests.js?v=20260824-2"></script>
-  <script src="js/battle.js?v=20260824-2"></script>
+  <script src="js/storage.js?v=20260824-3"></script>
+  <script src="data/rpg-quests.js?v=20260824-3"></script>
+  <script src="data/sentences.js?v=20260824-3"></script>
+  <script src="js/battle.js?v=20260824-3"></script>
 </body>
 </html>
