@@ -4,39 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
-  <title>推理</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-1401">
+  <title>掃除婦は朝寝る</title>
+  <link rel="stylesheet" href="css/style.css?v=20260823-2104">
   <style>
-    .menu-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
-    .menu-head h1{margin:0;text-align:center;font-size:22px}
-    .back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--brown);font-size:21px;font-weight:900;text-decoration:none}
-    .note{margin:4px 4px 18px;text-align:center;font-size:13px;line-height:1.7;color:#977582}
-    .choice{display:grid;gap:12px}
-    .choice a{text-decoration:none;color:inherit}
+    .menu-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}.menu-head h1{margin:0;text-align:center;font-size:22px}.back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--brown);font-size:21px;font-weight:900;text-decoration:none}.note{margin:4px 4px 18px;text-align:center;font-size:13px;line-height:1.7;color:#977582}.choice{display:grid;gap:12px}.choice a{text-decoration:none;color:inherit}.subtitle{text-align:center;font-size:12px;color:#b77791;font-weight:800;margin:-8px 0 16px}
   </style>
 </head>
 <body>
   <main class="app-shell">
-    <header class="menu-head">
-      <a class="back" href="story-menu.html" aria-label="選択画面へ戻る">←</a>
-      <h1>推理</h1>
-      <span aria-hidden="true"></span>
-    </header>
-
-    <p class="note">英語を使って事件を推理します。</p>
-
+    <header class="menu-head"><a class="back" href="story-menu.html" aria-label="選択画面へ戻る">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
+    <div class="subtitle">MYSTERY STORY</div>
+    <p class="note">夜間清掃員として働きながら、英語で事件の手がかりを見つけます。</p>
     <div class="mode-grid choice">
-      <a class="mode-card" href="mystery.html?mode=new">
-        <span class="mode-icon">＋</span>
-        <span class="mode-copy"><strong>始めから</strong><small>新しい事件を始める</small></span>
-        <span class="arrow">›</span>
-      </a>
-
-      <a class="mode-card" href="mystery.html?mode=continue">
-        <span class="mode-icon">💾</span>
-        <span class="mode-copy"><strong>続きから</strong><small>保存したところから再開する</small></span>
-        <span class="arrow">›</span>
-      </a>
+      <a class="mode-card" href="mystery-room.html?mode=new"><span class="mode-icon">＋</span><span class="mode-copy"><strong>始めから</strong><small>Unit1・最初の夜から始める</small></span><span class="arrow">›</span></a>
+      <a class="mode-card" href="mystery-room.html?mode=continue"><span class="mode-icon">💾</span><span class="mode-copy"><strong>続きから</strong><small>自動保存した場面から再開する</small></span><span class="arrow">›</span></a>
     </div>
   </main>
 </body>
