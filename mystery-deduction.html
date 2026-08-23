@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜推理</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2210">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2210">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
+  <style>.deduction-question .en{font-size:22px}.deduction-question .ja{font-size:17px;line-height:1.7}.deduction-intro .en{font-size:21px}.deduction-intro .ja{font-size:16px}</style>
 </head>
 <body>
   <main class="mystery-app">
@@ -14,7 +15,7 @@
     <p class="chapter-label">DEDUCTION / 推理</p>
 
     <section id="contradictionPhase">
-      <section class="story-card"><div class="en">Find the contradiction.</div><div class="ja">証拠と証言を1つずつ選んで、矛盾を見つけよう。</div></section>
+      <section class="story-card deduction-intro"><div class="en">Find the contradiction.</div><div class="ja">証拠と証言を1つずつ選んで、矛盾を見つけよう。</div></section>
       <div class="deduction-columns">
         <section class="deduction-box">
           <h2>EVIDENCE / 証拠</h2>
@@ -30,7 +31,7 @@
     </section>
 
     <section id="culpritPhase" class="hidden">
-      <section class="story-card"><div class="en" id="qEn"></div><div class="ja" id="qJa"></div></section>
+      <section class="story-card deduction-question"><div class="en" id="qEn"></div><div class="ja" id="qJa"></div></section>
       <section class="contradiction-found"><strong>CONTRADICTION / 矛盾</strong><div id="clueJa"></div></section>
       <div class="choice-list" id="choices"></div>
       <div class="result-box" id="result"></div>
@@ -99,7 +100,7 @@
       });
       choices.appendChild(btn);
     });
-    next.addEventListener('click',()=>{MysteryGame.setStage('hint');location.href='mystery-scene.html?phase=hint';});
+    next.addEventListener('click',()=>{MysteryGame.setStage('hint',{hintPage:0});location.href='mystery-scene.html?phase=hint';});
 
     const state=MysteryGame.loadState()||{};
     if(state.contradictionFound){document.getElementById('contradictionPhase').classList.add('hidden');culpritPhase.classList.remove('hidden');}
