@@ -8,100 +8,378 @@
   <title>ダンジョン探索</title>
   <style>
     *{box-sizing:border-box}
-    :root{--bg:#eee8e2;--paper:#fffdfb;--ink:#332c28;--line:#cfc2b7;--floor:#cdbcaa}
+    :root{--bg:#eee8e2;--paper:#fffdfb;--ink:#332c28;--line:#cfc2b7;--floor:#cdbcaa;--dark:#4f4742;--danger:#743a38;--gold:#b7863b}
     html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
     body{min-height:100dvh;overflow-x:hidden}
     button,a{font:inherit}
     button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
-    .app{width:min(100%,560px);min-height:100dvh;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+    .app{width:min(100%,560px);min-height:100dvh;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
     .topbar{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px}
     .topbar h1{margin:0;text-align:center;font-size:22px;line-height:1.2}
     .icon-btn{width:46px;height:46px;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);font-size:23px;font-weight:900;display:flex;align-items:center;justify-content:center;text-decoration:none}
     .status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .status-box{min-height:54px;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:7px 8px;text-align:center}
     .status-box small{display:block;font-size:14px;color:#7b6b61;margin-bottom:2px}.status-box strong{font-size:18px}
+    .complete-banner{display:none;border:2px solid #b78a49;border-radius:15px;background:#fff8e8;padding:11px 12px;text-align:center;font-size:17px;font-weight:800;line-height:1.45;color:#624a28}
+    .complete-banner.show{display:block}
     .map-card{border:1px solid var(--line);border-radius:18px;background:#d8cec4;padding:10px;box-shadow:0 5px 18px rgba(61,47,39,.06)}
     .map-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px}.map-head strong{font-size:18px}.map-head span{font-size:15px;color:#6d5e55}
-    .map-wrap{height:min(46dvh,390px);min-height:270px;border-radius:13px;background:#282523;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px;-webkit-overflow-scrolling:touch}
+    .map-wrap{height:min(44dvh,370px);min-height:260px;border-radius:13px;background:#282523;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px;-webkit-overflow-scrolling:touch}
     .map{display:grid;gap:4px;align-items:center;justify-items:center;margin:auto}
     .tile{position:relative;width:var(--tile-size);height:var(--tile-size);border-radius:9px;background:#5a5350;border:2px solid #272321;box-shadow:inset 0 0 0 4px #494340;overflow:hidden}
     .tile::after{content:"";position:absolute;inset:24%;border-radius:5px;background:var(--floor);box-shadow:inset 0 0 0 2px #ad9987;z-index:1}
     .path{position:absolute;background:var(--floor);z-index:1}.path.up{left:35%;top:0;width:30%;height:52%}.path.down{left:35%;bottom:0;width:30%;height:52%}.path.left{left:0;top:35%;width:52%;height:30%}.path.right{right:0;top:35%;width:52%;height:30%}
-    .tile.current{outline:4px solid #f6ca68;outline-offset:1px}.tile.start::before{content:"S";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:20px;font-weight:900;color:#614c3e}.tile.locked::before{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:17px}.tile.final::before{content:"★";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:22px;font-weight:900;color:#6d4a27}
+    .tile.current{outline:4px solid #f6ca68;outline-offset:1px}.tile.start::before{content:"S";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:20px;font-weight:900;color:#614c3e}.tile.locked::before{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;font-size:17px}
     .tile-roll{position:absolute;right:3px;bottom:1px;z-index:4;font-size:11px;font-weight:900;color:#3d332d;background:rgba(255,255,255,.72);border-radius:5px;padding:0 3px}
     .panel{border:1px solid var(--line);border-radius:17px;background:var(--paper);padding:12px}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.panel-title strong{font-size:18px}.dice-result{font-size:17px;font-weight:800;color:#705849}.message{min-height:54px;margin:0;font-size:18px;line-height:1.55;color:#4f433c}
-    .direction-area{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:54px 54px;gap:8px;margin-top:10px}.dir-btn,.backtrack-btn,.battle-btn,.main-btn{min-height:52px;border:1px solid #ac9b8e;border-radius:14px;background:#fff;color:#3f352f;font-size:19px;font-weight:900}.dir-btn:active,.backtrack-btn:active,.battle-btn:active,.main-btn:active{transform:translateY(1px);background:#eee6df}.dir-btn.up{grid-column:2;grid-row:1}.dir-btn.left{grid-column:1;grid-row:2}.dir-btn.right{grid-column:3;grid-row:2}.dir-btn.down{grid-column:2;grid-row:2}.dir-btn[hidden]{display:none}.backtrack-btn{width:100%;margin-top:8px;background:#eee6df}.backtrack-btn[hidden]{display:none}
-    .battle{margin-top:10px;padding:10px;border:1px solid #d1b1ae;border-radius:14px;background:#fff7f6}.battle[hidden]{display:none}.battle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:18px;margin-bottom:8px}.battle-btn{width:100%;background:#7f504b;color:#fff;border-color:#7f504b}
+    .direction-area{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:56px 56px;gap:8px;margin-top:10px}.dir-btn,.backtrack-btn,.battle-btn,.return-btn,.main-btn{min-height:54px;border:1px solid #ac9b8e;border-radius:14px;background:#fff;color:#3f352f;font-size:19px;font-weight:900}.dir-btn:active,.backtrack-btn:active,.battle-btn:active,.return-btn:active,.main-btn:active{transform:translateY(1px);background:#eee6df}.dir-btn.up{grid-column:2;grid-row:1}.dir-btn.left{grid-column:1;grid-row:2}.dir-btn.right{grid-column:3;grid-row:2}.dir-btn.down{grid-column:2;grid-row:2}.dir-btn[hidden]{display:none}.backtrack-btn{width:100%;margin-top:8px;background:#eee6df}.backtrack-btn[hidden]{display:none}
+    .battle{margin-top:10px;padding:12px;border:2px solid #b8726d;border-radius:14px;background:#fff7f6}.battle[hidden]{display:none}.battle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:18px;margin-bottom:8px}.battle-btn{width:100%;background:#7f504b;color:#fff;border-color:#7f504b}
+    .return-btn{display:none;width:100%;margin-top:10px;background:#5b4739;color:#fff;border-color:#5b4739}.return-btn.show{display:block}
     .log{max-height:112px;overflow:auto;margin-top:8px;padding-top:8px;border-top:1px solid #e2d9d2}.log p{margin:0 0 5px;font-size:16px;line-height:1.45;color:#76665c}.bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.main-btn{text-decoration:none;display:flex;align-items:center;justify-content:center;background:#fff}
-    .modal{position:fixed;inset:0;z-index:20;background:rgba(28,23,20,.68);display:flex;align-items:center;justify-content:center;padding:20px}.modal[hidden]{display:none}.modal-card{width:min(100%,430px);border-radius:22px;background:#fff;padding:24px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modal-card h2{margin:0 0 10px;font-size:27px}.modal-card p{margin:0 0 18px;font-size:18px;line-height:1.65;color:#6c5c53}.modal-card .main-btn{width:100%;min-height:58px;background:#51443d;color:#fff;border-color:#51443d}
-    @media(max-height:720px){.map-wrap{height:38dvh;min-height:230px}.status-box{min-height:48px;padding:4px 6px}.panel{padding:10px}.message{min-height:46px}}
+    .modal{position:fixed;inset:0;z-index:30;background:rgba(25,19,18,.78);display:flex;align-items:center;justify-content:center;padding:20px}.modal[hidden]{display:none}.modal-card{width:min(100%,430px);border-radius:22px;background:#fff;padding:24px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.28)}.modal-card h2{margin:0 0 10px;font-size:27px}.modal-card p{margin:0 0 18px;font-size:18px;line-height:1.65;color:#6c5c53}
+    .encounter-card{position:relative;overflow:hidden;border:3px solid #5e3734;background:linear-gradient(#2f2625,#1f1919);color:#fff;animation:encounterPop .2s ease-out}
+    .encounter-card::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle,rgba(188,80,68,.28),transparent 55%);animation:pulse 1s infinite alternate;pointer-events:none}
+    .encounter-kicker{position:relative;margin:0 0 8px;font-size:18px;font-weight:900;letter-spacing:.12em;color:#f0aaa2}.enemy-icon{position:relative;font-size:72px;line-height:1.1;margin:8px 0}.encounter-card h2{position:relative;font-size:30px;margin:0 0 8px}.encounter-card p{position:relative;color:#f1dedb}.encounter-start{position:relative;width:100%;min-height:58px;border:1px solid #d69991;border-radius:14px;background:#8c4944;color:#fff;font-size:20px;font-weight:900}
+    @keyframes encounterPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}@keyframes pulse{from{opacity:.45}to{opacity:1}}
+    @media(max-height:720px){.map-wrap{height:36dvh;min-height:220px}.status-box{min-height:48px;padding:4px 6px}.panel{padding:10px}.message{min-height:46px}.enemy-icon{font-size:58px}}
   </style>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <a class="icon-btn" href="dungeon-top.html?v=20260823-2318" aria-label="ダンジョントップへ戻る">←</a>
+      <a class="icon-btn" href="dungeon-top.html?v=20260823-2320" aria-label="ダンジョントップへ戻る">←</a>
       <h1>ダンジョン探索</h1>
       <button id="saveBtn" class="icon-btn" type="button" aria-label="セーブ">💾</button>
     </header>
+
     <section class="status" aria-label="状態">
       <div class="status-box"><small>LEVEL</small><strong id="levelText">1</strong></div>
       <div class="status-box"><small>HP</small><strong id="hpText">6 / 6</strong></div>
       <div class="status-box"><small>MAP</small><strong><span id="tileCount">1</span> / 8</strong></div>
     </section>
+
+    <div id="completeBanner" class="complete-banner">全マス開放！ LEVEL 1 CLEAR<br>帰っても、まだ中を歩き回ってもかまいません。</div>
+
     <section class="map-card">
       <div class="map-head"><strong>MAP</strong><span>黄色の枠＝現在地</span></div>
       <div class="map-wrap"><div id="map" class="map" aria-label="ダンジョンマップ"></div></div>
     </section>
+
     <section class="panel">
       <div class="panel-title"><strong id="placeName">スタート</strong><span id="diceResult" class="dice-result">🎲 —</span></div>
       <p id="message" class="message">進みたい方向を選んでください。</p>
       <div id="directionArea" class="direction-area" aria-label="進む方向">
-        <button class="dir-btn up" data-dir="up" type="button">↑</button><button class="dir-btn left" data-dir="left" type="button">←</button><button class="dir-btn right" data-dir="right" type="button">→</button><button class="dir-btn down" data-dir="down" type="button">↓</button>
+        <button class="dir-btn up" data-dir="up" type="button">↑</button>
+        <button class="dir-btn left" data-dir="left" type="button">←</button>
+        <button class="dir-btn right" data-dir="right" type="button">→</button>
+        <button class="dir-btn down" data-dir="down" type="button">↓</button>
       </div>
       <button id="backtrackBtn" class="backtrack-btn" type="button">ひとつ戻る</button>
-      <div id="battleBox" class="battle" hidden><div class="battle-row"><strong id="enemyName">敵</strong><span>敵HP <b id="enemyHp">1</b></span></div><button id="battleBtn" class="battle-btn" type="button">サイコロを振って戦う</button></div>
+
+      <div id="battleBox" class="battle" hidden>
+        <div class="battle-row"><strong id="enemyName">敵</strong><span>敵HP <b id="enemyHp">1</b></span></div>
+        <button id="battleBtn" class="battle-btn" type="button">サイコロを振って戦う</button>
+      </div>
+
+      <button id="returnBtn" class="return-btn" type="button">ダンジョンから帰る</button>
       <div id="log" class="log" aria-label="探索記録"></div>
     </section>
-    <div class="bottom-actions"><a class="main-btn" href="dungeon-top.html?v=20260823-2318">ダンジョントップ</a><a class="main-btn" href="story-menu.html?v=20260823-2318">物語選択</a></div>
+
+    <div class="bottom-actions">
+      <a class="main-btn" href="dungeon-top.html?v=20260823-2320">ダンジョントップ</a>
+      <a class="main-btn" href="story-menu.html?v=20260823-2320">物語選択</a>
+    </div>
   </main>
-  <div id="clearModal" class="modal" hidden><div class="modal-card"><h2 id="clearTitle">LEVEL 1 CLEAR</h2><p id="clearText">8マスの探索を終えました。</p><a class="main-btn" href="dungeon-top.html?v=20260823-2318">ダンジョントップへ</a></div></div>
+
+  <div id="encounterModal" class="modal" hidden>
+    <div class="modal-card encounter-card">
+      <p class="encounter-kicker">ENCOUNTER!</p>
+      <div id="encounterIcon" class="enemy-icon">👹</div>
+      <h2 id="encounterName">敵が現れた！</h2>
+      <p id="encounterText">暗がりから何かが飛び出してきました。</p>
+      <button id="encounterStart" class="encounter-start" type="button">戦う</button>
+    </div>
+  </div>
+
+  <div id="gameOverModal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>GAME OVER</h2>
+      <p>HPが0になりました。ダンジョントップから新しく始められます。</p>
+      <a class="main-btn" href="dungeon-top.html?v=20260823-2320">ダンジョントップへ</a>
+    </div>
+  </div>
+
 <script>
 (()=>{
   'use strict';
-  const SAVE_KEY='englishGameDungeonSaveV1',MAX_TILES=8,MAX_HP=6;
+  const SAVE_KEY='englishGameDungeonSaveV1';
+  const MAX_TILES=8;
+  const MAX_HP=6;
   const DIRS={up:{dx:0,dy:-1},down:{dx:0,dy:1},left:{dx:-1,dy:0},right:{dx:1,dy:0}};
-  const OPP={up:'down',down:'up',left:'right',right:'left'},LEFT={up:'left',left:'down',down:'right',right:'up'},RIGHT={up:'right',right:'down',down:'left',left:'up'},DIR_LABEL={up:'上',down:'下',left:'左',right:'右'};
+  const OPP={up:'down',down:'up',left:'right',right:'left'};
+  const LEFT={up:'left',left:'down',down:'right',right:'up'};
+  const RIGHT={up:'right',right:'down',down:'left',left:'up'};
+  const DIR_LABEL={up:'上',down:'下',left:'左',right:'右'};
   const shapeNames={start:'スタート',straight:'直進通路',leftTurn:'左曲がり',rightTurn:'右曲がり',tJunction:'T字路',cross:'十字路',deadend:'行き止まり',door:'扉',locked:'鍵のかかった扉',room:'大広間',hidden:'隠し通路',chamber:'小部屋'};
-  const enemies=[{name:'大ネズミ',hp:1,reward:'食料'},{name:'スライム',hp:1,reward:'回復薬'},{name:'ゴブリン',hp:2,reward:'鍵'},{name:'骸骨兵',hp:2,reward:'銅貨'},{name:'オーク',hp:3,reward:'良い装備'},{name:'ダンジョンの守護者',hp:4,reward:'地図の断片'}];
+  const enemies=[
+    {name:'大ネズミ',icon:'🐀',hp:1,reward:'食料',text:'物陰から大きなネズミが飛びかかってきた！'},
+    {name:'スライム',icon:'🟢',hp:1,reward:'回復薬',text:'足元の液体がうごめき、スライムが姿を現した！'},
+    {name:'ゴブリン',icon:'👺',hp:2,reward:'鍵',text:'曲がり角の向こうからゴブリンが武器を構えて現れた！'},
+    {name:'骸骨兵',icon:'💀',hp:2,reward:'銅貨',text:'散らばった骨が組み上がり、骸骨兵が立ちふさがった！'},
+    {name:'オーク',icon:'👹',hp:3,reward:'良い装備',text:'重い足音が響く。大きなオークがこちらを睨んでいる！'},
+    {name:'ダンジョンの守護者',icon:'🗿',hp:4,reward:'地図の断片',text:'石壁の一部が動き出した。ダンジョンの守護者だ！'}
+  ];
   const finds=['銅貨','食料','回復薬','鍵','良い装備','地図の断片'];
+
   let state=null;
-  const $=id=>document.getElementById(id),roll=()=>Math.floor(Math.random()*6)+1,key=(x,y)=>`${x},${y}`;
-  function freshState(){return{version:2,level:1,hp:MAX_HP,tiles:{},current:{x:0,y:0},history:[{x:0,y:0}],inventory:[],logs:[],encounter:null,cleared:false,lastDice:null,pendingClear:false};}
-  function initNew(){state=freshState();state.tiles[key(0,0)]={x:0,y:0,type:'start',label:'スタート',roll:0,exits:['up','down','left','right'],eventDone:true};addLog('ダンジョンに入りました。');save();}
-  function migrate(){if(!state)return;state.pendingClear=!!state.pendingClear;Object.values(state.tiles||{}).forEach(t=>{if(t.type==='stairs'){t.type='chamber';t.label='小部屋';t.exits=t.exits&&t.exits.length?t.exits:['down'];}});if(state.cleared&&state.hp>0&&Object.keys(state.tiles||{}).length<MAX_TILES)state.cleared=false;state.version=2;}
-  function load(){const forceNew=new URLSearchParams(location.search).get('new')==='1';if(forceNew){initNew();return;}try{const raw=localStorage.getItem(SAVE_KEY);state=raw?JSON.parse(raw):null;}catch(e){state=null;}if(!state||!state.tiles)initNew();else migrate();}
-  function save(show=false){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}if(show)$('message').textContent='セーブしました。';}
-  function addLog(text){state.logs.push(text);if(state.logs.length>12)state.logs=state.logs.slice(-12);}
-  function getTile(x=state.current.x,y=state.current.y){return state.tiles[key(x,y)];}function tileCount(){return Object.keys(state.tiles).length;}
-  function buildTileForMove(dir){const back=OPP[dir];let r=roll(),type='straight',exits=[],specialRoll=null;if(r===1){type='straight';exits=[back,dir];}if(r===2){type='leftTurn';exits=[back,LEFT[dir]];}if(r===3){type='rightTurn';exits=[back,RIGHT[dir]];}if(r===4){type='tJunction';exits=[back,LEFT[dir],RIGHT[dir]];}if(r===5){type='cross';exits=['up','down','left','right'];}if(r===6){specialRoll=roll();if(specialRoll===1){type='deadend';exits=[back];}if(specialRoll===2){type='door';exits=[back,dir];}if(specialRoll===3){type='locked';exits=[back];}if(specialRoll===4){type='room';exits=['up','down','left','right'];}if(specialRoll===5){type='hidden';exits=[back,dir,Math.random()<.5?LEFT[dir]:RIGHT[dir]];}if(specialRoll===6){type='chamber';exits=[back];}}return{type,label:shapeNames[type],exits:[...new Set(exits)],roll:r,specialRoll};}
-  function canUseExit(tile,dir){if(!tile||!tile.exits.includes(dir))return false;const d=DIRS[dir],nx=tile.x+d.dx,ny=tile.y+d.dy,neighbor=getTile(nx,ny);if(!neighbor)return tileCount()<MAX_TILES;return neighbor.exits.includes(OPP[dir]);}
-  function previousCoord(){return state.history.length>1?state.history[state.history.length-2]:null;}function dirToPrevious(){const p=previousCoord();if(!p)return null;const dx=p.x-state.current.x,dy=p.y-state.current.y;return Object.keys(DIRS).find(d=>DIRS[d].dx===dx&&DIRS[d].dy===dy)||null;}
-  function move(dir){if(state.encounter||state.cleared)return;const tile=getTile();if(!canUseExit(tile,dir))return;const d=DIRS[dir],nx=state.current.x+d.dx,ny=state.current.y+d.dy;let target=getTile(nx,ny),isNew=!target;if(isNew){const made=buildTileForMove(dir);target={x:nx,y:ny,type:made.type,label:made.label,roll:made.roll,specialRoll:made.specialRoll,exits:made.exits,eventDone:false,finalTile:tileCount()+1===MAX_TILES};state.tiles[key(nx,ny)]=target;state.lastDice=made.specialRoll?`${made.roll} → 特殊 ${made.specialRoll}`:`${made.roll}`;addLog(`🎲 ${made.roll}：${made.label}`+(made.specialRoll?`（特殊${made.specialRoll}）`:''));}else{state.lastDice=null;addLog(`${DIR_LABEL[dir]}の通路へ移動しました。`);}state.current={x:nx,y:ny};state.history.push({x:nx,y:ny});if(target.type==='locked'&&!state.inventory.includes('鍵'))addLog('鍵がないため、この先へは進めません。');else if(target.type==='locked'&&state.inventory.includes('鍵')){state.inventory.splice(state.inventory.indexOf('鍵'),1);if(!target.exits.includes(dir))target.exits.push(dir);target.type='door';target.label='鍵を開けた扉';addLog('鍵を使って扉を開けました。');}if(!target.eventDone){resolveEvent(target);target.eventDone=true;}if(state.hp<=0){save();render();showGameOver();return;}if(target.finalTile){state.pendingClear=true;if(!state.encounter)completeLevel();}save();render();}
-  function backtrack(){if(state.encounter||state.cleared||state.history.length<=1)return;state.history.pop();const p=state.history[state.history.length-1];state.current={x:p.x,y:p.y};state.lastDice=null;addLog('ひとつ前のマスへ戻りました。');save();render();}
-  function resolveEvent(){const r=roll();if(r===1)addLog('イベント：何もなし。静かな場所です。');if(r===2){const traces=['足跡','血痕','壁の傷','古い落書き'];addLog(`イベント：${traces[Math.floor(Math.random()*traces.length)]}を見つけました。`);}if(r===3){const c=roll();if(c>=4)addLog(`イベント：障害。判定${c}で無事に突破。`);else{damage(1);addLog(`イベント：障害。判定${c}で失敗、HP-1。`);}}if(r===4){const f=finds[roll()-1];state.inventory.push(f);addLog(`イベント：発見物「${f}」を入手。`);if(f==='食料'&&state.hp<MAX_HP){state.hp++;addLog('食料を使いHP+1。');}if(f==='回復薬'&&state.hp<MAX_HP){state.hp=Math.min(MAX_HP,state.hp+2);addLog('回復薬を使いHP+2。');}}if(r===5)startEnemy();if(r===6){const s=roll();if(s===1){const c=roll();if(c>=4)addLog(`特殊イベント：罠。判定${c}で回避。`);else{damage(1);addLog(`特殊イベント：罠。判定${c}でHP-1。`);}}if(s===2){const f=finds[roll()-1];state.inventory.push(f);addLog(`特殊イベント：遺体のそばで「${f}」を発見。`);}if(s===3)addLog('特殊イベント：別の探索者から近くの道の情報を聞きました。');if(s===4){const c=roll();if(c>=4){state.hp=Math.min(MAX_HP,state.hp+1);addLog('特殊イベント：祭壇。HP+1。');}else{damage(1);addLog('特殊イベント：祭壇。HP-1。');}}if(s===5)startEnemy(true);if(s===6){state.hp=Math.min(MAX_HP,state.hp+2);addLog('特殊イベント：安全な休息地点。HP+2。');}}}
-  function startEnemy(strong=false){const er=roll(),base=enemies[er-1];state.encounter={name:base.name,hp:base.hp+(strong?1:0),maxHp:base.hp+(strong?1:0),reward:base.reward,roll:er};addLog(`敵出現：${base.name}${strong?'（巣）':''}！`);}
-  function battle(){if(!state.encounter)return;const r=roll();state.lastDice=`戦闘 ${r}`;if(r>=4){state.encounter.hp--;addLog(`戦闘🎲${r}：攻撃成功。敵HP-1。`);if(state.encounter.hp<=0){const reward=state.encounter.reward;state.inventory.push(reward);addLog(`${state.encounter.name}を倒しました。「${reward}」を入手。`);state.encounter=null;}}else{damage(1);addLog(`戦闘🎲${r}：攻撃を受けHP-1。`);}if(state.hp<=0){save();render();showGameOver();return;}if(!state.encounter&&state.pendingClear){completeLevel();return;}save();render();}
-  function damage(n){state.hp=Math.max(0,state.hp-n);}function completeLevel(){state.pendingClear=false;state.cleared=true;addLog('8マスの探索を終えました。LEVEL 1終了です。');save();render();showClear();}
-  function renderMap(){const tiles=Object.values(state.tiles);let minX=Math.min(...tiles.map(t=>t.x)),maxX=Math.max(...tiles.map(t=>t.x)),minY=Math.min(...tiles.map(t=>t.y)),maxY=Math.max(...tiles.map(t=>t.y));if(maxX-minX+1<3){minX--;maxX++;}if(maxY-minY+1<3){minY--;maxY++;}const cols=maxX-minX+1,rows=maxY-minY+1,size=Math.max(38,Math.min(58,Math.floor((window.innerWidth-70)/Math.max(cols,3)))),map=$('map');map.style.setProperty('--tile-size',size+'px');map.style.gridTemplateColumns=`repeat(${cols}, ${size}px)`;map.style.gridTemplateRows=`repeat(${rows}, ${size}px)`;map.innerHTML='';for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const t=getTile(x,y),cell=document.createElement('div');if(!t){cell.style.width=size+'px';cell.style.height=size+'px';map.appendChild(cell);continue;}cell.className='tile';if(t.type==='start')cell.classList.add('start');if(t.type==='locked')cell.classList.add('locked');if(t.finalTile)cell.classList.add('final');if(x===state.current.x&&y===state.current.y)cell.classList.add('current');t.exits.forEach(d=>{const p=document.createElement('span');p.className=`path ${d}`;cell.appendChild(p);});if(t.roll){const r=document.createElement('span');r.className='tile-roll';r.textContent=t.roll;cell.appendChild(r);}cell.title=t.label;map.appendChild(cell);}}
-  function renderDirections(){const current=getTile(),backDir=dirToPrevious();document.querySelectorAll('.dir-btn').forEach(btn=>{const dir=btn.dataset.dir,forward=dir!==backDir&&canUseExit(current,dir);btn.hidden=!forward;btn.disabled=!!state.encounter||state.cleared;});$('backtrackBtn').hidden=state.history.length<=1||!!state.encounter||state.cleared;}
+  const $=id=>document.getElementById(id);
+  const roll=()=>Math.floor(Math.random()*6)+1;
+  const key=(x,y)=>`${x},${y}`;
+
+  function freshState(){
+    return {version:3,level:1,hp:MAX_HP,tiles:{},current:{x:0,y:0},history:[{x:0,y:0}],inventory:[],logs:[],encounter:null,mapComplete:false,gameOver:false,lastDice:null};
+  }
+
+  function initNew(){
+    state=freshState();
+    state.tiles[key(0,0)]={x:0,y:0,type:'start',label:'スタート',roll:0,exits:['up','down','left','right'],eventDone:true};
+    addLog('ダンジョンに入りました。');
+    save();
+  }
+
+  function migrate(){
+    if(!state)return;
+    Object.values(state.tiles||{}).forEach(t=>{
+      if(t.type==='stairs'){t.type='chamber';t.label='小部屋';}
+    });
+    state.mapComplete=Object.keys(state.tiles||{}).length>=MAX_TILES;
+    state.gameOver=state.hp<=0;
+    delete state.cleared;
+    delete state.pendingClear;
+    state.version=3;
+  }
+
+  function load(){
+    const forceNew=new URLSearchParams(location.search).get('new')==='1';
+    if(forceNew){initNew();return;}
+    try{const raw=localStorage.getItem(SAVE_KEY);state=raw?JSON.parse(raw):null;}catch(e){state=null;}
+    if(!state||!state.tiles)initNew();else migrate();
+  }
+
+  function save(show=false){
+    try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+    if(show)$('message').textContent='セーブしました。';
+  }
+  function addLog(text){state.logs.push(text);if(state.logs.length>14)state.logs=state.logs.slice(-14);}
+  function getTile(x=state.current.x,y=state.current.y){return state.tiles[key(x,y)];}
+  function tileCount(){return Object.keys(state.tiles).length;}
+
+  function checkMapComplete(){
+    if(!state.mapComplete&&tileCount()>=MAX_TILES){
+      state.mapComplete=true;
+      addLog('全8マスを開放しました。LEVEL 1 CLEAR！');
+    }
+  }
+
+  function buildTileForMove(dir){
+    const back=OPP[dir];
+    const r=roll();
+    let type='straight',exits=[],specialRoll=null;
+    if(r===1){type='straight';exits=[back,dir];}
+    if(r===2){type='leftTurn';exits=[back,LEFT[dir]];}
+    if(r===3){type='rightTurn';exits=[back,RIGHT[dir]];}
+    if(r===4){type='tJunction';exits=[back,LEFT[dir],RIGHT[dir]];}
+    if(r===5){type='cross';exits=['up','down','left','right'];}
+    if(r===6){
+      specialRoll=roll();
+      if(specialRoll===1){type='deadend';exits=[back];}
+      if(specialRoll===2){type='door';exits=[back,dir];}
+      if(specialRoll===3){type='locked';exits=[back];}
+      if(specialRoll===4){type='room';exits=['up','down','left','right'];}
+      if(specialRoll===5){type='hidden';exits=[back,dir,Math.random()<.5?LEFT[dir]:RIGHT[dir]];}
+      if(specialRoll===6){type='chamber';exits=[back];}
+    }
+    return {type,label:shapeNames[type],exits:[...new Set(exits)],roll:r,specialRoll,forward:dir};
+  }
+
+  function canUseExit(tile,dir){
+    if(!tile||!tile.exits.includes(dir))return false;
+    const d=DIRS[dir],nx=tile.x+d.dx,ny=tile.y+d.dy;
+    const neighbor=getTile(nx,ny);
+    if(neighbor)return neighbor.exits.includes(OPP[dir]);
+    return !state.mapComplete&&tileCount()<MAX_TILES;
+  }
+
+  function previousCoord(){return state.history.length>1?state.history[state.history.length-2]:null;}
+  function dirToPrevious(){
+    const p=previousCoord();if(!p)return null;
+    const dx=p.x-state.current.x,dy=p.y-state.current.y;
+    return Object.keys(DIRS).find(d=>DIRS[d].dx===dx&&DIRS[d].dy===dy)||null;
+  }
+
+  function move(dir){
+    if(state.encounter||state.gameOver)return;
+    const tile=getTile();
+    if(!canUseExit(tile,dir))return;
+    const d=DIRS[dir],nx=state.current.x+d.dx,ny=state.current.y+d.dy;
+    let target=getTile(nx,ny);
+
+    if(!target){
+      if(tileCount()>=MAX_TILES)return;
+      const made=buildTileForMove(dir);
+      target={x:nx,y:ny,type:made.type,label:made.label,roll:made.roll,specialRoll:made.specialRoll,exits:made.exits,eventDone:false,forward:made.forward};
+      state.tiles[key(nx,ny)]=target;
+      state.lastDice=made.specialRoll?`${made.roll} → 特殊 ${made.specialRoll}`:`${made.roll}`;
+      addLog(`🎲 ${made.roll}：${made.label}`+(made.specialRoll?`（特殊${made.specialRoll}）`:''));
+      checkMapComplete();
+    }else{
+      state.lastDice=null;
+      addLog(`${DIR_LABEL[dir]}の通路へ移動しました。`);
+    }
+
+    state.current={x:nx,y:ny};
+    state.history.push({x:nx,y:ny});
+
+    if(target.type==='locked'){
+      const keyIndex=state.inventory.indexOf('鍵');
+      if(keyIndex>=0){
+        state.inventory.splice(keyIndex,1);
+        if(target.forward&&!target.exits.includes(target.forward))target.exits.push(target.forward);
+        target.type='door';target.label='鍵を開けた扉';
+        addLog('鍵を使って扉を開けました。');
+      }else addLog('鍵のかかった扉です。鍵がありません。');
+    }
+
+    if(!target.eventDone){resolveEvent(target);target.eventDone=true;}
+    save();render();
+    if(state.hp<=0)showGameOver();
+  }
+
+  function backtrack(){
+    if(state.encounter||state.gameOver||state.history.length<=1)return;
+    state.history.pop();
+    const p=state.history[state.history.length-1];
+    state.current={x:p.x,y:p.y};state.lastDice=null;
+    addLog('ひとつ前のマスへ戻りました。');
+    save();render();
+  }
+
+  function resolveEvent(tile){
+    const r=roll();
+    if(r===1)addLog('イベント：何もなし。静かな場所です。');
+    if(r===2){const traces=['足跡','血痕','壁の傷','古い落書き'];addLog(`イベント：${traces[Math.floor(Math.random()*traces.length)]}を見つけました。`);}
+    if(r===3){const c=roll();if(c>=4)addLog(`イベント：障害。判定${c}で無事に突破。`);else{damage(1);addLog(`イベント：障害。判定${c}で失敗、HP-1。`);}}
+    if(r===4){
+      const f=finds[roll()-1];state.inventory.push(f);addLog(`イベント：発見物「${f}」を入手。`);
+      if(f==='食料'&&state.hp<MAX_HP){state.hp++;addLog('食料を使いHP+1。');}
+      if(f==='回復薬'&&state.hp<MAX_HP){state.hp=Math.min(MAX_HP,state.hp+2);addLog('回復薬を使いHP+2。');}
+    }
+    if(r===5)startEnemy(false);
+    if(r===6){
+      const s=roll();
+      if(s===1){const c=roll();if(c>=4)addLog(`特殊イベント：罠。判定${c}で回避。`);else{damage(1);addLog(`特殊イベント：罠。判定${c}でHP-1。`);}}
+      if(s===2){const f=finds[roll()-1];state.inventory.push(f);addLog(`特殊イベント：遺体のそばで「${f}」を発見。`);}
+      if(s===3)addLog('特殊イベント：別の探索者から近くの道の情報を聞きました。');
+      if(s===4){const c=roll();if(c>=4){state.hp=Math.min(MAX_HP,state.hp+1);addLog('特殊イベント：祭壇。HP+1。');}else{damage(1);addLog('特殊イベント：祭壇。HP-1。');}}
+      if(s===5)startEnemy(true);
+      if(s===6){state.hp=Math.min(MAX_HP,state.hp+2);addLog('特殊イベント：安全な休息地点。HP+2。');}
+    }
+  }
+
+  function startEnemy(strong=false){
+    const er=roll(),base=enemies[er-1];
+    state.encounter={name:base.name,icon:base.icon,text:base.text,hp:base.hp+(strong?1:0),maxHp:base.hp+(strong?1:0),reward:base.reward,roll:er,strong,intro:true};
+    addLog(`敵出現：${base.name}${strong?'（巣）':''}！`);
+  }
+
+  function showEncounter(){
+    if(!state.encounter||!state.encounter.intro)return;
+    $('encounterIcon').textContent=state.encounter.icon||'👹';
+    $('encounterName').textContent=`${state.encounter.name}が現れた！`;
+    $('encounterText').textContent=(state.encounter.strong?'ここは魔物の巣だった。 ':'')+(state.encounter.text||'敵がこちらに襲いかかってきた！');
+    $('encounterModal').hidden=false;
+  }
+
+  function battle(){
+    if(!state.encounter)return;
+    const r=roll();state.lastDice=`戦闘 ${r}`;
+    if(r>=4){
+      state.encounter.hp--;addLog(`戦闘🎲${r}：攻撃成功。敵HP-1。`);
+      if(state.encounter.hp<=0){
+        const reward=state.encounter.reward,name=state.encounter.name;
+        state.inventory.push(reward);state.encounter=null;
+        addLog(`${name}を倒しました。「${reward}」を入手。`);
+      }
+    }else{damage(1);addLog(`戦闘🎲${r}：攻撃を受けHP-1。`);}
+    save();render();
+    if(state.hp<=0)showGameOver();
+  }
+
+  function damage(n){state.hp=Math.max(0,state.hp-n);if(state.hp<=0)state.gameOver=true;}
+
+  function renderMap(){
+    const tiles=Object.values(state.tiles);
+    let minX=Math.min(...tiles.map(t=>t.x)),maxX=Math.max(...tiles.map(t=>t.x)),minY=Math.min(...tiles.map(t=>t.y)),maxY=Math.max(...tiles.map(t=>t.y));
+    if(maxX-minX+1<3){minX--;maxX++;}if(maxY-minY+1<3){minY--;maxY++;}
+    const cols=maxX-minX+1,rows=maxY-minY+1,size=Math.max(38,Math.min(58,Math.floor((window.innerWidth-70)/Math.max(cols,3))));
+    const map=$('map');map.style.setProperty('--tile-size',size+'px');map.style.gridTemplateColumns=`repeat(${cols},${size}px)`;map.style.gridTemplateRows=`repeat(${rows},${size}px)`;map.innerHTML='';
+    for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
+      const t=getTile(x,y),cell=document.createElement('div');
+      if(!t){cell.style.width=size+'px';cell.style.height=size+'px';map.appendChild(cell);continue;}
+      cell.className='tile';if(t.type==='start')cell.classList.add('start');if(t.type==='locked')cell.classList.add('locked');if(x===state.current.x&&y===state.current.y)cell.classList.add('current');
+      t.exits.forEach(d=>{const p=document.createElement('span');p.className=`path ${d}`;cell.appendChild(p);});
+      if(t.roll){const rr=document.createElement('span');rr.className='tile-roll';rr.textContent=t.roll;cell.appendChild(rr);}
+      cell.title=t.label;map.appendChild(cell);
+    }
+  }
+
+  function renderDirections(){
+    const current=getTile(),backDir=dirToPrevious();
+    document.querySelectorAll('.dir-btn').forEach(btn=>{
+      const dir=btn.dataset.dir;
+      btn.hidden=!(dir!==backDir&&canUseExit(current,dir));
+      btn.disabled=!!state.encounter||state.gameOver;
+    });
+    $('backtrackBtn').hidden=state.history.length<=1||!!state.encounter||state.gameOver;
+  }
+
   function renderLog(){$('log').innerHTML=state.logs.slice().reverse().map(x=>`<p>${escapeHtml(x)}</p>`).join('');}
-  function render(){$('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';$('message').textContent=state.encounter?`${state.encounter.name}と戦闘中です。`:state.cleared?'LEVEL 1の探索は終了しました。':tileCount()>=MAX_TILES?'最後のイベントを処理しています。':'道がある方向だけ押せます。未探索の先ではサイコロを振ります。';$('battleBox').hidden=!state.encounter;if(state.encounter){$('enemyName').textContent=state.encounter.name;$('enemyHp').textContent=state.encounter.hp;}renderMap();renderDirections();renderLog();}
-  function showClear(){$('clearTitle').textContent='LEVEL 1 CLEAR';$('clearText').textContent=`${tileCount()}マスの探索を終えました。レベル1はここで終了です。`;$('clearModal').hidden=false;}
-  function showGameOver(){state.encounter=null;state.pendingClear=false;state.cleared=true;save();$('clearTitle').textContent='GAME OVER';$('clearText').textContent='HPが0になりました。ダンジョントップから新しく始められます。';$('clearModal').hidden=false;render();}
+
+  function render(){
+    checkMapComplete();
+    $('levelText').textContent=state.level;$('hpText').textContent=`${state.hp} / ${MAX_HP}`;$('tileCount').textContent=tileCount();
+    const t=getTile();$('placeName').textContent=t?t.label:'ダンジョン';$('diceResult').textContent=state.lastDice?`🎲 ${state.lastDice}`:'🎲 —';
+    if(state.encounter)$('message').textContent=`${state.encounter.name}と戦闘中です。`;
+    else if(state.mapComplete)$('message').textContent='全マス開放済みです。開いた通路を自由に探索できます。帰る時は「ダンジョンから帰る」を押してください。';
+    else $('message').textContent='道がある方向だけ押せます。未探索の先ではサイコロを振ります。';
+    $('completeBanner').classList.toggle('show',state.mapComplete&&!state.gameOver);
+    $('returnBtn').classList.toggle('show',state.mapComplete&&!state.gameOver);
+    $('returnBtn').disabled=!!state.encounter;
+    $('battleBox').hidden=!state.encounter||!!(state.encounter&&state.encounter.intro);
+    if(state.encounter){$('enemyName').textContent=state.encounter.name;$('enemyHp').textContent=state.encounter.hp;}
+    renderMap();renderDirections();renderLog();showEncounter();
+  }
+
+  function showGameOver(){state.encounter=null;state.gameOver=true;save();$('encounterModal').hidden=true;$('gameOverModal').hidden=false;render();}
   function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-  document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));$('backtrackBtn').addEventListener('click',backtrack);$('battleBtn').addEventListener('click',battle);$('saveBtn').addEventListener('click',()=>{save(true);renderLog();});window.addEventListener('resize',renderMap);
-  load();render();if(state.hp<=0)showGameOver();else if(state.cleared)showClear();
+
+  document.querySelectorAll('.dir-btn').forEach(btn=>btn.addEventListener('click',()=>move(btn.dataset.dir)));
+  $('backtrackBtn').addEventListener('click',backtrack);
+  $('battleBtn').addEventListener('click',battle);
+  $('saveBtn').addEventListener('click',()=>{save(true);renderLog();});
+  $('encounterStart').addEventListener('click',()=>{
+    if(!state.encounter)return;
+    state.encounter.intro=false;$('encounterModal').hidden=true;save();render();
+  });
+  $('returnBtn').addEventListener('click',()=>{
+    if(!state.mapComplete||state.encounter)return;
+    addLog('探索を終え、ダンジョンから帰還しました。');save();
+    location.href='dungeon-top.html?v=20260823-2320';
+  });
+  window.addEventListener('resize',renderMap);
+
+  load();render();
+  if(state.gameOver||state.hp<=0)showGameOver();
 })();
 </script>
 </body>
