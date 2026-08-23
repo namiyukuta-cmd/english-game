@@ -1,0 +1,42 @@
+(()=>{
+  const SAVE_KEY='mystery_cleaner_save_v1';
+  const STAGE_URLS={room:'mystery-room.html',discovery:'mystery-discovery.html',questioning:'mystery-scene.html?phase=questioning',deduction:'mystery-deduction.html',hint:'mystery-scene.html?phase=hint',later:'mystery-later.html',complete:'mystery-room.html'};
+
+  function firstCase(){return (window.MYSTERY_CASES&&window.MYSTERY_CASES[0])||null;}
+  function loadState(){
+    try{return JSON.parse(localStorage.getItem(SAVE_KEY))||null;}catch(e){return null;}
+  }
+  function saveState(next){localStorage.setItem(SAVE_KEY,JSON.stringify(next));return next;}
+  function startNew(){
+    const c=firstCase();
+    if(!c)return null;
+    return saveState({caseId:c.id,stage:'room',completed:false});
+  }
+  function currentCase(){
+    const state=loadState();
+    const list=window.MYSTERY_CASES||[];
+    return list.find(c=>c.id===(state&&state.caseId))||firstCase();
+  }
+  function setStage(stage,extra){
+    const c=currentCase();
+    const prev=loadState()||{caseId:c?c.id:null};
+    return saveState(Object.assign({},prev,{caseId:c?c.id:prev.caseId,stage},extra||{}));
+  }
+  function stageUrl(stage){return STAGE_URLS[stage]||STAGE_URLS.room;}
+  function continueUrl(){const s=loadState();return stageUrl(s&&s.stage?s.stage:'room');}
+  function sentenceCard(item,speaker){
+    const grammar=item.grammar?`<button class="grammar-toggle" type="button">文法を見る</button><div class="grammar-card"><div class="grammar-title">${escapeHtml(item.grammar)}</div><div class="grammar-text">${escapeHtml(item.explain||'')}</div></div>`:'';
+    return `<section class="dialogue-card">${speaker?`<div class="speaker">${escapeHtml(speaker)}</div>`:''}<div class="en">${escapeHtml(item.en||'')}</div><div class="ja">${escapeHtml(item.ja||'')}</div>${grammar}</section>`;
+  }
+  function storyCard(en,ja){return `<section class="story-card"><div class="en">${escapeHtml(en||'')}</div><div class="ja">${escapeHtml(ja||'')}</div></section>`;}
+  function bindGrammar(root=document){
+    root.querySelectorAll('.grammar-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+      const card=btn.nextElementSibling;if(!card)return;
+      card.classList.toggle('open');
+      btn.textContent=card.classList.contains('open')?'文法を閉じる':'文法を見る';
+    }));
+  }
+  function escapeHtml(value){return String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
+
+  window.MysteryGame={SAVE_KEY,loadState,saveState,startNew,currentCase,setStage,stageUrl,continueUrl,sentenceCard,storyCard,bindGrammar,escapeHtml};
+})();
