@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜事情聴取</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2217">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2217">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2230">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2230">
 </head>
 <body>
   <main class="mystery-app">
@@ -38,8 +38,8 @@
         <div class="en" id="statementEn"></div>
       </div>
       <div class="page-footer">
-        <div class="page-count">TESTIMONY / 証言</div>
-        <button class="mystery-action reading-next" id="meaningBtn" type="button">What does it mean? / 意味を考える</button>
+        <div class="page-count" id="statementCount"></div>
+        <button class="mystery-action reading-next" id="meaningBtn" type="button"></button>
       </div>
     </section>
 
@@ -73,13 +73,26 @@
     const nextBtn=document.getElementById('nextBtn');
     const backToPeople=document.getElementById('backToPeople');
     let active=-1;
-    let introIndex=Math.min(Number(state.questioningIntroPage||0),1);
+    let statementPage=0;
+    let statementPages=[];
 
     document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / QUESTIONING / 事情聴取`;
+
+    function splitSentences(text,ja){
+      const re=ja?/[^。！？]+[。！？]?/g:/[^.!?]+[.!?]?/g;
+      return (String(text||'').match(re)||[String(text||'')]).map(x=>x.trim()).filter(Boolean);
+    }
+    function pairedPages(en,ja,speaker){
+      const e=splitSentences(en,false);
+      const j=splitSentences(ja,true);
+      return Array.from({length:Math.max(e.length,j.length)},(_,i)=>({speaker,en:e[i]||'',ja:j[i]||''}));
+    }
+
     const introPages=[
-      {speaker:'刑事',en:c.questioning.detective.en,ja:c.questioning.detective.ja},
-      {speaker:'SCENE / 状況',en:c.questioning.storyEn,ja:c.questioning.storyJa}
+      ...pairedPages(c.questioning.detective.en,c.questioning.detective.ja,'刑事'),
+      ...pairedPages(c.questioning.storyEn,c.questioning.storyJa,'SCENE / 状況')
     ];
+    let introIndex=Math.min(Number(state.questioningIntroPage||0),Math.max(0,introPages.length-1));
 
     function hideStages(){introStage.classList.add('hidden');menuStage.classList.add('hidden');statementStage.classList.add('hidden');translationStage.classList.add('hidden');}
     function showIntro(){hideStages();introStage.classList.remove('hidden');renderIntro();}
@@ -105,11 +118,23 @@
 
     suspectsEl.addEventListener('click',e=>{const btn=e.target.closest('[data-i]');if(!btn)return;active=Number(btn.dataset.i);openStatement(active);});
     function openStatement(i){
-      const s=c.suspects[i];hideStages();statementStage.classList.remove('hidden');
+      const s=c.suspects[i];
+      hideStages();statementStage.classList.remove('hidden');
       document.getElementById('personName').textContent=s.name+' / '+s.metaJa;
-      document.getElementById('statementEn').textContent=s.statementEn;
+      statementPages=splitSentences(s.statementEn,false);
+      statementPage=0;
+      renderStatement();
     }
-    document.getElementById('meaningBtn').addEventListener('click',()=>{if(active<0)return;openTranslation(active);});
+    function renderStatement(){
+      document.getElementById('statementEn').textContent=statementPages[statementPage]||'';
+      document.getElementById('statementCount').textContent=`${statementPage+1} / ${statementPages.length}`;
+      document.getElementById('meaningBtn').textContent=statementPage<statementPages.length-1?'Next / 次へ':'What does it mean? / 意味を考える';
+    }
+    document.getElementById('meaningBtn').addEventListener('click',()=>{
+      if(active<0)return;
+      if(statementPage<statementPages.length-1){statementPage++;renderStatement();return;}
+      openTranslation(active);
+    });
     function openTranslation(i){
       const s=c.suspects[i];hideStages();translationStage.classList.remove('hidden');
       document.getElementById('translationName').textContent=s.name;
