@@ -5,27 +5,34 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>掃除婦は朝寝る｜後日</title>
-  <link rel="stylesheet" href="css/style.css?v=20260823-2104">
-  <link rel="stylesheet" href="css/mystery.css?v=20260823-2104">
+  <link rel="stylesheet" href="css/style.css?v=20260823-2111">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2111">
 </head>
 <body>
   <main class="mystery-app">
     <header class="mystery-titlebar"><a class="mystery-back" href="mystery-scene.html?phase=hint">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
-    <p class="chapter-label">LATER / 後日</p>
+    <p class="chapter-label" id="chapterLabel">LATER / 後日</p>
     <section class="story-card"><div class="speaker">NEWS / ニュース</div><div class="en" id="newsEn"></div><div class="ja" id="newsJa"></div></section>
     <section class="story-card"><div class="en" id="closeEn"></div><div class="ja" id="closeJa"></div></section>
-    <button class="mystery-action" id="finishBtn" type="button">Back to my room. / 部屋へ戻る</button>
+    <button class="mystery-action" id="finishBtn" type="button"></button>
   </main>
-  <script src="data/mystery_cases.js?v=20260823-2104"></script>
-  <script src="js/mystery-common.js?v=20260823-2104"></script>
+  <script src="data/mystery_cases.js?v=20260823-2111"></script>
+  <script src="js/mystery-common.js?v=20260823-2111"></script>
   <script>
     if(!MysteryGame.loadState()) MysteryGame.startNew();
     const c=MysteryGame.currentCase();
+    const next=MysteryGame.nextCase(c.id);
+    document.getElementById('chapterLabel').textContent=`UNIT ${c.unit} / LATER / 後日`;
     document.getElementById('newsEn').textContent=c.later.newsEn;
     document.getElementById('newsJa').textContent=c.later.newsJa;
     document.getElementById('closeEn').textContent=c.later.closingEn;
     document.getElementById('closeJa').textContent=c.later.closingJa;
-    document.getElementById('finishBtn').addEventListener('click',()=>{MysteryGame.setStage('complete',{completed:true});location.href='mystery-room.html';});
+    const btn=document.getElementById('finishBtn');
+    btn.textContent=next?'Next month. / 次の月へ':'All cases complete. / 推理トップへ';
+    btn.addEventListener('click',()=>{
+      MysteryGame.finishCurrentCase();
+      location.href=next?'mystery-room.html':'mystery-start.html';
+    });
   </script>
 </body>
 </html>
