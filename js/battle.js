@@ -6,6 +6,13 @@
   const enemyId = params.get('id') || '';
   const reward = 12;
 
+  document.querySelectorAll('a[href^="rpg.html"]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      location.href = `rpg.html?v=${Date.now()}`;
+    });
+  });
+
   const enemyImages = {
     red: 'assets/enemies/slime_red.png',
     blue: 'assets/enemies/slime_blue.png',
