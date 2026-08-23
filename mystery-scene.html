@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff7fb">
+  <title>掃除婦は朝寝る｜事件現場</title>
+  <link rel="stylesheet" href="css/style.css?v=20260823-2104">
+  <link rel="stylesheet" href="css/mystery.css?v=20260823-2104">
+</head>
+<body>
+  <main class="mystery-app">
+    <header class="mystery-titlebar"><a class="mystery-back" href="mystery-discovery.html">←</a><h1>掃除婦は朝寝る</h1><span></span></header>
+    <p class="chapter-label" id="chapterLabel"></p>
+    <div id="content"></div>
+    <button class="mystery-action" id="nextBtn" type="button"></button>
+  </main>
+  <script src="data/mystery_cases.js?v=20260823-2104"></script>
+  <script src="js/mystery-common.js?v=20260823-2104"></script>
+  <script>
+    if(!MysteryGame.loadState()) MysteryGame.startNew();
+    const c=MysteryGame.currentCase();
+    const phase=new URLSearchParams(location.search).get('phase')==='hint'?'hint':'questioning';
+    const content=document.getElementById('content');
+    const next=document.getElementById('nextBtn');
+    if(phase==='questioning'){
+      document.getElementById('chapterLabel').textContent='QUESTIONING / 事情聴取';
+      let html=MysteryGame.sentenceCard(c.questioning.detective,'刑事');
+      html+=MysteryGame.storyCard(c.questioning.storyEn,c.questioning.storyJa);
+      html+=c.questioning.evidence.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
+      html+='<div class="suspect-list">'+c.suspects.map(s=>`<section class="suspect-card"><div class="suspect-name">${MysteryGame.escapeHtml(s.name)}</div><div class="suspect-meta">${MysteryGame.escapeHtml(s.metaJa)}</div><div class="en">${MysteryGame.escapeHtml(s.statementEn)}</div><div class="ja">${MysteryGame.escapeHtml(s.statementJa)}</div></section>`).join('')+'</div>';
+      content.innerHTML=html;
+      next.textContent='Think about it. / 推理する';
+      next.addEventListener('click',()=>{MysteryGame.setStage('deduction');location.href='mystery-deduction.html';});
+    }else{
+      document.querySelector('.mystery-back').href='mystery-deduction.html';
+      document.getElementById('chapterLabel').textContent='HINT / ヒントを伝える';
+      let html=MysteryGame.sentenceCard(c.hint.detective,'刑事');
+      html+=c.hint.study.map(x=>MysteryGame.sentenceCard(x,'主人公')).join('');
+      html+=MysteryGame.storyCard(c.hint.storyEn,c.hint.storyJa);
+      content.innerHTML=html;
+      next.textContent='A few days later... / 数日後';
+      next.addEventListener('click',()=>{MysteryGame.setStage('later');location.href='mystery-later.html';});
+    }
+    MysteryGame.bindGrammar();
+  </script>
+</body>
+</html>
