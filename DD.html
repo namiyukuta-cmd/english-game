@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#11100e">
+  <title>D&D TRPG</title>
+  <style>
+    :root{color-scheme:dark;--rail:74px;--line:#655743;--text:#f1e8da;--muted:#c4b49e;--panel:rgba(20,18,15,.92)}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11100e;color:var(--text);font-family:Georgia,"Yu Mincho",serif}
+    button{font:inherit}
+    .game{position:relative;width:100%;height:100dvh;min-height:420px;background:#15130f;overflow:hidden}
+    .rail{position:absolute;z-index:20;left:0;top:0;bottom:0;width:var(--rail);border-right:1px solid var(--line);background:rgba(17,15,12,.96);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 8px}
+    .rail-btn{width:58px;min-height:60px;border:1px solid var(--line);background:#27221b;color:var(--text);display:grid;place-items:center;gap:2px;padding:6px 2px}
+    .rail-btn .icon{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;line-height:1}
+    .rail-btn .label{font-size:10px;color:var(--muted)}
+    .rail-spacer{flex:1}
+    .stage{position:absolute;left:var(--rail);right:0;top:0;bottom:0;background:#24221d center/cover no-repeat;overflow:hidden}
+    .stage::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.04),rgba(0,0,0,.18))}
+    .stage-empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(235,224,206,.25);font-size:14px;letter-spacing:.12em;pointer-events:none}
+    .portrait{position:absolute;z-index:10;bottom:10px;width:clamp(110px,28vw,180px);height:clamp(86px,21vw,132px);border:1px solid #806d53;background:var(--panel);overflow:hidden}
+    .portrait.npc{left:calc(var(--rail) + 10px)}
+    .portrait.player{right:10px}
+    .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+    .portrait-name{position:absolute;left:0;right:0;bottom:0;min-height:25px;padding:4px 7px;background:rgba(12,11,9,.8);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .player-placeholder{position:absolute;inset:0 0 25px;display:grid;place-items:center;font-size:34px;color:#b9a78e}
+    .mob-silhouette{position:absolute;inset:4px 4px 25px;overflow:hidden}
+    .mob-head{position:absolute;width:31%;aspect-ratio:1;border-radius:50%;background:#050505;left:34.5%;top:10%}
+    .mob-body{position:absolute;width:70%;height:68%;border-radius:48% 48% 12% 12%;background:#050505;left:15%;top:40%}
+    .toast{position:absolute;z-index:40;top:14px;left:calc(var(--rail) + 14px);right:14px;max-width:560px;margin:auto;padding:10px 12px;border:1px solid var(--line);background:rgba(24,21,17,.94);color:var(--text);font-size:13px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}
+    .toast.show{opacity:1}
+    .modal-wrap{position:absolute;z-index:50;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:18px}
+    .modal-wrap[hidden]{display:none}
+    .modal{width:min(520px,100%);border:1px solid var(--line);background:#211d17;padding:18px}
+    .modal h2{margin:0 0 8px;font-size:20px}
+    .modal p{margin:7px 0;color:var(--muted);font-size:13px;line-height:1.65}
+    .modal input{width:100%;min-height:48px;margin-top:10px;border:1px solid var(--line);background:#14120f;color:var(--text);padding:10px 12px;font:16px ui-monospace,SFMono-Regular,Menlo,monospace}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .modal-actions button{min-height:44px;border:1px solid var(--line);background:#342b22;color:var(--text);padding:8px 14px}
+    .modal-actions .primary{background:#6b5740}
+    @media(max-width:440px){:root{--rail:62px}.rail{padding:8px 5px}.rail-btn{width:50px;min-height:56px}.portrait{width:30vw;height:23vw;min-width:96px;min-height:78px}.portrait.npc{left:calc(var(--rail) + 7px)}.portrait.player{right:7px}}
+  </style>
+</head>
+<body>
+  <main id="game" class="game">
+    <nav class="rail" aria-label="ゲーム操作">
+      <button id="saveBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">セーブ</span></button>
+      <button id="loadBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">ロード</span></button>
+      <div class="rail-spacer"></div>
+      <button id="backBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">戻る</span></button>
+    </nav>
+
+    <section id="stage" class="stage" aria-label="ゲーム背景">
+      <div id="stageEmpty" class="stage-empty">BACKGROUND</div>
+    </section>
+
+    <aside id="npcPortrait" class="portrait npc" aria-label="NPC">
+      <div id="mobSilhouette" class="mob-silhouette" aria-hidden="true">
+        <div class="mob-head"></div><div class="mob-body"></div>
+      </div>
+      <img id="npcImage" alt="" hidden>
+      <div id="npcName" class="portrait-name">NPC</div>
+    </aside>
+
+    <aside id="playerPortrait" class="portrait player" aria-label="主人公">
+      <div id="playerPlaceholder" class="player-placeholder">?</div>
+      <img id="playerImage" alt="" hidden>
+      <div id="playerName" class="portrait-name">PLAYER</div>
+    </aside>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <div id="tokenModal" class="modal-wrap" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
+        <h2 id="tokenTitle">GitHub連携</h2>
+        <p>GitHubへセーブするため、最初の1回だけトークンを入力してください。この値はセーブJSONには書き込みません。</p>
+        <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token">
+        <div class="modal-actions">
+          <button id="cancelTokenBtn" type="button">キャンセル</button>
+          <button id="connectSaveBtn" class="primary" type="button">連携してセーブ</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/dd-github.js?v=20260825-1"></script>
+  <script>
+    (() => {
+      const stage = document.getElementById('stage');
+      const stageEmpty = document.getElementById('stageEmpty');
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
+      const backBtn = document.getElementById('backBtn');
+      const toast = document.getElementById('toast');
+      const tokenModal = document.getElementById('tokenModal');
+      const tokenInput = document.getElementById('tokenInput');
+      const connectSaveBtn = document.getElementById('connectSaveBtn');
+      const cancelTokenBtn = document.getElementById('cancelTokenBtn');
+      const playerName = document.getElementById('playerName');
+      const playerImage = document.getElementById('playerImage');
+      const playerPlaceholder = document.getElementById('playerPlaceholder');
+      const npcName = document.getElementById('npcName');
+      const npcImage = document.getElementById('npcImage');
+      const mobSilhouette = document.getElementById('mobSilhouette');
+
+      let game = null;
+      let toastTimer = null;
+
+      function showToast(message, ms = 2200) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
+      }
+
+      function readGame() {
+        try {
+          const raw = localStorage.getItem('ddActiveGame');
+          game = raw ? JSON.parse(raw) : null;
+        } catch (_) {
+          game = null;
+        }
+        if (!game) {
+          location.replace('DD_top.html');
+          return false;
+        }
+        return true;
+      }
+
+      function writeLocalActive() {
+        localStorage.setItem('ddActiveGame', JSON.stringify(game));
+      }
+
+      function render() {
+        const character = game.character || {};
+        playerName.textContent = character.name || 'PLAYER';
+        if (character.portrait) {
+          playerImage.src = character.portrait;
+          playerImage.alt = character.name || '主人公';
+          playerImage.hidden = false;
+          playerPlaceholder.hidden = true;
+        } else {
+          playerImage.hidden = true;
+          playerPlaceholder.hidden = false;
+          playerPlaceholder.textContent = (character.name || '?').slice(0,1);
+        }
+
+        const currentNpc = game.currentNpc || null;
+        npcName.textContent = currentNpc?.name || 'NPC';
+        if (currentNpc?.portrait && !currentNpc?.isMob) {
+          npcImage.src = currentNpc.portrait;
+          npcImage.alt = currentNpc.name || 'NPC';
+          npcImage.hidden = false;
+          mobSilhouette.hidden = true;
+        } else {
+          npcImage.hidden = true;
+          mobSilhouette.hidden = false;
+        }
+
+        const background = game.current?.background || '';
+        if (background) {
+          stage.style.backgroundImage = `url(${JSON.stringify(background).slice(1,-1)})`;
+          stageEmpty.hidden = true;
+        } else {
+          stage.style.backgroundImage = '';
+          stageEmpty.hidden = false;
+        }
+      }
+
+      async function doSave() {
+        saveBtn.disabled = true;
+        showToast('セーブしています…', 12000);
+        try {
+          game = await DDGithub.saveGame(game);
+          writeLocalActive();
+          showToast('GitHubにセーブしました。');
+        } catch (error) {
+          showToast(error.message || 'セーブに失敗しました。', 4200);
+        } finally {
+          saveBtn.disabled = false;
+        }
+      }
+
+      saveBtn.addEventListener('click', () => {
+        if (!DDGithub.getToken()) {
+          tokenModal.hidden = false;
+          tokenInput.value = '';
+          tokenInput.focus();
+          return;
+        }
+        doSave();
+      });
+
+      connectSaveBtn.addEventListener('click', async () => {
+        connectSaveBtn.disabled = true;
+        try {
+          DDGithub.setToken(tokenInput.value);
+          await DDGithub.verifyConnection();
+          tokenModal.hidden = true;
+          await doSave();
+        } catch (error) {
+          DDGithub.clearToken();
+          showToast(error.message || 'GitHub連携に失敗しました。', 4200);
+        } finally {
+          connectSaveBtn.disabled = false;
+        }
+      });
+
+      tokenInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') connectSaveBtn.click();
+      });
+      cancelTokenBtn.addEventListener('click', () => tokenModal.hidden = true);
+      loadBtn.addEventListener('click', () => location.href = 'DD_saves.html');
+      backBtn.addEventListener('click', () => location.href = 'DD_top.html');
+
+      if (readGame()) render();
+    })();
+  </script>
+</body>
+</html>
