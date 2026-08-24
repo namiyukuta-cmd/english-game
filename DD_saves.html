@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171410">
+  <title>D&D セーブ</title>
+  <style>
+    :root{color-scheme:dark;--bg:#171410;--panel:#241f19;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684;--danger:#d89a8f}
+    *{box-sizing:border-box}
+    body{margin:0;background:#171410;color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:18px;min-height:100dvh}
+    main{width:min(720px,100%);margin:0 auto}
+    header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
+    header h1{margin:0;text-align:center;font-size:23px}
+    .back{width:44px;height:44px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px}
+    .panel{border:1px solid var(--line);background:#211c17;padding:18px}
+    .panel h2{margin:0 0 10px;font-size:20px;color:var(--accent)}
+    .panel p{margin:8px 0;color:var(--muted);font-size:14px;line-height:1.7}
+    .token-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
+    input{min-width:0;min-height:48px;border:1px solid var(--line);background:#15120f;color:var(--text);padding:10px 12px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    button{min-height:48px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:16px;font-weight:700;padding:10px 16px}
+    button:disabled{opacity:.5}
+    .small{font-size:12px!important;color:#a99881!important}
+    .warning{color:#d2aa84!important}
+    .status{min-height:24px;margin:14px 2px;color:var(--muted);font-size:14px}
+    .status.error{color:var(--danger)}
+    .save-list{display:grid;gap:10px}
+    .save-card{width:100%;text-align:left;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:#262018}
+    .save-copy{min-width:0}
+    .save-copy strong{display:block;font-size:18px;overflow-wrap:anywhere}
+    .save-copy span{display:block;margin-top:5px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+    .load-mark{font-size:24px;color:var(--accent)}
+    .empty{border:1px dashed var(--line);padding:28px 16px;text-align:center;color:var(--muted)}
+    .toolbar{display:flex;justify-content:flex-end;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+    .toolbar button{min-height:42px;font-size:13px;padding:8px 12px;background:transparent}
+    @media(max-width:520px){.token-row{grid-template-columns:1fr}.token-row button{width:100%}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a class="back" href="DD_top.html" aria-label="戻る">←</a>
+      <h1>続きから</h1>
+      <span></span>
+    </header>
+
+    <section id="connectPanel" class="panel" hidden>
+      <h2>GitHub連携</h2>
+      <p>最初の1回だけ、GitHubのトークンを入力します。以後はこのブラウザに保存したトークンを使います。</p>
+      <p class="small">接続先：namiyukuta-cmd / english-game / main</p>
+      <p class="small warning">トークンはゲームのセーブJSONには書き込みません。なお、このリポジトリがPublicの場合、GitHubへ保存したゲームデータ自体は公開されます。</p>
+      <div class="token-row">
+        <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token">
+        <button id="connectBtn" type="button">連携する</button>
+      </div>
+    </section>
+
+    <section id="savePanel" hidden>
+      <div class="toolbar">
+        <button id="refreshBtn" type="button">再読み込み</button>
+        <button id="disconnectBtn" type="button">GitHub連携を解除</button>
+      </div>
+      <div id="saveList" class="save-list"></div>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"></p>
+  </main>
+
+  <script src="js/dd-github.js?v=20260825-1"></script>
+  <script>
+    (() => {
+      const connectPanel = document.getElementById('connectPanel');
+      const savePanel = document.getElementById('savePanel');
+      const tokenInput = document.getElementById('tokenInput');
+      const connectBtn = document.getElementById('connectBtn');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const disconnectBtn = document.getElementById('disconnectBtn');
+      const saveList = document.getElementById('saveList');
+      const status = document.getElementById('status');
+
+      function setStatus(message, isError = false) {
+        status.textContent = message || '';
+        status.classList.toggle('error', isError);
+      }
+
+      function showConnect() {
+        connectPanel.hidden = false;
+        savePanel.hidden = true;
+        tokenInput.value = '';
+        tokenInput.focus();
+      }
+
+      function showSaves() {
+        connectPanel.hidden = true;
+        savePanel.hidden = false;
+      }
+
+      function formatDate(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return new Intl.DateTimeFormat('ja-JP', {dateStyle:'medium', timeStyle:'short'}).format(date);
+      }
+
+      async function loadList() {
+        showSaves();
+        saveList.innerHTML = '';
+        setStatus('セーブデータを読み込んでいます…');
+        try {
+          const files = await DDGithub.listSaves();
+          if (!files.length) {
+            saveList.innerHTML = '<div class="empty">まだGitHubにセーブデータがありません。</div>';
+            setStatus('');
+            return;
+          }
+
+          const entries = await Promise.all(files.map(async file => {
+            try {
+              const game = await DDGithub.loadSave(file.name);
+              return {file, game};
+            } catch (_) {
+              return {file, game:null};
+            }
+          }));
+
+          entries.forEach(({file, game}) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'save-card';
+            const name = game?.character?.name || file.name.replace(/\.json$/i, '');
+            const details = [];
+            if (game?.character?.level) details.push(`Lv.${game.character.level}`);
+            if (game?.character?.className) details.push(game.character.className);
+            if (game?.current?.location) details.push(game.current.location);
+            if (game?.meta?.updatedAt) details.push(formatDate(game.meta.updatedAt));
+            button.innerHTML = `<span class="save-copy"><strong></strong><span></span></span><span class="load-mark">›</span>`;
+            button.querySelector('strong').textContent = name;
+            button.querySelector('.save-copy span').textContent = details.join(' / ') || file.name;
+            button.addEventListener('click', async () => {
+              button.disabled = true;
+              setStatus(`${name} を読み込んでいます…`);
+              try {
+                const loaded = game || await DDGithub.loadSave(file.name);
+                localStorage.setItem('ddActiveGame', JSON.stringify(loaded));
+                location.href = 'DD.html';
+              } catch (error) {
+                setStatus(error.message || 'ロードに失敗しました。', true);
+                button.disabled = false;
+              }
+            });
+            saveList.appendChild(button);
+          });
+          setStatus('');
+        } catch (error) {
+          setStatus(error.message || 'セーブ一覧を取得できませんでした。', true);
+          if (/トークン|401|403/.test(error.message || '')) showConnect();
+        }
+      }
+
+      connectBtn.addEventListener('click', async () => {
+        connectBtn.disabled = true;
+        setStatus('GitHubへ接続しています…');
+        try {
+          DDGithub.setToken(tokenInput.value);
+          await DDGithub.verifyConnection();
+          await loadList();
+        } catch (error) {
+          DDGithub.clearToken();
+          setStatus(error.message || 'GitHub連携に失敗しました。', true);
+          connectBtn.disabled = false;
+        }
+      });
+
+      tokenInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') connectBtn.click();
+      });
+
+      refreshBtn.addEventListener('click', loadList);
+      disconnectBtn.addEventListener('click', () => {
+        DDGithub.clearToken();
+        setStatus('GitHub連携を解除しました。');
+        showConnect();
+      });
+
+      if (DDGithub.getToken()) loadList();
+      else showConnect();
+    })();
+  </script>
+</body>
+</html>
