@@ -53,7 +53,7 @@
 
   <form id="characterForm">
     <section class="step-panel">
-      <h2 class="section-title">1. クラスを選ぶ</h2><p class="lead">クラス、技能、開始装備を選びます。開始レベルは1で固定です。</p>
+      <h2 class="section-title">1. クラスを選ぶ</h2><p class="lead">クラスと開始装備を選びます。開始レベルは1で固定です。</p>
       <label class="field">クラス<select id="className"></select></label><div id="classInfo" class="info-box"></div>
       <h3 class="subhead">クラス開始装備</h3><div id="classEquipment" class="choice-grid"></div>
     </section>
@@ -71,6 +71,7 @@
       <div id="humanExtraWrap" hidden><div class="two"><label class="field">ヒューマン：追加Origin Feat<select id="humanFeat"></select></label><label class="field">ヒューマン：追加技能習熟<select id="humanSkill"></select></label></div></div>
       <h3 class="subhead">言語</h3><p class="mini-note">Common は全員が知っています。さらに標準言語を2つ選びます。</p>
       <div class="two"><label class="field">追加言語1<select id="language1"></select></label><label class="field">追加言語2<select id="language2"></select></label></div>
+      <div id="originChoiceSection"></div>
     </section>
 
     <section class="step-panel" hidden>
@@ -114,6 +115,8 @@
 <div class="nav-actions"><button id="prevBtn" type="button">戻る</button><button id="nextBtn" class="primary" type="button">次へ</button><button id="submitBtn" class="primary" type="submit" form="characterForm" hidden>冒険を始める</button></div>
 <script src="data/dd-srd-character.js?v=20260825-2"></script>
 <script src="data/dd-class-options.js?v=20260825-1"></script>
+<script src="data/dd-origin-options.js?v=20260825-1"></script>
 <script src="js/dd-new.js?v=20260825-2"></script>
+<script src="js/dd-origin.js?v=20260825-1"></script>
 </body>
 </html>
