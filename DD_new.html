@@ -4,29 +4,68 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#171410">
-  <title>D&D 新規キャラクター</title>
+  <title>D&D キャラクター作成</title>
   <style>
-    :root{color-scheme:dark;--bg:#171410;--panel:#241f19;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684}
+    :root{color-scheme:dark;--bg:#171410;--panel:#211c17;--panel2:#2b241c;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684;--bad:#ffb4a8}
     *{box-sizing:border-box}
-    body{margin:0;background:#171410;color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:18px;min-height:100dvh}
-    main{width:min(760px,100%);margin:0 auto}
-    header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
-    header h1{margin:0;text-align:center;font-size:23px}
-    .back{width:44px;height:44px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px}
-    form{border:1px solid var(--line);background:#211c17;padding:18px}
-    .section-title{margin:0 0 14px;font-size:18px;color:var(--accent)}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .abilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
-    label{display:grid;gap:7px;font-size:14px;color:var(--muted)}
-    input,select{width:100%;min-height:46px;border:1px solid var(--line);background:#171410;color:var(--text);padding:10px 12px;font:inherit;font-size:16px;border-radius:0}
+    html{background:var(--bg)}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:14px;min-height:100dvh}
+    main{width:min(820px,100%);margin:0 auto;padding-bottom:92px}
+    header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:12px}
+    header h1{margin:0;text-align:center;font-size:23px;line-height:1.35}
+    .back{width:46px;height:46px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px;background:#211c17}
+    .rules-note{margin:0 0 14px;text-align:center;color:var(--muted);font-size:13px;line-height:1.55}
+    .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 14px}
+    .step-dot{min-height:42px;border:1px solid #4f4436;background:#1d1915;color:#8f806c;font-size:12px;display:grid;place-items:center;text-align:center;padding:4px}
+    .step-dot.active{border-color:var(--accent);color:var(--text);background:#332a20}
+    .step-dot.done{color:#cdb991;border-color:#806b50}
+    form{border:1px solid var(--line);background:var(--panel);padding:16px}
+    .step-panel[hidden]{display:none}
+    .section-title{margin:0 0 8px;font-size:21px;color:var(--accent)}
+    .lead{margin:0 0 16px;color:var(--muted);font-size:15px;line-height:1.65}
+    .field{display:grid;gap:7px;margin-bottom:15px;font-size:15px;color:var(--muted)}
+    input,select,textarea{width:100%;min-height:48px;border:1px solid var(--line);background:#16130f;color:var(--text);padding:10px 12px;font:inherit;font-size:17px;border-radius:0}
+    textarea{min-height:100px;resize:vertical;line-height:1.55}
     input[type=number]{text-align:center}
-    .ability label{text-align:center}
-    .ability input{font-size:20px;font-weight:700}
-    .note{margin:16px 0 0;color:#ad9c85;font-size:12px;line-height:1.7}
-    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
-    button{min-height:48px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:17px;font-weight:700;padding:10px 18px}
-    button.primary{background:#6a563e}
-    @media(max-width:560px){.grid{grid-template-columns:1fr}.abilities{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .info-box{display:grid;gap:5px;border:1px solid #514535;background:#191611;padding:12px;margin:10px 0 16px;font-size:14px;line-height:1.55}
+    .info-box strong{color:var(--accent);font-size:17px}
+    .info-box span{color:var(--muted)}
+    .subhead{margin:19px 0 9px;font-size:17px;color:#eadbc6}
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .check-card,.radio-card{display:flex;align-items:flex-start;gap:10px;min-height:50px;border:1px solid #514535;background:#191611;color:var(--text);padding:10px;cursor:pointer}
+    .check-card input,.radio-card input{width:20px;height:20px;min-height:0;margin:2px 0 0;flex:0 0 auto}
+    .check-card span,.radio-card span{display:grid;gap:3px;font-size:15px;line-height:1.4}
+    .check-card small,.radio-card small{font-size:12px;color:var(--muted);line-height:1.45}
+    .check-card.disabled{opacity:.45;cursor:not-allowed}
+    .mini-note{margin:8px 0;color:var(--muted);font-size:13px;line-height:1.55}
+    .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .ability-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .ability-card{border:1px solid #514535;background:#191611;padding:10px;text-align:center}
+    .ability-card label{display:grid;gap:6px;color:var(--muted);font-size:13px}
+    .ability-card input{font-size:20px;font-weight:700}
+    .ability-final{display:block;margin-top:6px;color:var(--accent);font-size:14px}
+    .inline-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px}
+    .small-btn{min-height:44px;border:1px solid var(--line);background:#332a20;color:var(--text);padding:8px 12px;font:inherit;font-size:15px}
+    .status{font-size:13px;color:var(--muted);line-height:1.5}
+    .status.bad{color:var(--bad)}
+    .error{margin:14px 0 0;border:1px solid #8d534c;background:#311d19;color:#ffd3cc;padding:11px 12px;font-size:15px;line-height:1.55}
+    .summary{display:grid;gap:0;border:1px solid #514535;background:#191611}
+    .summary-row{display:grid;grid-template-columns:130px 1fr;gap:12px;padding:9px 11px;border-bottom:1px solid #3f362c;align-items:start}
+    .summary-row span{color:var(--muted);font-size:13px}
+    .summary-row strong{font-size:14px;line-height:1.5;font-weight:600}
+    .summary-abilities{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:#3f362c}
+    .summary-abilities>div{background:#191611;padding:9px 4px;text-align:center;display:grid;gap:2px}
+    .summary-abilities small{font-size:10px;color:var(--muted)}
+    .summary-abilities strong{font-size:19px;color:var(--accent)}
+    .summary-abilities span{font-size:12px}
+    .nav-actions{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(17,15,12,.96);border-top:1px solid #514535}
+    .nav-actions button{min-width:118px;min-height:50px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:17px;font-weight:700;padding:10px 18px}
+    .nav-actions button.primary{background:#6a563e}
+    .nav-actions button[hidden]{display:none}
+    .attribution{margin:18px 0 0;color:#80725f;font-size:10px;line-height:1.55}
+    @media(max-width:620px){
+      body{padding:10px}.steps{gap:3px}.step-dot{font-size:10px;padding:2px}.choice-grid,.two,.three{grid-template-columns:1fr}.ability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-row{grid-template-columns:96px 1fr}.summary-abilities{grid-template-columns:repeat(3,1fr)}form{padding:13px}.nav-actions button{min-width:94px;flex:1;max-width:220px}}
   </style>
 </head>
 <body>
@@ -37,102 +76,169 @@
       <span></span>
     </header>
 
+    <p class="rules-note">SRD 5.2.1 のキャラクター作成手順に沿って、レベル1の冒険者を作ります。</p>
+
+    <div class="steps" aria-label="作成手順">
+      <div class="step-dot">1<br>クラス</div>
+      <div class="step-dot">2<br>出自</div>
+      <div class="step-dot">3<br>能力値</div>
+      <div class="step-dot">4<br>属性</div>
+      <div class="step-dot">5<br>仕上げ</div>
+    </div>
+
     <form id="characterForm">
-      <h2 class="section-title">基本情報</h2>
-      <div class="grid">
-        <label>名前
-          <input id="name" name="name" required maxlength="40" autocomplete="off">
-        </label>
-        <label>レベル
-          <input id="level" name="level" type="number" min="1" max="20" value="1" required>
-        </label>
-        <label>種族
-          <input id="species" name="species" placeholder="Human / Elf など" maxlength="40">
-        </label>
-        <label>クラス
-          <input id="className" name="className" placeholder="Fighter / Rogue など" maxlength="40">
-        </label>
-        <label>背景
-          <input id="background" name="background" placeholder="Soldier / Sage など" maxlength="60">
-        </label>
-        <label>最大HP
-          <input id="maxHp" name="maxHp" type="number" min="1" max="999" value="10">
-        </label>
-      </div>
+      <section class="step-panel">
+        <h2 class="section-title">1. クラスを選ぶ</h2>
+        <p class="lead">クラスは得意分野、ヒット・ダイス、セーヴ習熟などを決めます。開始レベルは1で固定です。</p>
 
-      <h2 class="section-title" style="margin-top:24px">能力値</h2>
-      <div class="abilities">
-        <div class="ability"><label>STR<input id="str" type="number" min="1" max="30" value="10"></label></div>
-        <div class="ability"><label>DEX<input id="dex" type="number" min="1" max="30" value="10"></label></div>
-        <div class="ability"><label>CON<input id="con" type="number" min="1" max="30" value="10"></label></div>
-        <div class="ability"><label>INT<input id="int" type="number" min="1" max="30" value="10"></label></div>
-        <div class="ability"><label>WIS<input id="wis" type="number" min="1" max="30" value="10"></label></div>
-        <div class="ability"><label>CHA<input id="cha" type="number" min="1" max="30" value="10"></label></div>
-      </div>
+        <label class="field">クラス
+          <select id="className"></select>
+        </label>
+        <div id="classInfo" class="info-box"></div>
 
-      <p class="note">この画面はまずキャラシの土台だけです。クラス選択、習熟、技能、装備、呪文などはD&D SRDを見ながら後から追加できます。</p>
+        <h3 class="subhead">クラス技能</h3>
+        <p id="skillCountText" class="mini-note"></p>
+        <div id="classSkills" class="choice-grid"></div>
 
-      <div class="actions">
-        <button type="button" onclick="location.href='DD_top.html'">やめる</button>
-        <button class="primary" type="submit">冒険を始める</button>
-      </div>
+        <h3 class="subhead">クラス開始装備</h3>
+        <div id="classEquipment" class="choice-grid"></div>
+      </section>
+
+      <section class="step-panel" hidden>
+        <h2 class="section-title">2. 出自を決める</h2>
+        <p class="lead">背景・種族・言語を選びます。背景は能力値上昇、特技、技能習熟、道具習熟、開始装備を与えます。</p>
+
+        <label class="field">背景
+          <select id="background"></select>
+        </label>
+        <div id="backgroundInfo" class="info-box"></div>
+
+        <h3 class="subhead">背景開始装備</h3>
+        <div id="backgroundEquipment" class="choice-grid"></div>
+
+        <h3 class="subhead">背景による能力値上昇</h3>
+        <label class="field">上げ方
+          <select id="bonusMode">
+            <option value="split">1つを+2、別の1つを+1</option>
+            <option value="triple">3つをそれぞれ+1</option>
+          </select>
+        </label>
+        <div id="splitBonusWrap" class="two">
+          <label class="field">+2
+            <select id="bonusPlus2"></select>
+          </label>
+          <label class="field">+1
+            <select id="bonusPlus1"></select>
+          </label>
+        </div>
+
+        <h3 class="subhead">種族</h3>
+        <label class="field">種族
+          <select id="species"></select>
+        </label>
+        <div id="speciesInfo" class="info-box"></div>
+
+        <div id="speciesVariantWrap" hidden>
+          <label class="field"><span id="speciesVariantLabel">系統</span>
+            <select id="speciesVariant"></select>
+          </label>
+        </div>
+
+        <div id="sizeWrap" hidden>
+          <label class="field">サイズ
+            <select id="size"></select>
+          </label>
+        </div>
+
+        <div id="humanExtraWrap" hidden>
+          <div class="two">
+            <label class="field">ヒューマン：追加のOrigin Feat
+              <select id="humanFeat"></select>
+            </label>
+            <label class="field">ヒューマン：追加技能習熟
+              <select id="humanSkill"></select>
+            </label>
+          </div>
+        </div>
+
+        <h3 class="subhead">言語</h3>
+        <p class="mini-note">Common は全員が知っています。さらに標準言語を2つ選びます。</p>
+        <div class="two">
+          <label class="field">追加言語1
+            <select id="language1"></select>
+          </label>
+          <label class="field">追加言語2
+            <select id="language2"></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="step-panel" hidden>
+        <h2 class="section-title">3. 能力値を決める</h2>
+        <p class="lead">標準配列、4d6方式、27ポイント購入から選べます。表示の「最終値」は背景の上昇を加えた値です。</p>
+
+        <label class="field">生成方法
+          <select id="abilityMethod">
+            <option value="standard">標準配列（15, 14, 13, 12, 10, 8）</option>
+            <option value="random">ランダム（4d6の低い1個を除外 ×6）</option>
+            <option value="point">27ポイント購入</option>
+          </select>
+        </label>
+
+        <div class="inline-actions">
+          <button id="rollBtn" class="small-btn" type="button" hidden>4d6を6回振る</button>
+          <span id="rolledPool" class="status" hidden></span>
+          <span id="pointBuyInfo" class="status" hidden></span>
+        </div>
+
+        <div class="ability-grid">
+          <div class="ability-card"><label>筋力 STR<input id="str" type="number" value="10"><span class="ability-final">最終 <b id="strFinal">10 (+0)</b></span></label></div>
+          <div class="ability-card"><label>敏捷力 DEX<input id="dex" type="number" value="10"><span class="ability-final">最終 <b id="dexFinal">10 (+0)</b></span></label></div>
+          <div class="ability-card"><label>耐久力 CON<input id="con" type="number" value="10"><span class="ability-final">最終 <b id="conFinal">10 (+0)</b></span></label></div>
+          <div class="ability-card"><label>知力 INT<input id="int" type="number" value="10"><span class="ability-final">最終 <b id="intFinal">10 (+0)</b></span></label></div>
+          <div class="ability-card"><label>判断力 WIS<input id="wis" type="number" value="10"><span class="ability-final">最終 <b id="wisFinal">10 (+0)</b></span></label></div>
+          <div class="ability-card"><label>魅力 CHA<input id="cha" type="number" value="10"><span class="ability-final">最終 <b id="chaFinal">10 (+0)</b></span></label></div>
+        </div>
+        <p class="mini-note">標準配列は、クラスを選ぶとSRDの推奨配置を自動で入れます。数値の場所は入れ替えられます。</p>
+      </section>
+
+      <section class="step-panel" hidden>
+        <h2 class="section-title">4. 属性を選ぶ</h2>
+        <p class="lead">属性（Alignment）はキャラクターの道徳観と秩序への姿勢を表す短い目安です。</p>
+        <label class="field">属性
+          <select id="alignment"></select>
+        </label>
+      </section>
+
+      <section class="step-panel" hidden>
+        <h2 class="section-title">5. 仕上げ</h2>
+        <p class="lead">名前を付け、必要ならメモを書いて確認します。ここではまだGitHubへセーブしません。DD画面の「セーブ」を押した時だけ保存されます。</p>
+
+        <label class="field">名前
+          <input id="name" maxlength="40" autocomplete="off" required>
+        </label>
+        <label class="field">キャラクターメモ（任意）
+          <textarea id="notes" maxlength="1200" placeholder="外見、性格、経歴など"></textarea>
+        </label>
+
+        <h3 class="subhead">確認</h3>
+        <div id="summary" class="summary"></div>
+        <p class="mini-note">クラスや背景によって必要になるレベル1の細かな選択（呪文、Weapon Mastery、Fighting Styleなど）はセーブ情報の pendingChoices に記録し、次にキャラシ側へ追加できるようにしています。</p>
+      </section>
+
+      <div id="errorBox" class="error" hidden aria-live="polite"></div>
     </form>
+
+    <p class="attribution">This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at dndbeyond.com/srd. SRD 5.2.1 is licensed under CC BY 4.0.</p>
   </main>
 
-  <script>
-    (() => {
-      const form = document.getElementById('characterForm');
-      const numberValue = id => Number(document.getElementById(id).value) || 0;
-      const textValue = id => document.getElementById(id).value.trim();
+  <div class="nav-actions">
+    <button id="prevBtn" type="button">戻る</button>
+    <button id="nextBtn" class="primary" type="button">次へ</button>
+    <button id="submitBtn" class="primary" type="submit" form="characterForm" hidden>冒険を始める</button>
+  </div>
 
-      form.addEventListener('submit', event => {
-        event.preventDefault();
-        const name = textValue('name');
-        if (!name) return;
-        const id = (crypto.randomUUID ? crypto.randomUUID() : `dd-${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
-        const maxHp = Math.max(1, numberValue('maxHp'));
-        const game = {
-          id,
-          meta: {
-            saveFormat: 1,
-            createdAt: new Date().toISOString(),
-            updatedAt: null
-          },
-          character: {
-            id,
-            name,
-            level: Math.min(20, Math.max(1, numberValue('level'))),
-            species: textValue('species'),
-            className: textValue('className'),
-            background: textValue('background'),
-            hp: maxHp,
-            maxHp,
-            abilities: {
-              str: numberValue('str'), dex: numberValue('dex'), con: numberValue('con'),
-              int: numberValue('int'), wis: numberValue('wis'), cha: numberValue('cha')
-            },
-            portrait: ''
-          },
-          current: {
-            location: '未設定',
-            scene: 'start',
-            day: 1,
-            time: '朝'
-          },
-          inventory: [],
-          equipment: [],
-          quests: [],
-          npcs: [],
-          world: {
-            discoveredLocations: [],
-            activeEvents: []
-          },
-          log: []
-        };
-        localStorage.setItem('ddActiveGame', JSON.stringify(game));
-        location.href = 'DD.html';
-      });
-    })();
-  </script>
+  <script src="data/dd-srd-character.js?v=20260825-1"></script>
+  <script src="js/dd-new.js?v=20260825-1"></script>
 </body>
 </html>
