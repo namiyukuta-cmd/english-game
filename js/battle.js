@@ -205,6 +205,19 @@
     renderSentenceAnswer();
   }
 
+  function signalWrongBossAnswer() {
+    if (typeof navigator.vibrate === 'function') {
+      navigator.vibrate([90, 55, 90]);
+    }
+
+    const shell = document.querySelector('.battle-shell');
+    if (!shell) return;
+    shell.classList.remove('wrong-vibration');
+    void shell.offsetWidth;
+    shell.classList.add('wrong-vibration');
+    setTimeout(() => shell.classList.remove('wrong-vibration'), 320);
+  }
+
   function checkBossSentence() {
     const sentence = bossSentenceRounds[sentenceRound];
     const answer = sentencePicked.map(item => normalize(item.word));
@@ -213,6 +226,7 @@
     );
 
     if (!correct) {
+      signalWrongBossAnswer();
       $('battleMessage').textContent = '語順が違います。選びなおそう';
       sentencePicked.forEach(item => item.button.classList.add('wrong'));
       setTimeout(resetBossSentenceSelection, 650);
