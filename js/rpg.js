@@ -153,7 +153,7 @@
       );
       showMessage(`${exit.exitName}へ移動`);
       this.time.delayedCall(250, () => {
-        location.href = `${exit.destination}?v=20260824-7`;
+        location.href = `${exit.destination}?v=20260824-8`;
       });
     });
 
@@ -184,7 +184,7 @@
       saveReturnPosition(returnPosition.x, returnPosition.y);
       showMessage(`${door.buildingName}に入る`);
       this.time.delayedCall(250, () => {
-        location.href = `${door.destination}?v=20260824-7`;
+        location.href = `${door.destination}?v=20260824-8`;
       });
     });
 
@@ -219,7 +219,7 @@
       showMessage(`${enemy.name}に遭遇！`);
       this.time.delayedCall(450, () => {
         const returnPage = map.page || 'rpg.html';
-        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-7`;
+        location.href = `battle.html?enemy=${encodeURIComponent(enemy.name)}&id=${encodeURIComponent(enemy.enemyId || '')}&return=${encodeURIComponent(returnPage)}&v=20260824-8`;
       });
     });
 
@@ -314,7 +314,7 @@
 
   function update() {
     const touchMoving = Object.values(state.touch).some(Boolean);
-    const speed = touchMoving ? 130 : 165;
+    const speed = 165;
     let x = 0;
     let y = 0;
 
