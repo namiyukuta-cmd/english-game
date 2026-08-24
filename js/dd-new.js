@@ -36,7 +36,8 @@
     $('nextBtn').hidden = step === panels.length - 1;
     $('submitBtn').hidden = step !== panels.length - 1;
     showError('');
-    window.scrollTo({top:0, behavior:'instant'});
+    window.scrollTo({top:0, behavior:'auto'});
+    if (step === 1) renderSpecies();
     if (step === panels.length - 1) renderSummary();
   }
 
@@ -55,7 +56,13 @@
   function currentBackground() { return SRD.backgrounds[$('background').value]; }
   function currentSpecies() { return SRD.species[$('species').value]; }
 
-  function renderClass() {
+  function checkedSkills() {
+    return [...document.querySelectorAll('input[name="classSkill"]:checked')].map(el => el.value);
+  }
+
+  function renderClass({preserve=false} = {}) {
+    const priorSkills = preserve ? new Set(checkedSkills()) : new Set();
+    const priorEquipment = preserve ? document.querySelector('input[name="classEquipment"]:checked')?.value : null;
     const c = currentClass();
     $('classInfo').innerHTML = `
       <strong>${esc(c.ja)} / ${esc($('className').value)}</strong>
@@ -67,17 +74,21 @@
     const bgSkills = new Set(currentBackground()?.skills || []);
     $('classSkills').innerHTML = c.skills.map(skill => {
       const duplicate = bgSkills.has(skill);
+      const checked = !duplicate && priorSkills.has(skill);
       return `<label class="check-card ${duplicate ? 'disabled' : ''}">
-        <input type="checkbox" name="classSkill" value="${esc(skill)}" ${duplicate ? 'disabled' : ''}>
+        <input type="checkbox" name="classSkill" value="${esc(skill)}" ${duplicate ? 'disabled' : ''} ${checked ? 'checked' : ''}>
         <span>${esc(skill)}${duplicate ? '<small>背景ですでに習熟</small>' : ''}</span>
       </label>`;
     }).join('');
     $('skillCountText').textContent = `${c.skillCount}個選んでください。`;
 
-    $('classEquipment').innerHTML = c.equipment.map((eq, i) => `<label class="radio-card">
-      <input type="radio" name="classEquipment" value="${eq.id}" ${i === 0 ? 'checked' : ''}>
-      <span><strong>${esc(eq.label)}</strong><small>${esc(eq.items.join('、') || `${eq.gp} GP`)}</small></span>
-    </label>`).join('');
+    $('classEquipment').innerHTML = c.equipment.map((eq, i) => {
+      const checked = priorEquipment ? eq.id === priorEquipment : i === 0;
+      return `<label class="radio-card">
+        <input type="radio" name="classEquipment" value="${eq.id}" ${checked ? 'checked' : ''}>
+        <span><strong>${esc(eq.label)}</strong><small>${esc(eq.items.join('、') || `${eq.gp} GP`)}</small></span>
+      </label>`;
+    }).join('');
 
     if ($('abilityMethod').value === 'standard') applySuggestedArray();
   }
@@ -96,13 +107,12 @@
       <span><strong>${esc(eq.label)}</strong><small>${esc(eq.items.join('、') || `${eq.gp} GP`)}</small></span>
     </label>`).join('');
 
-    const plus2 = $('bonusPlus2');
-    const plus1 = $('bonusPlus1');
     const opts = b.abilities.map(id => `<option value="${id}">${esc(abilityName[id])}</option>`).join('');
-    plus2.innerHTML = opts;
-    plus1.innerHTML = opts;
-    plus1.selectedIndex = Math.min(1, b.abilities.length - 1);
-    renderClass();
+    $('bonusPlus2').innerHTML = opts;
+    $('bonusPlus1').innerHTML = opts;
+    $('bonusPlus1').selectedIndex = Math.min(1, b.abilities.length - 1);
+    renderClass({preserve:true});
+    renderSpecies();
     updateAbilityPreview();
   }
 
@@ -110,27 +120,29 @@
     const s = currentSpecies();
     $('speciesInfo').innerHTML = `<strong>${esc(s.ja)}</strong><span>移動速度：${s.speed} ft.</span>`;
 
-    const sizeWrap = $('sizeWrap');
     $('size').innerHTML = s.size.map(v => `<option value="${v}">${v}</option>`).join('');
-    sizeWrap.hidden = s.size.length <= 1;
+    $('sizeWrap').hidden = s.size.length <= 1;
 
-    const variantWrap = $('speciesVariantWrap');
     if (s.variants?.length) {
-      variantWrap.hidden = false;
+      $('speciesVariantWrap').hidden = false;
       $('speciesVariantLabel').textContent = s.variantLabel || '系統';
       $('speciesVariant').innerHTML = s.variants.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
     } else {
-      variantWrap.hidden = true;
+      $('speciesVariantWrap').hidden = true;
       $('speciesVariant').innerHTML = '';
     }
 
-    const humanWrap = $('humanExtraWrap');
     if (s.humanExtra) {
-      humanWrap.hidden = false;
-      $('humanFeat').innerHTML = SRD.originFeats.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
-      $('humanSkill').innerHTML = SRD.allSkills.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+      $('humanExtraWrap').hidden = false;
+      const currentFeat = $('humanFeat').value;
+      $('humanFeat').innerHTML = SRD.originFeats.map(v => `<option value="${esc(v)}" ${v === currentFeat ? 'selected' : ''}>${esc(v)}</option>`).join('');
+
+      const used = new Set([...currentBackground().skills, ...checkedSkills()]);
+      const oldSkill = $('humanSkill').value;
+      const available = SRD.allSkills.filter(v => !used.has(v));
+      $('humanSkill').innerHTML = available.map(v => `<option value="${esc(v)}" ${v === oldSkill ? 'selected' : ''}>${esc(v)}</option>`).join('');
     } else {
-      humanWrap.hidden = true;
+      $('humanExtraWrap').hidden = true;
     }
   }
 
@@ -217,10 +229,6 @@
     updateAbilityPreview();
   }
 
-  function checkedSkills() {
-    return [...document.querySelectorAll('input[name="classSkill"]:checked')].map(el => el.value);
-  }
-
   function selectedEquipment(name, list) {
     const id = document.querySelector(`input[name="${name}"]:checked`)?.value;
     return list.find(eq => eq.id === id) || list[0];
@@ -234,6 +242,10 @@
     }
     if (index === 1) {
       if ($('language1').value === $('language2').value) return '追加言語は別々の2つを選んでください。';
+      if (currentSpecies().humanExtra) {
+        const used = new Set([...currentBackground().skills, ...checkedSkills()]);
+        if (used.has($('humanSkill').value)) return 'ヒューマンの追加技能は、すでに習熟している技能とは別のものを選んでください。';
+      }
     }
     if (index === 2) {
       const mode = abilityMode();
@@ -362,7 +374,7 @@
     };
   }
 
-  $('className').addEventListener('change', renderClass);
+  $('className').addEventListener('change', () => { renderClass({preserve:false}); renderSpecies(); });
   $('background').addEventListener('change', renderBackground);
   $('species').addEventListener('change', renderSpecies);
   $('abilityMethod').addEventListener('change', renderAbilityMethod);
@@ -370,6 +382,7 @@
   $('bonusMode').addEventListener('change', renderBonusMode);
   $('bonusPlus2').addEventListener('change', updateAbilityPreview);
   $('bonusPlus1').addEventListener('change', updateAbilityPreview);
+  $('name').addEventListener('input', () => { if (step === panels.length - 1) renderSummary(); });
   abilityIds.forEach(id => $(id).addEventListener('input', updateAbilityPreview));
 
   $('nextBtn').addEventListener('click', () => {
