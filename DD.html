@@ -160,7 +160,8 @@
 
         const background = game.current?.background || '';
         if (background) {
-          stage.style.backgroundImage = `url(${JSON.stringify(background).slice(1,-1)})`;
+          const safeBackground = encodeURI(String(background)).replace(/"/g, '%22');
+          stage.style.backgroundImage = `url("${safeBackground}")`;
           stageEmpty.hidden = true;
         } else {
           stage.style.backgroundImage = '';
