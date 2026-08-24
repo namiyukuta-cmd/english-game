@@ -52,6 +52,7 @@
   let locked = false;
   let hp = maxHp;
   let victory = false;
+  let wrongEffectTimer = 0;
 
   $('enemyName').textContent = enemyName;
   $('coinCount').textContent = GameStore.state.coins;
@@ -127,6 +128,7 @@
     }
 
     locked = true;
+    signalWrongAnswer();
     first.button.classList.add('wrong');
     button.classList.add('wrong');
     $('battleMessage').textContent = '違う組み合わせ！';
@@ -180,11 +182,30 @@
 
   function pickSentenceWord(button, word, index) {
     if (locked || victory || button.classList.contains('matched')) return;
+
+    const sentence = bossSentenceRounds[sentenceRound];
+    const expectedWord = sentence.answer[sentencePicked.length];
+    if (normalize(word) !== normalize(expectedWord)) {
+      const answerWords = sentence.answer.map(normalize);
+      const isWrongOrder = answerWords.includes(normalize(word));
+      locked = true;
+      button.classList.add('wrong');
+      signalWrongAnswer();
+      $('battleMessage').textContent = isWrongOrder
+        ? '順番が違います。次に入る単語を選ぼう'
+        : 'その単語は使いません。別の単語を選ぼう';
+
+      setTimeout(() => {
+        button.classList.remove('wrong');
+        locked = false;
+      }, 440);
+      return;
+    }
+
     sentencePicked.push({ button, word, index });
     button.classList.add('matched');
     renderSentenceAnswer();
 
-    const sentence = bossSentenceRounds[sentenceRound];
     if (sentencePicked.length === sentence.answer.length) {
       locked = true;
       setTimeout(checkBossSentence, 180);
@@ -205,17 +226,36 @@
     renderSentenceAnswer();
   }
 
-  function signalWrongBossAnswer() {
-    if (typeof navigator.vibrate === 'function') {
-      navigator.vibrate([90, 55, 90]);
-    }
+  function signalWrongAnswer() {
+    const layer = $('wrongEffect');
+    if (!layer) return;
 
-    const shell = document.querySelector('.battle-shell');
-    if (!shell) return;
-    shell.classList.remove('wrong-vibration');
-    void shell.offsetWidth;
-    shell.classList.add('wrong-vibration');
-    setTimeout(() => shell.classList.remove('wrong-vibration'), 320);
+    clearTimeout(wrongEffectTimer);
+    const particleData = [
+      [-128,-72,18,-32,0],[-96,-20,11,24,10],[-76,58,16,-18,20],
+      [-42,-92,10,42,0],[-24,34,20,-35,25],[-8,-48,13,16,15],
+      [18,72,12,38,10],[36,-78,19,-22,20],[58,22,10,30,0],
+      [78,-36,15,-40,25],[98,66,18,18,15],[126,-8,12,-28,5],
+      [-142,18,9,20,25],[144,42,10,-16,20],[4,12,24,28,0]
+    ];
+    const particles = particleData.map(([x,y,size,rotate,delay]) => {
+      const particle = document.createElement('span');
+      particle.style.setProperty('--x', `${x}px`);
+      particle.style.setProperty('--y', `${y}px`);
+      particle.style.setProperty('--size', `${size}px`);
+      particle.style.setProperty('--rotate', `${rotate}deg`);
+      particle.style.setProperty('--delay', `${delay}ms`);
+      return particle;
+    });
+
+    layer.replaceChildren(...particles);
+    layer.classList.remove('show');
+    void layer.offsetWidth;
+    layer.classList.add('show');
+    wrongEffectTimer = setTimeout(() => {
+      layer.classList.remove('show');
+      layer.replaceChildren();
+    }, 520);
   }
 
   function checkBossSentence() {
@@ -226,7 +266,7 @@
     );
 
     if (!correct) {
-      signalWrongBossAnswer();
+      signalWrongAnswer();
       $('battleMessage').textContent = '語順が違います。選びなおそう';
       sentencePicked.forEach(item => item.button.classList.add('wrong'));
       setTimeout(resetBossSentenceSelection, 650);
