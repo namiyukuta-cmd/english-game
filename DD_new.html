@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171410">
+  <title>D&D 新規キャラクター</title>
+  <style>
+    :root{color-scheme:dark;--bg:#171410;--panel:#241f19;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684}
+    *{box-sizing:border-box}
+    body{margin:0;background:#171410;color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:18px;min-height:100dvh}
+    main{width:min(760px,100%);margin:0 auto}
+    header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
+    header h1{margin:0;text-align:center;font-size:23px}
+    .back{width:44px;height:44px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px}
+    form{border:1px solid var(--line);background:#211c17;padding:18px}
+    .section-title{margin:0 0 14px;font-size:18px;color:var(--accent)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .abilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+    label{display:grid;gap:7px;font-size:14px;color:var(--muted)}
+    input,select{width:100%;min-height:46px;border:1px solid var(--line);background:#171410;color:var(--text);padding:10px 12px;font:inherit;font-size:16px;border-radius:0}
+    input[type=number]{text-align:center}
+    .ability label{text-align:center}
+    .ability input{font-size:20px;font-weight:700}
+    .note{margin:16px 0 0;color:#ad9c85;font-size:12px;line-height:1.7}
+    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+    button{min-height:48px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:17px;font-weight:700;padding:10px 18px}
+    button.primary{background:#6a563e}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.abilities{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a class="back" href="DD_top.html" aria-label="戻る">←</a>
+      <h1>キャラクター作成</h1>
+      <span></span>
+    </header>
+
+    <form id="characterForm">
+      <h2 class="section-title">基本情報</h2>
+      <div class="grid">
+        <label>名前
+          <input id="name" name="name" required maxlength="40" autocomplete="off">
+        </label>
+        <label>レベル
+          <input id="level" name="level" type="number" min="1" max="20" value="1" required>
+        </label>
+        <label>種族
+          <input id="species" name="species" placeholder="Human / Elf など" maxlength="40">
+        </label>
+        <label>クラス
+          <input id="className" name="className" placeholder="Fighter / Rogue など" maxlength="40">
+        </label>
+        <label>背景
+          <input id="background" name="background" placeholder="Soldier / Sage など" maxlength="60">
+        </label>
+        <label>最大HP
+          <input id="maxHp" name="maxHp" type="number" min="1" max="999" value="10">
+        </label>
+      </div>
+
+      <h2 class="section-title" style="margin-top:24px">能力値</h2>
+      <div class="abilities">
+        <div class="ability"><label>STR<input id="str" type="number" min="1" max="30" value="10"></label></div>
+        <div class="ability"><label>DEX<input id="dex" type="number" min="1" max="30" value="10"></label></div>
+        <div class="ability"><label>CON<input id="con" type="number" min="1" max="30" value="10"></label></div>
+        <div class="ability"><label>INT<input id="int" type="number" min="1" max="30" value="10"></label></div>
+        <div class="ability"><label>WIS<input id="wis" type="number" min="1" max="30" value="10"></label></div>
+        <div class="ability"><label>CHA<input id="cha" type="number" min="1" max="30" value="10"></label></div>
+      </div>
+
+      <p class="note">この画面はまずキャラシの土台だけです。クラス選択、習熟、技能、装備、呪文などはD&D SRDを見ながら後から追加できます。</p>
+
+      <div class="actions">
+        <button type="button" onclick="location.href='DD_top.html'">やめる</button>
+        <button class="primary" type="submit">冒険を始める</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    (() => {
+      const form = document.getElementById('characterForm');
+      const numberValue = id => Number(document.getElementById(id).value) || 0;
+      const textValue = id => document.getElementById(id).value.trim();
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const name = textValue('name');
+        if (!name) return;
+        const id = (crypto.randomUUID ? crypto.randomUUID() : `dd-${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
+        const maxHp = Math.max(1, numberValue('maxHp'));
+        const game = {
+          id,
+          meta: {
+            saveFormat: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: null
+          },
+          character: {
+            id,
+            name,
+            level: Math.min(20, Math.max(1, numberValue('level'))),
+            species: textValue('species'),
+            className: textValue('className'),
+            background: textValue('background'),
+            hp: maxHp,
+            maxHp,
+            abilities: {
+              str: numberValue('str'), dex: numberValue('dex'), con: numberValue('con'),
+              int: numberValue('int'), wis: numberValue('wis'), cha: numberValue('cha')
+            },
+            portrait: ''
+          },
+          current: {
+            location: '未設定',
+            scene: 'start',
+            day: 1,
+            time: '朝'
+          },
+          inventory: [],
+          equipment: [],
+          quests: [],
+          npcs: [],
+          world: {
+            discoveredLocations: [],
+            activeEvents: []
+          },
+          log: []
+        };
+        localStorage.setItem('ddActiveGame', JSON.stringify(game));
+        location.href = 'DD.html';
+      });
+    })();
+  </script>
+</body>
+</html>
