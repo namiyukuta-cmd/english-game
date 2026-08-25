@@ -18,6 +18,8 @@
       --gold:#b7935f;
       --screen-image:none;
       --book-image:none;
+      --left-width:92px;
+      --top-height:76px;
     }
 
     *{box-sizing:border-box}
@@ -37,27 +39,28 @@
       background-size:cover;
       background-position:center;
       display:grid;
-      grid-template-columns:96px minmax(0,1fr);
-      grid-template-rows:96px minmax(0,1fr);
+      grid-template-columns:var(--left-width) minmax(0,1fr);
+      grid-template-rows:var(--top-height) minmax(0,1fr);
     }
 
+    /* 左上：ゲーム内日時 */
     .game-clock{
       grid-column:1;
       grid-row:1;
       position:relative;
-      z-index:20;
+      z-index:40;
       display:grid;
-      grid-template-columns:42px 1fr;
+      grid-template-columns:34px 1fr;
       grid-template-rows:1fr 1fr;
       align-items:center;
-      gap:0 5px;
-      padding:10px 5px 8px 9px;
+      gap:0 3px;
+      padding:8px 4px 6px 6px;
       color:#f0ddba;
       text-shadow:0 1px 2px #000;
     }
     .sky-icon{
       grid-row:1/3;
-      font-size:39px;
+      font-size:31px;
       line-height:1;
       text-align:center;
       color:#e9c77e;
@@ -66,69 +69,87 @@
     .game-date,.game-time{font-size:17px;font-weight:700;white-space:nowrap}
     .game-date{align-self:end}.game-time{align-self:start;color:#d9c5a7}
 
-    .top-tabs{
+    /* 上：TOP / SAVE / LOAD / LOG */
+    .system-menu{
       grid-column:2;
       grid-row:1;
       position:relative;
-      z-index:30;
+      z-index:45;
       display:flex;
-      align-items:end;
-      gap:4px;
-      padding:15px 7px 0 5px;
+      align-items:flex-end;
+      justify-content:flex-end;
+      gap:6px;
+      padding:calc(7px + env(safe-area-inset-top)) 8px 7px 6px;
       overflow-x:auto;
-      overflow-y:hidden;
       scrollbar-width:none;
     }
-    .top-tabs::-webkit-scrollbar{display:none}
-    .page-tab{
+    .system-menu::-webkit-scrollbar{display:none}
+    .system-button{
       flex:0 0 auto;
-      min-width:62px;
-      min-height:55px;
-      border:1px solid #5f4b35;
-      border-bottom:none;
-      border-radius:8px 8px 0 0;
-      padding:7px 8px 9px;
-      background:#a7875d;
-      color:#271c12;
-      font-size:17px;
-      font-weight:800;
-      box-shadow:0 -2px 8px rgba(0,0,0,.25) inset,0 -2px 7px rgba(0,0,0,.18);
-      transform:translateY(8px);
-      transition:transform .14s,background .14s;
-      white-space:nowrap;
-    }
-    .page-tab:nth-child(2n){background:#b69a70}
-    .page-tab:nth-child(3n){background:#9b8066}
-    .page-tab.active{transform:translateY(1px);background:#e4cda7}
-
-    .side-panel{
-      grid-column:1;
-      grid-row:2;
-      position:relative;
-      z-index:25;
-      min-height:0;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      padding:10px 7px calc(10px + env(safe-area-inset-bottom));
-    }
-    .side-button{
-      width:78px;
-      min-height:52px;
+      min-width:65px;
+      min-height:47px;
       border:1px solid #6a543d;
-      border-radius:5px;
+      border-radius:6px 6px 2px 2px;
       background:linear-gradient(#4a382a,#302219);
       color:#f1dfc1;
+      padding:7px 10px;
       font-size:17px;
       font-weight:800;
       box-shadow:0 3px 8px rgba(0,0,0,.28);
     }
-    .side-button:active{transform:translateY(1px)}
-    .side-spacer{flex:1;min-height:8px}
+    .system-button:active{transform:translateY(1px)}
+
+    /* 左：本の付箋タブ＋主人公カード */
+    .left-panel{
+      grid-column:1;
+      grid-row:2;
+      position:relative;
+      z-index:35;
+      min-height:0;
+      padding:10px 4px calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .page-tabs{
+      position:absolute;
+      top:10px;
+      left:4px;
+      right:-10px;
+      z-index:35;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:5px;
+    }
+    .page-tab{
+      width:84px;
+      min-height:47px;
+      border:1px solid #5f4b35;
+      border-right:none;
+      border-radius:7px 0 0 7px;
+      padding:7px 5px 7px 8px;
+      background:#a7875d;
+      color:#271c12;
+      font-size:17px;
+      font-weight:800;
+      text-align:left;
+      box-shadow:inset -3px 0 7px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.2);
+      transform:translateX(0);
+      transition:transform .14s,background .14s,width .14s;
+      white-space:nowrap;
+    }
+    .page-tab:nth-child(2n){background:#b69a70}
+    .page-tab:nth-child(3n){background:#9b8066}
+    .page-tab.active{
+      width:92px;
+      transform:translateX(8px);
+      background:#e4cda7;
+    }
 
     .player-mini{
-      width:82px;
+      position:absolute;
+      left:5px;
+      right:5px;
+      bottom:8px;
       border:1px solid #7b6347;
       background:#2b2119;
       color:#f0e0c7;
@@ -144,11 +165,12 @@
     }
     .mini-portrait img{width:100%;height:100%;object-fit:cover;display:block}
     .mini-initial{position:absolute;inset:0;display:grid;place-items:center;font-size:36px;color:#cdb58f}
-    .mini-copy{padding:7px 5px 8px;text-align:center}
+    .mini-copy{padding:6px 4px 7px;text-align:center}
     .mini-name{font-size:17px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .mini-row{font-size:17px;line-height:1.45;color:#d2bea0}
-    .mini-hp{margin-top:3px;color:#f1d6c8}
+    .mini-row{font-size:17px;line-height:1.4;color:#d2bea0}
+    .mini-hp{margin-top:2px;color:#f1d6c8}
 
+    /* 本。画像を使う場合も背景として読み込むだけ */
     .book-shell{
       --book-image:none;
       grid-column:2;
@@ -157,7 +179,7 @@
       z-index:10;
       min-width:0;
       min-height:0;
-      margin:0 8px 8px 1px;
+      margin:0 7px 8px 0;
       overflow:hidden;
       border:2px solid #5e4934;
       border-radius:7px 12px 12px 7px;
@@ -255,22 +277,23 @@
     .memo-text:focus{border-color:#6c4d2f;background:rgba(255,250,232,.58)}
     .log-meta{font-size:17px;color:#755f46}
 
-    .toast{position:fixed;z-index:300;left:105px;right:12px;top:105px;margin:auto;max-width:520px;padding:10px 12px;border:1px solid #816b50;background:rgba(40,29,21,.96);color:#f4e3c5;font-size:17px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}.toast.show{opacity:1}
+    .toast{position:fixed;z-index:300;left:100px;right:10px;top:82px;margin:auto;max-width:520px;padding:10px 12px;border:1px solid #816b50;background:rgba(40,29,21,.96);color:#f4e3c5;font-size:17px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}.toast.show{opacity:1}
 
     .modal-wrap{position:fixed;z-index:400;inset:0;background:rgba(0,0,0,.68);display:grid;place-items:center;padding:18px}
     .modal{width:min(520px,100%);border:1px solid #8a714f;background:#2a211a;color:#f2e3c9;padding:18px;box-shadow:0 18px 42px rgba(0,0,0,.55)}
     .modal h2{margin:0 0 10px;font-size:23px}.modal p{font-size:17px;line-height:1.6;color:#d1bda0}.modal input{width:100%;min-height:50px;border:1px solid #765f43;background:#17120e;color:#f4e7d1;padding:10px 12px;font:17px ui-monospace,SFMono-Regular,Menlo,monospace}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}.modal-actions button{min-height:48px;border:1px solid #725b40;background:#3b2d21;color:#f1dfc0;padding:8px 14px;font-size:17px;font-weight:800}.modal-actions .primary{background:#6a5237}
 
     @media(max-width:430px){
-      .app{grid-template-columns:88px minmax(0,1fr);grid-template-rows:92px minmax(0,1fr)}
-      .game-clock{grid-template-columns:36px 1fr;padding-left:6px}.sky-icon{font-size:34px}.game-date,.game-time{font-size:17px}
-      .top-tabs{padding-left:2px;padding-right:4px;gap:3px}.page-tab{min-width:59px;min-height:52px;padding-left:6px;padding-right:6px}
-      .side-panel{padding-left:5px;padding-right:5px}.side-button{width:74px;min-height:50px}.player-mini{width:76px}
+      :root{--left-width:82px;--top-height:72px}
+      .game-clock{grid-template-columns:29px 1fr;padding-left:4px;padding-right:2px}.sky-icon{font-size:28px}.game-date,.game-time{font-size:17px}
+      .system-menu{gap:4px;padding-left:2px;padding-right:4px}.system-button{min-width:55px;min-height:44px;padding:5px 6px}
+      .page-tabs{left:3px;right:-9px;gap:4px}.page-tab{width:75px;min-height:45px;padding-left:6px}.page-tab.active{width:83px}
+      .player-mini{left:4px;right:4px}.mini-copy{padding-left:2px;padding-right:2px}
       .book-shell{margin-right:5px}.book-page{inset:12px 8px 9px 17px;padding:5px}
       .main-page{grid-template-rows:minmax(180px,45%) auto minmax(145px,1fr)}
       .scene-image{min-height:175px}.destination-btn{min-width:86px;padding:8px 9px}
       .description-title{font-size:20px}.item-grid{grid-template-columns:1fr}
-      .toast{left:95px;right:7px;top:99px}
+      .toast{left:88px;right:7px;top:78px}
     }
   </style>
 </head>
@@ -282,21 +305,22 @@
       <div id="gameTime" class="game-time">08:00</div>
     </section>
 
-    <nav class="top-tabs" aria-label="本のページ">
-      <button class="page-tab active" type="button" data-page="main">メイン</button>
-      <button class="page-tab" type="button" data-page="quest">クエスト</button>
-      <button class="page-tab" type="button" data-page="inventory">所持品</button>
-      <button class="page-tab" type="button" data-page="skill">スキル</button>
-      <button class="page-tab" type="button" data-page="player">プレイヤー</button>
-      <button class="page-tab" type="button" data-page="memo">メモ</button>
+    <nav class="system-menu" aria-label="システムメニュー">
+      <button id="topButton" class="system-button" type="button">TOP</button>
+      <button id="saveButton" class="system-button" type="button">SAVE</button>
+      <button id="loadButton" class="system-button" type="button">LOAD</button>
+      <button id="logButton" class="system-button" type="button">LOG</button>
     </nav>
 
-    <aside class="side-panel" aria-label="システムメニュー">
-      <button id="topButton" class="side-button" type="button">TOP</button>
-      <button id="saveButton" class="side-button" type="button">セーブ</button>
-      <button id="loadButton" class="side-button" type="button">ロード</button>
-      <button id="logButton" class="side-button" type="button">ログ</button>
-      <div class="side-spacer"></div>
+    <aside class="left-panel">
+      <nav class="page-tabs" aria-label="本のページ">
+        <button class="page-tab active" type="button" data-page="main">メイン</button>
+        <button class="page-tab" type="button" data-page="quest">クエスト</button>
+        <button class="page-tab" type="button" data-page="inventory">所持品</button>
+        <button class="page-tab" type="button" data-page="skill">スキル</button>
+        <button class="page-tab" type="button" data-page="player">プレイヤー</button>
+        <button class="page-tab" type="button" data-page="memo">メモ</button>
+      </nav>
 
       <section class="player-mini" aria-label="主人公簡易情報">
         <div class="mini-portrait">
