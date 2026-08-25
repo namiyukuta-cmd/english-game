@@ -16,7 +16,7 @@
       --screen-image:none;
       --book-image:none;
       --rail:94px;
-      --tab-row:78px;
+      --tab-row:104px;
     }
 
     *{box-sizing:border-box}
@@ -40,7 +40,6 @@
       background-position:center;
     }
 
-    /* 左上：ゲーム内日時 */
     .game-clock{
       grid-column:1;
       grid-row:1;
@@ -67,7 +66,7 @@
     .game-date{align-self:end}
     .game-time{align-self:start;color:#d9c5a7}
 
-    /* 上：本の付箋。横長・低め */
+    /* 上：細い縦文字の付箋 */
     .top-tabs{
       grid-column:2;
       grid-row:1;
@@ -75,30 +74,36 @@
       z-index:35;
       display:flex;
       align-items:flex-end;
-      gap:4px;
-      padding:12px 6px 0 4px;
+      gap:5px;
+      padding:8px 6px 0 5px;
       overflow-x:auto;
       overflow-y:hidden;
       scrollbar-width:none;
     }
     .top-tabs::-webkit-scrollbar{display:none}
     .page-tab{
-      flex:0 0 auto;
-      min-width:72px;
-      height:39px;
-      min-height:39px;
+      flex:0 0 39px;
+      width:39px;
+      min-width:39px;
+      height:91px;
+      min-height:91px;
       border:1px solid #5f4b35;
       border-bottom:none;
       border-radius:7px 7px 0 0;
-      padding:5px 9px 7px;
+      padding:7px 4px 9px;
       background:#a7875d;
       color:#271c12;
-      font-size:14px;
+      font-size:13px;
       line-height:1;
       font-weight:800;
-      letter-spacing:.02em;
+      letter-spacing:0;
+      writing-mode:vertical-rl;
+      text-orientation:upright;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       box-shadow:0 -2px 7px rgba(0,0,0,.2) inset,0 -2px 6px rgba(0,0,0,.16);
-      transform:translateY(7px);
+      transform:translateY(8px);
       transition:transform .14s,background .14s;
       white-space:nowrap;
     }
@@ -106,7 +111,6 @@
     .page-tab:nth-child(3n){background:#9b8066}
     .page-tab.active{transform:translateY(1px);background:#e4cda7}
 
-    /* 左：TOP / SAVE / LOAD / LOG + 主人公カード */
     .side-panel{
       grid-column:1;
       grid-row:2;
@@ -143,13 +147,7 @@
       box-shadow:0 5px 15px rgba(0,0,0,.35);
       overflow:hidden;
     }
-    .mini-portrait{
-      position:relative;
-      width:100%;
-      aspect-ratio:1/1;
-      background:#19130f;
-      overflow:hidden;
-    }
+    .mini-portrait{position:relative;width:100%;aspect-ratio:1/1;background:#19130f;overflow:hidden}
     .mini-portrait img{width:100%;height:100%;object-fit:cover;display:block}
     .mini-initial{position:absolute;inset:0;display:grid;place-items:center;font-size:36px;color:#cdb58f}
     .mini-copy{padding:7px 5px 8px;text-align:center}
@@ -157,7 +155,6 @@
     .mini-row{font-size:17px;line-height:1.45;color:#d2bea0}
     .mini-hp{margin-top:3px;color:#f1d6c8}
 
-    /* 本 */
     .book-shell{
       --book-image:none;
       grid-column:2;
@@ -243,23 +240,23 @@
     .memo-page{height:100%;display:flex;flex-direction:column}.memo-text{flex:1;min-height:260px;width:100%;resize:none;border:1px solid rgba(82,59,37,.55);background:rgba(255,250,232,.42);color:#332515;padding:12px;font-size:17px;line-height:1.75;outline:none}.memo-text:focus{border-color:#6c4d2f;background:rgba(255,250,232,.58)}
     .log-meta{font-size:17px;color:#755f46}
 
-    .toast{position:fixed;z-index:300;left:105px;right:12px;top:84px;margin:auto;max-width:520px;padding:10px 12px;border:1px solid #816b50;background:rgba(40,29,21,.96);color:#f4e3c5;font-size:17px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}.toast.show{opacity:1}
+    .toast{position:fixed;z-index:300;left:105px;right:12px;top:110px;margin:auto;max-width:520px;padding:10px 12px;border:1px solid #816b50;background:rgba(40,29,21,.96);color:#f4e3c5;font-size:17px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}.toast.show{opacity:1}
 
     .modal-wrap{position:fixed;z-index:400;inset:0;background:rgba(0,0,0,.68);display:grid;place-items:center;padding:18px}
     .modal{width:min(520px,100%);border:1px solid #8a714f;background:#2a211a;color:#f2e3c9;padding:18px;box-shadow:0 18px 42px rgba(0,0,0,.55)}
     .modal h2{margin:0 0 10px;font-size:23px}.modal p{font-size:17px;line-height:1.6;color:#d1bda0}.modal input{width:100%;min-height:50px;border:1px solid #765f43;background:#17120e;color:#f4e7d1;padding:10px 12px;font:17px ui-monospace,SFMono-Regular,Menlo,monospace}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}.modal-actions button{min-height:48px;border:1px solid #725b40;background:#3b2d21;color:#f1dfc0;padding:8px 14px;font-size:17px;font-weight:800}.modal-actions .primary{background:#6a5237}
 
     @media(max-width:430px){
-      :root{--rail:88px;--tab-row:72px}
+      :root{--rail:88px;--tab-row:100px}
       .game-clock{grid-template-columns:34px 1fr;padding-left:5px}.sky-icon{font-size:30px}.game-date,.game-time{font-size:17px}
-      .top-tabs{padding-left:2px;padding-right:4px;gap:3px}
-      .page-tab{min-width:69px;height:37px;min-height:37px;padding:5px 8px 6px;font-size:13px}
+      .top-tabs{padding-left:4px;padding-right:4px;gap:4px}
+      .page-tab{flex-basis:37px;width:37px;min-width:37px;height:88px;min-height:88px;font-size:12px;padding:6px 3px 8px}
       .side-panel{padding-left:5px;padding-right:5px}.side-button{width:74px;min-height:46px;font-size:14px}.player-mini{width:76px}
       .book-shell{margin-right:5px}.book-page{inset:12px 8px 9px 17px;padding:5px}
       .main-page{grid-template-rows:minmax(180px,45%) auto minmax(145px,1fr)}
       .scene-image{min-height:175px}.destination-btn{min-width:86px;padding:8px 9px}
       .description-title{font-size:20px}.item-grid{grid-template-columns:1fr}
-      .toast{left:95px;right:7px;top:78px}
+      .toast{left:95px;right:7px;top:106px}
     }
   </style>
 </head>
