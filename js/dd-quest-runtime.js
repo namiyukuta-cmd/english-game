@@ -47,14 +47,17 @@
       game?.current?.settlementId,
       game?.current?.townId,
       game?.current?.villageId,
-      game?.current?.id
+      game?.current?.id,
+      game?.worldPosition?.settlementId,
+      game?.worldPosition?.regionId,
+      game?.worldPosition?.areaId
     ].filter(Boolean).map(String));
   }
 
   function isTownLike(game) {
     const mode = String(game?.current?.mode || '').toLowerCase();
     if (['town','city','village','settlement'].includes(mode)) return true;
-    if (game?.location?.settlementId && !currentPlaceId(game)) return true;
+    if ((game?.location?.settlementId || game?.worldPosition?.settlementId) && !currentPlaceId(game)) return true;
     return false;
   }
 
@@ -70,7 +73,9 @@
       || current?.destinations
       || current?.places
       || [];
-    return Array.isArray(source) ? source.filter(action => !action?.__questInjected) : [];
+    return Array.isArray(source)
+      ? source.filter(action => !action?.__questInjected && action?.kind !== 'questTalkHere' && action?.kind !== 'questAction')
+      : [];
   }
 
   function addUnique(list, action) {
@@ -86,9 +91,24 @@
     for (const quest of activeQuests(game)) {
       const effects = stageEffects(quest);
 
-      if (!placeId) {
-        for (const place of effects.unlockPlaces || []) {
-          if (!locationMatches(game, place.locationId)) continue;
+      for (const place of effects.unlockPlaces || []) {
+        if (!locationMatches(game, place.locationId)) continue;
+
+        if (placeId && String(place.placeId || '') === String(placeId)) {
+          addUnique(extras, {
+            id: `quest-talk-${quest.id}-${place.placeId || 'place'}`,
+            label: place.actionLabel || '依頼について',
+            __questDynamic: true,
+            __questInjected: true,
+            kind: 'questTalkHere',
+            questId: quest.id,
+            locationId: place.locationId || '',
+            placeId: place.placeId || ''
+          });
+          continue;
+        }
+
+        if (!placeId) {
           addUnique(extras, {
             id: `quest-place-${quest.id}-${place.placeId}`,
             label: place.label || '依頼先',
@@ -249,19 +269,11 @@
       mode: 'place',
       location: label,
       locationId: action.locationId === 'town_current'
-        ? (game.location.settlementId || game.location.locationId || '')
+        ? (game.location.settlementId || game.location.locationId || game.worldPosition?.settlementId || '')
         : (action.locationId || ''),
       placeId: action.placeId || '',
       description: action.description || `依頼「${quest?.title || '依頼'}」に関係する場所です。`,
       actions: [
-        {
-          id: `quest-talk-${action.questId}-${action.placeId || 'place'}`,
-          label: action.actionLabel || '依頼について',
-          __questDynamic: true,
-          __questInjected: true,
-          kind: 'questTalkHere',
-          questId: action.questId
-        },
         {
           id: `quest-return-${action.questId}-${action.placeId || 'place'}`,
           label: '戻る',
@@ -284,6 +296,7 @@
     } else {
       game.current.description = `行動しました。\n\n次の目的：${result.quest.currentObjective}`;
     }
+
     baseSetGame(apply(game));
   }
 
@@ -312,6 +325,7 @@
   baseSetGame(apply(MAIN.getGame()));
 
   window.DDQuestRuntime = {
+    version: 3,
     apply,
     advanceQuest,
     refresh: () => baseSetGame(apply(MAIN.getGame()))
