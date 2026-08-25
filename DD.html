@@ -120,23 +120,42 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:7px;
-      padding:9px 6px calc(9px + env(safe-area-inset-bottom));
+      gap:12px;
+      padding:10px 6px calc(9px + env(safe-area-inset-bottom));
     }
     .side-button{
-      width:78px;
-      min-height:48px;
+      width:54px;
+      height:54px;
+      min-height:54px;
+      flex:0 0 54px;
       border:1px solid #6a543d;
-      border-radius:5px;
+      border-radius:8px;
       background:linear-gradient(#4a382a,#302219);
       color:#f1dfc1;
-      padding:6px 5px;
-      font-size:15px;
-      font-weight:800;
-      letter-spacing:.04em;
+      padding:4px 3px 3px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
       box-shadow:0 3px 8px rgba(0,0,0,.28);
     }
-    .side-button:active{transform:translateY(1px)}
+    .side-button:active{transform:translateY(1px);background:linear-gradient(#584431,#38281e)}
+    .side-icon{
+      display:block;
+      font-size:20px;
+      line-height:1;
+      font-weight:400;
+      color:#f3dfba;
+    }
+    .side-label{
+      display:block;
+      font-size:9px;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:.05em;
+      color:#dcc9aa;
+    }
     .side-spacer{flex:1;min-height:8px}
 
     .player-mini{
@@ -251,7 +270,11 @@
       .game-clock{grid-template-columns:34px 1fr;padding-left:5px}.sky-icon{font-size:30px}.game-date,.game-time{font-size:17px}
       .top-tabs{padding-left:4px;padding-right:4px;gap:4px}
       .page-tab{flex-basis:37px;width:37px;min-width:37px;height:88px;min-height:88px;font-size:12px;padding:6px 3px 8px}
-      .side-panel{padding-left:5px;padding-right:5px}.side-button{width:74px;min-height:46px;font-size:14px}.player-mini{width:76px}
+      .side-panel{gap:12px;padding-left:5px;padding-right:5px}
+      .side-button{width:50px;height:50px;min-height:50px;flex-basis:50px}
+      .side-icon{font-size:18px}
+      .side-label{font-size:8px}
+      .player-mini{width:76px}
       .book-shell{margin-right:5px}.book-page{inset:12px 8px 9px 17px;padding:5px}
       .main-page{grid-template-rows:minmax(180px,45%) auto minmax(145px,1fr)}
       .scene-image{min-height:175px}.destination-btn{min-width:86px;padding:8px 9px}
@@ -278,10 +301,22 @@
     </nav>
 
     <aside class="side-panel" aria-label="System menu">
-      <button id="topButton" class="side-button" type="button">TOP</button>
-      <button id="saveButton" class="side-button" type="button">SAVE</button>
-      <button id="loadButton" class="side-button" type="button">LOAD</button>
-      <button id="logButton" class="side-button" type="button">LOG</button>
+      <button id="topButton" class="side-button" type="button" aria-label="Top">
+        <span class="side-icon" aria-hidden="true">⌂</span>
+        <span class="side-label">TOP</span>
+      </button>
+      <button id="saveButton" class="side-button" type="button" aria-label="Save">
+        <span class="side-icon" aria-hidden="true">▣</span>
+        <span class="side-label">SAVE</span>
+      </button>
+      <button id="loadButton" class="side-button" type="button" aria-label="Load">
+        <span class="side-icon" aria-hidden="true">⇩</span>
+        <span class="side-label">LOAD</span>
+      </button>
+      <button id="logButton" class="side-button" type="button" aria-label="Log">
+        <span class="side-icon" aria-hidden="true">≡</span>
+        <span class="side-label">LOG</span>
+      </button>
       <div class="side-spacer"></div>
 
       <section class="player-mini" aria-label="Player summary">
