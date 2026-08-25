@@ -40,11 +40,12 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #actionArea{position:relative;z-index:15;min-height:68px;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:7px 50px calc(7px + env(safe-area-inset-bottom)) 7px;background:#30241b;border-top:1px solid #71593f}
 .action-button{min-width:60px;min-height:44px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:6px 9px;font-size:14px;font-weight:800}
 
-/* 右下メニュー。矢印ボタンは開閉しても同じDOM・同じ位置 */
-#menuDock{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-#sideMenuItems{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-.menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:rgba(234,211,171,.97);color:#362819;font-size:12px;font-weight:800;box-shadow:-3px 3px 8px rgba(0,0,0,.18)}
-#menuToggleButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px;padding:0}
+/* 右下メニュー。矢印は同じ1個のボタン。メニュー本体は右からスライドして出る */
+#menuDock{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px;overflow:visible}
+#sideMenuItems{width:80px;display:flex;flex-direction:column;gap:5px;padding:6px 6px 6px 0;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25);transform:translateX(100%);opacity:0;pointer-events:none;transition:transform .18s ease-out,opacity .14s ease-out}
+#menuDock.open #sideMenuItems{transform:translateX(0);opacity:1;pointer-events:auto}
+.menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:#ead3ab;color:#362819;font-size:12px;font-weight:800}
+#menuToggleButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px;padding:0;position:relative;z-index:2}
 
 #windowLayer{position:absolute;z-index:50;inset:92px 8px 76px 8px;pointer-events:none}
 #gameWindow{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:2px solid #6e563d;border-radius:10px;background:#f0e1c5;box-shadow:0 8px 25px rgba(0,0,0,.38);pointer-events:auto}
@@ -116,7 +117,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   </div>
 
   <div id="menuDock">
-    <nav id="sideMenuItems" hidden>
+    <nav id="sideMenuItems">
       <button class="menu-button" data-window="quest" type="button">QUEST</button>
       <button class="menu-button" data-window="inventory" type="button">ITEM</button>
       <button class="menu-button" data-window="skill" type="button">SKILL</button>
@@ -138,12 +139,12 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 </div>
 
 <script>
-const sideMenuItems=document.getElementById('sideMenuItems');
+const menuDock=document.getElementById('menuDock');
 const menuToggleButton=document.getElementById('menuToggleButton');
 
 menuToggleButton.addEventListener('click',()=>{
-  const opening=sideMenuItems.hidden;
-  sideMenuItems.hidden=!opening;
+  const opening=!menuDock.classList.contains('open');
+  menuDock.classList.toggle('open',opening);
   menuToggleButton.textContent=opening?'▶':'◀';
   menuToggleButton.setAttribute('aria-expanded',opening?'true':'false');
   menuToggleButton.setAttribute('aria-label',opening?'メニューを閉じる':'メニューを開く');
