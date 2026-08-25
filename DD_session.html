@@ -29,20 +29,39 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 .system-button .label{margin-top:2px;font-size:8px}
 
 /* セッション本体 */
-#mainArea{min-height:0;display:grid;grid-template-rows:minmax(190px,47%) minmax(120px,1fr);overflow:hidden}
+#mainArea{position:relative;min-height:0;display:grid;grid-template-rows:minmax(190px,47%) minmax(120px,1fr);overflow:hidden}
 #sceneArea{position:relative;min-height:0;border-bottom:1px solid #9e8765;background:#cab591;overflow:hidden}
 #sceneImage{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}
 #scenePlaceholder{position:absolute;inset:0;display:grid;place-items:center;color:#66533d;font-size:15px}
-#messageArea{min-height:0;overflow-y:auto;background:#f1e3c9;padding:12px 14px 20px}
+#messageArea{min-height:0;overflow-y:auto;background:#f1e3c9;padding:12px 72px 20px 14px}
 #speakerName{margin-bottom:5px;font-size:15px;font-weight:800;color:#5e4630}
 #messageText{margin:0;font-size:15px;line-height:1.75;white-space:pre-wrap}
+
+/* マップ／シーン枠のすぐ下・右側のダイス */
+#diceDock{position:absolute;z-index:72;right:7px;top:calc(47% + 6px);display:flex;flex-direction:row;align-items:center;gap:5px;pointer-events:auto}
+#diceButton{width:58px;height:58px;border:0;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer}
+#diceButton:disabled{pointer-events:none}
+#dicePoly{width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);transform-origin:center;user-select:none;-webkit-user-select:none}
+#diceKind{font-size:8px;font-weight:900;line-height:1;letter-spacing:.3px}
+#diceFace{margin-top:2px;font-size:14px;font-weight:900;line-height:1}
+#diceButton.rolling #dicePoly{animation:diceRoll .68s cubic-bezier(.18,.72,.25,1)}
+#diceReadout{max-width:145px;padding:5px 7px;border:1px solid #826b4c;border-radius:7px;background:rgba(48,36,27,.94);color:#f4dfbd;font-size:11px;font-weight:750;line-height:1.35;text-align:right;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+@keyframes diceRoll{
+  0%{transform:rotate(0deg) translate(0,0) scale(1)}
+  16%{transform:rotate(85deg) translate(-2px,-7px) scale(1.06)}
+  33%{transform:rotate(185deg) translate(3px,-2px) scale(.96)}
+  50%{transform:rotate(295deg) translate(-3px,-6px) scale(1.04)}
+  68%{transform:rotate(405deg) translate(2px,-1px) scale(.98)}
+  84%{transform:rotate(500deg) translate(-1px,-4px) scale(1.02)}
+  100%{transform:rotate(540deg) translate(0,0) scale(1)}
+}
 
 /* 下中央 ▲ */
 #sessionBar{position:relative;z-index:80;display:flex;align-items:center;justify-content:center;background:#30241b;border-top:1px solid #71593f;padding:7px 48px calc(7px + env(safe-area-inset-bottom))}
 #actionToggleButton{width:62px;height:44px;border:1px solid #806849;border-radius:10px;background:#ead4ae;color:#352719;font-size:19px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.24)}
 
-/* 行動パレット。レイアウトを押し上げず上に重なる */
-#actionPalette{position:absolute;z-index:75;left:8px;right:8px;bottom:calc(62px + env(safe-area-inset-bottom));max-height:min(52vh,430px);display:flex;flex-direction:column;border:2px solid #6e563d;border-radius:11px 11px 8px 8px;background:#f0e1c5;box-shadow:0 -8px 24px rgba(0,0,0,.34);transform:translateY(calc(100% + 76px));opacity:0;pointer-events:none;transition:transform .2s ease-out,opacity .15s ease-out;overflow:hidden}
+/* 行動パレット。右側のダイス帯には重ならない */
+#actionPalette{position:absolute;z-index:75;left:8px;right:68px;bottom:calc(62px + env(safe-area-inset-bottom));max-height:min(52vh,430px);display:flex;flex-direction:column;border:2px solid #6e563d;border-radius:11px 11px 8px 8px;background:#f0e1c5;box-shadow:0 -8px 24px rgba(0,0,0,.34);transform:translateY(calc(100% + 76px));opacity:0;pointer-events:none;transition:transform .2s ease-out,opacity .15s ease-out;overflow:hidden}
 #gameScreen.actions-open #actionPalette{transform:translateY(0);opacity:1;pointer-events:auto}
 #actionTabs{display:flex;overflow-x:auto;gap:4px;padding:7px;background:#d3b98f;border-bottom:1px solid #866e4f;scrollbar-width:none}
 #actionTabs::-webkit-scrollbar{display:none}
@@ -77,6 +96,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   #messageText{font-size:15px}
   #actionOptions{grid-template-columns:1fr 1fr}
   .action-choice{font-size:13px}
+  #diceReadout{max-width:118px;font-size:10px}
 }
 </style>
 </head>
@@ -117,6 +137,16 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 朝の通りには商人と旅人の姿がある。
 さて、どうする？</p>
     </section>
+
+    <div id="diceDock" aria-live="polite">
+      <div id="diceReadout" hidden></div>
+      <button id="diceButton" type="button" aria-label="ダイスを振る">
+        <span id="dicePoly" aria-hidden="true">
+          <span id="diceKind">D100</span>
+          <strong id="diceFace">ROLL</strong>
+        </span>
+      </button>
+    </div>
   </main>
 
   <section id="actionPalette" aria-label="行動パレット">
@@ -161,6 +191,70 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 const gameScreen=document.getElementById('gameScreen');
 const actionToggleButton=document.getElementById('actionToggleButton');
 const actionOptions=document.getElementById('actionOptions');
+const messageText=document.getElementById('messageText');
+
+const diceButton=document.getElementById('diceButton');
+const diceKind=document.getElementById('diceKind');
+const diceFace=document.getElementById('diceFace');
+const diceReadout=document.getElementById('diceReadout');
+let diceRolling=false;
+let pendingRoll={sides:100,count:1,modifier:0,label:'フリーロール'};
+
+function randomDie(sides){
+  const max=Math.max(2,Math.floor(Number(sides)||100));
+  if(window.crypto&&window.crypto.getRandomValues){
+    const range=0x100000000;
+    const limit=range-(range%max);
+    const data=new Uint32Array(1);
+    do{window.crypto.getRandomValues(data);}while(data[0]>=limit);
+    return (data[0]%max)+1;
+  }
+  return Math.floor(Math.random()*max)+1;
+}
+
+function setPendingRoll(config={}){
+  const sides=Math.max(2,Math.floor(Number(config.sides)||20));
+  const count=Math.max(1,Math.floor(Number(config.count)||1));
+  const modifier=Number(config.modifier)||0;
+  pendingRoll={sides,count,modifier,label:config.label||'判定'};
+  diceKind.textContent=(count>1?count:'')+'D'+sides;
+  diceFace.textContent='ROLL';
+  diceReadout.hidden=true;
+}
+
+function rollPendingDice(){
+  if(diceRolling)return;
+  diceRolling=true;
+  const roll={...pendingRoll};
+  diceButton.classList.remove('rolling');
+  void diceButton.offsetWidth;
+  diceButton.classList.add('rolling');
+
+  let flickerCount=0;
+  const flicker=setInterval(()=>{
+    diceFace.textContent=randomDie(roll.sides);
+    flickerCount++;
+    if(flickerCount>9)clearInterval(flicker);
+  },55);
+
+  setTimeout(()=>{
+    clearInterval(flicker);
+    const values=Array.from({length:roll.count},()=>randomDie(roll.sides));
+    const subtotal=values.reduce((sum,value)=>sum+value,0);
+    const total=subtotal+roll.modifier;
+    diceKind.textContent=(roll.count>1?roll.count:'')+'D'+roll.sides;
+    diceFace.textContent=total;
+    const detail=roll.count>1?values.join(' + '):String(values[0]);
+    const modText=roll.modifier===0?'':(roll.modifier>0?` + ${roll.modifier}`:` - ${Math.abs(roll.modifier)}`);
+    diceReadout.textContent=`${roll.label}：${detail}${modText} = ${total}`;
+    diceReadout.hidden=false;
+    diceButton.classList.remove('rolling');
+    diceRolling=false;
+  },700);
+}
+
+diceButton.addEventListener('click',rollPendingDice);
+window.DDDice={setPendingRoll,roll:rollPendingDice};
 
 const actions={
   friendly:['挨拶する','世間話をする','話を聞く','説得する','助けを申し出る','贈り物をする'],
@@ -178,7 +272,15 @@ function renderActions(category){
     button.type='button';
     button.textContent=label;
     button.addEventListener('click',()=>{
-      document.getElementById('messageText').textContent=`「${label}」を選んだ。\n\nここにGM側の結果を表示します。`;
+      if(category==='check'){
+        setPendingRoll({sides:20,count:1,modifier:0,label});
+        messageText.textContent=`「${label}」を選んだ。\n\n右側のダイスでD20判定を行います。`;
+      }else if(category==='combat'&&label==='攻撃する'){
+        setPendingRoll({sides:20,count:1,modifier:0,label:'攻撃判定'});
+        messageText.textContent='「攻撃する」を選んだ。\n\n右側のダイスでD20攻撃判定を行います。';
+      }else{
+        messageText.textContent=`「${label}」を選んだ。\n\nここにGM側の結果を表示します。`;
+      }
       gameScreen.classList.remove('actions-open');
       actionToggleButton.textContent='▲';
       actionToggleButton.setAttribute('aria-expanded','false');
