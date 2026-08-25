@@ -37,9 +37,12 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 
 /* MAP / SCENE のすぐ下、右側 */
 #diceDock{position:absolute;z-index:72;right:7px;top:calc(47% + 6px);display:flex;flex-direction:row;align-items:center;gap:5px;overflow:visible;pointer-events:auto}
-#diceButton{width:58px;height:58px;border:0;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer;transform-origin:50% 50%;will-change:transform}
-#dicePoly{position:relative;width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);user-select:none;-webkit-user-select:none}
-#dicePoly::after{content:"";position:absolute;width:6px;height:6px;right:9px;top:7px;border-radius:50%;background:rgba(255,244,215,.9);box-shadow:0 1px 2px rgba(0,0,0,.45)}
+#diceButton{width:64px;height:64px;border:0;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer;overflow:visible}
+#dicePoly{position:relative;width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);transform-origin:50% 50%;will-change:transform;user-select:none;-webkit-user-select:none}
+/* 回転が目で分かるよう、非対称の大きな印を入れる */
+#dicePoly::before{content:"";position:absolute;left:9px;top:8px;width:34px;height:5px;border-radius:5px;background:rgba(255,244,215,.92);transform:rotate(-31deg);box-shadow:0 1px 2px rgba(0,0,0,.45)}
+#dicePoly::after{content:"";position:absolute;width:8px;height:8px;right:8px;top:8px;border-radius:50%;background:#fff4d7;box-shadow:0 1px 2px rgba(0,0,0,.5)}
+#diceKind,#diceFace{position:relative;z-index:2}
 #diceKind{font-size:8px;font-weight:900;line-height:1;letter-spacing:.3px}
 #diceFace{margin-top:2px;font-size:14px;font-weight:900;line-height:1}
 #diceReadout{max-width:145px;padding:5px 7px;border:1px solid #826b4c;border-radius:7px;background:rgba(48,36,27,.94);color:#f4dfbd;font-size:11px;font-weight:750;line-height:1.35;text-align:right;box-shadow:0 3px 8px rgba(0,0,0,.25)}
@@ -47,14 +50,11 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #sessionBar{position:relative;z-index:80;display:flex;align-items:center;justify-content:center;background:#30241b;border-top:1px solid #71593f;padding:7px 48px calc(7px + env(safe-area-inset-bottom))}
 #actionToggleButton{width:62px;height:44px;border:1px solid #806849;border-radius:10px;background:#ead4ae;color:#352719;font-size:19px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.24)}
 
-/* 以前の高さ感を保ち、タブだけ2段に折り返す */
+/* 高さは以前のまま。タブだけ3個＋2個の2段 */
 #actionPalette{position:absolute;z-index:75;left:8px;right:68px;bottom:calc(62px + env(safe-area-inset-bottom));max-height:min(52vh,430px);display:flex;flex-direction:column;border:2px solid #6e563d;border-radius:11px 11px 8px 8px;background:#f0e1c5;box-shadow:0 -8px 24px rgba(0,0,0,.34);transform:translateY(calc(100% + 76px));opacity:0;pointer-events:none;transition:transform .2s ease-out,opacity .15s ease-out;overflow:hidden}
 #gameScreen.actions-open #actionPalette{transform:translateY(0);opacity:1;pointer-events:auto}
-#actionTabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px;background:#d3b98f;border-bottom:1px solid #866e4f;overflow:hidden}
-.action-tab{height:38px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:4px 5px;font-size:13px;font-weight:800}
-.action-tab:nth-child(1),.action-tab:nth-child(2),.action-tab:nth-child(3){grid-column:span 2}
-.action-tab:nth-child(4){grid-column:2 / span 2}
-.action-tab:nth-child(5){grid-column:4 / span 2}
+#actionTabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:6px;background:#d3b98f;border-bottom:1px solid #866e4f;overflow:hidden}
+.action-tab{width:100%;height:38px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:4px 5px;font-size:13px;font-weight:800}
 .action-tab.active{background:#49382a;color:#f1dfc1;border-color:#49382a}
 #actionOptions{min-height:110px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:7px;padding:10px}
 .action-choice{min-height:46px;border:1px solid #8a704f;border-radius:7px;background:#f6e8cf;color:#342719;padding:7px 8px;font-size:14px;font-weight:750;text-align:left}
@@ -154,6 +154,7 @@ const actionToggleButton=document.getElementById('actionToggleButton');
 const actionOptions=document.getElementById('actionOptions');
 const messageText=document.getElementById('messageText');
 const diceButton=document.getElementById('diceButton');
+const dicePoly=document.getElementById('dicePoly');
 const diceKind=document.getElementById('diceKind');
 const diceFace=document.getElementById('diceFace');
 const diceReadout=document.getElementById('diceReadout');
@@ -180,25 +181,30 @@ function setPendingRoll(config={}){
   diceReadout.hidden=true;
 }
 
-/* iPhoneでも確実に見えるよう、ボタン本体のtransformを直接更新する */
-function spinDice(duration=1050){
+/* 回転を見失わないよう、ダイス本体を6回転させながら大きく左右へ振る */
+function spinDice(duration=1250){
   return new Promise(resolve=>{
     const started=performance.now();
-    let lastAngle=0;
-    const timer=setInterval(()=>{
-      const elapsed=performance.now()-started;
-      const p=Math.min(1,elapsed/duration);
-      lastAngle+=52;
-      const hop=-Math.abs(Math.sin(p*Math.PI*7))*12;
-      const sway=Math.sin(p*Math.PI*10)*6;
-      const scale=1+Math.sin(p*Math.PI*8)*.07;
-      diceButton.style.transform=`translate(${sway}px,${hop}px) rotate(${lastAngle}deg) scale(${scale})`;
-      if(p>=1){
-        clearInterval(timer);
-        diceButton.style.transform='translate(0,0) rotate(0deg) scale(1)';
+    const originalKind=diceKind.textContent;
+    diceKind.textContent='ROLL';
+    diceFace.textContent='↻';
+    function frame(now){
+      const p=Math.min(1,(now-started)/duration);
+      const eased=1-Math.pow(1-p,2.2);
+      const angle=2160*eased;
+      const travel=-72*Math.sin(Math.PI*p);
+      const hop=-22*Math.abs(Math.sin(Math.PI*p*5))*(1-p*.35);
+      const scale=1+.13*Math.abs(Math.sin(Math.PI*p*6));
+      dicePoly.style.transform=`translate(${travel}px,${hop}px) rotate(${angle}deg) scale(${scale})`;
+      if(p<1){
+        requestAnimationFrame(frame);
+      }else{
+        dicePoly.style.transform='translate(0,0) rotate(0deg) scale(1)';
+        diceKind.textContent=originalKind;
         resolve();
       }
-    },30);
+    }
+    requestAnimationFrame(frame);
   });
 }
 
@@ -207,10 +213,7 @@ async function rollPendingDice(){
   diceRolling=true;
   const roll={...pendingRoll};
   diceReadout.hidden=true;
-  let flickerCount=0;
-  const flicker=setInterval(()=>{diceFace.textContent=randomDie(roll.sides);flickerCount++;if(flickerCount>18)clearInterval(flicker);},50);
   await spinDice();
-  clearInterval(flicker);
   const values=Array.from({length:roll.count},()=>randomDie(roll.sides));
   const subtotal=values.reduce((sum,value)=>sum+value,0);
   const total=subtotal+roll.modifier;
