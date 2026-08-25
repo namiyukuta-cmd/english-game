@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DD SESSION</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:#17130f;color:#2f2418;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+
+#gameScreen{position:relative;width:100%;height:100dvh;min-height:560px;overflow:hidden;display:grid;grid-template-rows:92px minmax(0,1fr) 62px;background:#e9d8b8}
+
+/* 上部固定 */
+#topBar{position:relative;z-index:20;display:grid;grid-template-columns:54px minmax(0,1fr) 110px;min-height:92px;background:#33271e;color:#f1dfc1;border-bottom:1px solid #6d563c}
+#topLeft{display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 2px}
+#topCenter{min-width:0;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:5px 4px}
+#dateTime{font-size:14px;font-weight:700}
+#currentLocation{margin-top:2px;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#statusLine{margin-top:5px;display:flex;justify-content:center;gap:12px;font-size:13px}
+#topRight{display:grid;grid-template-columns:46px 46px;grid-template-rows:38px 38px;justify-content:end;align-content:start;gap:4px 5px;padding:6px 5px}
+#loadButton{grid-column:1;grid-row:1}
+#saveButton{grid-column:2;grid-row:1}
+#logButton{grid-column:2;grid-row:2}
+.system-button{width:46px;height:38px;border:1px solid #776047;border-radius:7px;background:#49382a;color:#f2dfbe;padding:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:10px;font-weight:700}
+.system-button .icon{font-size:17px;line-height:1}
+.system-button .label{margin-top:2px;font-size:8px}
+
+/* セッション本体 */
+#mainArea{min-height:0;display:grid;grid-template-rows:minmax(190px,47%) minmax(120px,1fr);overflow:hidden}
+#sceneArea{position:relative;min-height:0;border-bottom:1px solid #9e8765;background:#cab591;overflow:hidden}
+#sceneImage{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}
+#scenePlaceholder{position:absolute;inset:0;display:grid;place-items:center;color:#66533d;font-size:15px}
+#messageArea{min-height:0;overflow-y:auto;background:#f1e3c9;padding:12px 14px 20px}
+#speakerName{margin-bottom:5px;font-size:15px;font-weight:800;color:#5e4630}
+#messageText{margin:0;font-size:15px;line-height:1.75;white-space:pre-wrap}
+
+/* 下中央 ▲ */
+#sessionBar{position:relative;z-index:80;display:flex;align-items:center;justify-content:center;background:#30241b;border-top:1px solid #71593f;padding:7px 48px calc(7px + env(safe-area-inset-bottom))}
+#actionToggleButton{width:62px;height:44px;border:1px solid #806849;border-radius:10px;background:#ead4ae;color:#352719;font-size:19px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.24)}
+
+/* 行動パレット。レイアウトを押し上げず上に重なる */
+#actionPalette{position:absolute;z-index:75;left:8px;right:8px;bottom:calc(62px + env(safe-area-inset-bottom));max-height:min(52vh,430px);display:flex;flex-direction:column;border:2px solid #6e563d;border-radius:11px 11px 8px 8px;background:#f0e1c5;box-shadow:0 -8px 24px rgba(0,0,0,.34);transform:translateY(calc(100% + 76px));opacity:0;pointer-events:none;transition:transform .2s ease-out,opacity .15s ease-out;overflow:hidden}
+#gameScreen.actions-open #actionPalette{transform:translateY(0);opacity:1;pointer-events:auto}
+#actionTabs{display:flex;overflow-x:auto;gap:4px;padding:7px;background:#d3b98f;border-bottom:1px solid #866e4f;scrollbar-width:none}
+#actionTabs::-webkit-scrollbar{display:none}
+.action-tab{flex:0 0 auto;min-width:66px;height:38px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:5px 8px;font-size:13px;font-weight:800}
+.action-tab.active{background:#49382a;color:#f1dfc1;border-color:#49382a}
+#actionOptions{min-height:110px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:10px}
+.action-choice{min-height:46px;border:1px solid #8a704f;border-radius:7px;background:#f6e8cf;color:#342719;padding:7px 8px;font-size:14px;font-weight:750;text-align:left}
+#actionHint{padding:0 10px 9px;color:#715c43;font-size:12px;line-height:1.5}
+
+/* 右メニュー */
+#menuDock{position:absolute;z-index:90;right:0;bottom:calc(70px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px;overflow:visible}
+#sideMenuItems{width:80px;display:flex;flex-direction:column;gap:5px;padding:6px 6px 6px 0;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25);transform:translateX(100%);opacity:0;pointer-events:none;transition:transform .18s ease-out,opacity .14s ease-out}
+#menuDock.open #sideMenuItems{transform:translateX(0);opacity:1;pointer-events:auto}
+.menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:#ead3ab;color:#362819;font-size:12px;font-weight:800}
+#menuToggleButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px;padding:0;position:relative;z-index:2}
+
+/* 情報窓 */
+#windowLayer{position:absolute;z-index:100;inset:92px 8px 70px 8px;pointer-events:none}
+#gameWindow{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:2px solid #6e563d;border-radius:10px;background:#f0e1c5;box-shadow:0 8px 25px rgba(0,0,0,.38);pointer-events:auto}
+#windowHeader{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:5px 7px 5px 12px;background:#d6bd94;border-bottom:1px solid #866e4f}
+#windowTitle{font-size:17px;font-weight:800}
+#windowCloseButton{width:38px;height:38px;border:1px solid #7c6245;border-radius:50%;background:#f2dec0;color:#3a2a1d;font-size:20px;font-weight:700}
+#windowContent{flex:1;min-height:0;overflow:auto;padding:12px;font-size:15px;line-height:1.7}
+
+@media(max-width:430px){
+  #topBar{grid-template-columns:50px minmax(0,1fr) 104px}
+  #topRight{grid-template-columns:43px 43px}
+  #dateTime{font-size:13px}
+  #currentLocation{font-size:15px}
+  #statusLine{gap:8px;font-size:12px}
+  .system-button{width:43px}
+  #messageText{font-size:15px}
+  #actionOptions{grid-template-columns:1fr 1fr}
+  .action-choice{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div id="gameScreen">
+  <header id="topBar">
+    <div id="topLeft">
+      <button id="topButton" class="system-button" type="button">
+        <span class="icon">⌂</span><span class="label">TOP</span>
+      </button>
+    </div>
+
+    <div id="topCenter">
+      <div id="dateTime"><span id="gameDate">Day 1</span> ・ <span id="gameTime">08:00</span></div>
+      <div id="currentLocation">Brackenford</div>
+      <div id="statusLine">
+        <span>HP <strong id="miniHp">12/12</strong></span>
+        <span>AC <strong id="miniAc">14</strong></span>
+        <span>Lv. <strong id="miniLevel">1</strong></span>
+      </div>
+    </div>
+
+    <div id="topRight">
+      <button id="loadButton" class="system-button" type="button"><span class="icon">⇩</span><span class="label">LOAD</span></button>
+      <button id="saveButton" class="system-button" type="button"><span class="icon">▣</span><span class="label">SAVE</span></button>
+      <button id="logButton" class="system-button" type="button"><span class="icon">≡</span><span class="label">LOG</span></button>
+    </div>
+  </header>
+
+  <main id="mainArea">
+    <section id="sceneArea">
+      <div id="sceneImage"></div>
+      <div id="scenePlaceholder">MAP / SCENE</div>
+    </section>
+    <section id="messageArea">
+      <div id="speakerName">GM</div>
+      <p id="messageText">君たちはブラッケンフォードにいる。
+朝の通りには商人と旅人の姿がある。
+さて、どうする？</p>
+    </section>
+  </main>
+
+  <section id="actionPalette" aria-label="行動パレット">
+    <nav id="actionTabs" aria-label="行動カテゴリ">
+      <button class="action-tab active" data-category="friendly" type="button">友好</button>
+      <button class="action-tab" data-category="mischief" type="button">悪戯</button>
+      <button class="action-tab" data-category="investigate" type="button">調査</button>
+      <button class="action-tab" data-category="check" type="button">判定</button>
+      <button class="action-tab" data-category="combat" type="button">戦闘</button>
+    </nav>
+    <div id="actionOptions"></div>
+    <div id="actionHint">今は仮の共通行動です。あとで現在地・相手・状況によって表示する行動を変えます。</div>
+  </section>
+
+  <footer id="sessionBar">
+    <button id="actionToggleButton" type="button" aria-label="行動を開く" aria-expanded="false">▲</button>
+  </footer>
+
+  <div id="menuDock">
+    <nav id="sideMenuItems">
+      <button class="menu-button" data-window="quest" type="button">QUEST</button>
+      <button class="menu-button" data-window="inventory" type="button">ITEM</button>
+      <button class="menu-button" data-window="skill" type="button">SKILL</button>
+      <button class="menu-button" data-window="player" type="button">CHAR</button>
+      <button class="menu-button" data-window="memo" type="button">MEMO</button>
+    </nav>
+    <button id="menuToggleButton" type="button" aria-label="メニューを開く" aria-expanded="false">◀</button>
+  </div>
+
+  <div id="windowLayer" hidden>
+    <section id="gameWindow">
+      <header id="windowHeader">
+        <div id="windowTitle">ITEM</div>
+        <button id="windowCloseButton" type="button" aria-label="窓を閉じる">×</button>
+      </header>
+      <div id="windowContent">ここにITEM・QUEST・CHARなどを表示</div>
+    </section>
+  </div>
+</div>
+
+<script>
+const gameScreen=document.getElementById('gameScreen');
+const actionToggleButton=document.getElementById('actionToggleButton');
+const actionOptions=document.getElementById('actionOptions');
+
+const actions={
+  friendly:['挨拶する','世間話をする','話を聞く','説得する','助けを申し出る','贈り物をする'],
+  mischief:['嘘をつく','騙す','スリをする','盗む','尾行する','挑発する'],
+  investigate:['周囲を見る','人物を観察する','物を調べる','聞き耳を立てる','痕跡を探す','捜索する'],
+  check:['筋力で試す','敏捷で試す','知力で考える','判断力で見抜く','魅力で働きかける','運に任せる'],
+  combat:['攻撃する','武器を構える','組みつく','突き飛ばす','援護する','逃げる']
+};
+
+function renderActions(category){
+  actionOptions.innerHTML='';
+  (actions[category]||[]).forEach(label=>{
+    const button=document.createElement('button');
+    button.className='action-choice';
+    button.type='button';
+    button.textContent=label;
+    button.addEventListener('click',()=>{
+      document.getElementById('messageText').textContent=`「${label}」を選んだ。\n\nここにGM側の結果を表示します。`;
+      gameScreen.classList.remove('actions-open');
+      actionToggleButton.textContent='▲';
+      actionToggleButton.setAttribute('aria-expanded','false');
+    });
+    actionOptions.appendChild(button);
+  });
+}
+
+renderActions('friendly');
+
+actionToggleButton.addEventListener('click',()=>{
+  const opening=!gameScreen.classList.contains('actions-open');
+  gameScreen.classList.toggle('actions-open',opening);
+  actionToggleButton.textContent=opening?'▼':'▲';
+  actionToggleButton.setAttribute('aria-expanded',opening?'true':'false');
+  actionToggleButton.setAttribute('aria-label',opening?'行動を閉じる':'行動を開く');
+});
+
+document.querySelectorAll('.action-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.action-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderActions(tab.dataset.category);
+  });
+});
+
+const menuDock=document.getElementById('menuDock');
+const menuToggleButton=document.getElementById('menuToggleButton');
+menuToggleButton.addEventListener('click',()=>{
+  const opening=!menuDock.classList.contains('open');
+  menuDock.classList.toggle('open',opening);
+  menuToggleButton.textContent=opening?'▶':'◀';
+  menuToggleButton.setAttribute('aria-expanded',opening?'true':'false');
+});
+
+const windowLayer=document.getElementById('windowLayer');
+const windowTitle=document.getElementById('windowTitle');
+const windowContent=document.getElementById('windowContent');
+const windowCloseButton=document.getElementById('windowCloseButton');
+const windowNames={quest:'QUEST',inventory:'ITEM',skill:'SKILL',player:'CHAR',memo:'MEMO'};
+document.querySelectorAll('.menu-button').forEach(button=>{
+  button.addEventListener('click',()=>{
+    const type=button.dataset.window;
+    windowTitle.textContent=windowNames[type]||type;
+    windowContent.innerHTML=`<p>${windowNames[type]} の内容をここに表示します。</p>`;
+    windowLayer.hidden=false;
+  });
+});
+windowCloseButton.addEventListener('click',()=>{windowLayer.hidden=true;});
+</script>
+</body>
+</html>
