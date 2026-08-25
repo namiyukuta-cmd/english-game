@@ -9,6 +9,7 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden}
 body{background:#17130f;color:#2f2418;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
 button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 
 #gameScreen{position:relative;width:100%;height:100dvh;min-height:560px;overflow:hidden;display:grid;grid-template-rows:92px minmax(0,1fr) auto;background:#e9d8b8}
 
@@ -39,14 +40,13 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #actionArea{position:relative;z-index:15;min-height:68px;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:7px 50px calc(7px + env(safe-area-inset-bottom)) 7px;background:#30241b;border-top:1px solid #71593f}
 .action-button{min-width:60px;min-height:44px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:6px 9px;font-size:14px;font-weight:800}
 
-#menuOpenButton{position:absolute;z-index:60;right:0;bottom:calc(76px + env(safe-area-inset-bottom));width:34px;height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px}
-#sideMenu{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));width:74px;display:none;flex-direction:column;align-items:flex-end;gap:5px}
-#sideMenu.open{display:flex}
+/* 右下メニュー。矢印ボタンは開閉しても同じDOM・同じ位置 */
+#menuDock{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#sideMenuItems{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 .menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:rgba(234,211,171,.97);color:#362819;font-size:12px;font-weight:800;box-shadow:-3px 3px 8px rgba(0,0,0,.18)}
-#menuCloseButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px}
+#menuToggleButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px;padding:0}
 
 #windowLayer{position:absolute;z-index:50;inset:92px 8px 76px 8px;pointer-events:none}
-#windowLayer[hidden]{display:none}
 #gameWindow{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:2px solid #6e563d;border-radius:10px;background:#f0e1c5;box-shadow:0 8px 25px rgba(0,0,0,.38);pointer-events:auto}
 #windowHeader{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:5px 7px 5px 12px;background:#d6bd94;border-bottom:1px solid #866e4f}
 #windowTitle{font-size:17px;font-weight:800}
@@ -115,16 +115,16 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
     <button class="action-button" type="button">調べる</button>
   </div>
 
-  <button id="menuOpenButton" type="button" aria-label="メニューを開く">◀</button>
-
-  <nav id="sideMenu">
-    <button class="menu-button" data-window="quest" type="button">QUEST</button>
-    <button class="menu-button" data-window="inventory" type="button">ITEM</button>
-    <button class="menu-button" data-window="skill" type="button">SKILL</button>
-    <button class="menu-button" data-window="player" type="button">CHAR</button>
-    <button class="menu-button" data-window="memo" type="button">MEMO</button>
-    <button id="menuCloseButton" type="button" aria-label="メニューを閉じる">▶</button>
-  </nav>
+  <div id="menuDock">
+    <nav id="sideMenuItems" hidden>
+      <button class="menu-button" data-window="quest" type="button">QUEST</button>
+      <button class="menu-button" data-window="inventory" type="button">ITEM</button>
+      <button class="menu-button" data-window="skill" type="button">SKILL</button>
+      <button class="menu-button" data-window="player" type="button">CHAR</button>
+      <button class="menu-button" data-window="memo" type="button">MEMO</button>
+    </nav>
+    <button id="menuToggleButton" type="button" aria-label="メニューを開く" aria-expanded="false">◀</button>
+  </div>
 
   <div id="windowLayer" hidden>
     <section id="gameWindow">
@@ -138,17 +138,23 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 </div>
 
 <script>
-const sideMenu=document.getElementById('sideMenu');
-const menuOpenButton=document.getElementById('menuOpenButton');
-const menuCloseButton=document.getElementById('menuCloseButton');
-menuOpenButton.addEventListener('click',()=>{sideMenu.classList.add('open');menuOpenButton.hidden=true;});
-menuCloseButton.addEventListener('click',()=>{sideMenu.classList.remove('open');menuOpenButton.hidden=false;});
+const sideMenuItems=document.getElementById('sideMenuItems');
+const menuToggleButton=document.getElementById('menuToggleButton');
+
+menuToggleButton.addEventListener('click',()=>{
+  const opening=sideMenuItems.hidden;
+  sideMenuItems.hidden=!opening;
+  menuToggleButton.textContent=opening?'▶':'◀';
+  menuToggleButton.setAttribute('aria-expanded',opening?'true':'false');
+  menuToggleButton.setAttribute('aria-label',opening?'メニューを閉じる':'メニューを開く');
+});
 
 const windowLayer=document.getElementById('windowLayer');
 const windowTitle=document.getElementById('windowTitle');
 const windowContent=document.getElementById('windowContent');
 const windowCloseButton=document.getElementById('windowCloseButton');
 const windowNames={quest:'QUEST',inventory:'ITEM',skill:'SKILL',player:'CHAR',memo:'MEMO'};
+
 document.querySelectorAll('.menu-button').forEach(button=>{
   button.addEventListener('click',()=>{
     const type=button.dataset.window;
@@ -157,6 +163,7 @@ document.querySelectorAll('.menu-button').forEach(button=>{
     windowLayer.hidden=false;
   });
 });
+
 windowCloseButton.addEventListener('click',()=>{windowLayer.hidden=true;});
 </script>
 </body>
