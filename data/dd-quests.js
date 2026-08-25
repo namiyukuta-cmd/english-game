@@ -172,3 +172,34 @@ window.DD_QUEST_DATA = {
     }
   ]
 };
+
+(() => {
+  if (window.__ddWorldMainBootstrap) return;
+  window.__ddWorldMainBootstrap = true;
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function bootWorldMain() {
+    if (!document.getElementById('bookPage') || !window.DDMain) return;
+    try {
+      if (!window.DD_WORLD_DATA) await loadScript('data/dd-world.js?v=20260825-4');
+      if (!window.DDWorldMain) await loadScript('js/dd-world-main.js?v=20260825-1');
+    } catch (error) {
+      console.error('D&D world navigation load failed', error);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootWorldMain, {once:true});
+  } else {
+    bootWorldMain();
+  }
+})();
