@@ -43,37 +43,37 @@
           },
           tavern: {
             id:'tavern', nameJa:'酒場', type:'tavern',
-            description:'食事と酒、噂、依頼が集まる場所。依頼とNPCの中身はこれから追加する。',
+            description:'食事と酒、噂や仕事を求める者が集まるにぎやかな酒場。',
             exits:['town_square']
           },
           general_store: {
             id:'general_store', nameJa:'雑貨店', type:'shop',
-            description:'旅に必要な日用品を扱う店。商品データは固定データとして後から追加できる。',
+            description:'旅に必要な日用品や雑貨を扱う店。',
             exits:['town_square']
           },
           blacksmith: {
             id:'blacksmith', nameJa:'鍛冶屋', type:'shop',
-            description:'武器や防具を扱う鍛冶屋。',
+            description:'武器、防具、金属製の道具を扱う鍛冶屋。',
             exits:['town_square']
           },
           church: {
             id:'church', nameJa:'教会', type:'church',
-            description:'祈りや相談のために人が訪れる小さな教会。',
+            description:'祈りや相談のために人々が訪れる小さな教会。',
             exits:['town_square']
           },
           inn: {
             id:'inn', nameJa:'宿屋', type:'inn',
-            description:'宿泊して休息できる場所。宿泊処理は後から追加する。',
+            description:'旅人が宿泊し、休息を取るための宿屋。',
             exits:['town_square']
           },
           north_gate: {
             id:'north_gate', nameJa:'北門', type:'gate',
-            description:'街の北側の門。ここから街道へ出られる。長距離移動は次の段階で実装する。',
+            description:'街の北側の門。門の向こうには街道が続いている。',
             exits:['town_square']
           },
           south_gate: {
             id:'south_gate', nameJa:'南門', type:'gate',
-            description:'街の南側の門。ここから街道へ出られる。長距離移動は次の段階で実装する。',
+            description:'街の南側の門。門の向こうには街道が続いている。',
             exits:['town_square']
           }
         }
