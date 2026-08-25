@@ -40,10 +40,10 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 .action-button{min-width:60px;min-height:44px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:6px 9px;font-size:14px;font-weight:800}
 
 #menuOpenButton{position:absolute;z-index:60;right:0;bottom:calc(76px + env(safe-area-inset-bottom));width:34px;height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px}
-#sideMenu{position:absolute;z-index:70;right:0;bottom:calc(70px + env(safe-area-inset-bottom));width:74px;display:none;flex-direction:column;gap:5px;padding:6px;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25)}
+#sideMenu{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));width:74px;display:none;flex-direction:column;align-items:flex-end;gap:5px}
 #sideMenu.open{display:flex}
-.menu-button{min-height:43px;border:1px solid #806748;border-radius:6px;background:#ead3ab;color:#362819;font-size:12px;font-weight:800}
-#menuCloseButton{min-height:34px;border:1px solid #725a40;border-radius:6px;background:#49382a;color:#f0ddbd;font-size:17px}
+.menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:rgba(234,211,171,.97);color:#362819;font-size:12px;font-weight:800;box-shadow:-3px 3px 8px rgba(0,0,0,.18)}
+#menuCloseButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px}
 
 #windowLayer{position:absolute;z-index:50;inset:92px 8px 76px 8px;pointer-events:none}
 #windowLayer[hidden]{display:none}
@@ -118,12 +118,12 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   <button id="menuOpenButton" type="button" aria-label="メニューを開く">◀</button>
 
   <nav id="sideMenu">
-    <button id="menuCloseButton" type="button">▶</button>
     <button class="menu-button" data-window="quest" type="button">QUEST</button>
     <button class="menu-button" data-window="inventory" type="button">ITEM</button>
     <button class="menu-button" data-window="skill" type="button">SKILL</button>
     <button class="menu-button" data-window="player" type="button">CHAR</button>
     <button class="menu-button" data-window="memo" type="button">MEMO</button>
+    <button id="menuCloseButton" type="button" aria-label="メニューを閉じる">▶</button>
   </nav>
 
   <div id="windowLayer" hidden>
