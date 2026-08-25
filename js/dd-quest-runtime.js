@@ -26,7 +26,8 @@
   }
 
   function stageEffects(quest) {
-    if (quest?.effects && typeof quest.effects === 'object') return quest.effects;
+    const saved = quest?.effects;
+    if (saved && typeof saved === 'object' && Object.keys(saved).length) return saved;
     return stageDefinition(quest)?.effects || {};
   }
 
@@ -98,12 +99,14 @@
             questId: quest.id,
             locationId: place.locationId || '',
             placeId: place.placeId || '',
+            actionLabel: place.actionLabel || '',
             description: place.description || ''
           });
         }
       }
 
       for (const action of effects.unlockActions || []) {
+        if (action.locationId && !locationMatches(game, action.locationId)) continue;
         if (action.placeId && String(action.placeId) !== String(placeId)) continue;
         addUnique(extras, {
           id: action.actionId || `quest-action-${quest.id}`,
@@ -112,6 +115,7 @@
           __questInjected: true,
           kind: 'questAction',
           questId: quest.id,
+          locationId: action.locationId || '',
           placeId: action.placeId || ''
         });
       }
@@ -156,6 +160,35 @@
     });
   }
 
+  function rewardText(reward = {}) {
+    const parts = [];
+    if (reward.gp) parts.push(`${reward.gp} GP`);
+    if (reward.sp) parts.push(`${reward.sp} SP`);
+    if (reward.cp) parts.push(`${reward.cp} CP`);
+    if (Array.isArray(reward.items)) {
+      reward.items.forEach(item => parts.push(typeof item === 'string' ? item : item?.name || ''));
+    }
+    return parts.filter(Boolean).join(' / ');
+  }
+
+  function grantReward(game, quest, def) {
+    if (quest.rewardGranted) return;
+    const reward = quest.reward || def?.reward || {};
+    game.currency = game.currency || {};
+    for (const key of ['gp','sp','cp']) {
+      const amount = Number(reward[key] || 0);
+      if (amount) game.currency[key] = Number(game.currency[key] || 0) + amount;
+    }
+    if (Array.isArray(reward.items) && reward.items.length) {
+      game.inventory = Array.isArray(game.inventory) ? game.inventory : [];
+      for (const raw of reward.items) {
+        if (typeof raw === 'string') game.inventory.push({name:raw,quantity:1});
+        else if (raw && typeof raw === 'object') game.inventory.push(clone(raw));
+      }
+    }
+    quest.rewardGranted = true;
+  }
+
   function advanceQuest(game, questId) {
     const quest = activeQuests(game).find(q => q.id === questId);
     const def = questDefinition(questId);
@@ -177,8 +210,10 @@
       quest.completedAt = new Date().toISOString();
       quest.currentObjective = '完了';
       quest.effects = {};
-      questLog(game, `依頼「${quest.title || def.title}」を完了した。`, quest.id);
-      return { completed: true, quest };
+      grantReward(game, quest, def);
+      const reward = rewardText(quest.reward || def.reward || {});
+      questLog(game, `依頼「${quest.title || def.title}」を完了した。${reward ? ` 報酬：${reward}` : ''}`, quest.id);
+      return { completed: true, quest, reward };
     }
 
     quest.stageIndex = nextIndex;
@@ -221,8 +256,9 @@
       actions: [
         {
           id: `quest-talk-${action.questId}-${action.placeId || 'place'}`,
-          label: '依頼について',
+          label: action.actionLabel || '依頼について',
           __questDynamic: true,
+          __questInjected: true,
           kind: 'questTalkHere',
           questId: action.questId
         },
@@ -244,9 +280,9 @@
     if (!result) return;
 
     if (result.completed) {
-      game.current.description = `依頼「${result.quest.title}」は完了しました。`;
+      game.current.description = `依頼「${result.quest.title}」は完了しました。${result.reward ? `\n\n報酬：${result.reward}` : ''}`;
     } else {
-      game.current.description = `依頼について話を聞きました。\n\n次の目的：${result.quest.currentObjective}`;
+      game.current.description = `行動しました。\n\n次の目的：${result.quest.currentObjective}`;
     }
     baseSetGame(apply(game));
   }
