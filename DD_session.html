@@ -13,7 +13,6 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 
 #gameScreen{position:relative;width:100%;height:100dvh;min-height:560px;overflow:hidden;display:grid;grid-template-rows:92px minmax(0,1fr) 62px;background:#e9d8b8}
 
-/* 上部固定 */
 #topBar{position:relative;z-index:20;display:grid;grid-template-columns:54px minmax(0,1fr) 110px;min-height:92px;background:#33271e;color:#f1dfc1;border-bottom:1px solid #6d563c}
 #topLeft{display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 2px}
 #topCenter{min-width:0;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:5px 4px}
@@ -28,7 +27,6 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 .system-button .icon{font-size:17px;line-height:1}
 .system-button .label{margin-top:2px;font-size:8px}
 
-/* セッション本体 */
 #mainArea{position:relative;min-height:0;display:grid;grid-template-rows:minmax(190px,47%) minmax(120px,1fr);overflow:hidden}
 #sceneArea{position:relative;min-height:0;border-bottom:1px solid #9e8765;background:#cab591;overflow:hidden}
 #sceneImage{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}
@@ -37,38 +35,37 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #speakerName{margin-bottom:5px;font-size:15px;font-weight:800;color:#5e4630}
 #messageText{margin:0;font-size:15px;line-height:1.75;white-space:pre-wrap}
 
-/* マップ／シーン枠のすぐ下・右側のダイス */
-#diceDock{position:absolute;z-index:72;right:7px;top:calc(47% + 6px);display:flex;flex-direction:row;align-items:center;gap:5px;pointer-events:auto}
-#diceButton{width:58px;height:58px;border:0;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer}
-#diceButton:disabled{pointer-events:none}
-#dicePoly{position:relative;width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);transform-origin:50% 50%;will-change:transform;user-select:none;-webkit-user-select:none}
+/* MAP / SCENE のすぐ下、右側 */
+#diceDock{position:absolute;z-index:72;right:7px;top:calc(47% + 6px);display:flex;flex-direction:row;align-items:center;gap:5px;overflow:visible;pointer-events:auto}
+#diceButton{width:58px;height:58px;border:0;background:transparent;padding:0;display:grid;place-items:center;cursor:pointer;transform-origin:50% 50%;will-change:transform}
+#dicePoly{position:relative;width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);user-select:none;-webkit-user-select:none}
 #dicePoly::after{content:"";position:absolute;width:6px;height:6px;right:9px;top:7px;border-radius:50%;background:rgba(255,244,215,.9);box-shadow:0 1px 2px rgba(0,0,0,.45)}
 #diceKind{font-size:8px;font-weight:900;line-height:1;letter-spacing:.3px}
 #diceFace{margin-top:2px;font-size:14px;font-weight:900;line-height:1}
 #diceReadout{max-width:145px;padding:5px 7px;border:1px solid #826b4c;border-radius:7px;background:rgba(48,36,27,.94);color:#f4dfbd;font-size:11px;font-weight:750;line-height:1.35;text-align:right;box-shadow:0 3px 8px rgba(0,0,0,.25)}
 
-/* 下中央 ▲ */
 #sessionBar{position:relative;z-index:80;display:flex;align-items:center;justify-content:center;background:#30241b;border-top:1px solid #71593f;padding:7px 48px calc(7px + env(safe-area-inset-bottom))}
 #actionToggleButton{width:62px;height:44px;border:1px solid #806849;border-radius:10px;background:#ead4ae;color:#352719;font-size:19px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.24)}
 
-/* 行動パレット。前の高さを基準に、タブ2列分だけ自然に高くなる */
+/* 以前の高さ感を保ち、タブだけ2段に折り返す */
 #actionPalette{position:absolute;z-index:75;left:8px;right:68px;bottom:calc(62px + env(safe-area-inset-bottom));max-height:min(52vh,430px);display:flex;flex-direction:column;border:2px solid #6e563d;border-radius:11px 11px 8px 8px;background:#f0e1c5;box-shadow:0 -8px 24px rgba(0,0,0,.34);transform:translateY(calc(100% + 76px));opacity:0;pointer-events:none;transition:transform .2s ease-out,opacity .15s ease-out;overflow:hidden}
 #gameScreen.actions-open #actionPalette{transform:translateY(0);opacity:1;pointer-events:auto}
-#actionTabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:6px;background:#d3b98f;border-bottom:1px solid #866e4f;overflow:hidden}
-.action-tab{width:100%;height:36px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:4px 7px;font-size:13px;font-weight:800}
+#actionTabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px;background:#d3b98f;border-bottom:1px solid #866e4f;overflow:hidden}
+.action-tab{height:38px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:4px 5px;font-size:13px;font-weight:800}
+.action-tab:nth-child(1),.action-tab:nth-child(2),.action-tab:nth-child(3){grid-column:span 2}
+.action-tab:nth-child(4){grid-column:2 / span 2}
+.action-tab:nth-child(5){grid-column:4 / span 2}
 .action-tab.active{background:#49382a;color:#f1dfc1;border-color:#49382a}
 #actionOptions{min-height:110px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:7px;padding:10px}
 .action-choice{min-height:46px;border:1px solid #8a704f;border-radius:7px;background:#f6e8cf;color:#342719;padding:7px 8px;font-size:14px;font-weight:750;text-align:left}
 #actionHint{flex:0 0 auto;padding:0 10px 9px;color:#715c43;font-size:12px;line-height:1.5}
 
-/* 右メニュー */
 #menuDock{position:absolute;z-index:90;right:0;bottom:calc(70px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px;overflow:visible}
 #sideMenuItems{width:80px;display:flex;flex-direction:column;gap:5px;padding:6px 6px 6px 0;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25);transform:translateX(100%);opacity:0;pointer-events:none;transition:transform .18s ease-out,opacity .14s ease-out}
 #menuDock.open #sideMenuItems{transform:translateX(0);opacity:1;pointer-events:auto}
 .menu-button{width:74px;min-height:43px;border:1px solid #806748;border-right:none;border-radius:7px 0 0 7px;background:#ead3ab;color:#362819;font-size:12px;font-weight:800}
 #menuToggleButton{width:34px;height:46px;min-height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px;padding:0;position:relative;z-index:2}
 
-/* 情報窓 */
 #windowLayer{position:absolute;z-index:100;inset:92px 8px 70px 8px;pointer-events:none}
 #gameWindow{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:2px solid #6e563d;border-radius:10px;background:#f0e1c5;box-shadow:0 8px 25px rgba(0,0,0,.38);pointer-events:auto}
 #windowHeader{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:5px 7px 5px 12px;background:#d6bd94;border-bottom:1px solid #866e4f}
@@ -93,21 +90,13 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 <div id="gameScreen">
   <header id="topBar">
     <div id="topLeft">
-      <button id="topButton" class="system-button" type="button">
-        <span class="icon">⌂</span><span class="label">TOP</span>
-      </button>
+      <button id="topButton" class="system-button" type="button"><span class="icon">⌂</span><span class="label">TOP</span></button>
     </div>
-
     <div id="topCenter">
       <div id="dateTime"><span id="gameDate">Day 1</span> ・ <span id="gameTime">08:00</span></div>
       <div id="currentLocation">Brackenford</div>
-      <div id="statusLine">
-        <span>HP <strong id="miniHp">12/12</strong></span>
-        <span>AC <strong id="miniAc">14</strong></span>
-        <span>Lv. <strong id="miniLevel">1</strong></span>
-      </div>
+      <div id="statusLine"><span>HP <strong id="miniHp">12/12</strong></span><span>AC <strong id="miniAc">14</strong></span><span>Lv. <strong id="miniLevel">1</strong></span></div>
     </div>
-
     <div id="topRight">
       <button id="loadButton" class="system-button" type="button"><span class="icon">⇩</span><span class="label">LOAD</span></button>
       <button id="saveButton" class="system-button" type="button"><span class="icon">▣</span><span class="label">SAVE</span></button>
@@ -116,25 +105,13 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   </header>
 
   <main id="mainArea">
-    <section id="sceneArea">
-      <div id="sceneImage"></div>
-      <div id="scenePlaceholder">MAP / SCENE</div>
-    </section>
-    <section id="messageArea">
-      <div id="speakerName">GM</div>
-      <p id="messageText">君たちはブラッケンフォードにいる。
+    <section id="sceneArea"><div id="sceneImage"></div><div id="scenePlaceholder">MAP / SCENE</div></section>
+    <section id="messageArea"><div id="speakerName">GM</div><p id="messageText">君たちはブラッケンフォードにいる。
 朝の通りには商人と旅人の姿がある。
-さて、どうする？</p>
-    </section>
-
+さて、どうする？</p></section>
     <div id="diceDock" aria-live="polite">
       <div id="diceReadout" hidden></div>
-      <button id="diceButton" type="button" aria-label="ダイスを振る">
-        <span id="dicePoly" aria-hidden="true">
-          <span id="diceKind">D100</span>
-          <strong id="diceFace">ROLL</strong>
-        </span>
-      </button>
+      <button id="diceButton" type="button" aria-label="ダイスを振る"><span id="dicePoly" aria-hidden="true"><span id="diceKind">D100</span><strong id="diceFace">ROLL</strong></span></button>
     </div>
   </main>
 
@@ -150,9 +127,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
     <div id="actionHint">今は仮の共通行動です。あとで現在地・相手・状況によって表示する行動を変えます。</div>
   </section>
 
-  <footer id="sessionBar">
-    <button id="actionToggleButton" type="button" aria-label="行動を開く" aria-expanded="false">▲</button>
-  </footer>
+  <footer id="sessionBar"><button id="actionToggleButton" type="button" aria-label="行動を開く" aria-expanded="false">▲</button></footer>
 
   <div id="menuDock">
     <nav id="sideMenuItems">
@@ -167,10 +142,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 
   <div id="windowLayer" hidden>
     <section id="gameWindow">
-      <header id="windowHeader">
-        <div id="windowTitle">ITEM</div>
-        <button id="windowCloseButton" type="button" aria-label="窓を閉じる">×</button>
-      </header>
+      <header id="windowHeader"><div id="windowTitle">ITEM</div><button id="windowCloseButton" type="button" aria-label="窓を閉じる">×</button></header>
       <div id="windowContent">ここにITEM・QUEST・CHARなどを表示</div>
     </section>
   </div>
@@ -181,9 +153,7 @@ const gameScreen=document.getElementById('gameScreen');
 const actionToggleButton=document.getElementById('actionToggleButton');
 const actionOptions=document.getElementById('actionOptions');
 const messageText=document.getElementById('messageText');
-
 const diceButton=document.getElementById('diceButton');
-const dicePoly=document.getElementById('dicePoly');
 const diceKind=document.getElementById('diceKind');
 const diceFace=document.getElementById('diceFace');
 const diceReadout=document.getElementById('diceReadout');
@@ -193,11 +163,9 @@ let pendingRoll={sides:100,count:1,modifier:0,label:'フリーロール'};
 function randomDie(sides){
   const max=Math.max(2,Math.floor(Number(sides)||100));
   if(window.crypto&&window.crypto.getRandomValues){
-    const range=0x100000000;
-    const limit=range-(range%max);
-    const data=new Uint32Array(1);
+    const range=0x100000000,limit=range-(range%max),data=new Uint32Array(1);
     do{window.crypto.getRandomValues(data);}while(data[0]>=limit);
-    return (data[0]%max)+1;
+    return(data[0]%max)+1;
   }
   return Math.floor(Math.random()*max)+1;
 }
@@ -212,59 +180,47 @@ function setPendingRoll(config={}){
   diceReadout.hidden=true;
 }
 
-function animateDice(){
-  const frames=[
-    {transform:'translate(0,0) rotate(0deg) scale(1)'},
-    {transform:'translate(-9px,-13px) rotate(210deg) scale(1.14)'},
-    {transform:'translate(7px,-5px) rotate(470deg) scale(.92)'},
-    {transform:'translate(-6px,-15px) rotate(760deg) scale(1.1)'},
-    {transform:'translate(8px,-3px) rotate(1040deg) scale(.95)'},
-    {transform:'translate(-4px,-9px) rotate(1320deg) scale(1.06)'},
-    {transform:'translate(0,0) rotate(1620deg) scale(1)'}
-  ];
-  if(typeof dicePoly.animate==='function'){
-    const animation=dicePoly.animate(frames,{duration:1050,easing:'cubic-bezier(.16,.72,.24,1)',iterations:1});
-    animation.onfinish=()=>{dicePoly.style.transform='';};
-    return;
-  }
-  let step=0;
-  const fallback=setInterval(()=>{
-    const f=frames[step%frames.length];
-    dicePoly.style.transform=f.transform;
-    step++;
-    if(step>=frames.length*2){
-      clearInterval(fallback);
-      dicePoly.style.transform='';
-    }
-  },80);
+/* iPhoneでも確実に見えるよう、ボタン本体のtransformを直接更新する */
+function spinDice(duration=1050){
+  return new Promise(resolve=>{
+    const started=performance.now();
+    let lastAngle=0;
+    const timer=setInterval(()=>{
+      const elapsed=performance.now()-started;
+      const p=Math.min(1,elapsed/duration);
+      lastAngle+=52;
+      const hop=-Math.abs(Math.sin(p*Math.PI*7))*12;
+      const sway=Math.sin(p*Math.PI*10)*6;
+      const scale=1+Math.sin(p*Math.PI*8)*.07;
+      diceButton.style.transform=`translate(${sway}px,${hop}px) rotate(${lastAngle}deg) scale(${scale})`;
+      if(p>=1){
+        clearInterval(timer);
+        diceButton.style.transform='translate(0,0) rotate(0deg) scale(1)';
+        resolve();
+      }
+    },30);
+  });
 }
 
-function rollPendingDice(){
+async function rollPendingDice(){
   if(diceRolling)return;
   diceRolling=true;
   const roll={...pendingRoll};
-  animateDice();
-
+  diceReadout.hidden=true;
   let flickerCount=0;
-  const flicker=setInterval(()=>{
-    diceFace.textContent=randomDie(roll.sides);
-    flickerCount++;
-    if(flickerCount>16)clearInterval(flicker);
-  },55);
-
-  setTimeout(()=>{
-    clearInterval(flicker);
-    const values=Array.from({length:roll.count},()=>randomDie(roll.sides));
-    const subtotal=values.reduce((sum,value)=>sum+value,0);
-    const total=subtotal+roll.modifier;
-    diceKind.textContent=(roll.count>1?roll.count:'')+'D'+roll.sides;
-    diceFace.textContent=total;
-    const detail=roll.count>1?values.join(' + '):String(values[0]);
-    const modText=roll.modifier===0?'':(roll.modifier>0?` + ${roll.modifier}`:` - ${Math.abs(roll.modifier)}`);
-    diceReadout.textContent=`${roll.label}：${detail}${modText} = ${total}`;
-    diceReadout.hidden=false;
-    diceRolling=false;
-  },1080);
+  const flicker=setInterval(()=>{diceFace.textContent=randomDie(roll.sides);flickerCount++;if(flickerCount>18)clearInterval(flicker);},50);
+  await spinDice();
+  clearInterval(flicker);
+  const values=Array.from({length:roll.count},()=>randomDie(roll.sides));
+  const subtotal=values.reduce((sum,value)=>sum+value,0);
+  const total=subtotal+roll.modifier;
+  diceKind.textContent=(roll.count>1?roll.count:'')+'D'+roll.sides;
+  diceFace.textContent=total;
+  const detail=roll.count>1?values.join(' + '):String(values[0]);
+  const modText=roll.modifier===0?'':(roll.modifier>0?` + ${roll.modifier}`:` - ${Math.abs(roll.modifier)}`);
+  diceReadout.textContent=`${roll.label}：${detail}${modText} = ${total}`;
+  diceReadout.hidden=false;
+  diceRolling=false;
 }
 
 diceButton.addEventListener('click',rollPendingDice);
@@ -282,9 +238,7 @@ function renderActions(category){
   actionOptions.innerHTML='';
   (actions[category]||[]).forEach(label=>{
     const button=document.createElement('button');
-    button.className='action-choice';
-    button.type='button';
-    button.textContent=label;
+    button.className='action-choice';button.type='button';button.textContent=label;
     button.addEventListener('click',()=>{
       if(category==='check'){
         setPendingRoll({sides:20,count:1,modifier:0,label});
@@ -304,7 +258,6 @@ function renderActions(category){
 }
 
 renderActions('friendly');
-
 actionToggleButton.addEventListener('click',()=>{
   const opening=!gameScreen.classList.contains('actions-open');
   gameScreen.classList.toggle('actions-open',opening);
