@@ -6,67 +6,125 @@
   <meta name="theme-color" content="#11100e">
   <title>D&D TRPG</title>
   <style>
-    :root{color-scheme:dark;--rail:74px;--line:#655743;--text:#f1e8da;--muted:#c4b49e;--panel:rgba(20,18,15,.92)}
+    :root{
+      color-scheme:dark;
+      --rail:78px;
+      --bg:#11100e;
+      --desk:#191714;
+      --panel:#211d17;
+      --panel2:#171410;
+      --line:#6b5c47;
+      --line-soft:#473d31;
+      --text:#f1e8da;
+      --muted:#c4b49e;
+      --accent:#d5b982;
+      --shadow:0 16px 34px rgba(0,0,0,.42);
+    }
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11100e;color:var(--text);font-family:Georgia,"Yu Mincho",serif}
-    button{font:inherit}
-    .game{position:relative;width:100%;height:100dvh;min-height:420px;background:#15130f;overflow:hidden}
-    .rail{position:absolute;z-index:20;left:0;top:0;bottom:0;width:var(--rail);border-right:1px solid var(--line);background:rgba(17,15,12,.96);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 8px}
-    .rail-btn{width:58px;min-height:60px;border:1px solid var(--line);background:#27221b;color:var(--text);display:grid;place-items:center;gap:2px;padding:6px 2px}
-    .rail-btn .icon{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;line-height:1}
-    .rail-btn .label{font-size:10px;color:var(--muted)}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Georgia,"Yu Mincho",serif}
+    button,textarea{font:inherit}
+    button{touch-action:manipulation}
+    [hidden]{display:none!important}
+
+    .app{position:relative;width:100%;height:100dvh;min-height:430px;background:var(--desk);overflow:hidden}
+    .rail{position:absolute;z-index:100;left:0;top:0;bottom:0;width:var(--rail);display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 7px calc(10px + env(safe-area-inset-bottom));border-right:1px solid var(--line);background:#12100d}
+    .rail-title{width:100%;text-align:center;font-size:10px;color:#8f806d;letter-spacing:.12em;padding:1px 0 3px}
+    .rail-btn{width:62px;min-height:58px;border:1px solid #514636;background:#242019;color:var(--text);display:grid;place-items:center;gap:2px;padding:5px 2px;cursor:pointer}
+    .rail-btn:hover,.rail-btn.open{border-color:var(--accent);background:#332a20}
+    .rail-btn:disabled{opacity:.5}
+    .rail-icon{font-size:20px;line-height:1;font-weight:700;color:#ead8bc}
+    .rail-label{font-size:10px;color:var(--muted);white-space:nowrap}
+    .rail-sep{width:48px;border-top:1px solid #3f372d;margin:2px 0}
     .rail-spacer{flex:1}
-    .stage{position:absolute;left:var(--rail);right:0;top:0;bottom:0;background:#24221d center/cover no-repeat;overflow:hidden}
-    .stage::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.04),rgba(0,0,0,.18))}
-    .stage-empty{position:absolute;inset:0;display:grid;place-items:center;color:rgba(235,224,206,.25);font-size:14px;letter-spacing:.12em;pointer-events:none}
-    .portrait{position:absolute;z-index:10;bottom:10px;width:clamp(110px,28vw,180px);height:clamp(86px,21vw,132px);border:1px solid #806d53;background:var(--panel);overflow:hidden}
-    .portrait.npc{left:calc(var(--rail) + 10px)}
-    .portrait.player{right:10px}
-    .portrait img{width:100%;height:100%;object-fit:cover;display:block}
-    .portrait-name{position:absolute;left:0;right:0;bottom:0;min-height:25px;padding:4px 7px;background:rgba(12,11,9,.8);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .player-placeholder{position:absolute;inset:0 0 25px;display:grid;place-items:center;font-size:34px;color:#b9a78e}
-    .mob-silhouette{position:absolute;inset:4px 4px 25px;overflow:hidden}
-    .mob-head{position:absolute;width:31%;aspect-ratio:1;border-radius:50%;background:#050505;left:34.5%;top:10%}
-    .mob-body{position:absolute;width:70%;height:68%;border-radius:48% 48% 12% 12%;background:#050505;left:15%;top:40%}
-    .toast{position:absolute;z-index:40;top:14px;left:calc(var(--rail) + 14px);right:14px;max-width:560px;margin:auto;padding:10px 12px;border:1px solid var(--line);background:rgba(24,21,17,.94);color:var(--text);font-size:13px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}
-    .toast.show{opacity:1}
-    .modal-wrap{position:absolute;z-index:50;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;padding:18px}
-    .modal-wrap[hidden]{display:none}
-    .modal{width:min(520px,100%);border:1px solid var(--line);background:#211d17;padding:18px}
-    .modal h2{margin:0 0 8px;font-size:20px}
-    .modal p{margin:7px 0;color:var(--muted);font-size:13px;line-height:1.65}
-    .modal input{width:100%;min-height:48px;margin-top:10px;border:1px solid var(--line);background:#14120f;color:var(--text);padding:10px 12px;font:16px ui-monospace,SFMono-Regular,Menlo,monospace}
-    .modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
-    .modal-actions button{min-height:44px;border:1px solid var(--line);background:#342b22;color:var(--text);padding:8px 14px}
-    .modal-actions .primary{background:#6b5740}
-    @media(max-width:440px){:root{--rail:62px}.rail{padding:8px 5px}.rail-btn{width:50px;min-height:56px}.portrait{width:30vw;height:23vw;min-width:96px;min-height:78px}.portrait.npc{left:calc(var(--rail) + 7px)}.portrait.player{right:7px}}
+    .system-btn{min-height:46px}.system-btn .rail-icon{font-size:16px}.system-btn .rail-label{font-size:9px}
+
+    .desktop{position:absolute;left:var(--rail);right:0;top:0;bottom:0;overflow:hidden;background:
+      linear-gradient(rgba(255,255,255,.015),rgba(255,255,255,.015)),
+      radial-gradient(circle at 48% 35%,#25211b 0,#191714 55%,#14120f 100%)}
+    .desktop::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:24px 24px}
+    .desktop-tools{position:absolute;z-index:90;top:8px;right:9px;display:flex;gap:7px}
+    .desktop-tool{min-height:34px;border:1px solid #5c4e3b;background:rgba(31,27,22,.94);color:var(--text);padding:5px 11px;font-size:12px}
+
+    .dd-window{position:absolute;z-index:30;min-width:220px;min-height:170px;border:1px solid #79674e;background:var(--panel);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+    .dd-window.active-window{border-color:#a88e65;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+    .window-titlebar{height:39px;flex:0 0 39px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px 0 12px;border-bottom:1px solid var(--line);background:#17130f;cursor:grab;user-select:none;touch-action:none}
+    .window-titlebar:active{cursor:grabbing}
+    .window-title{font-size:15px;color:#eadbc6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .window-controls{display:flex;gap:4px}
+    .window-btn{width:31px;height:29px;border:1px solid #554838;background:#262019;color:#dfcfb8;font-size:18px;line-height:1;padding:0}
+    .window-btn:hover{background:#3b3025}
+    .window-body{position:relative;flex:1;min-height:0;overflow:auto;padding:13px;background:var(--panel)}
+    .window-resize{position:absolute;z-index:5;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;touch-action:none}
+    .window-resize::after{content:"";position:absolute;right:4px;bottom:4px;width:10px;height:10px;border-right:2px solid #907a5d;border-bottom:2px solid #907a5d}
+    .dd-window.maximized .window-resize{display:none}
+
+    .scene-body{padding:0;overflow:hidden}
+    .scene-canvas,.map-canvas{position:relative;width:100%;height:100%;min-height:180px;background:#24211c center/cover no-repeat;overflow:hidden}
+    .scene-canvas::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.03),rgba(0,0,0,.24));pointer-events:none}
+    .scene-placeholder,.map-placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:rgba(237,224,204,.27);letter-spacing:.13em;font-size:14px}
+    .map-placeholder span{font-size:26px}.map-placeholder small{display:block;font-size:11px;letter-spacing:.04em;margin-top:7px}
+    .scene-location,.map-location{position:absolute;z-index:3;left:10px;bottom:10px;padding:6px 9px;border:1px solid rgba(214,190,147,.5);background:rgba(15,13,10,.82);font-size:12px}
+    .map-location{left:auto;right:10px}.map-pin{margin-right:6px;color:#d9bb82}
+    .map-canvas{background-color:#ddd1b8;background-size:cover;color:#241f18}
+    .map-canvas::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(74,57,34,.08),rgba(74,57,34,.08) 1px,transparent 1px,transparent 24px),repeating-linear-gradient(90deg,rgba(74,57,34,.08),rgba(74,57,34,.08) 1px,transparent 1px,transparent 24px)}
+    .map-canvas .map-placeholder{color:rgba(52,40,26,.45)}
+
+    .player-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line-soft);padding-bottom:12px;margin-bottom:12px}
+    .player-head h2{font-size:22px;margin:0 0 4px;color:var(--accent)}
+    .player-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .hp-box{min-width:100px;border:1px solid var(--line);padding:8px 10px;text-align:center;background:#16130f}.hp-box small{display:block;color:var(--muted);font-size:10px}.hp-box strong{font-size:18px}
+    .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.stat-strip>div,.ability-tile{border:1px solid var(--line-soft);background:#191611;text-align:center;padding:8px 4px;display:grid;gap:2px}.stat-strip small,.ability-tile small{font-size:10px;color:var(--muted)}.stat-strip strong{font-size:16px}.ability-list{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.ability-tile strong{font-size:19px;color:var(--accent)}.ability-tile span{font-size:11px;color:var(--muted)}
+    .data-block,.list-section{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:10px}.data-block h3,.list-section h3{margin:0 0 7px;color:#eadbc6;font-size:15px}.data-block p,.list-section p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.list-section ul{margin:0;padding-left:20px}.list-section li{margin:5px 0;color:#e7ddcf;font-size:13px;line-height:1.5}.empty-text{color:#8f806d!important}
+    .money-strip{display:flex;gap:7px;flex-wrap:wrap}.money-strip span{border:1px solid var(--line);background:#17140f;padding:7px 10px;font-size:12px}.money-strip strong{color:var(--accent);font-size:15px;margin-left:4px}
+    .quest-list{display:grid;gap:10px}.quest-card{border:1px solid var(--line-soft);background:#191611;padding:11px}.quest-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.quest-top strong{font-size:15px;color:#eadbc6}.quest-top span{font-size:10px;border:1px solid #665741;padding:3px 6px;color:var(--muted)}.quest-card p{font-size:13px;line-height:1.55;color:var(--muted);margin:8px 0 0}.quest-progress{margin-top:8px;font-size:11px;color:#cbb895}
+    .empty-panel{min-height:170px;display:grid;place-content:center;text-align:center;gap:7px;color:#8f806d}.empty-panel strong{font-size:15px;color:#bbaa90}.empty-panel span{font-size:12px;max-width:280px;line-height:1.55}
+    .window-note{border:1px solid #514535;background:#181510;color:#bfae96;padding:9px 10px;font-size:12px;line-height:1.55;margin-bottom:11px}.log-list{display:grid;gap:8px}.log-entry{border:1px solid var(--line-soft);background:#191611;padding:9px 10px}.log-meta{display:flex;gap:8px;flex-wrap:wrap;color:#9f8d74;font-size:10px}.log-entry p{margin:6px 0 0;font-size:13px;line-height:1.55;color:#e8dfd2;white-space:pre-wrap}.free-note{width:100%;height:calc(100% - 68px);min-height:170px;resize:none;border:1px solid var(--line);background:#15120f;color:var(--text);padding:12px;font-size:15px;line-height:1.65;outline:none}.free-note:focus{border-color:#9b825f}
+
+    .portrait{position:absolute;z-index:80;bottom:10px;width:clamp(108px,23vw,170px);height:clamp(82px,18vw,126px);border:1px solid #806d53;background:rgba(20,18,15,.94);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none}
+    .portrait.npc{left:calc(var(--rail) + 10px)}.portrait.player{right:10px}.portrait img{width:100%;height:100%;object-fit:cover;display:block}.portrait-name{position:absolute;left:0;right:0;bottom:0;min-height:24px;padding:4px 7px;background:rgba(12,11,9,.84);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.portrait-placeholder{position:absolute;inset:0 0 24px;display:grid;place-items:center;font-size:34px;color:#b9a78e}.mob-silhouette{position:absolute;inset:3px 3px 24px}.mob-head{position:absolute;width:31%;aspect-ratio:1;border-radius:50%;background:#050505;left:34.5%;top:9%}.mob-body{position:absolute;width:70%;height:69%;border-radius:48% 48% 12% 12%;background:#050505;left:15%;top:39%}
+
+    .toast{position:absolute;z-index:150;top:12px;left:calc(var(--rail) + 12px);right:12px;max-width:560px;margin:auto;padding:10px 12px;border:1px solid var(--line);background:rgba(24,21,17,.96);color:var(--text);font-size:13px;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s}.toast.show{opacity:1}
+    .modal-wrap{position:absolute;z-index:200;inset:0;background:rgba(0,0,0,.66);display:grid;place-items:center;padding:18px}.modal{width:min(520px,100%);border:1px solid var(--line);background:#211d17;padding:18px;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:20px}.modal p{margin:7px 0;color:var(--muted);font-size:13px;line-height:1.65}.modal input{width:100%;min-height:48px;margin-top:10px;border:1px solid var(--line);background:#14120f;color:var(--text);padding:10px 12px;font:16px ui-monospace,SFMono-Regular,Menlo,monospace}.modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}.modal-actions button{min-height:44px;border:1px solid var(--line);background:#342b22;color:var(--text);padding:8px 14px}.modal-actions .primary{background:#6b5740}
+
+    @media(max-width:680px){
+      :root{--rail:64px}.rail{padding:7px 5px;gap:5px}.rail-title{display:none}.rail-btn{width:52px;min-height:51px}.rail-icon{font-size:17px}.rail-label{font-size:9px}.system-btn{min-height:42px}.desktop-tools{top:6px;right:6px}.desktop-tool{min-height:31px;padding:4px 8px;font-size:11px}.portrait{width:28vw;height:21vw;min-width:94px;min-height:74px}.portrait.npc{left:calc(var(--rail) + 6px)}.portrait.player{right:6px}.ability-list{grid-template-columns:repeat(3,1fr)}.stat-strip{grid-template-columns:repeat(2,1fr)}.window-body{padding:11px}}
   </style>
 </head>
 <body>
-  <main id="game" class="game">
-    <nav class="rail" aria-label="ゲーム操作">
-      <button id="saveBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">セーブ</span></button>
-      <button id="loadBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">ロード</span></button>
+  <main class="app">
+    <nav id="menuRail" class="rail" aria-label="ゲームメニュー">
+      <div class="rail-title">MENU</div>
+      <button class="rail-btn" type="button" data-open-window="quest" aria-label="クエスト"><span class="rail-icon">任</span><span class="rail-label">クエスト</span></button>
+      <button class="rail-btn" type="button" data-open-window="player" aria-label="プレイヤー"><span class="rail-icon">人</span><span class="rail-label">プレイヤー</span></button>
+      <button class="rail-btn" type="button" data-open-window="skill" aria-label="スキル"><span class="rail-icon">技</span><span class="rail-label">スキル</span></button>
+      <button class="rail-btn" type="button" data-open-window="inventory" aria-label="所持品"><span class="rail-icon">袋</span><span class="rail-label">所持品</span></button>
+      <button class="rail-btn" type="button" data-open-window="log" aria-label="ログ"><span class="rail-icon">記</span><span class="rail-label">ログ</span></button>
+      <button class="rail-btn" type="button" data-open-window="note" aria-label="ノート"><span class="rail-icon">筆</span><span class="rail-label">ノート</span></button>
+
       <div class="rail-spacer"></div>
-      <button id="backBtn" class="rail-btn" type="button"><span class="icon">□</span><span class="label">戻る</span></button>
+      <div class="rail-sep"></div>
+      <button id="saveBtn" class="rail-btn system-btn" type="button"><span class="rail-icon">保</span><span class="rail-label">セーブ</span></button>
+      <button id="loadBtn" class="rail-btn system-btn" type="button"><span class="rail-icon">読</span><span class="rail-label">ロード</span></button>
+      <button id="backBtn" class="rail-btn system-btn" type="button"><span class="rail-icon">戻</span><span class="rail-label">トップ</span></button>
     </nav>
 
-    <section id="stage" class="stage" aria-label="ゲーム背景">
-      <div id="stageEmpty" class="stage-empty">BACKGROUND</div>
+    <section id="desktop" class="desktop" aria-label="ゲーム画面">
+      <div class="desktop-tools">
+        <button id="sceneLauncher" class="desktop-tool" type="button">場面</button>
+        <button id="mapLauncher" class="desktop-tool" type="button">地図</button>
+      </div>
     </section>
 
     <aside id="npcPortrait" class="portrait npc" aria-label="NPC">
-      <div id="mobSilhouette" class="mob-silhouette" aria-hidden="true">
-        <div class="mob-head"></div><div class="mob-body"></div>
-      </div>
-      <img id="npcImage" alt="" hidden>
-      <div id="npcName" class="portrait-name">NPC</div>
+      <div class="mob-silhouette" aria-hidden="true"><div class="mob-head"></div><div class="mob-body"></div></div>
+      <img alt="" hidden>
+      <div class="portrait-name">NPC</div>
     </aside>
 
     <aside id="playerPortrait" class="portrait player" aria-label="主人公">
-      <div id="playerPlaceholder" class="player-placeholder">?</div>
-      <img id="playerImage" alt="" hidden>
-      <div id="playerName" class="portrait-name">PLAYER</div>
+      <div class="portrait-placeholder">?</div>
+      <img alt="" hidden>
+      <div class="portrait-name">PLAYER</div>
     </aside>
 
     <div id="toast" class="toast" aria-live="polite"></div>
@@ -85,138 +143,6 @@
   </main>
 
   <script src="js/dd-github.js?v=20260825-1"></script>
-  <script>
-    (() => {
-      const stage = document.getElementById('stage');
-      const stageEmpty = document.getElementById('stageEmpty');
-      const saveBtn = document.getElementById('saveBtn');
-      const loadBtn = document.getElementById('loadBtn');
-      const backBtn = document.getElementById('backBtn');
-      const toast = document.getElementById('toast');
-      const tokenModal = document.getElementById('tokenModal');
-      const tokenInput = document.getElementById('tokenInput');
-      const connectSaveBtn = document.getElementById('connectSaveBtn');
-      const cancelTokenBtn = document.getElementById('cancelTokenBtn');
-      const playerName = document.getElementById('playerName');
-      const playerImage = document.getElementById('playerImage');
-      const playerPlaceholder = document.getElementById('playerPlaceholder');
-      const npcName = document.getElementById('npcName');
-      const npcImage = document.getElementById('npcImage');
-      const mobSilhouette = document.getElementById('mobSilhouette');
-
-      let game = null;
-      let toastTimer = null;
-
-      function showToast(message, ms = 2200) {
-        clearTimeout(toastTimer);
-        toast.textContent = message;
-        toast.classList.add('show');
-        toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
-      }
-
-      function readGame() {
-        try {
-          const raw = localStorage.getItem('ddActiveGame');
-          game = raw ? JSON.parse(raw) : null;
-        } catch (_) {
-          game = null;
-        }
-        if (!game) {
-          location.replace('DD_top.html');
-          return false;
-        }
-        return true;
-      }
-
-      function writeLocalActive() {
-        localStorage.setItem('ddActiveGame', JSON.stringify(game));
-      }
-
-      function render() {
-        const character = game.character || {};
-        playerName.textContent = character.name || 'PLAYER';
-        if (character.portrait) {
-          playerImage.src = character.portrait;
-          playerImage.alt = character.name || '主人公';
-          playerImage.hidden = false;
-          playerPlaceholder.hidden = true;
-        } else {
-          playerImage.hidden = true;
-          playerPlaceholder.hidden = false;
-          playerPlaceholder.textContent = (character.name || '?').slice(0,1);
-        }
-
-        const currentNpc = game.currentNpc || null;
-        npcName.textContent = currentNpc?.name || 'NPC';
-        if (currentNpc?.portrait && !currentNpc?.isMob) {
-          npcImage.src = currentNpc.portrait;
-          npcImage.alt = currentNpc.name || 'NPC';
-          npcImage.hidden = false;
-          mobSilhouette.hidden = true;
-        } else {
-          npcImage.hidden = true;
-          mobSilhouette.hidden = false;
-        }
-
-        const background = game.current?.background || '';
-        if (background) {
-          const safeBackground = encodeURI(String(background)).replace(/"/g, '%22');
-          stage.style.backgroundImage = `url("${safeBackground}")`;
-          stageEmpty.hidden = true;
-        } else {
-          stage.style.backgroundImage = '';
-          stageEmpty.hidden = false;
-        }
-      }
-
-      async function doSave() {
-        saveBtn.disabled = true;
-        showToast('セーブしています…', 12000);
-        try {
-          game = await DDGithub.saveGame(game);
-          writeLocalActive();
-          showToast('GitHubにセーブしました。');
-        } catch (error) {
-          showToast(error.message || 'セーブに失敗しました。', 4200);
-        } finally {
-          saveBtn.disabled = false;
-        }
-      }
-
-      saveBtn.addEventListener('click', () => {
-        if (!DDGithub.getToken()) {
-          tokenModal.hidden = false;
-          tokenInput.value = '';
-          tokenInput.focus();
-          return;
-        }
-        doSave();
-      });
-
-      connectSaveBtn.addEventListener('click', async () => {
-        connectSaveBtn.disabled = true;
-        try {
-          DDGithub.setToken(tokenInput.value);
-          await DDGithub.verifyConnection();
-          tokenModal.hidden = true;
-          await doSave();
-        } catch (error) {
-          DDGithub.clearToken();
-          showToast(error.message || 'GitHub連携に失敗しました。', 4200);
-        } finally {
-          connectSaveBtn.disabled = false;
-        }
-      });
-
-      tokenInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter') connectSaveBtn.click();
-      });
-      cancelTokenBtn.addEventListener('click', () => tokenModal.hidden = true);
-      loadBtn.addEventListener('click', () => location.href = 'DD_saves.html');
-      backBtn.addEventListener('click', () => location.href = 'DD_top.html');
-
-      if (readGame()) render();
-    })();
-  </script>
+  <script src="js/dd-windows.js?v=20260825-1"></script>
 </body>
 </html>
