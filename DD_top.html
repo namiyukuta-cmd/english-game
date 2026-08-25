@@ -9,14 +9,16 @@
     :root{color-scheme:dark;--bg:#171410;--panel:#241f19;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684}
     *{box-sizing:border-box}
     body{margin:0;min-height:100dvh;background:radial-gradient(circle at top,#2b241c 0,#171410 55%);color:var(--text);font-family:Georgia,"Yu Mincho",serif;display:flex;align-items:center;justify-content:center;padding:24px}
-    main{width:min(520px,100%);border:1px solid var(--line);background:rgba(28,24,19,.94);padding:28px 22px;box-shadow:0 16px 44px rgba(0,0,0,.28)}
+    main{width:min(560px,100%);border:1px solid var(--line);background:rgba(28,24,19,.94);padding:28px 22px;box-shadow:0 16px 44px rgba(0,0,0,.28)}
     h1{margin:0 0 8px;text-align:center;font-size:30px;letter-spacing:.06em}
-    .sub{margin:0 0 28px;text-align:center;color:var(--muted);font-size:14px}
+    .sub{margin:0 0 28px;text-align:center;color:var(--muted);font-size:17px;line-height:1.55}
     .menu{display:grid;gap:12px}
-    a{display:flex;align-items:center;justify-content:center;min-height:58px;padding:14px 18px;border:1px solid var(--line);background:#2b251e;color:var(--text);text-decoration:none;font-size:19px;font-weight:700;letter-spacing:.03em}
+    a{display:flex;align-items:center;justify-content:center;min-height:62px;padding:14px 18px;border:1px solid var(--line);background:#2b251e;color:var(--text);text-decoration:none;font-size:18px;font-weight:700;line-height:1.45;text-align:center;letter-spacing:.02em}
     a:active{transform:translateY(1px)}
+    a.random{background:#34291f;border-color:#826b4f}
     a.secondary{background:transparent;color:var(--muted)}
-    .note{margin:20px 4px 0;color:#aa9983;font-size:12px;line-height:1.7;text-align:center}
+    .note{margin:20px 4px 0;color:#aa9983;font-size:17px;line-height:1.65;text-align:center}
+    @media(max-width:520px){body{padding:16px}main{padding:24px 16px}a{font-size:17px;min-height:60px;padding:12px 13px}.sub,.note{font-size:17px}}
   </style>
 </head>
 <body>
@@ -24,7 +26,8 @@
     <h1>D&D TRPG</h1>
     <p class="sub">キャラクターごとに別の冒険を保存します。</p>
     <nav class="menu" aria-label="ゲームメニュー">
-      <a href="DD_new.html">新しく始める</a>
+      <a href="DD_new.html">新しいキャラを作成して始める</a>
+      <a class="random" href="DD_random.html">新しくランダムキャラクターを作成して始める</a>
       <a href="DD_saves.html">続きから</a>
       <a class="secondary" href="story-menu.html">戻る</a>
     </nav>
