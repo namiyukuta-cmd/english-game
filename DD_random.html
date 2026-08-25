@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171410">
+  <title>D&D ランダムキャラクター</title>
+  <style>
+    :root{color-scheme:dark;--bg:#171410;--panel:#211c17;--panel2:#191611;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684}
+    *{box-sizing:border-box}
+    html{background:var(--bg)}
+    body{margin:0;min-height:100dvh;background:radial-gradient(circle at top,#2b241c 0,#171410 58%);color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:14px 14px 110px}
+    main{width:min(820px,100%);margin:0 auto}
+    header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:12px}
+    header h1{margin:0;text-align:center;font-size:23px;line-height:1.35}
+    .back{width:46px;height:46px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px;background:#211c17}
+    .lead{margin:0 0 14px;text-align:center;color:var(--muted);font-size:17px;line-height:1.65}
+    .sheet{border:1px solid var(--line);background:rgba(33,28,23,.96);padding:16px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+    .name{margin:0 0 5px;font-size:29px;color:var(--accent);overflow-wrap:anywhere}
+    .sub{margin:0 0 16px;color:var(--muted);font-size:17px;line-height:1.55}
+    .status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+    .status>div{border:1px solid #514535;background:var(--panel2);padding:9px;text-align:center;font-size:17px;color:var(--muted)}
+    .status strong{display:block;margin-top:3px;color:var(--text);font-size:21px}
+    .ability-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:12px 0 16px}
+    .ability{border:1px solid #514535;background:var(--panel2);text-align:center;padding:8px 4px}
+    .ability small{display:block;font-size:13px;color:var(--muted)}
+    .ability strong{display:block;font-size:22px;color:var(--accent);margin:2px 0}
+    .ability span{display:block;font-size:15px}
+    .section{border-top:1px solid #514535;padding-top:13px;margin-top:13px}
+    .section h2{margin:0 0 8px;font-size:20px;color:#eadbc6}
+    .section p{margin:0;font-size:17px;line-height:1.7;color:var(--text)}
+    .chips{display:flex;flex-wrap:wrap;gap:7px}
+    .chip{border:1px solid #5b4d3d;background:#191611;padding:7px 9px;font-size:17px;line-height:1.35;color:#e7ddcf}
+    .choice-list{display:grid;gap:7px}
+    .choice-row{display:grid;grid-template-columns:145px 1fr;gap:10px;border-bottom:1px solid #3f362c;padding:7px 0;font-size:17px;line-height:1.5}
+    .choice-row span:first-child{color:var(--muted)}
+    .empty{color:var(--muted)!important}
+    .error{border:1px solid #8d534c;background:#311d19;color:#ffd3cc;padding:13px;font-size:17px;line-height:1.6}
+    .attribution{margin:16px 2px 0;color:#80725f;font-size:11px;line-height:1.55}
+    .actions{position:fixed;z-index:20;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(17,15,12,.97);border-top:1px solid #514535}
+    .actions button{min-height:54px;border:1px solid var(--line);background:#332a20;color:var(--text);font:inherit;font-size:17px;font-weight:700;padding:9px 10px;touch-action:manipulation}
+    .actions .primary{background:#6a563e}.actions .reroll{background:#403225}.actions .top{background:transparent;color:var(--muted)}
+    @media(max-width:620px){body{padding:10px 10px 118px}.sheet{padding:13px}.status{grid-template-columns:repeat(3,1fr)}.ability-grid{grid-template-columns:repeat(3,1fr)}.choice-row{grid-template-columns:1fr;gap:2px}.actions{grid-template-columns:1.25fr 1fr .8fr}.actions button{font-size:17px;padding:8px 5px}.name{font-size:26px}}
+  </style>
+</head>
+<body>
+<main>
+  <header><a class="back" href="DD_top.html" aria-label="TOPへ戻る">←</a><h1>ランダムキャラクター</h1><span></span></header>
+  <p class="lead">名前・クラス・種族・背景・能力値・技能・装備などをランダムで作成します。</p>
+  <section id="characterSheet" class="sheet" aria-live="polite"></section>
+  <p class="attribution">This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License.</p>
+</main>
+
+<nav class="actions" aria-label="ランダムキャラクター操作">
+  <button id="startButton" class="primary" type="button">これで始める</button>
+  <button id="rerollButton" class="reroll" type="button">作り直す</button>
+  <button id="topButton" class="top" type="button">TOPへ</button>
+</nav>
+
+<script src="data/dd-srd-character.js?v=20260825-2"></script>
+<script src="data/dd-class-options.js?v=20260825-1"></script>
+<script src="data/dd-origin-options.js?v=20260825-1"></script>
+<script src="js/dd-random.js?v=20260825-1"></script>
+</body>
+</html>
