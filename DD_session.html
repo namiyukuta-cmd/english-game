@@ -35,12 +35,12 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #speakerName{margin-bottom:5px;font-size:15px;font-weight:800;color:#5e4630}
 #messageText{margin:0;font-size:15px;line-height:1.75;white-space:pre-wrap}
 
-/* MAP / SCENE のすぐ下・右側。3D Dice Box はここだけで使う */
+/* MAP / SCENE のすぐ下・右側。3Dの投擲領域はロール中だけ左へ広がる */
 #diceDock{position:absolute;z-index:72;right:3px;top:calc(47% + 2px);display:flex;align-items:center;gap:4px;overflow:visible}
 #diceReadout{max-width:128px;padding:5px 7px;border:1px solid #826b4c;border-radius:7px;background:rgba(48,36,27,.94);color:#f4dfbd;font-size:10px;font-weight:750;line-height:1.35;text-align:right;box-shadow:0 3px 8px rgba(0,0,0,.25)}
 #diceButton{position:relative;width:76px;height:76px;border:0;background:transparent;padding:0;display:block;overflow:visible}
-#diceBox3d{position:absolute;inset:-8px;width:92px;height:92px;pointer-events:none;overflow:visible;opacity:0;transition:opacity .08s linear}
-#diceBox3d canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important}
+#diceBox3d{position:absolute;right:-8px;top:-30px;width:220px;height:136px;pointer-events:none;overflow:visible;opacity:0;transition:opacity .08s linear}
+#diceBox3d canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important;background:transparent!important}
 #diceButton.rolling #diceBox3d{opacity:1}
 #diceIdle{position:absolute;left:10px;top:10px;width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0,72% 7%,91% 23%,100% 50%,91% 77%,72% 93%,50% 100%,28% 93%,9% 77%,0 50%,9% 23%,28% 7%);background:conic-gradient(from 18deg,#8e7552,#4a3829,#ad9166,#59442f,#8a6c4b,#3b2c21,#a6885e,#513d2c,#8e7552);color:#fff2d5;border:1px solid #2e2117;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));text-shadow:0 1px 2px rgba(0,0,0,.65);transition:opacity .08s linear}
 #diceButton.rolling #diceIdle{opacity:0}
@@ -157,6 +157,7 @@ const actionOptions=document.getElementById('actionOptions');
 const messageText=document.getElementById('messageText');
 
 const diceButton=document.getElementById('diceButton');
+const diceIdleKind=document.getElementById('diceIdleKind');
 const diceIdleValue=document.getElementById('diceIdleValue');
 const diceReadout=document.getElementById('diceReadout');
 let diceRolling=false;
@@ -177,15 +178,20 @@ function randomDie(sides){
 
 async function init3DDice(){
   try{
-    const module=await import('https://unpkg.com/@3d-dice/dice-box@1.0.8/dist/dice-box.es.min.js');
+    const module=await import('https://unpkg.com/@3d-dice/dice-box@1.1.4/dist/dice-box.es.min.js');
     const DiceBox=module.default;
-    diceBox3D=new DiceBox('#diceBox3d',{
+    diceBox3D=new DiceBox({
+      container:'#diceBox3d',
       assetPath:'assets/',
-      origin:'https://unpkg.com/@3d-dice/dice-box@1.0.8/dist/',
+      origin:'https://unpkg.com/@3d-dice/dice-box@1.1.4/dist/',
       theme:'default',
       themeColor:'#806747',
       offscreen:false,
-      scale:5
+      enableShadows:false,
+      scale:4,
+      throwForce:7,
+      spinForce:6,
+      settleTimeout:4500
     });
     await diceBox3D.init();
     dice3DReady=true;
@@ -203,11 +209,12 @@ function setPendingRoll(config={}){
     modifier:Number(config.modifier)||0,
     label:config.label||'判定'
   };
+  diceIdleKind.textContent=(pendingRoll.count>1?pendingRoll.count:'')+'D'+pendingRoll.sides;
   diceIdleValue.textContent='ROLL';
   diceReadout.hidden=true;
 }
 
-function finishInternalRoll(roll){
+function finishFallbackRoll(roll){
   const values=Array.from({length:roll.count},()=>randomDie(roll.sides));
   const subtotal=values.reduce((sum,value)=>sum+value,0);
   const total=subtotal+roll.modifier;
@@ -218,10 +225,25 @@ function finishInternalRoll(roll){
   diceReadout.hidden=false;
 }
 
+function finish3DRoll(roll,results){
+  const group=Array.isArray(results)&&results.length?results[0]:null;
+  if(!group||group.value===undefined||group.value===null){
+    finishFallbackRoll(roll);
+    return;
+  }
+  const total=Number(group.value);
+  diceIdleValue.textContent=Number.isFinite(total)?total:String(group.value);
+  const values=Array.isArray(group.rolls)?group.rolls.map(d=>d.value):[];
+  const modText=roll.modifier===0?'':(roll.modifier>0?` + ${roll.modifier}`:` - ${Math.abs(roll.modifier)}`);
+  const detail=values.length?values.join(' + ')+modText:String(group.value);
+  diceReadout.textContent=`${roll.label}：${detail} = ${group.value}`;
+  diceReadout.hidden=false;
+}
+
 async function rollPendingDice(){
   if(diceRolling)return;
   if(!dice3DReady){
-    diceReadout.textContent=dice3DError?'3Dダイスを読み込めませんでした':'3Dダイス読込中…';
+    diceReadout.textContent=dice3DError?'3Dダイスの初期化に失敗しました':'3Dダイス準備中…';
     diceReadout.hidden=false;
     return;
   }
@@ -230,9 +252,10 @@ async function rollPendingDice(){
   diceButton.classList.add('rolling');
   const roll={...pendingRoll};
   try{
-    if(typeof diceBox3D.clear==='function')diceBox3D.clear();
-    await diceBox3D.roll('1d100');
-    finishInternalRoll(roll);
+    const supportedSides=[4,6,8,10,12,20,100];
+    const sides=supportedSides.includes(roll.sides)?roll.sides:20;
+    const results=await diceBox3D.roll({qty:roll.count,sides,modifier:roll.modifier});
+    finish3DRoll(roll,results);
   }catch(error){
     console.error('3D Dice roll failed:',error);
     diceReadout.textContent='3Dダイスのロールに失敗しました';
@@ -242,7 +265,7 @@ async function rollPendingDice(){
       if(diceBox3D&&typeof diceBox3D.clear==='function')diceBox3D.clear();
       diceButton.classList.remove('rolling');
       diceRolling=false;
-    },120);
+    },700);
   }
 }
 
