@@ -69,7 +69,7 @@
       || current?.destinations
       || current?.places
       || [];
-    return Array.isArray(source) ? source.filter(action => !action?.__questDynamic) : [];
+    return Array.isArray(source) ? source.filter(action => !action?.__questInjected) : [];
   }
 
   function addUnique(list, action) {
@@ -85,19 +85,22 @@
     for (const quest of activeQuests(game)) {
       const effects = stageEffects(quest);
 
-      for (const place of effects.unlockPlaces || []) {
-        if (!locationMatches(game, place.locationId)) continue;
-        addUnique(extras, {
-          id: `quest-place-${quest.id}-${place.placeId}`,
-          label: place.label || '依頼先',
-          target: place.placeId,
-          __questDynamic: true,
-          kind: 'questPlace',
-          questId: quest.id,
-          locationId: place.locationId || '',
-          placeId: place.placeId || '',
-          description: place.description || ''
-        });
+      if (!placeId) {
+        for (const place of effects.unlockPlaces || []) {
+          if (!locationMatches(game, place.locationId)) continue;
+          addUnique(extras, {
+            id: `quest-place-${quest.id}-${place.placeId}`,
+            label: place.label || '依頼先',
+            target: place.placeId,
+            __questDynamic: true,
+            __questInjected: true,
+            kind: 'questPlace',
+            questId: quest.id,
+            locationId: place.locationId || '',
+            placeId: place.placeId || '',
+            description: place.description || ''
+          });
+        }
       }
 
       for (const action of effects.unlockActions || []) {
@@ -106,6 +109,7 @@
           id: action.actionId || `quest-action-${quest.id}`,
           label: action.label || '依頼について',
           __questDynamic: true,
+          __questInjected: true,
           kind: 'questAction',
           questId: quest.id,
           placeId: action.placeId || ''
