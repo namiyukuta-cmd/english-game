@@ -174,6 +174,21 @@ window.DD_QUEST_DATA = {
 };
 
 (() => {
+  if (document.getElementById('ddChatUiFont')) return;
+  const style = document.createElement('style');
+  style.id = 'ddChatUiFont';
+  style.textContent = `
+    body, button, textarea, input, select {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans JP", sans-serif !important;
+    }
+    .page-tab {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans JP", sans-serif !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+(() => {
   if (window.__ddWorldMainBootstrap) return;
   window.__ddWorldMainBootstrap = true;
 
