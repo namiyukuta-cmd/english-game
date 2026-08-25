@@ -223,8 +223,8 @@
   }
 
   function goBack() {
-    if (history.length > 1 && document.referrer) history.back();
-    else location.href = 'DD.html';
+    writeGame();
+    location.href = 'DD.html?v=20260825-6';
   }
 
   $('acceptButton').addEventListener('click', acceptQuest);
