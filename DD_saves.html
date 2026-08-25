@@ -58,9 +58,7 @@
       </div>
     </section>
 
-    <div class="toolbar">
-      <button id="refreshBtn" type="button">再読み込み</button>
-    </div>
+    <div class="toolbar"><button id="refreshBtn" type="button">再読み込み</button></div>
 
     <section id="characterPanel">
       <div class="section-title"><h2>キャラクターを選ぶ</h2></div>
@@ -68,10 +66,7 @@
     </section>
 
     <section id="snapshotPanel" hidden>
-      <div class="section-title">
-        <h2 id="snapshotTitle">セーブデータ</h2>
-        <button id="backCharactersBtn" type="button">← キャラクター選択</button>
-      </div>
+      <div class="section-title"><h2 id="snapshotTitle">セーブデータ</h2><button id="backCharactersBtn" type="button">← キャラクター選択</button></div>
       <div id="snapshotList" class="list"></div>
     </section>
 
@@ -97,153 +92,54 @@
       const status = document.getElementById('status');
 
       let selectedCharacter = null;
-
-      function setStatus(message, error = false) {
-        status.textContent = message || '';
-        status.classList.toggle('error', error);
-      }
-
-      function updateConnectionView() {
-        const connected = !!DDGithub.getToken();
-        connectedView.hidden = !connected;
-        connectView.hidden = connected;
-      }
-
-      function profileDetails(profile = {}) {
-        const values = [];
-        if (profile.level) values.push(`Lv.${profile.level}`);
-        if (profile.classNameJa || profile.className) values.push(profile.classNameJa || profile.className);
-        if (profile.speciesJa || profile.species) values.push(profile.speciesJa || profile.species);
-        if (profile.latestLocation) values.push(profile.latestLocation);
-        return values.join(' / ');
-      }
+      function setStatus(message, error = false) { status.textContent = message || ''; status.classList.toggle('error', error); }
+      function updateConnectionView() { const connected = !!DDGithub.getToken(); connectedView.hidden = !connected; connectView.hidden = connected; }
+      function profileDetails(profile = {}) { const values=[]; if(profile.level)values.push(`Lv.${profile.level}`); if(profile.classNameJa||profile.className)values.push(profile.classNameJa||profile.className); if(profile.speciesJa||profile.species)values.push(profile.speciesJa||profile.species); if(profile.latestLocation)values.push(profile.latestLocation); return values.join(' / '); }
 
       async function loadCharacters() {
-        selectedCharacter = null;
-        characterPanel.hidden = false;
-        snapshotPanel.hidden = true;
-        characterList.innerHTML = '';
-        setStatus('キャラクターを読み込んでいます…');
+        selectedCharacter=null; characterPanel.hidden=false; snapshotPanel.hidden=true; characterList.innerHTML=''; setStatus('キャラクターを読み込んでいます…');
         try {
-          const characters = await DDSave.listCharacters();
-          if (!characters.length) {
-            characterList.innerHTML = '<div class="empty">新しい複数セーブ形式のキャラクターはまだありません。<br>DD.htmlで一度セーブすると、ここに表示されます。</div>';
-            setStatus('');
-            return;
-          }
-          characters.forEach(character => {
-            const profile = character.profile || {};
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'card character-card';
-            button.innerHTML = '<span class="card-main"><strong></strong><span></span></span><span class="card-action">選ぶ ›</span>';
-            button.querySelector('strong').textContent = profile.name || character.id;
-            button.querySelector('.card-main span').textContent = profileDetails(profile) || character.id;
-            button.addEventListener('click', () => loadSnapshots(character));
-            characterList.appendChild(button);
+          const characters=await DDSave.listCharacters();
+          if(!characters.length){characterList.innerHTML='<div class="empty">新しい複数セーブ形式のキャラクターはまだありません。<br>DD.htmlで一度セーブすると、ここに表示されます。</div>';setStatus('');return;}
+          characters.forEach(character=>{
+            const profile=character.profile||{}; const button=document.createElement('button'); button.type='button'; button.className='card character-card';
+            button.innerHTML='<span class="card-main"><strong></strong><span></span></span><span class="card-action">選ぶ ›</span>';
+            button.querySelector('strong').textContent=profile.name||character.id; button.querySelector('.card-main span').textContent=profileDetails(profile)||character.id;
+            button.addEventListener('click',()=>loadSnapshots(character)); characterList.appendChild(button);
           });
           setStatus('');
-        } catch (error) {
-          setStatus(error.message || 'キャラクター一覧を取得できませんでした。', true);
-        }
+        } catch(error){setStatus(error.message||'キャラクター一覧を取得できませんでした。',true);}
       }
 
       async function loadSnapshots(character) {
-        selectedCharacter = character;
-        characterPanel.hidden = true;
-        snapshotPanel.hidden = false;
-        snapshotList.innerHTML = '';
-        snapshotTitle.textContent = `${character.profile?.name || character.id} のセーブ`;
-        setStatus('セーブデータを読み込んでいます…');
+        selectedCharacter=character; characterPanel.hidden=true; snapshotPanel.hidden=false; snapshotList.innerHTML=''; snapshotTitle.textContent=`${character.profile?.name||character.id} のセーブ`; setStatus('セーブデータを読み込んでいます…');
         try {
-          const snapshots = await DDSave.listSnapshots(character.id);
-          if (!snapshots.length) {
-            snapshotList.innerHTML = '<div class="empty">このキャラクターにはセーブデータがありません。</div>';
-            setStatus('');
-            return;
-          }
-          snapshots.forEach(snapshot => {
-            const card = document.createElement('article');
-            card.className = 'card';
-            const title = snapshot.label || snapshot.filename.replace(/\.json$/i, '');
-            const details = [DDSave.fmtGameTime(snapshot.gameTime), snapshot.location, DDSave.fmtDate(snapshot.updatedAt)].filter(Boolean).join(' / ');
-            card.innerHTML = '<div class="card-main"><strong></strong><span></span></div><div class="snapshot-actions"><button class="load" type="button">ロード</button><button class="delete" type="button">削除</button></div>';
-            card.querySelector('strong').textContent = title;
-            card.querySelector('.card-main span').textContent = details;
-
-            const loadBtn = card.querySelector('.load');
-            const deleteBtn = card.querySelector('.delete');
-
-            loadBtn.addEventListener('click', async () => {
-              loadBtn.disabled = true;
-              setStatus(`${title} をロードしています…`);
-              try {
-                await DDSave.loadSnapshot(character.id, snapshot.filename);
-                location.href = 'DD.html';
-              } catch (error) {
-                setStatus(error.message || 'ロードに失敗しました。', true);
-                loadBtn.disabled = false;
-              }
+          const snapshots=await DDSave.listSnapshots(character.id);
+          if(!snapshots.length){snapshotList.innerHTML='<div class="empty">このキャラクターにはセーブデータがありません。</div>';setStatus('');return;}
+          snapshots.forEach(snapshot=>{
+            const card=document.createElement('article'); card.className='card'; const title=snapshot.label||snapshot.filename.replace(/\.json$/i,'');
+            const details=[DDSave.fmtGameTime(snapshot.gameTime),snapshot.location,DDSave.fmtDate(snapshot.updatedAt)].filter(Boolean).join(' / ');
+            card.innerHTML='<div class="card-main"><strong></strong><span></span></div><div class="snapshot-actions"><button class="load" type="button">ロード</button><button class="delete" type="button">削除</button></div>';
+            card.querySelector('strong').textContent=title; card.querySelector('.card-main span').textContent=details;
+            const loadBtn=card.querySelector('.load'); const deleteBtn=card.querySelector('.delete');
+            loadBtn.addEventListener('click',async()=>{loadBtn.disabled=true;setStatus(`${title} をロードしています…`);try{await DDSave.loadSnapshot(character.id,snapshot.filename);location.href='DD.html?v=20260825-4';}catch(error){setStatus(error.message||'ロードに失敗しました。',true);loadBtn.disabled=false;}});
+            deleteBtn.addEventListener('click',async()=>{
+              if(!DDGithub.getToken()){updateConnectionView();connectView.hidden=false;connectedView.hidden=true;tokenInput.focus();setStatus('削除するにはGitHub連携が必要です。',true);return;}
+              if(!confirm(`「${title}」を削除しますか？\nこのセーブデータはGitHubから削除されます。`))return;
+              deleteBtn.disabled=true;setStatus(`${title} を削除しています…`);try{await DDSave.deleteSnapshot(character.id,snapshot.filename);await loadSnapshots(character);}catch(error){setStatus(error.message||'削除に失敗しました。',true);deleteBtn.disabled=false;}
             });
-
-            deleteBtn.addEventListener('click', async () => {
-              if (!DDGithub.getToken()) {
-                updateConnectionView();
-                connectView.hidden = false;
-                connectedView.hidden = true;
-                tokenInput.focus();
-                setStatus('削除するにはGitHub連携が必要です。', true);
-                return;
-              }
-              if (!confirm(`「${title}」を削除しますか？\nこのセーブデータはGitHubから削除されます。`)) return;
-              deleteBtn.disabled = true;
-              setStatus(`${title} を削除しています…`);
-              try {
-                await DDSave.deleteSnapshot(character.id, snapshot.filename);
-                await loadSnapshots(character);
-              } catch (error) {
-                setStatus(error.message || '削除に失敗しました。', true);
-                deleteBtn.disabled = false;
-              }
-            });
-
             snapshotList.appendChild(card);
           });
           setStatus('');
-        } catch (error) {
-          setStatus(error.message || 'セーブ一覧を取得できませんでした。', true);
-        }
+        } catch(error){setStatus(error.message||'セーブ一覧を取得できませんでした。',true);}
       }
 
-      connectBtn.addEventListener('click', async () => {
-        connectBtn.disabled = true;
-        setStatus('GitHubへ接続しています…');
-        try {
-          DDGithub.setToken(tokenInput.value);
-          await DDGithub.verifyConnection();
-          tokenInput.value = '';
-          updateConnectionView();
-          setStatus('GitHubに連携しました。');
-        } catch (error) {
-          DDGithub.clearToken();
-          updateConnectionView();
-          setStatus(error.message || 'GitHub連携に失敗しました。', true);
-        } finally {
-          connectBtn.disabled = false;
-        }
-      });
-
-      tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') connectBtn.click(); });
-      disconnectBtn.addEventListener('click', () => {
-        DDGithub.clearToken();
-        updateConnectionView();
-        setStatus('GitHub連携を解除しました。ロードは引き続きできます。');
-      });
-      refreshBtn.addEventListener('click', () => selectedCharacter ? loadSnapshots(selectedCharacter) : loadCharacters());
-      backCharactersBtn.addEventListener('click', loadCharacters);
-
-      updateConnectionView();
-      loadCharacters();
+      connectBtn.addEventListener('click',async()=>{connectBtn.disabled=true;setStatus('GitHubへ接続しています…');try{DDGithub.setToken(tokenInput.value);await DDGithub.verifyConnection();tokenInput.value='';updateConnectionView();setStatus('GitHubに連携しました。');}catch(error){DDGithub.clearToken();updateConnectionView();setStatus(error.message||'GitHub連携に失敗しました。',true);}finally{connectBtn.disabled=false;}});
+      tokenInput.addEventListener('keydown',event=>{if(event.key==='Enter')connectBtn.click();});
+      disconnectBtn.addEventListener('click',()=>{DDGithub.clearToken();updateConnectionView();setStatus('GitHub連携を解除しました。ロードは引き続きできます。');});
+      refreshBtn.addEventListener('click',()=>selectedCharacter?loadSnapshots(selectedCharacter):loadCharacters());
+      backCharactersBtn.addEventListener('click',loadCharacters);
+      updateConnectionView(); loadCharacters();
     })();
   </script>
 </body>
