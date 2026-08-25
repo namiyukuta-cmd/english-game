@@ -4,156 +4,214 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#171410">
-  <title>D&D セーブ</title>
+  <title>D&D ロード</title>
   <style>
     :root{color-scheme:dark;--bg:#171410;--panel:#241f19;--line:#6e5d49;--text:#f3eadc;--muted:#c6b69e;--accent:#d2b684;--danger:#d89a8f}
     *{box-sizing:border-box}
-    body{margin:0;background:#171410;color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:18px;min-height:100dvh}
-    main{width:min(720px,100%);margin:0 auto}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Yu Mincho",serif;padding:18px;min-height:100dvh}
+    main{width:min(760px,100%);margin:0 auto}
     header{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:18px}
-    header h1{margin:0;text-align:center;font-size:23px}
-    .back{width:44px;height:44px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:22px}
-    .panel{border:1px solid var(--line);background:#211c17;padding:18px}
-    .panel h2{margin:0 0 10px;font-size:20px;color:var(--accent)}
-    .panel p{margin:8px 0;color:var(--muted);font-size:14px;line-height:1.7}
-    .token-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
-    input{min-width:0;min-height:48px;border:1px solid var(--line);background:#15120f;color:var(--text);padding:10px 12px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    button{min-height:48px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:16px;font-weight:700;padding:10px 16px}
+    header h1{margin:0;text-align:center;font-size:24px}
+    .back{width:46px;height:46px;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;font-size:23px}
+    .panel{border:1px solid var(--line);background:#211c17;padding:17px;margin-bottom:14px}
+    .panel h2{margin:0 0 9px;font-size:21px;color:var(--accent)}
+    .panel p{margin:7px 0;color:var(--muted);font-size:17px;line-height:1.55}
+    .small{font-size:14px!important;color:#a99881!important}.warning{color:#d2aa84!important}
+    .token-row{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:13px}
+    input{min-width:0;min-height:48px;border:1px solid var(--line);background:#15120f;color:var(--text);padding:10px 12px;font-size:17px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    button{min-height:48px;border:1px solid var(--line);background:#3a3025;color:var(--text);font:inherit;font-size:17px;font-weight:700;padding:9px 14px;touch-action:manipulation}
     button:disabled{opacity:.5}
-    .small{font-size:12px!important;color:#a99881!important}
-    .warning{color:#d2aa84!important}
-    .status{min-height:24px;margin:14px 2px;color:var(--muted);font-size:14px}
-    .status.error{color:var(--danger)}
-    .save-list{display:grid;gap:10px}
-    .save-card{width:100%;text-align:left;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:#262018}
-    .save-copy{min-width:0}
-    .save-copy strong{display:block;font-size:18px;overflow-wrap:anywhere}
-    .save-copy span{display:block;margin-top:5px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
-    .load-mark{font-size:24px;color:var(--accent)}
-    .empty{border:1px dashed var(--line);padding:28px 16px;text-align:center;color:var(--muted)}
-    .toolbar{display:flex;justify-content:flex-end;gap:8px;margin:0 0 12px;flex-wrap:wrap}
-    .toolbar button{min-height:42px;font-size:13px;padding:8px 12px;background:transparent}
-    @media(max-width:520px){.token-row{grid-template-columns:1fr}.token-row button{width:100%}}
+    .toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:12px}.toolbar button{font-size:15px;min-height:43px;background:transparent}
+    .status{min-height:26px;margin:12px 2px;color:var(--muted);font-size:16px}.status.error{color:var(--danger)}
+    .list{display:grid;gap:10px}.card{border:1px solid #554838;background:#262018;padding:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+    .card-main{min-width:0}.card-main strong{display:block;font-size:19px;overflow-wrap:anywhere}.card-main span{display:block;margin-top:5px;font-size:15px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
+    .card-action{min-width:86px}.character-card{cursor:pointer}.character-card:hover{border-color:var(--accent)}
+    .snapshot-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.snapshot-actions button{min-height:43px;font-size:15px;padding:7px 11px}.delete{border-color:#7d514a!important;color:#efb8ae!important;background:#2b1c19!important}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 11px}.section-title h2{margin:0;font-size:21px;color:var(--accent)}.section-title button{min-height:42px;font-size:15px;background:transparent}
+    .empty{border:1px dashed var(--line);padding:28px 16px;text-align:center;color:var(--muted);font-size:17px;line-height:1.6}
+    .connection-state{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.connection-state strong{font-size:16px;color:var(--accent)}
+    @media(max-width:560px){body{padding:12px}.token-row{grid-template-columns:1fr}.token-row button{width:100%}.card{grid-template-columns:1fr}.card-action,.snapshot-actions button{width:100%}.snapshot-actions{display:grid;grid-template-columns:1fr 1fr}.panel{padding:14px}}
   </style>
 </head>
 <body>
   <main>
     <header>
       <a class="back" href="DD_top.html" aria-label="戻る">←</a>
-      <h1>続きから</h1>
+      <h1>ロード</h1>
       <span></span>
     </header>
 
-    <section id="connectPanel" class="panel" hidden>
-      <h2>GitHub連携</h2>
-      <p>最初の1回だけ、GitHubのトークンを入力します。以後はこのブラウザに保存したトークンを使います。</p>
-      <p class="small">接続先：namiyukuta-cmd / english-game / main</p>
-      <p class="small warning">トークンはゲームのセーブJSONには書き込みません。なお、このリポジトリがPublicの場合、GitHubへ保存したゲームデータ自体は公開されます。</p>
-      <div class="token-row">
-        <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token">
-        <button id="connectBtn" type="button">連携する</button>
+    <section class="panel">
+      <div id="connectedView" class="connection-state" hidden>
+        <strong>GitHub連携済み</strong>
+        <button id="disconnectBtn" type="button">連携を解除</button>
+      </div>
+      <div id="connectView" hidden>
+        <h2>GitHub連携</h2>
+        <p>Publicリポジトリなので、ロードだけならトークンなしでもできます。セーブの新規作成・上書き・削除にはトークンが必要です。</p>
+        <p class="small">接続先：namiyukuta-cmd / english-game / main</p>
+        <p class="small warning">トークンはセーブJSONには保存しません。このブラウザのlocalStorageだけに保存します。</p>
+        <div class="token-row">
+          <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token">
+          <button id="connectBtn" type="button">連携する</button>
+        </div>
       </div>
     </section>
 
-    <section id="savePanel" hidden>
-      <div class="toolbar">
-        <button id="refreshBtn" type="button">再読み込み</button>
-        <button id="disconnectBtn" type="button">GitHub連携を解除</button>
+    <div class="toolbar">
+      <button id="refreshBtn" type="button">再読み込み</button>
+    </div>
+
+    <section id="characterPanel">
+      <div class="section-title"><h2>キャラクターを選ぶ</h2></div>
+      <div id="characterList" class="list"></div>
+    </section>
+
+    <section id="snapshotPanel" hidden>
+      <div class="section-title">
+        <h2 id="snapshotTitle">セーブデータ</h2>
+        <button id="backCharactersBtn" type="button">← キャラクター選択</button>
       </div>
-      <div id="saveList" class="save-list"></div>
+      <div id="snapshotList" class="list"></div>
     </section>
 
     <p id="status" class="status" aria-live="polite"></p>
   </main>
 
-  <script src="js/dd-github.js?v=20260825-1"></script>
+  <script src="js/dd-github.js?v=20260825-2"></script>
+  <script src="js/dd-save.js?v=20260825-1"></script>
   <script>
     (() => {
-      const connectPanel = document.getElementById('connectPanel');
-      const savePanel = document.getElementById('savePanel');
+      const connectView = document.getElementById('connectView');
+      const connectedView = document.getElementById('connectedView');
       const tokenInput = document.getElementById('tokenInput');
       const connectBtn = document.getElementById('connectBtn');
-      const refreshBtn = document.getElementById('refreshBtn');
       const disconnectBtn = document.getElementById('disconnectBtn');
-      const saveList = document.getElementById('saveList');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const characterPanel = document.getElementById('characterPanel');
+      const snapshotPanel = document.getElementById('snapshotPanel');
+      const characterList = document.getElementById('characterList');
+      const snapshotList = document.getElementById('snapshotList');
+      const snapshotTitle = document.getElementById('snapshotTitle');
+      const backCharactersBtn = document.getElementById('backCharactersBtn');
       const status = document.getElementById('status');
 
-      function setStatus(message, isError = false) {
+      let selectedCharacter = null;
+
+      function setStatus(message, error = false) {
         status.textContent = message || '';
-        status.classList.toggle('error', isError);
+        status.classList.toggle('error', error);
       }
 
-      function showConnect() {
-        connectPanel.hidden = false;
-        savePanel.hidden = true;
-        tokenInput.value = '';
-        tokenInput.focus();
+      function updateConnectionView() {
+        const connected = !!DDGithub.getToken();
+        connectedView.hidden = !connected;
+        connectView.hidden = connected;
       }
 
-      function showSaves() {
-        connectPanel.hidden = true;
-        savePanel.hidden = false;
+      function profileDetails(profile = {}) {
+        const values = [];
+        if (profile.level) values.push(`Lv.${profile.level}`);
+        if (profile.classNameJa || profile.className) values.push(profile.classNameJa || profile.className);
+        if (profile.speciesJa || profile.species) values.push(profile.speciesJa || profile.species);
+        if (profile.latestLocation) values.push(profile.latestLocation);
+        return values.join(' / ');
       }
 
-      function formatDate(value) {
-        if (!value) return '';
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        return new Intl.DateTimeFormat('ja-JP', {dateStyle:'medium', timeStyle:'short'}).format(date);
-      }
-
-      async function loadList() {
-        showSaves();
-        saveList.innerHTML = '';
-        setStatus('セーブデータを読み込んでいます…');
+      async function loadCharacters() {
+        selectedCharacter = null;
+        characterPanel.hidden = false;
+        snapshotPanel.hidden = true;
+        characterList.innerHTML = '';
+        setStatus('キャラクターを読み込んでいます…');
         try {
-          const files = await DDGithub.listSaves();
-          if (!files.length) {
-            saveList.innerHTML = '<div class="empty">まだGitHubにセーブデータがありません。</div>';
+          const characters = await DDSave.listCharacters();
+          if (!characters.length) {
+            characterList.innerHTML = '<div class="empty">新しい複数セーブ形式のキャラクターはまだありません。<br>DD.htmlで一度セーブすると、ここに表示されます。</div>';
             setStatus('');
             return;
           }
-
-          const entries = await Promise.all(files.map(async file => {
-            try {
-              const game = await DDGithub.loadSave(file.name);
-              return {file, game};
-            } catch (_) {
-              return {file, game:null};
-            }
-          }));
-
-          entries.forEach(({file, game}) => {
+          characters.forEach(character => {
+            const profile = character.profile || {};
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = 'save-card';
-            const name = game?.character?.name || file.name.replace(/\.json$/i, '');
-            const details = [];
-            if (game?.character?.level) details.push(`Lv.${game.character.level}`);
-            if (game?.character?.className) details.push(game.character.className);
-            if (game?.current?.location) details.push(game.current.location);
-            if (game?.meta?.updatedAt) details.push(formatDate(game.meta.updatedAt));
-            button.innerHTML = `<span class="save-copy"><strong></strong><span></span></span><span class="load-mark">›</span>`;
-            button.querySelector('strong').textContent = name;
-            button.querySelector('.save-copy span').textContent = details.join(' / ') || file.name;
-            button.addEventListener('click', async () => {
-              button.disabled = true;
-              setStatus(`${name} を読み込んでいます…`);
+            button.className = 'card character-card';
+            button.innerHTML = '<span class="card-main"><strong></strong><span></span></span><span class="card-action">選ぶ ›</span>';
+            button.querySelector('strong').textContent = profile.name || character.id;
+            button.querySelector('.card-main span').textContent = profileDetails(profile) || character.id;
+            button.addEventListener('click', () => loadSnapshots(character));
+            characterList.appendChild(button);
+          });
+          setStatus('');
+        } catch (error) {
+          setStatus(error.message || 'キャラクター一覧を取得できませんでした。', true);
+        }
+      }
+
+      async function loadSnapshots(character) {
+        selectedCharacter = character;
+        characterPanel.hidden = true;
+        snapshotPanel.hidden = false;
+        snapshotList.innerHTML = '';
+        snapshotTitle.textContent = `${character.profile?.name || character.id} のセーブ`;
+        setStatus('セーブデータを読み込んでいます…');
+        try {
+          const snapshots = await DDSave.listSnapshots(character.id);
+          if (!snapshots.length) {
+            snapshotList.innerHTML = '<div class="empty">このキャラクターにはセーブデータがありません。</div>';
+            setStatus('');
+            return;
+          }
+          snapshots.forEach(snapshot => {
+            const card = document.createElement('article');
+            card.className = 'card';
+            const title = snapshot.label || snapshot.filename.replace(/\.json$/i, '');
+            const details = [DDSave.fmtGameTime(snapshot.gameTime), snapshot.location, DDSave.fmtDate(snapshot.updatedAt)].filter(Boolean).join(' / ');
+            card.innerHTML = '<div class="card-main"><strong></strong><span></span></div><div class="snapshot-actions"><button class="load" type="button">ロード</button><button class="delete" type="button">削除</button></div>';
+            card.querySelector('strong').textContent = title;
+            card.querySelector('.card-main span').textContent = details;
+
+            const loadBtn = card.querySelector('.load');
+            const deleteBtn = card.querySelector('.delete');
+
+            loadBtn.addEventListener('click', async () => {
+              loadBtn.disabled = true;
+              setStatus(`${title} をロードしています…`);
               try {
-                const loaded = game || await DDGithub.loadSave(file.name);
-                localStorage.setItem('ddActiveGame', JSON.stringify(loaded));
+                await DDSave.loadSnapshot(character.id, snapshot.filename);
                 location.href = 'DD.html';
               } catch (error) {
                 setStatus(error.message || 'ロードに失敗しました。', true);
-                button.disabled = false;
+                loadBtn.disabled = false;
               }
             });
-            saveList.appendChild(button);
+
+            deleteBtn.addEventListener('click', async () => {
+              if (!DDGithub.getToken()) {
+                updateConnectionView();
+                connectView.hidden = false;
+                connectedView.hidden = true;
+                tokenInput.focus();
+                setStatus('削除するにはGitHub連携が必要です。', true);
+                return;
+              }
+              if (!confirm(`「${title}」を削除しますか？\nこのセーブデータはGitHubから削除されます。`)) return;
+              deleteBtn.disabled = true;
+              setStatus(`${title} を削除しています…`);
+              try {
+                await DDSave.deleteSnapshot(character.id, snapshot.filename);
+                await loadSnapshots(character);
+              } catch (error) {
+                setStatus(error.message || '削除に失敗しました。', true);
+                deleteBtn.disabled = false;
+              }
+            });
+
+            snapshotList.appendChild(card);
           });
           setStatus('');
         } catch (error) {
           setStatus(error.message || 'セーブ一覧を取得できませんでした。', true);
-          if (/トークン|401|403/.test(error.message || '')) showConnect();
         }
       }
 
@@ -163,27 +221,29 @@
         try {
           DDGithub.setToken(tokenInput.value);
           await DDGithub.verifyConnection();
-          await loadList();
+          tokenInput.value = '';
+          updateConnectionView();
+          setStatus('GitHubに連携しました。');
         } catch (error) {
           DDGithub.clearToken();
+          updateConnectionView();
           setStatus(error.message || 'GitHub連携に失敗しました。', true);
+        } finally {
           connectBtn.disabled = false;
         }
       });
 
-      tokenInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter') connectBtn.click();
-      });
-
-      refreshBtn.addEventListener('click', loadList);
+      tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') connectBtn.click(); });
       disconnectBtn.addEventListener('click', () => {
         DDGithub.clearToken();
-        setStatus('GitHub連携を解除しました。');
-        showConnect();
+        updateConnectionView();
+        setStatus('GitHub連携を解除しました。ロードは引き続きできます。');
       });
+      refreshBtn.addEventListener('click', () => selectedCharacter ? loadSnapshots(selectedCharacter) : loadCharacters());
+      backCharactersBtn.addEventListener('click', loadCharacters);
 
-      if (DDGithub.getToken()) loadList();
-      else showConnect();
+      updateConnectionView();
+      loadCharacters();
     })();
   </script>
 </body>
