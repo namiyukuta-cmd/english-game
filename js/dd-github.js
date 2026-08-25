@@ -195,7 +195,7 @@
     if (managerPromise) return managerPromise;
     managerPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'js/dd-save.js?v=20260825-1';
+      script.src = 'js/dd-save.js?v=20260825-2';
       script.onload = () => window.DDSave ? resolve(window.DDSave) : reject(new Error('セーブ機能を読み込めませんでした。'));
       script.onerror = () => reject(new Error('セーブ機能を読み込めませんでした。'));
       document.head.appendChild(script);
@@ -203,11 +203,30 @@
     return managerPromise;
   }
 
+  function clone(value) {
+    return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+  }
+
+  // 街移動など、DD.html の追加UIが localStorage に更新した状態を
+  // ウィンドウ側のゲーム状態へ合流してからスナップショットを作る。
+  function mergeRuntimeState(game) {
+    let local = null;
+    try { local = JSON.parse(localStorage.getItem('ddActiveGame') || 'null'); }
+    catch (_) {}
+    if (!local || local?.character?.id !== game?.character?.id) return game;
+
+    const merged = clone(game || {});
+    for (const key of ['time','location','world','worldState','current','log']) {
+      if (local[key] !== undefined) merged[key] = clone(local[key]);
+    }
+    return merged;
+  }
+
   // DD.html の既存呼び出しを維持しつつ、新しい複数セーブ画面へ渡す。
   async function saveGame(game) {
     if (!getToken()) throw new Error('GitHubトークンが未設定です。');
     const manager = await ensureSaveManager();
-    return manager.openSaveDialog(game);
+    return manager.openSaveDialog(mergeRuntimeState(game));
   }
 
   window.DDGithub = {
@@ -227,4 +246,12 @@
     saveGame,
     saveFilename
   };
+
+  // ゲーム画面だけで街・地図UIを追加する。ロード画面では読み込まない。
+  if (document.getElementById('desktop')) {
+    const script = document.createElement('script');
+    script.src = 'js/dd-world-ui.js?v=20260825-3';
+    script.onerror = () => console.error('世界UIを読み込めませんでした。');
+    document.head.appendChild(script);
+  }
 })();
