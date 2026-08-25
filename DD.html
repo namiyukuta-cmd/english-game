@@ -4,947 +4,160 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DD TRPG</title>
-
 <style>
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-}
-
-body{
-  background:#17130f;
-  color:#2f2418;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    "Noto Sans JP",
-    sans-serif;
-}
-
-button{
-  font:inherit;
-  touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
-}
-
-
-/* =========================
-   画面全体
-========================= */
-
-#gameScreen{
-  position:relative;
-  width:100%;
-  height:100dvh;
-  min-height:560px;
-  overflow:hidden;
-
-  display:grid;
-
-  grid-template-rows:
-    92px
-    minmax(0,1fr)
-    auto;
-
-  background:#e9d8b8;
-}
-
-
-/* =========================
-   上部固定バー
-========================= */
-
-#topBar{
-  position:relative;
-  z-index:20;
-
-  display:grid;
-
-  grid-template-columns:
-    54px
-    minmax(0,1fr)
-    110px;
-
-  min-height:92px;
-
-  background:#33271e;
-  color:#f1dfc1;
-
-  border-bottom:1px solid #6d563c;
-}
-
-
-/* 左：TOP / LOG */
-
-#topLeft{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-
-  gap:4px;
-  padding:5px 2px;
-}
-
-
-/* 中央：日時・現在地・HP */
-
-#topCenter{
-  min-width:0;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-
-  text-align:center;
-
-  padding:5px 4px;
-}
-
-#dateTime{
-  font-size:14px;
-  font-weight:700;
-}
-
-#currentLocation{
-  margin-top:2px;
-
-  font-size:16px;
-  font-weight:800;
-
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-#statusLine{
-  margin-top:5px;
-
-  display:flex;
-  justify-content:center;
-  gap:12px;
-
-  font-size:13px;
-}
-
-
-/* 右：LOAD / SAVE */
-
-#topRight{
-  display:flex;
-  justify-content:flex-end;
-  align-items:flex-start;
-
-  gap:5px;
-  padding:6px 5px;
-}
-
-
-/* 小さいシステムボタン */
-
-.system-button{
-  width:46px;
-  height:38px;
-
-  border:1px solid #776047;
-  border-radius:7px;
-
-  background:#49382a;
-  color:#f2dfbe;
-
-  padding:2px;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-
-  font-size:10px;
-  font-weight:700;
-}
-
-.system-button .icon{
-  font-size:17px;
-  line-height:1;
-}
-
-.system-button .label{
-  margin-top:2px;
-  font-size:8px;
-}
-
-
-/* =========================
-   ゲーム本体
-========================= */
-
-#mainArea{
-  min-height:0;
-
-  display:grid;
-
-  grid-template-rows:
-    minmax(180px,45%)
-    minmax(100px,1fr);
-
-  overflow:hidden;
-}
-
-
-/* 上：地図・風景・NPC・敵 */
-
-#sceneArea{
-  position:relative;
-
-  min-height:0;
-
-  border-bottom:1px solid #9e8765;
-
-  background:#cab591;
-
-  overflow:hidden;
-}
-
-#sceneImage{
-  position:absolute;
-  inset:0;
-
-  background-position:center;
-  background-size:cover;
-  background-repeat:no-repeat;
-}
-
-#scenePlaceholder{
-  position:absolute;
-  inset:0;
-
-  display:grid;
-  place-items:center;
-
-  color:#66533d;
-  font-size:15px;
-}
-
-
-/* 下：会話・説明 */
-
-#messageArea{
-  min-height:0;
-  overflow-y:auto;
-
-  background:#f1e3c9;
-
-  padding:12px 14px 18px;
-}
-
-#speakerName{
-  margin-bottom:5px;
-
-  font-size:15px;
-  font-weight:800;
-
-  color:#5e4630;
-}
-
-#messageText{
-  margin:0;
-
-  font-size:15px;
-  line-height:1.75;
-
-  white-space:pre-wrap;
-}
-
-
-/* =========================
-   下部固定：その場の行動
-========================= */
-
-#actionArea{
-  position:relative;
-  z-index:15;
-
-  min-height:68px;
-
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-
-  gap:6px;
-
-  padding:
-    7px
-    50px
-    calc(7px + env(safe-area-inset-bottom))
-    7px;
-
-  background:#30241b;
-
-  border-top:1px solid #71593f;
-}
-
-.action-button{
-  min-width:60px;
-  min-height:44px;
-
-  border:1px solid #806849;
-  border-radius:7px;
-
-  background:#ead4ae;
-  color:#352719;
-
-  padding:6px 9px;
-
-  font-size:14px;
-  font-weight:800;
-}
-
-
-/* =========================
-   右端メニュー
-========================= */
-
-/*
-  普段は右側に隠れている。
-
-  ◀ で表示
-  ▶ で収納
-*/
-
-#menuOpenButton{
-  position:absolute;
-
-  z-index:60;
-
-  right:0;
-  bottom:
-    calc(
-      76px + env(safe-area-inset-bottom)
-    );
-
-  width:34px;
-  height:46px;
-
-  border:1px solid #6b533b;
-  border-right:none;
-
-  border-radius:8px 0 0 8px;
-
-  background:#3b2c21;
-  color:#f0ddbd;
-
-  font-size:18px;
-}
-
-#sideMenu{
-  position:absolute;
-
-  z-index:70;
-
-  right:0;
-  bottom:
-    calc(
-      70px + env(safe-area-inset-bottom)
-    );
-
-  width:74px;
-
-  display:none;
-
-  flex-direction:column;
-
-  gap:5px;
-
-  padding:6px;
-
-  border:
-    1px solid #6d553d;
-
-  border-right:none;
-
-  border-radius:
-    9px 0 0 9px;
-
-  background:
-    rgba(45,33,24,.97);
-
-  box-shadow:
-    -4px 4px 12px
-    rgba(0,0,0,.25);
-}
-
-#sideMenu.open{
-  display:flex;
-}
-
-.menu-button{
-  min-height:43px;
-
-  border:1px solid #806748;
-  border-radius:6px;
-
-  background:#ead3ab;
-  color:#362819;
-
-  font-size:12px;
-  font-weight:800;
-}
-
-#menuCloseButton{
-  min-height:34px;
-
-  border:1px solid #725a40;
-  border-radius:6px;
-
-  background:#49382a;
-  color:#f0ddbd;
-
-  font-size:17px;
-}
-
-
-/* =========================
-   窓
-========================= */
-
-/*
-  QUEST / ITEM / CHAR などは
-  画面遷移せず、この窓に表示
-*/
-
-#windowLayer{
-  position:absolute;
-
-  z-index:50;
-
-  inset:92px 8px 76px 8px;
-
-  pointer-events:none;
-}
-
-#windowLayer[hidden]{
-  display:none;
-}
-
-#gameWindow{
-  position:relative;
-
-  width:100%;
-  height:100%;
-
-  display:flex;
-  flex-direction:column;
-
-  overflow:hidden;
-
-  border:2px solid #6e563d;
-  border-radius:10px;
-
-  background:#f0e1c5;
-
-  box-shadow:
-    0 8px 25px
-    rgba(0,0,0,.38);
-
-  pointer-events:auto;
-}
-
-#windowHeader{
-  min-height:48px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:5px 7px 5px 12px;
-
-  background:#d6bd94;
-
-  border-bottom:1px solid #866e4f;
-}
-
-#windowTitle{
-  font-size:17px;
-  font-weight:800;
-}
-
-#windowCloseButton{
-  width:38px;
-  height:38px;
-
-  border:1px solid #7c6245;
-  border-radius:50%;
-
-  background:#f2dec0;
-  color:#3a2a1d;
-
-  font-size:20px;
-  font-weight:700;
-}
-
-#windowContent{
-  flex:1;
-  min-height:0;
-
-  overflow:auto;
-
-  padding:12px;
-
-  font-size:15px;
-  line-height:1.7;
-}
-
-
-/* =========================
-   スマホ幅
-========================= */
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:#17130f;color:#2f2418;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP",sans-serif}
+button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+#gameScreen{position:relative;width:100%;height:100dvh;min-height:560px;overflow:hidden;display:grid;grid-template-rows:92px minmax(0,1fr) auto;background:#e9d8b8}
+
+#topBar{position:relative;z-index:20;display:grid;grid-template-columns:54px minmax(0,1fr) 110px;min-height:92px;background:#33271e;color:#f1dfc1;border-bottom:1px solid #6d563c}
+#topLeft{display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 2px}
+#topCenter{min-width:0;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:5px 4px}
+#dateTime{font-size:14px;font-weight:700}
+#currentLocation{margin-top:2px;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#statusLine{margin-top:5px;display:flex;justify-content:center;gap:12px;font-size:13px}
+
+#topRight{display:grid;grid-template-columns:46px 46px;grid-template-rows:38px 38px;justify-content:end;align-content:start;gap:4px 5px;padding:6px 5px}
+#loadButton{grid-column:1;grid-row:1}
+#saveButton{grid-column:2;grid-row:1}
+#logButton{grid-column:2;grid-row:2}
+
+.system-button{width:46px;height:38px;border:1px solid #776047;border-radius:7px;background:#49382a;color:#f2dfbe;padding:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:10px;font-weight:700}
+.system-button .icon{font-size:17px;line-height:1}
+.system-button .label{margin-top:2px;font-size:8px}
+
+#mainArea{min-height:0;display:grid;grid-template-rows:minmax(180px,45%) minmax(100px,1fr);overflow:hidden}
+#sceneArea{position:relative;min-height:0;border-bottom:1px solid #9e8765;background:#cab591;overflow:hidden}
+#sceneImage{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat}
+#scenePlaceholder{position:absolute;inset:0;display:grid;place-items:center;color:#66533d;font-size:15px}
+#messageArea{min-height:0;overflow-y:auto;background:#f1e3c9;padding:12px 14px 18px}
+#speakerName{margin-bottom:5px;font-size:15px;font-weight:800;color:#5e4630}
+#messageText{margin:0;font-size:15px;line-height:1.75;white-space:pre-wrap}
+
+#actionArea{position:relative;z-index:15;min-height:68px;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:7px 50px calc(7px + env(safe-area-inset-bottom)) 7px;background:#30241b;border-top:1px solid #71593f}
+.action-button{min-width:60px;min-height:44px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:6px 9px;font-size:14px;font-weight:800}
+
+#menuOpenButton{position:absolute;z-index:60;right:0;bottom:calc(76px + env(safe-area-inset-bottom));width:34px;height:46px;border:1px solid #6b533b;border-right:none;border-radius:8px 0 0 8px;background:#3b2c21;color:#f0ddbd;font-size:18px}
+#sideMenu{position:absolute;z-index:70;right:0;bottom:calc(70px + env(safe-area-inset-bottom));width:74px;display:none;flex-direction:column;gap:5px;padding:6px;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25)}
+#sideMenu.open{display:flex}
+.menu-button{min-height:43px;border:1px solid #806748;border-radius:6px;background:#ead3ab;color:#362819;font-size:12px;font-weight:800}
+#menuCloseButton{min-height:34px;border:1px solid #725a40;border-radius:6px;background:#49382a;color:#f0ddbd;font-size:17px}
+
+#windowLayer{position:absolute;z-index:50;inset:92px 8px 76px 8px;pointer-events:none}
+#windowLayer[hidden]{display:none}
+#gameWindow{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;border:2px solid #6e563d;border-radius:10px;background:#f0e1c5;box-shadow:0 8px 25px rgba(0,0,0,.38);pointer-events:auto}
+#windowHeader{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:5px 7px 5px 12px;background:#d6bd94;border-bottom:1px solid #866e4f}
+#windowTitle{font-size:17px;font-weight:800}
+#windowCloseButton{width:38px;height:38px;border:1px solid #7c6245;border-radius:50%;background:#f2dec0;color:#3a2a1d;font-size:20px;font-weight:700}
+#windowContent{flex:1;min-height:0;overflow:auto;padding:12px;font-size:15px;line-height:1.7}
 
 @media(max-width:430px){
-
-  #topBar{
-    grid-template-columns:
-      50px
-      minmax(0,1fr)
-      104px;
-  }
-
-  #dateTime{
-    font-size:13px;
-  }
-
-  #currentLocation{
-    font-size:15px;
-  }
-
-  #statusLine{
-    gap:8px;
-    font-size:12px;
-  }
-
-  .system-button{
-    width:43px;
-  }
-
-  #messageText{
-    font-size:15px;
-  }
-
-  .action-button{
-    min-width:58px;
-    font-size:14px;
-  }
-
+  #topBar{grid-template-columns:50px minmax(0,1fr) 104px}
+  #topRight{grid-template-columns:43px 43px}
+  #dateTime{font-size:13px}
+  #currentLocation{font-size:15px}
+  #statusLine{gap:8px;font-size:12px}
+  .system-button{width:43px}
+  #messageText{font-size:15px}
+  .action-button{min-width:58px;font-size:14px}
 }
 </style>
 </head>
-
-
 <body>
-
 <div id="gameScreen">
-
-
-  <!-- =====================
-       上部
-  ====================== -->
-
   <header id="topBar">
-
-
-    <!-- 左上 -->
-
     <div id="topLeft">
-
-      <button
-        id="topButton"
-        class="system-button"
-        type="button"
-      >
-        <span class="icon">⌂</span>
-        <span class="label">TOP</span>
+      <button id="topButton" class="system-button" type="button">
+        <span class="icon">⌂</span><span class="label">TOP</span>
       </button>
-
-      <button
-        id="logButton"
-        class="system-button"
-        type="button"
-      >
-        <span class="icon">≡</span>
-        <span class="label">LOG</span>
-      </button>
-
     </div>
-
-
-    <!-- 上中央 -->
 
     <div id="topCenter">
-
-      <div id="dateTime">
-        <span id="gameDate">
-          Day 1
-        </span>
-
-        ・
-
-        <span id="gameTime">
-          08:00
-        </span>
-      </div>
-
-      <div id="currentLocation">
-        Brackenford
-      </div>
-
+      <div id="dateTime"><span id="gameDate">Day 1</span> ・ <span id="gameTime">08:00</span></div>
+      <div id="currentLocation">Brackenford</div>
       <div id="statusLine">
-
-        <span>
-          HP
-          <strong id="miniHp">
-            12/12
-          </strong>
-        </span>
-
-        <span>
-          AC
-          <strong id="miniAc">
-            14
-          </strong>
-        </span>
-
-        <span>
-          Lv.
-          <strong id="miniLevel">
-            1
-          </strong>
-        </span>
-
+        <span>HP <strong id="miniHp">12/12</strong></span>
+        <span>AC <strong id="miniAc">14</strong></span>
+        <span>Lv. <strong id="miniLevel">1</strong></span>
       </div>
-
     </div>
-
-
-    <!-- 右上 -->
 
     <div id="topRight">
-
-      <button
-        id="loadButton"
-        class="system-button"
-        type="button"
-      >
-        <span class="icon">⇩</span>
-        <span class="label">LOAD</span>
+      <button id="loadButton" class="system-button" type="button">
+        <span class="icon">⇩</span><span class="label">LOAD</span>
       </button>
-
-      <button
-        id="saveButton"
-        class="system-button"
-        type="button"
-      >
-        <span class="icon">▣</span>
-        <span class="label">SAVE</span>
+      <button id="saveButton" class="system-button" type="button">
+        <span class="icon">▣</span><span class="label">SAVE</span>
       </button>
-
+      <button id="logButton" class="system-button" type="button">
+        <span class="icon">≡</span><span class="label">LOG</span>
+      </button>
     </div>
-
-
   </header>
 
-
-
-  <!-- =====================
-       通常ゲーム画面
-  ====================== -->
-
   <main id="mainArea">
-
-
-    <!-- 地図・背景 -->
-
     <section id="sceneArea">
-
       <div id="sceneImage"></div>
-
-      <div id="scenePlaceholder">
-        MAP / SCENE
-      </div>
-
+      <div id="scenePlaceholder">MAP / SCENE</div>
     </section>
-
-
-
-    <!-- 会話・説明 -->
-
     <section id="messageArea">
-
-      <div id="speakerName">
-        Brackenford
-      </div>
-
-      <p id="messageText">
-石造りの建物が並ぶ町だ。
-通りには旅人と商人の姿が見える。
-      </p>
-
+      <div id="speakerName">Brackenford</div>
+      <p id="messageText">石造りの建物が並ぶ町だ。
+通りには旅人と商人の姿が見える。</p>
     </section>
-
-
   </main>
 
-
-
-  <!-- =====================
-       下部：行動
-  ====================== -->
-
   <div id="actionArea">
-
-    <button class="action-button">
-      移動
-    </button>
-
-    <button class="action-button">
-      話す
-    </button>
-
-    <button class="action-button">
-      調べる
-    </button>
-
+    <button class="action-button" type="button">移動</button>
+    <button class="action-button" type="button">話す</button>
+    <button class="action-button" type="button">調べる</button>
   </div>
 
-
-
-  <!-- =====================
-       右端メニューを開く
-  ====================== -->
-
-  <button
-    id="menuOpenButton"
-    type="button"
-    aria-label="メニューを開く"
-  >
-    ◀
-  </button>
-
-
-
-  <!-- =====================
-       右側の縦メニュー
-  ====================== -->
+  <button id="menuOpenButton" type="button" aria-label="メニューを開く">◀</button>
 
   <nav id="sideMenu">
-
-    <button
-      id="menuCloseButton"
-      type="button"
-    >
-      ▶
-    </button>
-
-    <button
-      class="menu-button"
-      data-window="quest"
-    >
-      QUEST
-    </button>
-
-    <button
-      class="menu-button"
-      data-window="inventory"
-    >
-      ITEM
-    </button>
-
-    <button
-      class="menu-button"
-      data-window="skill"
-    >
-      SKILL
-    </button>
-
-    <button
-      class="menu-button"
-      data-window="player"
-    >
-      CHAR
-    </button>
-
-    <button
-      class="menu-button"
-      data-window="memo"
-    >
-      MEMO
-    </button>
-
+    <button id="menuCloseButton" type="button">▶</button>
+    <button class="menu-button" data-window="quest" type="button">QUEST</button>
+    <button class="menu-button" data-window="inventory" type="button">ITEM</button>
+    <button class="menu-button" data-window="skill" type="button">SKILL</button>
+    <button class="menu-button" data-window="player" type="button">CHAR</button>
+    <button class="menu-button" data-window="memo" type="button">MEMO</button>
   </nav>
 
-
-
-  <!-- =====================
-       開く窓
-  ====================== -->
-
-  <div
-    id="windowLayer"
-    hidden
-  >
-
+  <div id="windowLayer" hidden>
     <section id="gameWindow">
-
       <header id="windowHeader">
-
-        <div id="windowTitle">
-          ITEM
-        </div>
-
-        <button
-          id="windowCloseButton"
-          type="button"
-          aria-label="窓を閉じる"
-        >
-          ×
-        </button>
-
+        <div id="windowTitle">ITEM</div>
+        <button id="windowCloseButton" type="button" aria-label="窓を閉じる">×</button>
       </header>
-
-      <div id="windowContent">
-        ここにITEM・QUEST・CHARなどを表示
-      </div>
-
+      <div id="windowContent">ここにITEM・QUEST・CHARなどを表示</div>
     </section>
-
   </div>
-
-
 </div>
 
-
-
 <script>
+const sideMenu=document.getElementById('sideMenu');
+const menuOpenButton=document.getElementById('menuOpenButton');
+const menuCloseButton=document.getElementById('menuCloseButton');
+menuOpenButton.addEventListener('click',()=>{sideMenu.classList.add('open');menuOpenButton.hidden=true;});
+menuCloseButton.addEventListener('click',()=>{sideMenu.classList.remove('open');menuOpenButton.hidden=false;});
 
-/* =========================
-   右メニュー
-========================= */
-
-const sideMenu =
-  document.getElementById("sideMenu");
-
-const menuOpenButton =
-  document.getElementById("menuOpenButton");
-
-const menuCloseButton =
-  document.getElementById("menuCloseButton");
-
-
-menuOpenButton.addEventListener(
-  "click",
-  () => {
-
-    sideMenu.classList.add("open");
-
-    menuOpenButton.hidden = true;
-
-  }
-);
-
-
-menuCloseButton.addEventListener(
-  "click",
-  () => {
-
-    sideMenu.classList.remove("open");
-
-    menuOpenButton.hidden = false;
-
-  }
-);
-
-
-
-/* =========================
-   窓
-========================= */
-
-const windowLayer =
-  document.getElementById("windowLayer");
-
-const windowTitle =
-  document.getElementById("windowTitle");
-
-const windowContent =
-  document.getElementById("windowContent");
-
-const windowCloseButton =
-  document.getElementById("windowCloseButton");
-
-
-const windowNames = {
-
-  quest:"QUEST",
-
-  inventory:"ITEM",
-
-  skill:"SKILL",
-
-  player:"CHAR",
-
-  memo:"MEMO"
-
-};
-
-
-document.querySelectorAll(
-  ".menu-button"
-).forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      const type =
-        button.dataset.window;
-
-      windowTitle.textContent =
-        windowNames[type] || type;
-
-      windowContent.innerHTML = `
-        <p>
-          ${windowNames[type]}
-          の内容をここに表示します。
-        </p>
-      `;
-
-      windowLayer.hidden = false;
-
-    }
-  );
-
+const windowLayer=document.getElementById('windowLayer');
+const windowTitle=document.getElementById('windowTitle');
+const windowContent=document.getElementById('windowContent');
+const windowCloseButton=document.getElementById('windowCloseButton');
+const windowNames={quest:'QUEST',inventory:'ITEM',skill:'SKILL',player:'CHAR',memo:'MEMO'};
+document.querySelectorAll('.menu-button').forEach(button=>{
+  button.addEventListener('click',()=>{
+    const type=button.dataset.window;
+    windowTitle.textContent=windowNames[type]||type;
+    windowContent.innerHTML=`<p>${windowNames[type]} の内容をここに表示します。</p>`;
+    windowLayer.hidden=false;
+  });
 });
-
-
-windowCloseButton.addEventListener(
-  "click",
-  () => {
-
-    windowLayer.hidden = true;
-
-  }
-);
-
+windowCloseButton.addEventListener('click',()=>{windowLayer.hidden=true;});
 </script>
-
-
 </body>
 </html>
