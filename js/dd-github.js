@@ -42,12 +42,8 @@
       }
     });
 
-    if (response.status === 401) {
-      throw new Error('GitHubトークンを確認してください。');
-    }
-    if (response.status === 403) {
-      throw new Error('GitHubへのアクセス権限がありません。トークンのContents権限を確認してください。');
-    }
+    if (response.status === 401) throw new Error('GitHubトークンを確認してください。');
+    if (response.status === 403) throw new Error('GitHubへのアクセス権限がありません。トークンのContents権限を確認してください。');
     return response;
   }
 
@@ -72,14 +68,18 @@
       .slice(0, 60) || 'character';
   }
 
-  function saveFilename(game) {
-    const id = game?.character?.id || game?.id || `character-${Date.now()}`;
-    return `${safeId(id)}.json`;
+  function encodePath(path = '') {
+    return String(path)
+      .split('/')
+      .filter(Boolean)
+      .map(part => encodeURIComponent(part))
+      .join('/');
   }
 
-  function contentsUrl(filename = '') {
-    const base = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.saveDir}`;
-    return filename ? `${base}/${encodeURIComponent(filename)}` : base;
+  function repoContentsUrl(path = '') {
+    const base = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents`;
+    const encoded = encodePath(path);
+    return encoded ? `${base}/${encoded}` : base;
   }
 
   async function verifyConnection() {
@@ -89,74 +89,125 @@
     return true;
   }
 
-  async function listSaves() {
-    const response = await apiFetch(`${contentsUrl()}?ref=${encodeURIComponent(CONFIG.branch)}`);
+  async function listPath(path) {
+    const response = await apiFetch(`${repoContentsUrl(path)}?ref=${encodeURIComponent(CONFIG.branch)}`);
     if (response.status === 404) return [];
-    if (!response.ok) throw new Error(`セーブ一覧を取得できませんでした (${response.status})。`);
-    const items = await response.json();
-    if (!Array.isArray(items)) return [];
+    if (!response.ok) throw new Error(`GitHubの一覧を取得できませんでした (${response.status})。`);
+    const value = await response.json();
+    return Array.isArray(value) ? value : [];
+  }
+
+  async function readJsonPath(path) {
+    const response = await apiFetch(`${repoContentsUrl(path)}?ref=${encodeURIComponent(CONFIG.branch)}`);
+    if (!response.ok) throw new Error(`データを読み込めませんでした (${response.status})。`);
+    const file = await response.json();
+    const text = base64ToUtf8(file.content);
+    return {
+      data: JSON.parse(text),
+      sha: file.sha || null,
+      name: file.name || String(path).split('/').pop(),
+      path: file.path || path
+    };
+  }
+
+  async function writeJsonPath(path, data, message = 'Update DD data') {
+    if (!getToken()) throw new Error('GitHubへ保存するにはトークンが必要です。');
+
+    const lookup = await apiFetch(`${repoContentsUrl(path)}?ref=${encodeURIComponent(CONFIG.branch)}`);
+    let sha = null;
+    if (lookup.ok) {
+      const current = await lookup.json();
+      sha = current.sha || null;
+    } else if (lookup.status !== 404) {
+      throw new Error(`既存データを確認できませんでした (${lookup.status})。`);
+    }
+
+    const body = {
+      message,
+      content: utf8ToBase64(JSON.stringify(data, null, 2)),
+      branch: CONFIG.branch
+    };
+    if (sha) body.sha = sha;
+
+    const response = await apiFetch(repoContentsUrl(path), {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      let detail = '';
+      try {
+        const result = await response.json();
+        detail = result.message ? ` ${result.message}` : '';
+      } catch (_) {}
+      throw new Error(`GitHubへの保存に失敗しました (${response.status})。${detail}`);
+    }
+    const result = await response.json();
+    return {
+      path,
+      sha: result.content?.sha || null,
+      commitSha: result.commit?.sha || null
+    };
+  }
+
+  async function deletePath(path, message = 'Delete DD data') {
+    if (!getToken()) throw new Error('GitHubから削除するにはトークンが必要です。');
+    const lookup = await apiFetch(`${repoContentsUrl(path)}?ref=${encodeURIComponent(CONFIG.branch)}`);
+    if (lookup.status === 404) return false;
+    if (!lookup.ok) throw new Error(`削除するデータを確認できませんでした (${lookup.status})。`);
+    const current = await lookup.json();
+    const response = await apiFetch(repoContentsUrl(path), {
+      method: 'DELETE',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message, sha: current.sha, branch: CONFIG.branch})
+    });
+    if (!response.ok) throw new Error(`セーブデータを削除できませんでした (${response.status})。`);
+    return true;
+  }
+
+  // 旧・単一セーブ形式の読み込み互換用。
+  function saveFilename(game) {
+    const id = game?.character?.id || game?.id || `character-${Date.now()}`;
+    return `${safeId(id)}.json`;
+  }
+
+  function legacyPath(filename = '') {
+    return filename ? `${CONFIG.saveDir}/${filename}` : CONFIG.saveDir;
+  }
+
+  async function listSaves() {
+    const items = await listPath(CONFIG.saveDir);
     return items
       .filter(item => item.type === 'file' && item.name.endsWith('.json'))
       .sort((a, b) => a.name.localeCompare(b.name, 'ja'));
   }
 
   async function loadSave(filename) {
-    const response = await apiFetch(`${contentsUrl(filename)}?ref=${encodeURIComponent(CONFIG.branch)}`);
-    if (!response.ok) throw new Error(`セーブデータを読み込めませんでした (${response.status})。`);
-    const file = await response.json();
-    const jsonText = base64ToUtf8(file.content);
-    const game = JSON.parse(jsonText);
-    game.__github = { filename: file.name, sha: file.sha };
+    const file = await readJsonPath(legacyPath(filename));
+    const game = file.data;
+    game.__github = {filename: file.name, sha: file.sha};
     return game;
   }
 
+  let managerPromise = null;
+  function ensureSaveManager() {
+    if (window.DDSave) return Promise.resolve(window.DDSave);
+    if (managerPromise) return managerPromise;
+    managerPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'js/dd-save.js?v=20260825-1';
+      script.onload = () => window.DDSave ? resolve(window.DDSave) : reject(new Error('セーブ機能を読み込めませんでした。'));
+      script.onerror = () => reject(new Error('セーブ機能を読み込めませんでした。'));
+      document.head.appendChild(script);
+    });
+    return managerPromise;
+  }
+
+  // DD.html の既存呼び出しを維持しつつ、新しい複数セーブ画面へ渡す。
   async function saveGame(game) {
     if (!getToken()) throw new Error('GitHubトークンが未設定です。');
-    if (!game || typeof game !== 'object') throw new Error('保存するゲームデータがありません。');
-
-    const filename = game.__github?.filename || saveFilename(game);
-    const lookup = await apiFetch(`${contentsUrl(filename)}?ref=${encodeURIComponent(CONFIG.branch)}`);
-    let sha = null;
-    if (lookup.ok) {
-      const current = await lookup.json();
-      sha = current.sha;
-    } else if (lookup.status !== 404) {
-      throw new Error(`既存セーブを確認できませんでした (${lookup.status})。`);
-    }
-
-    const payload = JSON.parse(JSON.stringify(game));
-    delete payload.__github;
-    payload.meta = payload.meta || {};
-    payload.meta.updatedAt = new Date().toISOString();
-    payload.meta.saveFormat = 1;
-
-    const body = {
-      message: `Save DD game: ${payload.character?.name || filename}`,
-      content: utf8ToBase64(JSON.stringify(payload, null, 2)),
-      branch: CONFIG.branch
-    };
-    if (sha) body.sha = sha;
-
-    const response = await apiFetch(contentsUrl(filename), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-      let detail = '';
-      try {
-        const data = await response.json();
-        detail = data.message ? ` ${data.message}` : '';
-      } catch (_) {}
-      throw new Error(`セーブに失敗しました (${response.status})。${detail}`);
-    }
-    const result = await response.json();
-    game.__github = {
-      filename,
-      sha: result.content?.sha || null
-    };
-    game.meta = payload.meta;
-    return game;
+    const manager = await ensureSaveManager();
+    return manager.openSaveDialog(game);
   }
 
   window.DDGithub = {
@@ -165,8 +216,15 @@
     setToken,
     clearToken,
     verifyConnection,
+    safeId,
+    listPath,
+    readJsonPath,
+    writeJsonPath,
+    deletePath,
+    ensureSaveManager,
     listSaves,
     loadSave,
-    saveGame
+    saveGame,
+    saveFilename
   };
 })();
