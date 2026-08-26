@@ -168,7 +168,7 @@
 
 
     /* =====================================
-       景色全体の箱
+       景色全体
     ===================================== */
 
     .scene{
@@ -190,7 +190,7 @@
 
     /* =====================================
        DIV 1
-       背景画像レイヤー
+       背景画像
     ===================================== */
 
     .scene-background{
@@ -204,9 +204,7 @@
         url("assets/survival/forest_01.png");
 
       background-size:cover;
-
       background-position:center;
-
       background-repeat:no-repeat;
 
       pointer-events:none;
@@ -215,10 +213,7 @@
 
     /* =====================================
        DIV 2
-       アイテムレイヤー
-
-       枝・石・焚き火などは
-       後でここに追加する
+       拾えるアイテム
     ===================================== */
 
     .scene-objects{
@@ -232,11 +227,81 @@
     }
 
 
+    .scene-object{
+      position:absolute;
+
+      display:block;
+
+      padding:0;
+      margin:0;
+
+      border:0;
+
+      background:transparent;
+
+      cursor:pointer;
+
+      pointer-events:auto;
+
+      -webkit-tap-highlight-color:transparent;
+    }
+
+
+    .scene-object img{
+      display:block;
+
+      width:100%;
+      height:100%;
+
+      object-fit:contain;
+
+      pointer-events:none;
+    }
+
+
+    .scene-object:active{
+      transform:scale(.96);
+    }
+
+
+    /* =========================
+       枝
+    ========================= */
+
+    #branchObject{
+      width:43%;
+
+      aspect-ratio:1 / 1;
+
+      left:3%;
+      bottom:0%;
+    }
+
+
+    /* =========================
+       石
+    ========================= */
+
+    #stoneObject{
+      width:27%;
+
+      aspect-ratio:1 / 1;
+
+      right:7%;
+      bottom:7%;
+    }
+
+
+    /* 拾った後 */
+
+    .scene-object.collected{
+      display:none;
+    }
+
+
     /* =====================================
        DIV 3
-       タップ判定レイヤー
-
-       道・ドア・倒木・川など
+       タップ判定
     ===================================== */
 
     .scene-hotspots{
@@ -247,6 +312,19 @@
       z-index:3;
 
       pointer-events:none;
+    }
+
+
+    .hotspot{
+      position:absolute;
+
+      padding:0;
+
+      border:0;
+
+      background:transparent;
+
+      pointer-events:auto;
     }
 
 
@@ -277,51 +355,6 @@
       white-space:nowrap;
 
       pointer-events:none;
-    }
-
-
-    /* =====================================
-       後で使うアイテム共通
-    ===================================== */
-
-    .scene-object{
-      position:absolute;
-
-      padding:0;
-
-      border:0;
-
-      background:transparent;
-
-      pointer-events:auto;
-    }
-
-    .scene-object img{
-      display:block;
-
-      width:100%;
-      height:100%;
-
-      object-fit:contain;
-
-      pointer-events:none;
-    }
-
-
-    /* =====================================
-       後で使う透明タップ判定
-    ===================================== */
-
-    .hotspot{
-      position:absolute;
-
-      padding:0;
-
-      border:0;
-
-      background:transparent;
-
-      pointer-events:auto;
     }
 
 
@@ -446,12 +479,48 @@
       text-align:center;
     }
 
+
+    /* =========================
+       ITEM一覧
+    ========================= */
+
     .item-list{
       min-height:55px;
 
       font-size:17px;
       line-height:1.6;
     }
+
+    .item-row{
+      min-height:50px;
+
+      padding:10px 4px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:12px;
+
+      border-bottom:1px solid #ddd;
+    }
+
+    .item-row:last-child{
+      border-bottom:0;
+    }
+
+    .item-name{
+      font-size:17px;
+      font-weight:700;
+    }
+
+    .item-count{
+      flex:0 0 auto;
+
+      font-size:17px;
+      font-weight:900;
+    }
+
 
     .close-button{
       width:100%;
@@ -563,14 +632,10 @@
 
   <!-- =====================================
        景色
-
-       3つのDIVを重ねる
   ====================================== -->
 
   <section class="scene">
 
-
-    <!-- 場所名 -->
 
     <div class="scene-name">
       雪山・針葉樹林
@@ -592,23 +657,59 @@
 
     <!-- =========================
          DIV 2
-         アイテム
-
-         次に枝・石などを置く
+         拾えるアイテム
     ========================== -->
 
     <div
       id="objectLayer"
       class="scene-objects"
-    ></div>
+    >
+
+
+      <!-- 枝 -->
+
+      <button
+        id="branchObject"
+        class="scene-object"
+        type="button"
+        aria-label="細い枝を拾う"
+      >
+
+        <img
+          src="assets/survival/branch_01.png"
+          alt=""
+          draggable="false"
+        >
+
+      </button>
+
+
+
+      <!-- 石 -->
+
+      <button
+        id="stoneObject"
+        class="scene-object"
+        type="button"
+        aria-label="小石を拾う"
+      >
+
+        <img
+          src="assets/survival/stone_01.png"
+          alt=""
+          draggable="false"
+        >
+
+      </button>
+
+
+    </div>
 
 
 
     <!-- =========================
          DIV 3
          タップ判定
-
-         次に道・ドアなどを置く
     ========================== -->
 
     <div
@@ -629,8 +730,7 @@
     id="message"
     class="message"
   >
-    雪の積もった針葉樹林です。
-    正面には森の奥へ続く道が見えます。
+    雪の積もった針葉樹林です。足元に拾えそうな物があります。
   </div>
 
 
@@ -720,6 +820,20 @@
 
 
 
+  /* =========================
+     所持品
+  ========================= */
+
+  const inventory = {
+
+    branch:0,
+
+    stone:0
+
+  };
+
+
+
   function renderClock(){
 
     const total =
@@ -777,7 +891,7 @@
 
 
   /* =========================
-     何もしなくても時間経過
+     ゲーム時間
 
      現実1秒
      ↓
@@ -810,6 +924,203 @@
 
 
   /* =========================
+     メッセージ表示
+  ========================= */
+
+  function setMessage(text){
+
+    document
+      .getElementById("message")
+      .textContent =
+        text;
+
+  }
+
+
+
+  /* =========================
+     ITEM一覧更新
+  ========================= */
+
+  function renderInventory(){
+
+    const itemList =
+      document.getElementById(
+        "itemList"
+      );
+
+
+    const rows = [];
+
+
+
+    if(inventory.branch > 0){
+
+      rows.push(
+        `
+          <div class="item-row">
+
+            <span class="item-name">
+              細い枝
+            </span>
+
+            <span class="item-count">
+              × ${inventory.branch}
+            </span>
+
+          </div>
+        `
+      );
+
+    }
+
+
+
+    if(inventory.stone > 0){
+
+      rows.push(
+        `
+          <div class="item-row">
+
+            <span class="item-name">
+              小石
+            </span>
+
+            <span class="item-count">
+              × ${inventory.stone}
+            </span>
+
+          </div>
+        `
+      );
+
+    }
+
+
+
+    if(rows.length === 0){
+
+      itemList.textContent =
+        "まだ何も持っていません。";
+
+      return;
+
+    }
+
+
+
+    itemList.innerHTML =
+      rows.join("");
+
+  }
+
+
+
+  /* =========================
+     枝を拾う
+  ========================= */
+
+  document
+    .getElementById(
+      "branchObject"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
+
+        const branchObject =
+          document.getElementById(
+            "branchObject"
+          );
+
+
+        if(
+          branchObject
+            .classList
+            .contains("collected")
+        ){
+          return;
+        }
+
+
+        inventory.branch += 1;
+
+
+        branchObject
+          .classList
+          .add("collected");
+
+
+        gameSeconds += 10;
+
+
+        renderClock();
+
+        renderInventory();
+
+
+        setMessage(
+          "細い枝を拾いました。"
+        );
+
+      }
+    );
+
+
+
+  /* =========================
+     石を拾う
+  ========================= */
+
+  document
+    .getElementById(
+      "stoneObject"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
+
+        const stoneObject =
+          document.getElementById(
+            "stoneObject"
+          );
+
+
+        if(
+          stoneObject
+            .classList
+            .contains("collected")
+        ){
+          return;
+        }
+
+
+        inventory.stone += 1;
+
+
+        stoneObject
+          .classList
+          .add("collected");
+
+
+        gameSeconds += 10;
+
+
+        renderClock();
+
+        renderInventory();
+
+
+        setMessage(
+          "小石を拾いました。"
+        );
+
+      }
+    );
+
+
+
+  /* =========================
      ITEM
   ========================= */
 
@@ -829,6 +1140,10 @@
 
         menuOpen=true;
 
+
+        renderInventory();
+
+
         itemModal
           .classList
           .add("open");
@@ -847,6 +1162,7 @@
       ()=>{
 
         menuOpen=false;
+
 
         itemModal
           .classList
@@ -880,12 +1196,58 @@
         renderClock();
 
 
-        document
-          .getElementById(
-            "message"
-          )
-          .textContent =
-            "黒い針葉樹が雪の中に立っています。正面には森の奥へ続く道、右奥には凍った川が見えます。（30秒経過）";
+
+        const branchLeft =
+          inventory.branch === 0;
+
+
+        const stoneLeft =
+          inventory.stone === 0;
+
+
+
+        if(
+          branchLeft &&
+          stoneLeft
+        ){
+
+          setMessage(
+            "雪の積もった針葉樹林です。足元に細い枝と小石があります。正面には森の奥へ続く道が見えます。（30秒経過）"
+          );
+
+          return;
+
+        }
+
+
+
+        if(branchLeft){
+
+          setMessage(
+            "雪の積もった針葉樹林です。足元に細い枝があります。正面には森の奥へ続く道が見えます。（30秒経過）"
+          );
+
+          return;
+
+        }
+
+
+
+        if(stoneLeft){
+
+          setMessage(
+            "雪の積もった針葉樹林です。足元に小石があります。正面には森の奥へ続く道が見えます。（30秒経過）"
+          );
+
+          return;
+
+        }
+
+
+
+        setMessage(
+          "雪の積もった針葉樹林です。正面には森の奥へ続く道が見えます。（30秒経過）"
+        );
 
       }
     );
@@ -893,6 +1255,8 @@
 
 
   renderClock();
+
+  renderInventory();
 
 </script>
 
