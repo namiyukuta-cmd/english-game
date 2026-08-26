@@ -25,24 +25,28 @@
     .info strong{display:block;margin-top:2px;font-size:17px;line-height:1.08;white-space:nowrap}
 
     .field-wrap{position:relative;min-height:0;flex:1 1 auto;border:2px solid #b8cdd9;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 6px 18px rgba(45,75,92,.08)}
-    .field{position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse at 15% 18%,#fff 0 42px,transparent 43px),radial-gradient(ellipse at 72% 13%,#fff 0 58px,transparent 59px),radial-gradient(ellipse at 45% 72%,rgba(255,255,255,.9) 0 70px,transparent 71px),linear-gradient(180deg,#f9fdff 0%,#edf6fb 45%,#f8fcff 100%)}
+    .field{position:absolute;inset:0;overflow:hidden;transition:background .25s ease}
+    .field.area-forest{background:radial-gradient(ellipse at 15% 18%,#fff 0 42px,transparent 43px),radial-gradient(ellipse at 72% 13%,#fff 0 58px,transparent 59px),radial-gradient(ellipse at 45% 72%,rgba(255,255,255,.9) 0 70px,transparent 71px),linear-gradient(180deg,#f9fdff 0%,#edf6fb 45%,#f8fcff 100%)}
+    .field.area-snowfield{background:radial-gradient(ellipse at 52% 32%,rgba(255,255,255,.95) 0 90px,transparent 91px),linear-gradient(160deg,#ffffff 0%,#edf7fc 55%,#dcecf5 100%)}
+    .field.area-river{background:linear-gradient(110deg,transparent 0 31%,rgba(193,226,241,.86) 32% 66%,transparent 67%),linear-gradient(180deg,#f9fdff 0%,#e8f3f8 100%)}
+    .field.area-rock{background:radial-gradient(circle at 18% 72%,#d8e1e6 0 34px,transparent 35px),radial-gradient(circle at 78% 24%,#cbd8df 0 44px,transparent 45px),linear-gradient(180deg,#f7fbfd 0%,#e2ebf0 100%)}
     .field::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(165deg,rgba(155,190,209,.08) 0 1px,transparent 1px 38px);pointer-events:none}
-    .area-label{position:absolute;left:50%;top:7px;transform:translateX(-50%);z-index:8;padding:5px 9px;border:1px solid #d5e2ea;border-radius:10px;background:rgba(255,255,255,.9);font-size:17px;font-weight:800;white-space:nowrap;pointer-events:none}
 
-    .tree{position:absolute;font-size:38px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));pointer-events:none;z-index:1}
-    .tree.small{font-size:31px;opacity:.92}
-
-    .ground-item{position:absolute;width:46px;height:46px;padding:0;border:0;background:transparent;display:grid;place-items:center;font-size:27px;line-height:1;z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12))}
+    .area-label{position:absolute;left:50%;top:7px;transform:translateX(-50%);z-index:10;padding:5px 9px;border:1px solid #d5e2ea;border-radius:10px;background:rgba(255,255,255,.92);font-size:17px;font-weight:800;white-space:nowrap;pointer-events:none}
+    .decor{position:absolute;line-height:1;pointer-events:none;z-index:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.11))}
+    .ground-item{position:absolute;width:46px;height:46px;margin-left:-23px;margin-top:-23px;padding:0;border:0;background:transparent;display:grid;place-items:center;font-size:27px;line-height:1;z-index:4;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12))}
     .ground-item::after{content:"";position:absolute;left:7px;right:7px;bottom:3px;height:7px;border-radius:50%;background:rgba(83,107,121,.12);z-index:-1}
-    .ground-item.hidden{display:none}
     .ground-item:active{transform:scale(.94)}
 
-    .campfire{position:absolute;width:52px;height:52px;margin-left:-26px;margin-top:-34px;display:grid;place-items:center;font-size:34px;line-height:1;z-index:4;pointer-events:none;filter:drop-shadow(0 0 8px rgba(255,136,35,.55));animation:fireGlow .8s ease-in-out infinite alternate}
+    .exit{position:absolute;z-index:7;min-width:92px;min-height:44px;padding:7px 10px;border:1px solid #98b4c4;border-radius:14px;background:rgba(255,255,255,.94);color:#294553;font-size:17px;font-weight:900;box-shadow:0 4px 12px rgba(45,75,92,.10);transform:translate(-50%,-50%)}
+    .exit:active{background:#e9f4fa}
+
+    .campfire{position:absolute;width:52px;height:52px;margin-left:-26px;margin-top:-34px;display:grid;place-items:center;font-size:34px;line-height:1;z-index:5;pointer-events:none;filter:drop-shadow(0 0 8px rgba(255,136,35,.55));animation:fireGlow .8s ease-in-out infinite alternate}
     .campfire[hidden]{display:none}
     .campfire::after{content:"";position:absolute;left:8px;right:8px;bottom:4px;height:8px;border-radius:50%;background:rgba(73,91,102,.18);z-index:-1}
     @keyframes fireGlow{from{transform:scale(.96)}to{transform:scale(1.05)}}
 
-    .player{position:absolute;width:46px;height:58px;margin-left:-23px;margin-top:-45px;z-index:5;transition-property:left,top;transition-timing-function:linear;filter:drop-shadow(0 3px 2px rgba(49,67,77,.22));pointer-events:none}
+    .player{position:absolute;width:46px;height:58px;margin-left:-23px;margin-top:-45px;z-index:6;transition-property:left,top;transition-timing-function:linear;filter:drop-shadow(0 3px 2px rgba(49,67,77,.22));pointer-events:none}
     .player.walking{animation:bob .25s ease-in-out infinite alternate}
     @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
     .hood{position:absolute;left:5px;top:0;width:36px;height:35px;border-radius:50% 50% 46% 46%;background:#d76d83;border:2px solid #7d4855;z-index:3}
@@ -59,7 +63,7 @@
     .leg{position:absolute;top:51px;width:8px;height:7px;border-radius:0 0 4px 4px;background:#554b50;z-index:1}
     .leg.left{left:12px}.leg.right{right:12px}
 
-    .pickup-ring{position:absolute;width:54px;height:54px;margin-left:-27px;margin-top:-27px;border:2px solid rgba(79,128,153,.55);border-radius:50%;z-index:2;pointer-events:none;animation:ring .65s ease-out infinite;display:none}
+    .pickup-ring{position:absolute;width:54px;height:54px;margin-left:-27px;margin-top:-27px;border:2px solid rgba(79,128,153,.55);border-radius:50%;z-index:3;pointer-events:none;animation:ring .65s ease-out infinite;display:none}
     .pickup-ring.show{display:block}
     @keyframes ring{from{transform:scale(.65);opacity:.8}to{transform:scale(1.15);opacity:0}}
 
@@ -68,7 +72,6 @@
     .menu-btn{min-height:50px;padding:6px;border:1px solid #9eb7c5;border-radius:14px;background:#fff;color:#294352;font-size:17px;font-weight:900}
     .menu-btn:active{transform:translateY(1px);background:#edf6fb}
     .menu-btn.fire{background:#35596d;color:#fff;border-color:#35596d}
-    .menu-btn.fire[disabled]{opacity:.45}
 
     .modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,42,52,.42)}
     .modal.open{display:flex}
@@ -80,20 +83,10 @@
     .item-list{display:grid;gap:8px}
     .item-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:11px;border:1px solid #cadae3;border-radius:14px;background:#fff;font-size:17px}
     .item-row .icon{font-size:26px;text-align:center}
-    .item-row strong{font-size:18px}
-    .item-row .count{font-size:20px;font-weight:900}
+    .item-row strong{font-size:18px}.item-row .count{font-size:20px;font-weight:900}
     .empty-note{font-size:17px;line-height:1.5;color:#607784;text-align:center;padding:12px}
 
-    @media(max-width:390px){
-      .shell{padding-left:6px;padding-right:6px;gap:5px}
-      .title{font-size:19px}
-      .info-row{gap:4px}
-      .info{padding-left:2px;padding-right:2px}
-      .tree{font-size:34px}
-      .ground-item{width:42px;height:42px;font-size:25px}
-      .message{min-height:44px}
-      .menu-btn{min-height:47px}
-    }
+    @media(max-width:390px){.shell{padding-left:6px;padding-right:6px;gap:5px}.title{font-size:19px}.info-row{gap:4px}.info{padding-left:2px;padding-right:2px}.message{min-height:44px}.menu-btn{min-height:47px}.exit{min-width:86px;padding-left:8px;padding-right:8px}}
   </style>
 </head>
 <body>
@@ -112,41 +105,24 @@
     </section>
 
     <section class="field-wrap">
-      <div id="field" class="field" aria-label="雪原。タップした場所へ移動します。">
-        <div class="area-label">雪山・針葉樹林</div>
-
-        <div class="tree" style="left:4%;top:13%">🌲</div>
-        <div class="tree small" style="left:23%;top:6%">🌲</div>
-        <div class="tree" style="right:4%;top:15%">🌲</div>
-        <div class="tree small" style="right:22%;top:36%">🌲</div>
-        <div class="tree" style="left:5%;bottom:9%">🌲</div>
-        <div class="tree small" style="left:31%;bottom:25%">🌲</div>
-        <div class="tree" style="right:7%;bottom:8%">🌲</div>
-
-        <button class="ground-item" data-id="b1" data-kind="branch" style="left:18%;top:22%" aria-label="枝">🪾</button>
-        <button class="ground-item" data-id="s1" data-kind="stone" style="left:55%;top:17%" aria-label="小石">🪨</button>
-        <button class="ground-item" data-id="b2" data-kind="branch" style="left:40%;top:41%" aria-label="枝">🪾</button>
-        <button class="ground-item" data-id="s2" data-kind="stone" style="left:72%;top:44%" aria-label="小石">🪨</button>
-        <button class="ground-item" data-id="s3" data-kind="stone" style="left:17%;top:63%" aria-label="小石">🪨</button>
-        <button class="ground-item" data-id="b3" data-kind="branch" style="left:55%;top:71%" aria-label="枝">🪾</button>
-        <button class="ground-item" data-id="s4" data-kind="stone" style="left:76%;top:74%" aria-label="小石">🪨</button>
-
+      <div id="field" class="field area-forest" aria-label="雪山フィールド。タップした場所へ移動します。">
+        <div id="areaLabel" class="area-label">雪山・針葉樹林</div>
+        <div id="decorLayer"></div>
+        <div id="itemLayer"></div>
+        <div id="exitLayer"></div>
         <div id="pickupRing" class="pickup-ring" aria-hidden="true"></div>
         <div id="campfire" class="campfire" hidden aria-hidden="true">🔥</div>
-
         <div id="player" class="player" aria-label="主人公">
-          <div class="hood"></div>
-          <div class="hair"></div>
+          <div class="hood"></div><div class="hair"></div>
           <div class="eye left"></div><div class="eye right"></div>
           <div class="cheek left"></div><div class="cheek right"></div>
-          <div class="scarf"></div>
-          <div class="coat"></div>
+          <div class="scarf"></div><div class="coat"></div>
           <div class="leg left"></div><div class="leg right"></div>
         </div>
       </div>
     </section>
 
-    <div id="message" class="message" aria-live="polite">雪の上の枝や小石をタップすると、そこまで歩いて拾います。</div>
+    <div id="message" class="message" aria-live="polite">雪の上を調べて、生き残るための物を集めましょう。</div>
 
     <nav class="bottom-menu" aria-label="メニュー">
       <button id="itemBtn" class="menu-btn" type="button">🎒 ITEM</button>
@@ -157,10 +133,7 @@
 
   <div id="itemModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="itemTitle">
     <section class="modal-card">
-      <header class="modal-head">
-        <h2 id="itemTitle">ITEM</h2>
-        <button id="closeItem" class="close-btn" type="button" aria-label="閉じる">×</button>
-      </header>
+      <header class="modal-head"><h2 id="itemTitle">ITEM</h2><button id="closeItem" class="close-btn" type="button" aria-label="閉じる">×</button></header>
       <p class="pause-note">ITEMを開いている間、ゲーム内時間は止まります。</p>
       <div id="itemList" class="item-list"></div>
     </section>
@@ -170,9 +143,47 @@
     const SAVE_KEY='englishGameSurvivalSaveV2';
     const PASSIVE_GAME_SECONDS=5;
     const MOVE_SECONDS_PER_PIXEL=.55;
+    const AREA_CHANGE_SECONDS=120;
     const START_TIME_SECONDS=8*60*60;
 
+    const AREAS={
+      forest:{
+        name:'雪山・針葉樹林',className:'area-forest',cold:'寒い',description:'針葉樹が密集しています。枝を集めやすく、風も少し弱い場所です。',
+        decor:[['🌲',8,18,40],['🌲',26,9,34],['🌲',89,20,42],['🌲',78,48,34],['🌲',9,78,42],['🌲',33,67,34],['🌲',90,82,40]],
+        items:[['b1','branch','🪾',22,27],['s1','stone','🪨',59,21],['b2','branch','🪾',43,45],['s2','stone','🪨',73,49],['s3','stone','🪨',20,64],['b3','branch','🪾',58,73],['s4','stone','🪨',78,76]],
+        exits:[
+          {label:'↑ 雪原へ',to:'snowfield',x:50,y:11,enterX:50,enterY:87},
+          {label:'凍った川 →',to:'river',x:86,y:58,enterX:13,enterY:58}
+        ]
+      },
+      snowfield:{
+        name:'吹きさらしの雪原',className:'area-snowfield',cold:'とても寒い',description:'木が少なく、風を遮るものがありません。遠くまで見渡せます。',
+        decor:[['❄️',16,23,24],['❄️',74,17,22],['🌲',8,78,32],['🌲',91,70,31],['❄️',55,62,20]],
+        items:[['s1','stone','🪨',28,34],['b1','branch','🪾',69,42],['s2','stone','🪨',55,70]],
+        exits:[
+          {label:'↑ 岩場へ',to:'rock',x:50,y:11,enterX:50,enterY:87},
+          {label:'↓ 針葉樹林',to:'forest',x:50,y:89,enterX:50,enterY:14}
+        ]
+      },
+      river:{
+        name:'凍った川',className:'area-river',cold:'かなり寒い',description:'厚い氷に覆われた川です。岸には流木や小石が残っています。',
+        decor:[['🧊',42,24,28],['🧊',58,57,30],['🌲',8,20,35],['🌲',91,79,34],['🧊',47,80,24]],
+        items:[['b1','branch','🪾',27,32],['s1','stone','🪨',72,30],['b2','branch','🪾',67,69],['s2','stone','🪨',24,72]],
+        exits:[{label:'← 針葉樹林',to:'forest',x:12,y:55,enterX:87,enterY:55}]
+      },
+      rock:{
+        name:'風の弱い岩場',className:'area-rock',cold:'寒い',description:'大きな岩が風を遮っています。石を集めやすい場所です。',
+        decor:[['🪨',12,25,42],['🪨',84,26,48],['🪨',18,75,38],['🌲',88,75,31],['🪨',70,61,34]],
+        items:[['s1','stone','🪨',34,25],['s2','stone','🪨',62,37],['s3','stone','🪨',39,65],['b1','branch','🪾',70,76]],
+        exits:[{label:'↓ 雪原へ',to:'snowfield',x:50,y:89,enterX:50,enterY:14}]
+      }
+    };
+
     const field=document.getElementById('field');
+    const areaLabel=document.getElementById('areaLabel');
+    const decorLayer=document.getElementById('decorLayer');
+    const itemLayer=document.getElementById('itemLayer');
+    const exitLayer=document.getElementById('exitLayer');
     const player=document.getElementById('player');
     const pickupRing=document.getElementById('pickupRing');
     const campfire=document.getElementById('campfire');
@@ -182,289 +193,122 @@
     const fireBtn=document.getElementById('fireBtn');
     const params=new URLSearchParams(location.search);
 
-    const defaultState={
-      xPct:50,
-      yPct:85,
-      branch:0,
-      stone:0,
-      food:0,
-      fire:false,
-      fireXPct:null,
-      fireYPct:null,
-      collected:[],
-      gameSeconds:START_TIME_SECONDS
-    };
-
-    let state={...defaultState};
-    let moving=false;
-    let menuOpen=false;
-    let moveTimer=null;
-    let saveTick=0;
+    const defaultState={currentArea:'forest',xPct:50,yPct:85,branch:0,stone:0,food:0,collected:[],campfires:{},gameSeconds:START_TIME_SECONDS};
+    let state={...defaultState,campfires:{}};
+    let moving=false,menuOpen=false,moveTimer=null,saveTick=0;
 
     function load(){
-      if(params.get('new')==='1'){
-        try{localStorage.removeItem(SAVE_KEY)}catch(e){}
-        return;
-      }
+      if(params.get('new')==='1'){try{localStorage.removeItem(SAVE_KEY)}catch(e){};return}
       try{
         const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
-        if(saved&&typeof saved==='object')state={...defaultState,...saved};
-        if(state.fire&&(state.fireXPct===null||state.fireYPct===null)){
-          state.fireXPct=state.xPct;
-          state.fireYPct=state.yPct;
+        if(saved&&typeof saved==='object'){
+          state={...defaultState,...saved,campfires:{...(saved.campfires||{})}};
+          if(!AREAS[state.currentArea])state.currentArea='forest';
+          if(Array.isArray(saved.collected))state.collected=saved.collected.map(id=>String(id).includes(':')?id:'forest:'+id);
+          if(saved.fire&&!state.campfires.forest){state.campfires.forest={xPct:saved.fireXPct??50,yPct:saved.fireYPct??70}}
         }
       }catch(e){}
     }
-
-    function save(){
-      try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}
-    }
-
+    function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
     function setMessage(text){message.textContent=text}
+    function area(){return AREAS[state.currentArea]}
+    function itemKey(id){return state.currentArea+':'+id}
 
-    function formatDuration(total){
-      total=Math.max(0,Math.round(total));
-      const m=Math.floor(total/60);
-      const s=total%60;
-      if(m===0)return s+'秒';
-      if(s===0)return m+'分';
-      return m+'分'+s+'秒';
-    }
+    function formatDuration(total){total=Math.max(0,Math.round(total));const m=Math.floor(total/60),s=total%60;if(!m)return s+'秒';return s?m+'分'+s+'秒':m+'分'}
+    function advanceTime(seconds){state.gameSeconds+=Math.max(0,Math.round(seconds));renderClock()}
+    function renderClock(){const total=Math.floor(state.gameSeconds),day=Math.floor(total/86400)+1,sec=((total%86400)+86400)%86400,h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;document.querySelector('.info.time small').textContent=day+'日目';document.getElementById('clock').textContent=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':')}
 
-    function renderClock(){
-      const total=Math.floor(state.gameSeconds);
-      const day=Math.floor(total/86400)+1;
-      const secInDay=((total%86400)+86400)%86400;
-      const h=Math.floor(secInDay/3600);
-      const m=Math.floor((secInDay%3600)/60);
-      const s=secInDay%60;
-      document.querySelector('.info.time small').textContent=day+'日目';
-      document.getElementById('clock').textContent=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
-    }
-
-    function advanceTime(seconds){
-      state.gameSeconds+=Math.max(0,Math.round(seconds));
-      renderClock();
-    }
-
-    function renderPlayer(){
-      const rect=field.getBoundingClientRect();
-      player.style.left=(rect.width*state.xPct/100)+'px';
-      player.style.top=(rect.height*state.yPct/100)+'px';
-    }
-
-    function renderCampfire(){
-      if(!state.fire||state.fireXPct===null||state.fireYPct===null){
-        campfire.hidden=true;
-        return;
-      }
-      const rect=field.getBoundingClientRect();
-      campfire.hidden=false;
-      campfire.style.left=(rect.width*state.fireXPct/100)+'px';
-      campfire.style.top=(rect.height*state.fireYPct/100)+'px';
-    }
-
-    function renderItems(){
-      document.querySelectorAll('.ground-item').forEach(el=>{
-        el.classList.toggle('hidden',state.collected.includes(el.dataset.id));
-      });
-    }
-
-    function renderStatus(){
-      document.getElementById('warmth').textContent=state.fire?'暖かい':'寒い';
-      document.getElementById('hunger').textContent=state.food>=2?'少し安心':'平気';
-      document.getElementById('fireState').textContent=state.fire?'あり':'なし';
-      fireBtn.disabled=state.fire;
-      fireBtn.textContent=state.fire?'🔥 燃焼中':'🔥 焚き火';
-    }
-
-    function renderInventory(){
-      const rows=[];
-      if(state.branch>0)rows.push(`<div class="item-row"><span class="icon">🪾</span><strong>枝</strong><span class="count">× ${state.branch}</span></div>`);
-      if(state.stone>0)rows.push(`<div class="item-row"><span class="icon">🪨</span><strong>小石</strong><span class="count">× ${state.stone}</span></div>`);
-      if(state.food>0)rows.push(`<div class="item-row"><span class="icon">🫐</span><strong>実</strong><span class="count">× ${state.food}</span></div>`);
-      itemList.innerHTML=rows.length?rows.join(''):'<div class="empty-note">まだ何も持っていません。</div>';
-    }
-
-    function render(){
-      renderPlayer();
+    function renderArea(){
+      const a=area();
+      field.className='field '+a.className;
+      areaLabel.textContent=a.name;
+      decorLayer.innerHTML=a.decor.map(([icon,x,y,size])=>`<span class="decor" style="left:${x}%;top:${y}%;font-size:${size}px;transform:translate(-50%,-50%)">${icon}</span>`).join('');
+      itemLayer.innerHTML=a.items.filter(([id])=>!state.collected.includes(itemKey(id))).map(([id,kind,icon,x,y])=>`<button class="ground-item" data-id="${id}" data-kind="${kind}" data-x="${x}" data-y="${y}" style="left:${x}%;top:${y}%" aria-label="${kind==='branch'?'枝':'小石'}">${icon}</button>`).join('');
+      exitLayer.innerHTML=a.exits.map((e,i)=>`<button class="exit" data-exit="${i}" style="left:${e.x}%;top:${e.y}%">${e.label}</button>`).join('');
       renderCampfire();
-      renderItems();
       renderStatus();
-      renderClock();
-      if(menuOpen)renderInventory();
     }
 
-    function fieldPointFromEvent(e){
-      const rect=field.getBoundingClientRect();
-      const x=Math.max(24,Math.min(rect.width-24,e.clientX-rect.left));
-      const y=Math.max(55,Math.min(rect.height-18,e.clientY-rect.top));
-      return{x,y,xPct:x/rect.width*100,yPct:y/rect.height*100};
+    function renderPlayer(){const rect=field.getBoundingClientRect();player.style.left=rect.width*(state.xPct/100)+'px';player.style.top=rect.height*(state.yPct/100)+'px'}
+    function renderCampfire(){const fire=state.campfires[state.currentArea];if(!fire){campfire.hidden=true;return}campfire.hidden=false;campfire.style.left=fire.xPct+'%';campfire.style.top=fire.yPct+'%'}
+    function distancePct(a,b){return Math.hypot(a.xPct-b.xPct,a.yPct-b.yPct)}
+    function renderStatus(){
+      const fire=state.campfires[state.currentArea];
+      const nearFire=fire&&distancePct({xPct:state.xPct,yPct:state.yPct},fire)<18;
+      document.getElementById('warmth').textContent=nearFire?'暖かい':area().cold;
+      document.getElementById('hunger').textContent=state.food>=2?'少し安心':'平気';
+      document.getElementById('fireState').textContent=fire?'あり':'なし';
+      fireBtn.textContent=fire?'🔥 火あり':'🔥 焚き火';
     }
+    function renderInventory(){const rows=[];if(state.branch>0)rows.push(`<div class="item-row"><span class="icon">🪾</span><strong>枝</strong><span class="count">× ${state.branch}</span></div>`);if(state.stone>0)rows.push(`<div class="item-row"><span class="icon">🪨</span><strong>小石</strong><span class="count">× ${state.stone}</span></div>`);if(state.food>0)rows.push(`<div class="item-row"><span class="icon">🫐</span><strong>実</strong><span class="count">× ${state.food}</span></div>`);itemList.innerHTML=rows.length?rows.join(''):'<div class="empty-note">まだ何も持っていません。</div>'}
+    function render(){renderArea();renderPlayer();renderClock();if(menuOpen)renderInventory()}
 
-    function getPlayerPixel(){
-      const rect=field.getBoundingClientRect();
-      return{x:rect.width*state.xPct/100,y:rect.height*state.yPct/100};
-    }
-
-    function itemTarget(el){
-      const fieldRect=field.getBoundingClientRect();
-      const rect=el.getBoundingClientRect();
-      const x=rect.left-fieldRect.left+rect.width/2;
-      const y=rect.top-fieldRect.top+rect.height/2+14;
-      return{x,y,xPct:x/fieldRect.width*100,yPct:y/fieldRect.height*100};
-    }
-
-    function showTargetRing(target){
-      pickupRing.style.left=target.x+'px';
-      pickupRing.style.top=target.y+'px';
-      pickupRing.classList.add('show');
-    }
-
+    function getPlayerPixel(){const r=field.getBoundingClientRect();return{x:r.width*state.xPct/100,y:r.height*state.yPct/100}}
+    function targetFromPct(xPct,yPct){const r=field.getBoundingClientRect();return{x:r.width*xPct/100,y:r.height*yPct/100,xPct,yPct}}
+    function fieldPointFromEvent(e){const r=field.getBoundingClientRect(),x=Math.max(24,Math.min(r.width-24,e.clientX-r.left)),y=Math.max(55,Math.min(r.height-18,e.clientY-r.top));return{x,y,xPct:x/r.width*100,yPct:y/r.height*100}}
+    function showTargetRing(t){pickupRing.style.left=t.x+'px';pickupRing.style.top=t.y+'px';pickupRing.classList.add('show')}
     function hideTargetRing(){pickupRing.classList.remove('show')}
 
-    function moveTo(target,collectEl=null){
-      if(menuOpen)return;
+    function moveTo(target,onArrive=null,showRing=false){
+      if(menuOpen||moving)return;
       if(moveTimer)clearTimeout(moveTimer);
-
-      const from=getPlayerPixel();
-      const distance=Math.hypot(target.x-from.x,target.y-from.y);
-      if(distance<3){
-        if(collectEl)collectItem(collectEl);
-        return;
-      }
-
+      const from=getPlayerPixel(),distance=Math.hypot(target.x-from.x,target.y-from.y);
+      if(distance<3){if(onArrive)onArrive();return}
       moving=true;
       const travelSeconds=Math.max(1,Math.round(distance*MOVE_SECONDS_PER_PIXEL));
       const animMs=Math.max(260,Math.min(1400,distance*4.2));
-
-      player.classList.add('walking');
-      player.style.transitionDuration=animMs+'ms';
-      state.xPct=target.xPct;
-      state.yPct=target.yPct;
-      renderPlayer();
-      if(collectEl)showTargetRing(target);else hideTargetRing();
+      player.classList.add('walking');player.style.transitionDuration=animMs+'ms';
+      state.xPct=target.xPct;state.yPct=target.yPct;renderPlayer();renderStatus();
+      showRing?showTargetRing(target):hideTargetRing();
       setMessage('雪の上を歩いています……');
-
-      moveTimer=setTimeout(()=>{
-        moving=false;
-        player.classList.remove('walking');
-        hideTargetRing();
-        advanceTime(travelSeconds);
-        if(collectEl){
-          collectItem(collectEl,travelSeconds);
-        }else{
-          setMessage(formatDuration(travelSeconds)+'歩きました。');
-          checkNearbyItem();
-        }
-        save();
-      },animMs);
+      moveTimer=setTimeout(()=>{moving=false;player.classList.remove('walking');hideTargetRing();advanceTime(travelSeconds);if(onArrive)onArrive(travelSeconds);else{setMessage(formatDuration(travelSeconds)+'歩きました。');renderStatus()}save()},animMs);
     }
 
     function collectItem(el,travelSeconds=0){
-      if(!el||state.collected.includes(el.dataset.id))return;
-      const kind=el.dataset.kind;
-      state.collected.push(el.dataset.id);
-      if(kind==='branch'){
-        state.branch++;
-        setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'枝を1本拾いました。');
-      }else if(kind==='stone'){
-        state.stone++;
-        setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'小石を1個拾いました。');
-      }
-      renderItems();
-      renderStatus();
-      save();
+      const id=el.dataset.id,key=itemKey(id);if(state.collected.includes(key))return;
+      state.collected.push(key);
+      if(el.dataset.kind==='branch'){state.branch++;setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'枝を1本拾いました。')}
+      else{state.stone++;setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'小石を1個拾いました。')}
+      renderArea();renderPlayer();save();
     }
 
-    function checkNearbyItem(){
-      const p=getPlayerPixel();
-      let nearest=null;
-      let nearestDist=9999;
-      document.querySelectorAll('.ground-item:not(.hidden)').forEach(el=>{
-        const t=itemTarget(el);
-        const d=Math.hypot(t.x-p.x,t.y-p.y);
-        if(d<32&&d<nearestDist){nearest=el;nearestDist=d}
-      });
-      if(nearest)collectItem(nearest);
+    function changeArea(exit,travelSeconds){
+      const oldName=area().name;
+      advanceTime(AREA_CHANGE_SECONDS);
+      state.currentArea=exit.to;state.xPct=exit.enterX;state.yPct=exit.enterY;
+      render();
+      setMessage(oldName+'から「'+area().name+'」へ移動しました。移動に'+formatDuration(travelSeconds+AREA_CHANGE_SECONDS)+'かかりました。');
+      save();
     }
 
     field.addEventListener('click',e=>{
       const item=e.target.closest('.ground-item');
-      if(item){
-        e.preventDefault();
-        e.stopPropagation();
-        moveTo(itemTarget(item),item);
-        return;
-      }
+      if(item){e.preventDefault();e.stopPropagation();moveTo(targetFromPct(Number(item.dataset.x),Number(item.dataset.y)),t=>collectItem(item,t),true);return}
+      const exitBtn=e.target.closest('.exit');
+      if(exitBtn){e.preventDefault();e.stopPropagation();const ex=area().exits[Number(exitBtn.dataset.exit)];moveTo(targetFromPct(ex.x,ex.y),t=>changeArea(ex,t),true);return}
       moveTo(fieldPointFromEvent(e));
     });
 
-    document.getElementById('itemBtn').addEventListener('click',()=>{
-      if(moving)return;
-      menuOpen=true;
-      renderInventory();
-      itemModal.classList.add('open');
-    });
-
-    function closeInventory(){
-      menuOpen=false;
-      itemModal.classList.remove('open');
-      save();
-    }
-
+    document.getElementById('itemBtn').addEventListener('click',()=>{if(moving)return;menuOpen=true;renderInventory();itemModal.classList.add('open')});
+    function closeInventory(){menuOpen=false;itemModal.classList.remove('open');save()}
     document.getElementById('closeItem').addEventListener('click',closeInventory);
     itemModal.addEventListener('click',e=>{if(e.target===itemModal)closeInventory()});
 
-    document.getElementById('lookBtn').addEventListener('click',()=>{
-      if(moving||menuOpen)return;
-      advanceTime(30);
-      const texts=[
-        '針葉樹の間に、まだ使えそうな物が落ちています。',
-        '雪は深く、歩くのに時間がかかります。',
-        '風が冷たいです。早めに火を確保した方がよさそうです。',
-        '白い雪原が続いています。足元には枝や小石があります。'
-      ];
-      setMessage(texts[Math.floor(Math.random()*texts.length)]+'（30秒経過）');
-      save();
-    });
+    document.getElementById('lookBtn').addEventListener('click',()=>{if(moving||menuOpen)return;advanceTime(30);const a=area();const extras={forest:['木の根元に枝が落ちています。','木々が風を少し遮っています。'],snowfield:['風が強く、足跡がすぐ薄れていきます。','遠くまで白い雪原が続いています。'],river:['氷の下に水の流れが見えます。','岸辺に流木が引っかかっています。'],rock:['岩陰は少し風が弱いです。','足元には大小の石があります。']};const arr=[a.description,...extras[state.currentArea]];setMessage(arr[Math.floor(Math.random()*arr.length)]+'（30秒経過）');save()});
 
     fireBtn.addEventListener('click',()=>{
       if(moving||menuOpen)return;
-      if(state.fire){setMessage('焚き火はすでに燃えています。');return}
-      if(state.branch<3||state.stone<4){
-        const need=[];
-        if(state.branch<3)need.push('枝あと'+(3-state.branch)+'本');
-        if(state.stone<4)need.push('小石あと'+(4-state.stone)+'個');
-        setMessage('材料が足りません。'+need.join('、')+'必要です。');
-        return;
-      }
-
-      state.branch-=3;
-      state.stone-=4;
-      state.fire=true;
-      state.fireXPct=state.xPct;
-      state.fireYPct=state.yPct;
-      advanceTime(120);
-      setMessage('今いる場所に焚き火を作りました。（2分経過）');
-      renderCampfire();
-      renderStatus();
-      save();
+      if(state.campfires[state.currentArea]){setMessage('この場所には、すでに焚き火があります。');return}
+      if(state.branch<3||state.stone<4){const need=[];if(state.branch<3)need.push('枝あと'+(3-state.branch)+'本');if(state.stone<4)need.push('小石あと'+(4-state.stone)+'個');setMessage('材料が足りません。'+need.join('、')+'必要です。');return}
+      state.branch-=3;state.stone-=4;state.campfires[state.currentArea]={xPct:state.xPct,yPct:state.yPct};advanceTime(120);renderCampfire();renderStatus();setMessage('この場所に焚き火を作りました。（2分経過）');save();
     });
 
-    setInterval(()=>{
-      if(document.visibilityState!=='visible'||menuOpen||moving)return;
-      advanceTime(PASSIVE_GAME_SECONDS);
-      saveTick++;
-      if(saveTick>=5){saveTick=0;save()}
-    },1000);
-
+    setInterval(()=>{if(document.visibilityState!=='visible'||menuOpen||moving)return;advanceTime(PASSIVE_GAME_SECONDS);saveTick++;if(saveTick>=5){saveTick=0;save()}},1000);
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
     window.addEventListener('beforeunload',save);
     window.addEventListener('resize',()=>{renderPlayer();renderCampfire()});
 
-    load();
-    render();
+    load();render();setMessage(area().description+' 出口をタップすると別の場所へ歩いて移動できます。');
   </script>
 </body>
 </html>
