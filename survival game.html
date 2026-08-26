@@ -3,208 +3,542 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#eaf4fa">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="theme-color" content="#eef7ff">
   <title>雪山サバイバル</title>
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#263845;background:#eaf4fa}
-    body{min-height:100dvh;background:linear-gradient(180deg,#f9fdff 0%,#edf6fb 48%,#dceaf2 100%)}
+    html,body{
+      margin:0;
+      min-height:100%;
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+      color:#243746;
+      background:#dfeaf2;
+    }
+    body{
+      min-height:100dvh;
+      background:linear-gradient(180deg,#eff7fc 0%,#e7f1f7 100%);
+    }
     button,a{font:inherit}
-    button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
-    .shell{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
-    .topbar{display:grid;grid-template-columns:48px 1fr 48px;align-items:center}
-    .topbar h1{margin:0;text-align:center;font-size:22px;line-height:1.25}
-    .back{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid #b7cbd7;border-radius:13px;background:#fff;color:#304957;text-decoration:none;font-size:22px;font-weight:800}
-    .scene{position:relative;min-height:210px;padding:20px 18px;border:1px solid #b8ccd7;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#d9edf7 0 53%,#f8fcfe 53% 100%);box-shadow:0 8px 22px rgba(38,67,84,.08)}
-    .mountains{position:absolute;left:0;right:0;top:48px;text-align:center;font-size:72px;letter-spacing:-18px;opacity:.82;pointer-events:none}
-    .trees{position:absolute;left:10px;right:10px;bottom:14px;display:flex;justify-content:space-around;font-size:47px;pointer-events:none}
-    .fire{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:54px;filter:drop-shadow(0 0 13px rgba(255,132,40,.45))}
-    .scene-text{position:relative;z-index:2;width:min(330px,88%);padding:12px 14px;border-radius:15px;background:rgba(255,255,255,.88);box-shadow:0 4px 12px rgba(38,67,84,.06)}
-    .scene-text strong{display:block;margin-bottom:5px;font-size:20px}
-    .scene-text p{margin:0;font-size:17px;line-height:1.55;color:#526a77}
-    .status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .status-card{padding:9px 6px;border:1px solid #c0d2dc;border-radius:14px;background:#fff;text-align:center}
-    .status-card small{display:block;margin-bottom:2px;font-size:17px;color:#607783}
-    .status-card strong{font-size:18px}
-    .message{min-height:58px;padding:11px 13px;border:1px solid #bfd1dc;border-radius:15px;background:#fff;font-size:17px;line-height:1.55;color:#3d5563}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-    .action-btn{min-height:58px;padding:9px;border:1px solid #9fb7c5;border-radius:16px;background:#fff;color:#294352;font-size:17px;font-weight:800;box-shadow:0 4px 12px rgba(38,67,84,.06)}
-    .action-btn:active{transform:translateY(1px);background:#edf6fb}
-    .action-btn.fire-btn{grid-column:1/-1;background:#35596d;color:#fff;border-color:#35596d}
-    .action-btn.fire-btn[disabled]{opacity:.45}
-    .inventory{padding:14px;border:1px solid #bfd1dc;border-radius:18px;background:rgba(255,255,255,.86)}
-    .inventory h2{margin:0 0 10px;font-size:19px}
-    .items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .item{padding:9px 5px;border-radius:13px;background:#eef6fa;text-align:center;font-size:17px;line-height:1.4}
-    .item strong{display:block;font-size:18px}
-    .goal{margin:0;padding:12px 13px;border-radius:15px;background:#f9fcfe;border:1px dashed #a9c1cf;font-size:17px;line-height:1.55;text-align:center;color:#526b79}
-    @media(max-width:370px){.shell{padding-left:10px;padding-right:10px}.scene{min-height:195px}.mountains{font-size:62px}.trees{font-size:42px}.action-btn{font-size:17px}}
+    button{
+      touch-action:manipulation;
+      -webkit-user-select:none;
+      user-select:none;
+    }
+
+    .shell{
+      width:min(100%,540px);
+      min-height:100dvh;
+      margin:0 auto;
+      padding:calc(12px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .topbar{
+      display:grid;
+      grid-template-columns:48px 1fr 48px;
+      align-items:center;
+      gap:8px;
+    }
+    .back{
+      width:44px;
+      height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #b8cad6;
+      border-radius:14px;
+      background:#fff;
+      color:#304959;
+      text-decoration:none;
+      font-size:22px;
+      font-weight:800;
+    }
+    .title{
+      margin:0;
+      text-align:center;
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .field-wrap{
+      border:2px solid #b8cdd9;
+      border-radius:18px;
+      background:#f6fbff;
+      overflow:hidden;
+      box-shadow:0 8px 20px rgba(45,75,92,.08);
+    }
+
+    .field-head{
+      padding:8px 10px;
+      border-bottom:1px solid #d7e5ee;
+      background:#eef7fc;
+      font-size:17px;
+      font-weight:800;
+      text-align:center;
+    }
+
+    .field{
+      position:relative;
+      width:100%;
+      height:420px;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.95) 0 38px, transparent 39px),
+        radial-gradient(circle at 80% 22%, rgba(255,255,255,.92) 0 44px, transparent 45px),
+        radial-gradient(circle at 30% 80%, rgba(255,255,255,.88) 0 52px, transparent 53px),
+        radial-gradient(circle at 70% 72%, rgba(255,255,255,.88) 0 46px, transparent 47px),
+        linear-gradient(180deg,#fafdff 0%,#f1f8fd 100%);
+    }
+
+    .snow-label{
+      position:absolute;
+      left:50%;
+      top:10px;
+      transform:translateX(-50%);
+      z-index:3;
+      padding:6px 10px;
+      border-radius:12px;
+      background:rgba(255,255,255,.92);
+      border:1px solid #d6e5ee;
+      font-size:17px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .tap-guide{
+      position:absolute;
+      left:50%;
+      bottom:10px;
+      transform:translateX(-50%);
+      z-index:3;
+      padding:6px 10px;
+      border-radius:12px;
+      background:rgba(255,255,255,.92);
+      border:1px solid #d6e5ee;
+      font-size:17px;
+      white-space:nowrap;
+    }
+
+    .tree{
+      position:absolute;
+      font-size:40px;
+      line-height:1;
+      filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));
+      pointer-events:none;
+    }
+
+    .player{
+      position:absolute;
+      width:34px;
+      height:34px;
+      margin-left:-17px;
+      margin-top:-17px;
+      border-radius:50%;
+      background:#f7c7cf;
+      border:3px solid #7a4856;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+      transition:left .22s linear, top .22s linear;
+      z-index:4;
+    }
+    .player::before,
+    .player::after{
+      content:"";
+      position:absolute;
+      top:10px;
+      width:4px;
+      height:4px;
+      border-radius:50%;
+      background:#2d2230;
+    }
+    .player::before{left:8px}
+    .player::after{right:8px}
+
+    .item{
+      position:absolute;
+      min-width:34px;
+      min-height:34px;
+      padding:2px 4px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      background:transparent;
+      font-size:24px;
+      line-height:1;
+      z-index:2;
+    }
+    .item.branch{filter:drop-shadow(0 1px 1px rgba(0,0,0,.12))}
+    .item.stone{filter:drop-shadow(0 1px 1px rgba(0,0,0,.14))}
+    .item.hidden{display:none}
+
+    .hud{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+    .hud-card{
+      padding:10px 6px;
+      border:1px solid #c5d7e2;
+      border-radius:15px;
+      background:#fff;
+      text-align:center;
+    }
+    .hud-card small{
+      display:block;
+      margin-bottom:3px;
+      font-size:17px;
+      color:#5d7380;
+    }
+    .hud-card strong{
+      font-size:18px;
+    }
+
+    .message{
+      min-height:60px;
+      padding:12px 13px;
+      border:1px solid #c5d7e2;
+      border-radius:16px;
+      background:#fff;
+      font-size:17px;
+      line-height:1.55;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .btn{
+      min-height:56px;
+      padding:10px 8px;
+      border:1px solid #9fb8c7;
+      border-radius:16px;
+      background:#fff;
+      color:#2c4554;
+      font-size:17px;
+      font-weight:800;
+    }
+    .btn:active{
+      transform:translateY(1px);
+      background:#eef7fc;
+    }
+    .btn.fire{
+      grid-column:1 / -1;
+      background:#355b70;
+      color:#fff;
+      border-color:#355b70;
+    }
+    .btn.fire[disabled]{
+      opacity:.45;
+    }
+
+    .inventory{
+      padding:13px;
+      border:1px solid #c5d7e2;
+      border-radius:18px;
+      background:#fff;
+    }
+    .inventory h2{
+      margin:0 0 10px;
+      font-size:19px;
+    }
+    .inv-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+    .inv-item{
+      padding:10px 6px;
+      border-radius:14px;
+      background:#eef7fc;
+      text-align:center;
+      font-size:17px;
+      line-height:1.35;
+    }
+    .inv-item strong{
+      display:block;
+      margin-top:4px;
+      font-size:18px;
+    }
+
+    .goal{
+      margin:0;
+      padding:11px 12px;
+      border:1px dashed #a8c2d2;
+      border-radius:15px;
+      background:#f9fcff;
+      text-align:center;
+      font-size:17px;
+      line-height:1.55;
+      color:#516875;
+    }
+
+    @media(max-width:390px){
+      .field{height:380px}
+      .title{font-size:19px}
+    }
   </style>
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
-      <a class="back" href="survival%20game_TOP.html" aria-label="サバイバルトップへ戻る">←</a>
-      <h1>雪山サバイバル</h1>
+      <a class="back" href="survival%20game_TOP.html" aria-label="戻る">←</a>
+      <h1 class="title">雪山サバイバル</h1>
       <span aria-hidden="true"></span>
     </header>
 
-    <section class="scene" aria-label="雪山">
-      <div class="mountains" aria-hidden="true">🏔️🏔️</div>
-      <div class="trees" aria-hidden="true"><span>🌲</span><span>🌲</span><span>🌲</span></div>
-      <div id="fireIcon" class="fire" aria-hidden="true" hidden>🔥</div>
-      <div class="scene-text">
-        <strong id="sceneTitle">雪山・針葉樹林</strong>
-        <p id="sceneDescription">雪の中に、折れた枝や石が見えます。まずは使えそうな物を集めましょう。</p>
+    <section class="field-wrap">
+      <div class="field-head">雪原フィールド</div>
+      <div id="field" class="field" aria-label="雪原">
+        <div class="snow-label">白い雪原をタップして移動</div>
+
+        <div class="tree" style="left:18px; top:56px;">🌲</div>
+        <div class="tree" style="right:18px; top:72px;">🌲</div>
+        <div class="tree" style="left:22px; bottom:56px;">🌲</div>
+        <div class="tree" style="right:22px; bottom:48px;">🌲</div>
+        <div class="tree" style="left:44%; top:140px;">🌲</div>
+
+        <button class="item branch" data-id="b1" data-kind="branch" style="left:82px; top:118px;">🪾</button>
+        <button class="item stone"  data-id="s1" data-kind="stone"  style="left:250px; top:108px;">🪨</button>
+        <button class="item branch" data-id="b2" data-kind="branch" style="left:132px; top:210px;">🪾</button>
+        <button class="item stone"  data-id="s2" data-kind="stone"  style="left:290px; top:210px;">🪨</button>
+        <button class="item stone"  data-id="s3" data-kind="stone"  style="left:92px; top:302px;">🪨</button>
+        <button class="item branch" data-id="b3" data-kind="branch" style="left:250px; top:316px;">🪾</button>
+        <button class="item stone"  data-id="s4" data-kind="stone"  style="left:180px; top:72px;">🪨</button>
+
+        <div id="player" class="player" aria-label="主人公"></div>
+
+        <div class="tap-guide">近づくと自動で拾います</div>
       </div>
     </section>
 
-    <section class="status" aria-label="状態">
-      <div class="status-card"><small>体温</small><strong id="warmth">寒い</strong></div>
-      <div class="status-card"><small>空腹</small><strong id="hunger">平気</strong></div>
-      <div class="status-card"><small>焚き火</small><strong id="fireState">なし</strong></div>
+    <section class="hud" aria-label="状態">
+      <div class="hud-card"><small>体温</small><strong id="warmth">寒い</strong></div>
+      <div class="hud-card"><small>空腹</small><strong id="hunger">平気</strong></div>
+      <div class="hud-card"><small>焚き火</small><strong id="fireState">なし</strong></div>
     </section>
 
-    <div id="message" class="message" aria-live="polite">何も持っていません。周囲を探してみましょう。</div>
+    <div id="message" class="message" aria-live="polite">
+      雪の上に枝や小石が落ちています。タップして近づいてみましょう。
+    </div>
 
-    <section class="actions" aria-label="行動">
-      <button id="pickBranch" class="action-btn" type="button">🌿 枝を拾う</button>
-      <button id="pickStone" class="action-btn" type="button">🪨 石を拾う</button>
-      <button id="findFood" class="action-btn" type="button">🫐 実を探す</button>
-      <button id="lookAround" class="action-btn" type="button">👀 周囲を見る</button>
-      <button id="makeFire" class="action-btn fire-btn" type="button">🔥 焚き火を作る<br>枝3・石4</button>
+    <section class="actions">
+      <button id="lookBtn" class="btn" type="button">👀 周囲を見る</button>
+      <button id="foodBtn" class="btn" type="button">🫐 実を探す</button>
+      <button id="fireBtn" class="btn fire" type="button">🔥 焚き火を作る　枝3・石4</button>
     </section>
 
-    <section class="inventory" aria-label="所持品">
+    <section class="inventory">
       <h2>所持品</h2>
-      <div class="items">
-        <div class="item">🌿 枝<strong id="branchCount">0</strong></div>
-        <div class="item">🪨 石<strong id="stoneCount">0</strong></div>
-        <div class="item">🫐 実<strong id="foodCount">0</strong></div>
+      <div class="inv-grid">
+        <div class="inv-item">🪾 枝<strong id="branchCount">0</strong></div>
+        <div class="inv-item">🪨 小石<strong id="stoneCount">0</strong></div>
+        <div class="inv-item">🫐 実<strong id="foodCount">0</strong></div>
       </div>
     </section>
 
-    <p id="goal" class="goal">最初の目標：枝を3本、石を4個集めて焚き火を作る。</p>
+    <p id="goal" class="goal">
+      最初の目標：枝を3つ、小石を4つ集めて焚き火を作る。
+    </p>
   </main>
 
   <script>
-    const SAVE_KEY='englishGameSurvivalSaveV1';
-    const params=new URLSearchParams(location.search);
+    const SAVE_KEY = 'englishGameSurvivalSaveV1';
+    const field = document.getElementById('field');
+    const playerEl = document.getElementById('player');
+    const messageEl = document.getElementById('message');
 
-    const defaultState={
-      branch:0,
-      stone:0,
-      food:0,
-      fire:false,
-      turns:0
+    const params = new URLSearchParams(location.search);
+
+    const defaultState = {
+      x: 170,
+      y: 250,
+      branch: 0,
+      stone: 0,
+      food: 0,
+      fire: false,
+      collected: []
     };
 
-    let state={...defaultState};
+    let state = {...defaultState};
 
     function load(){
-      if(params.get('new')==='1'){
-        try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+      if(params.get('new') === '1'){
+        try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
         return;
       }
       try{
-        const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
-        if(saved&&typeof saved==='object') state={...defaultState,...saved};
+        const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+        if(saved && typeof saved === 'object'){
+          state = {...defaultState, ...saved};
+        }
       }catch(e){}
     }
 
     function save(){
-      try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+      try{
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      }catch(e){}
     }
 
     function setMessage(text){
-      document.getElementById('message').textContent=text;
+      messageEl.textContent = text;
+    }
+
+    function renderPlayer(){
+      playerEl.style.left = state.x + 'px';
+      playerEl.style.top = state.y + 'px';
+    }
+
+    function renderItems(){
+      document.querySelectorAll('.item').forEach(el => {
+        const id = el.dataset.id;
+        el.classList.toggle('hidden', state.collected.includes(id));
+      });
+    }
+
+    function renderHud(){
+      document.getElementById('branchCount').textContent = state.branch;
+      document.getElementById('stoneCount').textContent = state.stone;
+      document.getElementById('foodCount').textContent = state.food;
+      document.getElementById('fireState').textContent = state.fire ? 'あり' : 'なし';
+      document.getElementById('warmth').textContent = state.fire ? '暖かい' : '寒い';
+      document.getElementById('hunger').textContent = state.food >= 2 ? '少し安心' : '平気';
+
+      const fireBtn = document.getElementById('fireBtn');
+      fireBtn.disabled = state.fire;
+      fireBtn.textContent = state.fire ? '🔥 焚き火が燃えている' : '🔥 焚き火を作る　枝3・石4';
+
+      if(state.fire){
+        document.getElementById('goal').textContent = '最初の目標達成：焚き火を起こした。';
+      }else{
+        document.getElementById('goal').textContent = '最初の目標：枝を3つ、小石を4つ集めて焚き火を作る。';
+      }
     }
 
     function render(){
-      document.getElementById('branchCount').textContent=state.branch;
-      document.getElementById('stoneCount').textContent=state.stone;
-      document.getElementById('foodCount').textContent=state.food;
-      document.getElementById('fireIcon').hidden=!state.fire;
-      document.getElementById('fireState').textContent=state.fire?'あり':'なし';
-      document.getElementById('warmth').textContent=state.fire?'暖かい':'寒い';
-      document.getElementById('hunger').textContent=state.food>=2?'少し安心':'平気';
-
-      const fireBtn=document.getElementById('makeFire');
-      fireBtn.disabled=state.fire;
-      fireBtn.innerHTML=state.fire?'🔥 焚き火が燃えている':'🔥 焚き火を作る<br>枝3・石4';
-
-      if(state.fire){
-        document.getElementById('sceneTitle').textContent='小さな焚き火';
-        document.getElementById('sceneDescription').textContent='火がつきました。凍える心配が少し減りました。次に何をするか考えられそうです。';
-        document.getElementById('goal').textContent='最初の目標達成：焚き火を起こした。';
-      }
+      renderPlayer();
+      renderItems();
+      renderHud();
     }
 
-    function act(){
-      state.turns++;
+    function clamp(v, min, max){
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function movePlayerTo(clientX, clientY){
+      const rect = field.getBoundingClientRect();
+      const x = clamp(clientX - rect.left, 18, rect.width - 18);
+      const y = clamp(clientY - rect.top, 18, rect.height - 18);
+
+      state.x = Math.round(x);
+      state.y = Math.round(y);
+      renderPlayer();
       save();
-      render();
+
+      setTimeout(checkNearbyItems, 230);
     }
 
-    document.getElementById('pickBranch').addEventListener('click',()=>{
-      state.branch++;
-      setMessage('雪の上から、乾いている枝を1本拾いました。');
-      act();
-    });
+    function collectItem(el){
+      const id = el.dataset.id;
+      const kind = el.dataset.kind;
+      if(state.collected.includes(id)) return;
 
-    document.getElementById('pickStone').addEventListener('click',()=>{
-      state.stone++;
-      setMessage('雪から出ている石を1個拾いました。');
-      act();
-    });
+      state.collected.push(id);
 
-    document.getElementById('findFood').addEventListener('click',()=>{
-      const found=Math.random()<0.55;
-      if(found){
-        state.food++;
-        setMessage('雪の少ない木の根元で、小さな実を見つけました。');
-      }else{
-        setMessage('食べられそうな物を探しましたが、今回は見つかりませんでした。');
+      if(kind === 'branch'){
+        state.branch += 1;
+        setMessage('枝を1つ拾いました。');
+      }else if(kind === 'stone'){
+        state.stone += 1;
+        setMessage('小石を1つ拾いました。');
       }
-      act();
+
+      render();
+      save();
+    }
+
+    function checkNearbyItems(){
+      document.querySelectorAll('.item').forEach(el => {
+        if(el.classList.contains('hidden')) return;
+
+        const itemX = parseFloat(el.style.left) + 17;
+        const itemY = parseFloat(el.style.top) + 17;
+        const dx = state.x - itemX;
+        const dy = state.y - itemY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if(dist < 42){
+          collectItem(el);
+        }
+      });
+    }
+
+    field.addEventListener('click', (e) => {
+      if(e.target.classList.contains('item')){
+        const rect = e.target.getBoundingClientRect();
+        movePlayerTo(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return;
+      }
+      movePlayerTo(e.clientX, e.clientY);
     });
 
-    document.getElementById('lookAround').addEventListener('click',()=>{
-      const texts=[
-        '針葉樹が続いています。少し先にも枝が落ちています。',
-        '雪の下から、いくつか石がのぞいています。',
-        '風が強くなっています。火を起こせる場所を作った方がよさそうです。',
-        '木々の向こうは白く霞んでいて、遠くまでは見えません。'
+    document.querySelectorAll('.item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+
+    document.getElementById('lookBtn').addEventListener('click', () => {
+      const texts = [
+        '白い雪が広がっています。近くに枝や小石が見えます。',
+        '針葉樹のそばに、使えそうな物が落ちています。',
+        'このままでは寒いです。まずは焚き火を目指しましょう。',
+        '雪原は静かです。足元をよく見ると拾えそうな物があります。'
       ];
-      setMessage(texts[Math.floor(Math.random()*texts.length)]);
-      act();
+      setMessage(texts[Math.floor(Math.random() * texts.length)]);
     });
 
-    document.getElementById('makeFire').addEventListener('click',()=>{
+    document.getElementById('foodBtn').addEventListener('click', () => {
+      if(Math.random() < 0.55){
+        state.food += 1;
+        setMessage('雪の少ない場所で実を見つけました。');
+        render();
+        save();
+      }else{
+        setMessage('食べられそうな実は見つかりませんでした。');
+      }
+    });
+
+    document.getElementById('fireBtn').addEventListener('click', () => {
       if(state.fire){
-        setMessage('焚き火はすでに燃えています。');
+        setMessage('焚き火はすでにあります。');
         return;
       }
-      if(state.branch<3||state.stone<4){
-        const needBranch=Math.max(0,3-state.branch);
-        const needStone=Math.max(0,4-state.stone);
-        const missing=[];
-        if(needBranch)missing.push('枝あと'+needBranch+'本');
-        if(needStone)missing.push('石あと'+needStone+'個');
-        setMessage('まだ材料が足りません。'+missing.join('、')+'必要です。');
+      if(state.branch < 3 || state.stone < 4){
+        const need = [];
+        if(state.branch < 3) need.push('枝あと' + (3 - state.branch));
+        if(state.stone < 4) need.push('小石あと' + (4 - state.stone));
+        setMessage('材料が足りません。' + need.join('、') + '必要です。');
         return;
       }
-      state.branch-=3;
-      state.stone-=4;
-      state.fire=true;
-      setMessage('石で囲いを作り、枝を組みました。小さな火がつきました。');
-      act();
+
+      state.branch -= 3;
+      state.stone -= 4;
+      state.fire = true;
+
+      setMessage('雪の上に小さな焚き火を作りました。少し暖かくなりました。');
+      render();
+      save();
     });
 
     load();
     render();
-    if(state.fire)setMessage('焚き火が燃れています。ここまでの進行は保存されています。');
+
+    if(state.fire){
+      setMessage('焚き火があります。続きを始めました。');
+    }
   </script>
 </body>
 </html>
