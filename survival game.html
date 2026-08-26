@@ -1,274 +1,701 @@
 <!doctype html>
 <html lang="ja">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雪山サバイバル</title>
+  <meta charset="utf-8">
 
-<style>
-*{
-  box-sizing:border-box;
-}
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
-html,body{
-  margin:0;
-  min-height:100%;
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
-  background:#dfeaf2;
-  color:#263845;
-}
+  <title>雪山サバイバル</title>
 
-body{
-  min-height:100dvh;
-}
+  <style>
 
-.game{
-  width:min(100%,540px);
-  min-height:100dvh;
-  margin:auto;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
+    *{
+      box-sizing:border-box;
+    }
 
-/* 上の情報 */
-.status{
-  display:grid;
-  grid-template-columns:1.3fr 1fr 1fr;
-  gap:6px;
-}
+    html,
+    body{
+      margin:0;
+      width:100%;
+      height:100%;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Hiragino Sans",
+        "Yu Gothic",
+        sans-serif;
 
-.status-box{
-  padding:8px 5px;
-  border:1px solid #b8cad5;
-  border-radius:12px;
-  background:white;
-  text-align:center;
-}
+      background:#e7eaec;
+      color:#202427;
+    }
 
-.status-box small{
-  display:block;
-  font-size:17px;
-}
+    body{
+      min-height:100dvh;
+    }
 
-.status-box strong{
-  display:block;
-  margin-top:3px;
-  font-size:18px;
-}
+    button,
+    a{
+      font:inherit;
+    }
 
-/* 一人称の景色 */
-.scene{
-  position:relative;
-  width:100%;
-  height:500px;
-  overflow:hidden;
-  border:2px solid #b6cbd8;
-  border-radius:17px;
+    button{
+      touch-action:manipulation;
+      -webkit-user-select:none;
+      user-select:none;
+    }
 
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
 
-  /* 画像がまだ無い時の仮背景 */
-  background-color:#edf6fb;
-}
+    /* =========================
+       ゲーム全体
+    ========================= */
 
-.scene-title{
-  position:absolute;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:10;
+    .game{
+      width:min(100%,540px);
+      height:100dvh;
 
-  padding:7px 12px;
-  border-radius:12px;
-  background:rgba(255,255,255,.9);
+      margin:0 auto;
 
-  font-size:18px;
-  font-weight:900;
-  white-space:nowrap;
-}
+      padding:
+        calc(8px + env(safe-area-inset-top))
+        8px
+        calc(8px + env(safe-area-inset-bottom));
 
-/* 景色の中のタップ場所 */
-.hotspot{
-  position:absolute;
-  min-width:70px;
-  min-height:48px;
+      display:flex;
+      flex-direction:column;
 
-  border:1px solid rgba(80,110,125,.7);
-  border-radius:13px;
+      gap:7px;
 
-  background:rgba(255,255,255,.78);
+      overflow:hidden;
+    }
 
-  font-size:17px;
-  font-weight:800;
 
-  color:#294352;
+    /* =========================
+       上部
+    ========================= */
 
-  touch-action:manipulation;
-}
+    .topbar{
+      display:grid;
+      grid-template-columns:44px 1fr 44px;
+      align-items:center;
 
-.hotspot:active{
-  transform:scale(.97);
-}
+      flex:0 0 auto;
+    }
 
-/* 下の文章 */
-.message{
-  min-height:72px;
-  padding:12px;
+    .back{
+      width:42px;
+      height:42px;
 
-  border:1px solid #b8cad5;
-  border-radius:15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-  background:white;
+      border:1px solid #999;
+      border-radius:13px;
 
-  font-size:17px;
-  line-height:1.6;
-}
+      background:#fff;
 
-.menu{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-}
+      color:#222;
+      text-decoration:none;
 
-.menu button{
-  min-height:54px;
+      font-size:22px;
+      font-weight:900;
+    }
 
-  border:1px solid #9fb6c4;
-  border-radius:14px;
+    .title{
+      margin:0;
 
-  background:white;
+      text-align:center;
 
-  font-size:17px;
-  font-weight:900;
-}
+      font-size:20px;
+      font-weight:900;
+    }
 
-/* ITEM */
-.modal{
-  position:fixed;
-  inset:0;
-  display:none;
 
-  align-items:center;
-  justify-content:center;
+    /* =========================
+       ステータス
+    ========================= */
 
-  padding:20px;
+    .status{
+      display:grid;
 
-  background:rgba(20,35,45,.45);
+      grid-template-columns:
+        1.2fr
+        1fr
+        1.4fr;
 
-  z-index:100;
-}
+      gap:5px;
 
-.modal.open{
-  display:flex;
-}
+      flex:0 0 auto;
+    }
 
-.modal-card{
-  width:min(420px,100%);
-  padding:18px;
+    .status-box{
+      min-height:59px;
 
-  border-radius:20px;
-  background:white;
-}
+      padding:6px 4px;
 
-.modal-card h2{
-  margin-top:0;
-  font-size:22px;
-}
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
 
-.item-row{
-  padding:12px 0;
-  border-bottom:1px solid #ddd;
+      border:1px solid #aaa;
+      border-radius:12px;
 
-  font-size:18px;
-}
+      background:#fff;
 
-.close{
-  width:100%;
-  min-height:50px;
+      text-align:center;
+    }
 
-  margin-top:15px;
+    .status-box small{
+      display:block;
 
-  border:1px solid #aaa;
-  border-radius:13px;
+      font-size:17px;
+      line-height:1.1;
+    }
 
-  background:white;
+    .status-box strong{
+      display:block;
 
-  font-size:17px;
-  font-weight:900;
-}
-</style>
+      margin-top:3px;
+
+      font-size:17px;
+      line-height:1.15;
+    }
+
+
+    /* =====================================
+       景色全体の箱
+    ===================================== */
+
+    .scene{
+      position:relative;
+
+      width:100%;
+
+      min-height:0;
+      flex:1 1 auto;
+
+      overflow:hidden;
+
+      border:2px solid #8d9397;
+      border-radius:16px;
+
+      background:#ddd;
+    }
+
+
+    /* =====================================
+       DIV 1
+       背景画像レイヤー
+    ===================================== */
+
+    .scene-background{
+      position:absolute;
+
+      inset:0;
+
+      z-index:1;
+
+      background-image:
+        url("assets/survival/forest_01.png");
+
+      background-size:cover;
+
+      background-position:center;
+
+      background-repeat:no-repeat;
+
+      pointer-events:none;
+    }
+
+
+    /* =====================================
+       DIV 2
+       アイテムレイヤー
+
+       枝・石・焚き火などは
+       後でここに追加する
+    ===================================== */
+
+    .scene-objects{
+      position:absolute;
+
+      inset:0;
+
+      z-index:2;
+
+      pointer-events:none;
+    }
+
+
+    /* =====================================
+       DIV 3
+       タップ判定レイヤー
+
+       道・ドア・倒木・川など
+    ===================================== */
+
+    .scene-hotspots{
+      position:absolute;
+
+      inset:0;
+
+      z-index:3;
+
+      pointer-events:none;
+    }
+
+
+    /* =========================
+       場所名
+    ========================= */
+
+    .scene-name{
+      position:absolute;
+
+      left:50%;
+      top:9px;
+
+      transform:translateX(-50%);
+
+      z-index:10;
+
+      padding:6px 11px;
+
+      border:1px solid rgba(0,0,0,.2);
+      border-radius:11px;
+
+      background:rgba(255,255,255,.82);
+
+      font-size:17px;
+      font-weight:900;
+
+      white-space:nowrap;
+
+      pointer-events:none;
+    }
+
+
+    /* =====================================
+       後で使うアイテム共通
+    ===================================== */
+
+    .scene-object{
+      position:absolute;
+
+      padding:0;
+
+      border:0;
+
+      background:transparent;
+
+      pointer-events:auto;
+    }
+
+    .scene-object img{
+      display:block;
+
+      width:100%;
+      height:100%;
+
+      object-fit:contain;
+
+      pointer-events:none;
+    }
+
+
+    /* =====================================
+       後で使う透明タップ判定
+    ===================================== */
+
+    .hotspot{
+      position:absolute;
+
+      padding:0;
+
+      border:0;
+
+      background:transparent;
+
+      pointer-events:auto;
+    }
+
+
+    /* =========================
+       説明欄
+    ========================= */
+
+    .message{
+      min-height:68px;
+
+      padding:9px 11px;
+
+      display:flex;
+      align-items:center;
+
+      flex:0 0 auto;
+
+      border:1px solid #aaa;
+      border-radius:14px;
+
+      background:#fff;
+
+      font-size:17px;
+      line-height:1.5;
+    }
+
+
+    /* =========================
+       下メニュー
+    ========================= */
+
+    .menu{
+      display:grid;
+
+      grid-template-columns:
+        1fr
+        1fr;
+
+      gap:6px;
+
+      flex:0 0 auto;
+    }
+
+    .menu-button{
+      min-height:50px;
+
+      border:1px solid #999;
+      border-radius:14px;
+
+      background:#fff;
+
+      color:#222;
+
+      font-size:17px;
+      font-weight:900;
+    }
+
+    .menu-button:active{
+      transform:translateY(1px);
+
+      background:#eee;
+    }
+
+
+    /* =========================
+       ITEM画面
+    ========================= */
+
+    .modal{
+      position:fixed;
+
+      inset:0;
+
+      z-index:100;
+
+      display:none;
+
+      align-items:center;
+      justify-content:center;
+
+      padding:18px;
+
+      background:rgba(0,0,0,.5);
+    }
+
+    .modal.open{
+      display:flex;
+    }
+
+    .modal-card{
+      width:min(430px,100%);
+
+      max-height:80dvh;
+
+      overflow:auto;
+
+      padding:16px;
+
+      border-radius:18px;
+
+      background:#fff;
+    }
+
+    .modal-card h2{
+      margin:0 0 12px;
+
+      font-size:22px;
+    }
+
+    .pause-note{
+      margin:0 0 12px;
+
+      padding:9px;
+
+      border-radius:11px;
+
+      background:#eee;
+
+      font-size:17px;
+      line-height:1.45;
+
+      text-align:center;
+    }
+
+    .item-list{
+      min-height:55px;
+
+      font-size:17px;
+      line-height:1.6;
+    }
+
+    .close-button{
+      width:100%;
+
+      min-height:50px;
+
+      margin-top:14px;
+
+      border:1px solid #999;
+      border-radius:13px;
+
+      background:#fff;
+
+      font-size:17px;
+      font-weight:900;
+    }
+
+
+    @media(max-width:390px){
+
+      .game{
+        padding-left:6px;
+        padding-right:6px;
+      }
+
+    }
+
+  </style>
 </head>
+
+
 
 <body>
 
 <main class="game">
 
+
+  <!-- =========================
+       上部
+  ========================== -->
+
+  <header class="topbar">
+
+    <a
+      class="back"
+      href="survival%20game_TOP.html"
+      aria-label="戻る"
+    >
+      ←
+    </a>
+
+    <h1 class="title">
+      雪山サバイバル
+    </h1>
+
+    <span></span>
+
+  </header>
+
+
+
+  <!-- =========================
+       ステータス
+  ========================== -->
+
   <section class="status">
 
     <div class="status-box">
-      <small id="day">1日目</small>
-      <strong id="clock">08:00:00</strong>
+
+      <small id="day">
+        1日目
+      </small>
+
+      <strong id="clock">
+        08:00:00
+      </strong>
+
     </div>
 
-    <div class="status-box">
-      <small>体温</small>
-      <strong>寒い</strong>
-    </div>
 
     <div class="status-box">
-      <small>現在地</small>
-      <strong id="placeName">針葉樹林</strong>
+
+      <small>
+        体温
+      </small>
+
+      <strong>
+        寒い
+      </strong>
+
+    </div>
+
+
+    <div class="status-box">
+
+      <small>
+        現在地
+      </small>
+
+      <strong>
+        針葉樹林
+      </strong>
+
     </div>
 
   </section>
 
 
-  <!-- 一人称の景色 -->
-  <section id="scene" class="scene">
 
-    <div id="sceneTitle" class="scene-title">
-      針葉樹林
+  <!-- =====================================
+       景色
+
+       3つのDIVを重ねる
+  ====================================== -->
+
+  <section class="scene">
+
+
+    <!-- 場所名 -->
+
+    <div class="scene-name">
+      雪山・針葉樹林
     </div>
 
-    <!-- JSでここにタップ場所が追加される -->
+
+
+    <!-- =========================
+         DIV 1
+         背景
+    ========================== -->
+
+    <div
+      class="scene-background"
+      aria-hidden="true"
+    ></div>
+
+
+
+    <!-- =========================
+         DIV 2
+         アイテム
+
+         次に枝・石などを置く
+    ========================== -->
+
+    <div
+      id="objectLayer"
+      class="scene-objects"
+    ></div>
+
+
+
+    <!-- =========================
+         DIV 3
+         タップ判定
+
+         次に道・ドアなどを置く
+    ========================== -->
+
+    <div
+      id="hotspotLayer"
+      class="scene-hotspots"
+    ></div>
+
 
   </section>
 
 
-  <div id="message" class="message">
+
+  <!-- =========================
+       説明欄
+  ========================== -->
+
+  <div
+    id="message"
+    class="message"
+  >
     雪の積もった針葉樹林です。
+    正面には森の奥へ続く道が見えます。
   </div>
 
 
+
+  <!-- =========================
+       下メニュー
+  ========================== -->
+
   <nav class="menu">
 
-    <button id="itemButton">
-      🎒 ITEM
+    <button
+      id="itemButton"
+      class="menu-button"
+      type="button"
+    >
+      ITEM
     </button>
 
-    <button id="lookButton">
-      👀 周囲を見る
+
+    <button
+      id="lookButton"
+      class="menu-button"
+      type="button"
+    >
+      周囲を見る
     </button>
 
   </nav>
 
+
 </main>
 
 
-<!-- ITEM画面 -->
-<div id="itemModal" class="modal">
+
+<!-- =========================
+     ITEM
+========================== -->
+
+<div
+  id="itemModal"
+  class="modal"
+>
 
   <section class="modal-card">
 
-    <h2>ITEM</h2>
+    <h2>
+      ITEM
+    </h2>
 
-    <div id="itemList"></div>
+    <p class="pause-note">
+      ITEMを開いている間、ゲーム内時間は止まります。
+    </p>
 
-    <button id="closeItem" class="close">
+    <div
+      id="itemList"
+      class="item-list"
+    >
+      まだ何も持っていません。
+    </div>
+
+    <button
+      id="closeItem"
+      class="close-button"
+      type="button"
+    >
       閉じる
     </button>
 
@@ -277,620 +704,199 @@ body{
 </div>
 
 
+
 <script>
 
-/* =========================
-   景色データ
-========================= */
+  /* =========================
+     ゲーム時間
+  ========================= */
 
-const SCENES = {
-
-  forest: {
-
-    name:"針葉樹林",
-
-    /*
-      後で背景PNGを作ったら、
-
-      assets/survival/forest_01.png
-
-      のように置く
-    */
-
-    background:"",
-
-    description:
-      "雪の積もった針葉樹林です。少し先に倒木が見えます。",
-
-    hotspots:[
-
-      {
-        id:"branch01",
-        label:"🪾 細い枝",
-        x:12,
-        y:72,
-
-        type:"item",
-        item:"branch",
-
-        time:20,
-
-        text:"足元の細い枝を拾いました。"
-      },
-
-      {
-        id:"fallenTree",
-        label:"倒木",
-        x:42,
-        y:45,
-
-        type:"move",
-        scene:"fallenTree",
-
-        time:120,
-
-        text:"雪を踏みながら倒木へ向かいます。"
-      },
-
-      {
-        id:"river",
-        label:"凍った川 →",
-        x:72,
-        y:63,
-
-        type:"move",
-        scene:"river",
-
-        time:420,
-
-        text:"木々の間を抜け、凍った川へ向かいます。"
-      }
-
-    ]
-
-  },
+  let gameSeconds =
+    8 * 60 * 60;
 
 
-  fallenTree: {
-
-    name:"倒木のそば",
-
-    background:"",
-
-    description:
-      "大きな針葉樹が雪の上に倒れています。折れた枝がいくつもあります。",
-
-    hotspots:[
-
-      {
-        id:"branch02",
-        label:"🪾 太い枝",
-        x:32,
-        y:57,
-
-        type:"item",
-        item:"branch",
-
-        time:35,
-
-        text:"倒木から太い枝を拾いました。"
-      },
-
-      {
-        id:"stone01",
-        label:"🪨 小石",
-        x:72,
-        y:72,
-
-        type:"item",
-        item:"stone",
-
-        time:25,
-
-        text:"雪の中から小石を拾いました。"
-      },
-
-      {
-        id:"backForest",
-        label:"← 森へ戻る",
-        x:5,
-        y:12,
-
-        type:"move",
-        scene:"forest",
-
-        time:120,
-
-        text:"元いた森へ戻ります。"
-      }
-
-    ]
-
-  },
+  let menuOpen =
+    false;
 
 
-  river: {
 
-    name:"凍った川",
+  function renderClock(){
 
-    background:"",
+    const total =
+      Math.floor(gameSeconds);
 
-    description:
-      "川は厚い氷に覆われています。岸には流木が引っかかっています。",
 
-    hotspots:[
+    const day =
+      Math.floor(total / 86400) + 1;
 
-      {
-        id:"driftwood",
-        label:"🪾 流木",
-        x:60,
-        y:54,
 
-        type:"item",
-        item:"branch",
+    const secondInDay =
+      total % 86400;
 
-        time:80,
 
-        text:"岸まで歩き、流木を拾いました。"
-      },
+    const hour =
+      Math.floor(
+        secondInDay / 3600
+      );
 
-      {
-        id:"ice",
-        label:"🧊 氷",
-        x:37,
-        y:67,
 
-        type:"look",
+    const minute =
+      Math.floor(
+        (secondInDay % 3600) / 60
+      );
 
-        time:30,
 
-        text:"川の表面はかなり厚く凍っています。"
-      },
+    const second =
+      secondInDay % 60;
 
-      {
-        id:"backForest",
-        label:"← 森へ戻る",
-        x:5,
-        y:12,
 
-        type:"move",
-        scene:"forest",
 
-        time:420,
+    document
+      .getElementById("day")
+      .textContent =
+        day + "日目";
 
-        text:"針葉樹林へ戻ります。"
-      }
 
-    ]
+    document
+      .getElementById("clock")
+      .textContent =
+        [
+          hour,
+          minute,
+          second
+        ]
+        .map(
+          number =>
+            String(number)
+              .padStart(2,"0")
+        )
+        .join(":");
 
   }
 
-};
 
 
-/* =========================
-   ゲーム状態
-========================= */
+  /* =========================
+     何もしなくても時間経過
 
-let state = {
+     現実1秒
+     ↓
+     ゲーム内5秒
+  ========================= */
 
-  currentScene:"forest",
+  setInterval(()=>{
 
-  branch:0,
-  stone:0,
+    if(menuOpen){
+      return;
+    }
 
-  collected:[],
-
-  gameSeconds:8 * 60 * 60
-
-};
-
-let menuOpen=false;
-
-
-/* =========================
-   景色表示
-========================= */
-
-const sceneElement=
-  document.getElementById("scene");
-
-const messageElement=
-  document.getElementById("message");
-
-
-function renderScene(){
-
-  const data =
-    SCENES[state.currentScene];
-
-  document.getElementById("sceneTitle")
-    .textContent=data.name;
-
-  document.getElementById("placeName")
-    .textContent=data.name;
-
-
-  /*
-    背景画像
-  */
-
-  if(data.background){
-
-    sceneElement.style.backgroundImage =
-      `url("${data.background}")`;
-
-  }else{
-
-    /*
-      画像が無い間の仮背景
-    */
-
-    sceneElement.style.backgroundImage =
-      "linear-gradient(180deg,#dcecf6 0%,#f8fcff 60%,#eef6fb 100%)";
-
-  }
-
-
-  /*
-    古いhotspot削除
-  */
-
-  sceneElement
-    .querySelectorAll(".hotspot")
-    .forEach(el=>el.remove());
-
-
-  /*
-    新しいhotspot作成
-  */
-
-  data.hotspots.forEach(hotspot=>{
-
-    /*
-      拾った物は再表示しない
-    */
 
     if(
-      hotspot.type==="item" &&
-      state.collected.includes(hotspot.id)
+      document.visibilityState
+      !==
+      "visible"
     ){
       return;
     }
 
 
-    const button =
-      document.createElement("button");
-
-    button.className="hotspot";
-
-    button.textContent=
-      hotspot.label;
-
-    button.style.left=
-      hotspot.x+"%";
-
-    button.style.top=
-      hotspot.y+"%";
+    gameSeconds += 5;
 
 
-    button.addEventListener(
+    renderClock();
+
+  },1000);
+
+
+
+  /* =========================
+     ITEM
+  ========================= */
+
+  const itemModal =
+    document.getElementById(
+      "itemModal"
+    );
+
+
+  document
+    .getElementById(
+      "itemButton"
+    )
+    .addEventListener(
       "click",
-      ()=>activateHotspot(hotspot)
+      ()=>{
+
+        menuOpen=true;
+
+        itemModal
+          .classList
+          .add("open");
+
+      }
     );
 
 
-    sceneElement.appendChild(button);
 
-  });
+  document
+    .getElementById(
+      "closeItem"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
 
+        menuOpen=false;
 
-  messageElement.textContent=
-    data.description;
+        itemModal
+          .classList
+          .remove("open");
 
-}
-
-
-/* =========================
-   景色の中をタップ
-========================= */
-
-function activateHotspot(hotspot){
-
-  if(menuOpen)return;
-
-
-  /* 時間を進める */
-
-  advanceTime(hotspot.time);
-
-
-  /*
-    アイテム
-  */
-
-  if(hotspot.type==="item"){
-
-    state.collected.push(
-      hotspot.id
+      }
     );
 
 
-    if(hotspot.item==="branch"){
 
-      state.branch++;
+  /* =========================
+     周囲を見る
+  ========================= */
 
-    }
+  document
+    .getElementById(
+      "lookButton"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
 
-
-    if(hotspot.item==="stone"){
-
-      state.stone++;
-
-    }
-
-
-    messageElement.textContent =
-      hotspot.text +
-      "（"+formatDuration(hotspot.time)+"経過）";
-
-
-    renderScene();
-
-    return;
-
-  }
+        if(menuOpen){
+          return;
+        }
 
 
-  /*
-    移動
-  */
-
-  if(hotspot.type==="move"){
-
-    messageElement.textContent=
-      hotspot.text;
+        gameSeconds += 30;
 
 
-    /*
-      少しだけ間を置いて
-      景色を切り替える
-    */
-
-    setTimeout(()=>{
-
-      state.currentScene=
-        hotspot.scene;
-
-      renderScene();
-
-    },400);
-
-    return;
-
-  }
+        renderClock();
 
 
-  /*
-    調べるだけ
-  */
+        document
+          .getElementById(
+            "message"
+          )
+          .textContent =
+            "黒い針葉樹が雪の中に立っています。正面には森の奥へ続く道、右奥には凍った川が見えます。（30秒経過）";
 
-  if(hotspot.type==="look"){
-
-    messageElement.textContent =
-      hotspot.text +
-      "（"+formatDuration(hotspot.time)+"経過）";
-
-  }
-
-}
+      }
+    );
 
 
-/* =========================
-   時間
-========================= */
-
-function advanceTime(seconds){
-
-  state.gameSeconds += seconds;
 
   renderClock();
 
-}
-
-
-function renderClock(){
-
-  const total =
-    Math.floor(state.gameSeconds);
-
-  const day =
-    Math.floor(total / 86400) + 1;
-
-  const sec =
-    total % 86400;
-
-  const hour =
-    Math.floor(sec / 3600);
-
-  const minute =
-    Math.floor(
-      (sec % 3600) / 60
-    );
-
-  const second =
-    sec % 60;
-
-
-  document.getElementById("day")
-    .textContent =
-      day+"日目";
-
-
-  document.getElementById("clock")
-    .textContent =
-      [
-        hour,
-        minute,
-        second
-      ]
-      .map(
-        n=>String(n).padStart(2,"0")
-      )
-      .join(":");
-
-}
-
-
-function formatDuration(seconds){
-
-  if(seconds < 60){
-
-    return seconds+"秒";
-
-  }
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  const rest =
-    seconds % 60;
-
-
-  if(rest===0){
-
-    return minutes+"分";
-
-  }
-
-  return minutes+"分"+rest+"秒";
-
-}
-
-
-/* =========================
-   何もしなくても時間経過
-========================= */
-
-setInterval(()=>{
-
-  /*
-    ITEMを開いている時は止める
-  */
-
-  if(menuOpen)return;
-
-
-  /*
-    現実1秒
-    ↓
-    ゲーム内5秒
-  */
-
-  advanceTime(5);
-
-},1000);
-
-
-/* =========================
-   ITEM
-========================= */
-
-const itemModal =
-  document.getElementById("itemModal");
-
-
-document
-  .getElementById("itemButton")
-  .addEventListener("click",()=>{
-
-    menuOpen=true;
-
-    renderItems();
-
-    itemModal.classList.add("open");
-
-  });
-
-
-document
-  .getElementById("closeItem")
-  .addEventListener("click",()=>{
-
-    menuOpen=false;
-
-    itemModal.classList.remove("open");
-
-  });
-
-
-function renderItems(){
-
-  const list =
-    document.getElementById("itemList");
-
-  const items=[];
-
-
-  if(state.branch){
-
-    items.push(
-      `<div class="item-row">
-        🪾 枝　×${state.branch}
-      </div>`
-    );
-
-  }
-
-
-  if(state.stone){
-
-    items.push(
-      `<div class="item-row">
-        🪨 小石　×${state.stone}
-      </div>`
-    );
-
-  }
-
-
-  list.innerHTML =
-    items.length
-      ? items.join("")
-      : `<div class="item-row">
-          何も持っていません。
-        </div>`;
-
-}
-
-
-/* =========================
-   周囲を見る
-========================= */
-
-document
-  .getElementById("lookButton")
-  .addEventListener("click",()=>{
-
-    if(menuOpen)return;
-
-    advanceTime(30);
-
-    messageElement.textContent =
-      SCENES[state.currentScene].description +
-      "（30秒経過）";
-
-  });
-
-
-/* =========================
-   開始
-========================= */
-
-renderScene();
-renderClock();
-
 </script>
 
+
 </body>
+
 </html>
