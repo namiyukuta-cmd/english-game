@@ -51,21 +51,26 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #windowHeader{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:5px 7px 5px 12px;background:#d6bd94;border-bottom:1px solid #866e4f}
 #windowTitle{font-size:17px;font-weight:800}
 #windowCloseButton{width:38px;height:38px;border:1px solid #7c6245;border-radius:50%;background:#f2dec0;color:#3a2a1d;font-size:20px;font-weight:700}
-#windowContent{flex:1;min-height:0;overflow:auto;padding:12px;font-size:15px;line-height:1.7}
+#windowContent{flex:1;min-height:0;overflow:auto;padding:10px 12px 14px;font-size:15px;line-height:1.7}
 
-.skill-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:-2px 0 10px;padding:8px 10px;border:1px solid #a48a64;border-radius:7px;background:#e1c9a2;font-size:14px;font-weight:700}
-.skill-legend{font-size:12px;font-weight:600;color:#70583f;text-align:right}
-.skill-list{display:grid;gap:7px}
-.skill-row{padding:9px 8px 10px;border:1px solid #ad936d;border-radius:8px;background:#f8ead0}
-.skill-main{display:grid;grid-template-columns:minmax(0,1fr) 48px 54px 30px;gap:6px;align-items:center}
-.skill-name{min-width:0;font-size:16px;font-weight:850;line-height:1.2;overflow-wrap:anywhere}
-.skill-ability,.skill-mod{height:36px;display:grid;place-items:center;border:1px solid #a98d67;border-radius:6px;background:#dfc8a5;font-size:13px;font-weight:800}
-.skill-mod{background:#ead6b5;font-size:16px}
-.skill-prof{width:27px;height:27px;border:2px dashed #927b5f;border-radius:50%;justify-self:center;display:grid;place-items:center;color:#f5e8d2;font-size:12px;font-weight:900}
+.skill-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 7px;padding:6px 8px;border:1px solid #a48a64;border-radius:6px;background:#e1c9a2;font-size:13px;font-weight:700}
+.skill-legend{font-size:11px;font-weight:600;color:#70583f;text-align:right;white-space:nowrap}
+.skill-list{border:1px solid #ad936d;border-radius:7px;overflow:hidden;background:#f8ead0}
+.skill-row{padding:4px 6px;border-bottom:1px solid #d1b891;background:#f8ead0}
+.skill-row:last-child{border-bottom:0}
+.skill-main{display:grid;grid-template-columns:minmax(0,1fr) 40px 44px 24px;gap:5px;align-items:center;min-height:30px}
+.skill-name{min-width:0;font-size:14px;font-weight:850;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-name small{margin-left:5px;color:#765f45;font-size:11px;font-weight:700}
+.skill-ability,.skill-mod{height:28px;display:grid;place-items:center;border:1px solid #a98d67;border-radius:5px;background:#dfc8a5;font-size:11px;font-weight:800}
+.skill-mod{background:#ead6b5;font-size:14px}
+.skill-prof{width:21px;height:21px;border:2px dashed #927b5f;border-radius:50%;justify-self:center;display:grid;place-items:center;color:#f5e8d2;font-size:9px;font-weight:900}
 .skill-prof.on{border-style:solid;border-color:#6d352a;background:#8a3d31}
-.skill-prof.expertise{border-style:double;border-width:4px;border-color:#6d352a;background:#8a3d31}
-.skill-desc{margin-top:7px;padding-top:7px;border-top:1px solid #d3ba93;color:#5d4934;font-size:14px;line-height:1.55}
-.skill-desc strong{color:#3f3022}
+.skill-prof.expertise{border-style:double;border-width:3px;border-color:#6d352a;background:#8a3d31}
+.skill-explanations{margin-top:14px;padding-top:10px;border-top:2px solid #a98d67}
+.skill-explanations h3{margin:0 0 7px;font-size:16px;color:#4a3828}
+.skill-explanation{padding:7px 2px;border-bottom:1px solid #d5bd98;color:#5d4934;font-size:14px;line-height:1.5}
+.skill-explanation:last-child{border-bottom:0}
+.skill-explanation strong{color:#3f3022}
 
 @media(max-width:430px){
   #topBar{grid-template-columns:50px minmax(0,1fr) 104px}
@@ -76,9 +81,9 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   .system-button{width:43px}
   #messageText{font-size:15px}
   .action-button{min-width:58px;font-size:14px}
-  .skill-main{grid-template-columns:minmax(0,1fr) 44px 50px 28px;gap:5px}
-  .skill-name{font-size:15px}
-  .skill-desc{font-size:14px}
+  .skill-main{grid-template-columns:minmax(0,1fr) 38px 42px 22px;gap:4px}
+  .skill-name{font-size:13px}
+  .skill-name small{font-size:10px}
 }
 </style>
 </head>
@@ -255,18 +260,17 @@ function renderSkillWindow(){
     const profClass=isExpert?'skill-prof expertise':isProficient?'skill-prof on':'skill-prof';
     const profMark=isExpert?'E':isProficient?'●':'';
     const profLabel=isExpert?'Expertise':isProficient?'習熟':'未習熟';
-    return `<div class="skill-row">
-      <div class="skill-main">
-        <div class="skill-name">${escHtml(skill.name)}</div>
-        <div class="skill-ability">${skill.ability.toUpperCase()}</div>
-        <div class="skill-mod">${fmtMod(total)}</div>
-        <div class="${profClass}" aria-label="${profLabel}" title="${profLabel}">${profMark}</div>
-      </div>
-      <div class="skill-desc"><strong>${escHtml(skill.ja)}</strong>：${escHtml(skill.desc)}</div>
-    </div>`;
+    return `<div class="skill-row"><div class="skill-main">
+      <div class="skill-name">${escHtml(skill.name)}<small>${escHtml(skill.ja)}</small></div>
+      <div class="skill-ability">${skill.ability.toUpperCase()}</div>
+      <div class="skill-mod">${fmtMod(total)}</div>
+      <div class="${profClass}" aria-label="${profLabel}" title="${profLabel}">${profMark}</div>
+    </div></div>`;
   }).join('');
 
-  return `<div class="skill-summary"><span>Lv.${level}　習熟ボーナス ${fmtMod(proficiencyBonus)}</span><span class="skill-legend">● 習熟　E Expertise</span></div><div class="skill-list">${rows}</div>`;
+  const explanations=skillDefs.map(skill=>`<div class="skill-explanation"><strong>${escHtml(skill.ja)}（${escHtml(skill.name)}）</strong><br>${escHtml(skill.desc)}</div>`).join('');
+
+  return `<div class="skill-summary"><span>Lv.${level}　習熟ボーナス ${fmtMod(proficiencyBonus)}</span><span class="skill-legend">● 習熟　E Expertise</span></div><div class="skill-list">${rows}</div><section class="skill-explanations"><h3>技能の説明</h3>${explanations}</section>`;
 }
 
 document.querySelectorAll('.menu-button').forEach(button=>{
