@@ -53,6 +53,20 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #windowCloseButton{width:38px;height:38px;border:1px solid #7c6245;border-radius:50%;background:#f2dec0;color:#3a2a1d;font-size:20px;font-weight:700}
 #windowContent{flex:1;min-height:0;overflow:auto;padding:12px;font-size:15px;line-height:1.7}
 
+.skill-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:-2px 0 10px;padding:8px 10px;border:1px solid #a48a64;border-radius:7px;background:#e1c9a2;font-size:14px;font-weight:700}
+.skill-legend{font-size:12px;font-weight:600;color:#70583f;text-align:right}
+.skill-list{display:grid;gap:7px}
+.skill-row{padding:9px 8px 10px;border:1px solid #ad936d;border-radius:8px;background:#f8ead0}
+.skill-main{display:grid;grid-template-columns:minmax(0,1fr) 48px 54px 30px;gap:6px;align-items:center}
+.skill-name{min-width:0;font-size:16px;font-weight:850;line-height:1.2;overflow-wrap:anywhere}
+.skill-ability,.skill-mod{height:36px;display:grid;place-items:center;border:1px solid #a98d67;border-radius:6px;background:#dfc8a5;font-size:13px;font-weight:800}
+.skill-mod{background:#ead6b5;font-size:16px}
+.skill-prof{width:27px;height:27px;border:2px dashed #927b5f;border-radius:50%;justify-self:center;display:grid;place-items:center;color:#f5e8d2;font-size:12px;font-weight:900}
+.skill-prof.on{border-style:solid;border-color:#6d352a;background:#8a3d31}
+.skill-prof.expertise{border-style:double;border-width:4px;border-color:#6d352a;background:#8a3d31}
+.skill-desc{margin-top:7px;padding-top:7px;border-top:1px solid #d3ba93;color:#5d4934;font-size:14px;line-height:1.55}
+.skill-desc strong{color:#3f3022}
+
 @media(max-width:430px){
   #topBar{grid-template-columns:50px minmax(0,1fr) 104px}
   #topRight{grid-template-columns:43px 43px}
@@ -62,6 +76,9 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   .system-button{width:43px}
   #messageText{font-size:15px}
   .action-button{min-width:58px;font-size:14px}
+  .skill-main{grid-template-columns:minmax(0,1fr) 44px 50px 28px;gap:5px}
+  .skill-name{font-size:15px}
+  .skill-desc{font-size:14px}
 }
 </style>
 </head>
@@ -184,13 +201,80 @@ const windowLayer=document.getElementById('windowLayer');
 const windowTitle=document.getElementById('windowTitle');
 const windowContent=document.getElementById('windowContent');
 const windowCloseButton=document.getElementById('windowCloseButton');
-const windowNames={quest:'QUEST',inventory:'ITEM',skill:'SKILL',player:'CHAR',memo:'MEMO'};
+const windowNames={quest:'QUEST',inventory:'ITEM',skill:'SKILLS',player:'CHAR',memo:'MEMO'};
+
+const skillDefs=[
+  {name:'Acrobatics',ja:'軽業',ability:'dex',desc:'バランスを保つ、足場の悪い場所を渡る、身軽な動きをする時に使う。'},
+  {name:'Animal Handling',ja:'動物使い',ability:'wis',desc:'動物を落ち着かせる、扱う、意図を読む時に使う。'},
+  {name:'Arcana',ja:'魔法学',ability:'int',desc:'呪文、魔法の品、魔法現象などについて知識を思い出す時に使う。'},
+  {name:'Athletics',ja:'運動',ability:'str',desc:'登る、跳ぶ、泳ぐ、押す・引くなど、力を使う行動に使う。'},
+  {name:'Deception',ja:'ペテン',ability:'cha',desc:'嘘を信じ込ませる、正体や意図をごまかす時に使う。'},
+  {name:'History',ja:'歴史',ability:'int',desc:'過去の出来事、人物、国、戦争などの知識を思い出す時に使う。'},
+  {name:'Insight',ja:'看破',ability:'wis',desc:'相手の態度や言葉から、本音、嘘、意図などを読み取る時に使う。'},
+  {name:'Intimidation',ja:'威圧',ability:'cha',desc:'脅しや迫力で、相手を従わせようとする時に使う。'},
+  {name:'Investigation',ja:'捜査',ability:'int',desc:'手掛かりを探し、情報を組み合わせて答えを導く時に使う。'},
+  {name:'Medicine',ja:'医術',ability:'wis',desc:'傷や病気の状態を判断し、応急処置などを行う時に使う。'},
+  {name:'Nature',ja:'自然',ability:'int',desc:'動植物、天候、地形など、自然界についての知識を思い出す時に使う。'},
+  {name:'Perception',ja:'知覚',ability:'wis',desc:'見る、聞く、匂いを嗅ぐなどで、周囲の異変に気づく時に使う。'},
+  {name:'Performance',ja:'芸能',ability:'cha',desc:'歌、演奏、演技、踊りなどで、人を楽しませる時に使う。'},
+  {name:'Persuasion',ja:'説得',ability:'cha',desc:'話し合い、礼儀、理屈などで、相手の考えや行動を動かす時に使う。'},
+  {name:'Religion',ja:'宗教',ability:'int',desc:'神々、信仰、聖職、宗教儀式などについて知識を思い出す時に使う。'},
+  {name:'Sleight of Hand',ja:'手先の早業',ability:'dex',desc:'スリ、こっそり物を隠すなど、細かな手作業をごまかす時に使う。'},
+  {name:'Stealth',ja:'隠密',ability:'dex',desc:'姿や音を隠し、相手に気づかれずに動く時に使う。'},
+  {name:'Survival',ja:'生存',ability:'wis',desc:'追跡、道探し、野外での危険回避や食料確保などに使う。'}
+];
+
+function escHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function fmtMod(value){return value>=0?`+${value}`:String(value);}
+function abilityMod(score){return Math.floor(((Number(score)||10)-10)/2);}
+function proficiencyBonusFromLevel(level){
+  const lv=Math.max(1,Math.min(20,Math.floor(Number(level)||1)));
+  return Math.min(6,2+Math.floor((lv-1)/4));
+}
+function activeGame(){
+  try{return JSON.parse(localStorage.getItem('ddActiveGame')||'null');}catch(_){return null;}
+}
+function renderSkillWindow(){
+  const game=activeGame();
+  const character=game&&game.character?game.character:{};
+  const abilities=character.abilities||{};
+  const level=Math.max(1,Math.floor(Number(character.level)||1));
+  const proficiencyBonus=proficiencyBonusFromLevel(level);
+  const proficient=new Set((Array.isArray(character.skills)?character.skills:[]).map(v=>String(v).toLowerCase()));
+  const expertiseSource=character.classChoices&&Array.isArray(character.classChoices.expertise)?character.classChoices.expertise:[];
+  const expertise=new Set(expertiseSource.map(v=>String(v).toLowerCase()));
+
+  const rows=skillDefs.map(skill=>{
+    const key=skill.name.toLowerCase();
+    const isExpert=expertise.has(key);
+    const isProficient=isExpert||proficient.has(key);
+    const base=abilityMod(abilities[skill.ability]);
+    const total=base+(isExpert?proficiencyBonus*2:isProficient?proficiencyBonus:0);
+    const profClass=isExpert?'skill-prof expertise':isProficient?'skill-prof on':'skill-prof';
+    const profMark=isExpert?'E':isProficient?'●':'';
+    const profLabel=isExpert?'Expertise':isProficient?'習熟':'未習熟';
+    return `<div class="skill-row">
+      <div class="skill-main">
+        <div class="skill-name">${escHtml(skill.name)}</div>
+        <div class="skill-ability">${skill.ability.toUpperCase()}</div>
+        <div class="skill-mod">${fmtMod(total)}</div>
+        <div class="${profClass}" aria-label="${profLabel}" title="${profLabel}">${profMark}</div>
+      </div>
+      <div class="skill-desc"><strong>${escHtml(skill.ja)}</strong>：${escHtml(skill.desc)}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="skill-summary"><span>Lv.${level}　習熟ボーナス ${fmtMod(proficiencyBonus)}</span><span class="skill-legend">● 習熟　E Expertise</span></div><div class="skill-list">${rows}</div>`;
+}
 
 document.querySelectorAll('.menu-button').forEach(button=>{
   button.addEventListener('click',()=>{
     const type=button.dataset.window;
     windowTitle.textContent=windowNames[type]||type;
-    windowContent.innerHTML=`<p>${windowNames[type]} の内容をここに表示します。</p>`;
+    if(type==='skill')windowContent.innerHTML=renderSkillWindow();
+    else windowContent.innerHTML=`<p>${windowNames[type]} の内容をここに表示します。</p>`;
     windowLayer.hidden=false;
   });
 });
