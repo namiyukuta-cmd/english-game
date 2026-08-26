@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eef6fb">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>雪山サバイバル</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#eef6fb;color:#263845;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    body{min-height:100dvh;background:linear-gradient(180deg,#f9fdff 0%,#eaf4fa 52%,#dcebf3 100%)}
+    button,a{font:inherit}
+    .survival-shell{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+    .survival-head{display:grid;grid-template-columns:52px 1fr 52px;align-items:center;margin-bottom:22px}
+    .survival-head h1{margin:0;text-align:center;font-size:25px;line-height:1.25;color:#253945}
+    .back-btn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid #b9ccd8;border-radius:14px;background:#fff;color:#344d5c;font-size:24px;font-weight:800;text-decoration:none;box-shadow:0 4px 12px rgba(38,67,84,.06);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .hero{padding:24px 20px 22px;margin-bottom:20px;border:1px solid #bed1dc;border-radius:22px;background:rgba(255,255,255,.9);text-align:center;box-shadow:0 10px 26px rgba(38,67,84,.08)}
+    .hero-icon{font-size:54px;line-height:1;margin-bottom:12px}
+    .hero h2{margin:0 0 10px;font-size:23px;line-height:1.4}
+    .hero p{margin:0;font-size:17px;line-height:1.75;color:#526b79}
+    .status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 20px}
+    .status-card{padding:11px 6px;border:1px solid #c8d8e1;border-radius:15px;background:rgba(255,255,255,.78);text-align:center}
+    .status-card span{display:block;font-size:21px;line-height:1.2;margin-bottom:4px}
+    .status-card strong{font-size:17px}
+    .menu{display:grid;gap:13px;margin-top:auto;margin-bottom:auto}
+    .menu-btn{width:100%;min-height:62px;border:1px solid #9eb6c5;border-radius:17px;background:#fff;color:#294352;font-size:19px;font-weight:800;box-shadow:0 5px 14px rgba(38,67,84,.07);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .menu-btn:active{transform:translateY(1px);background:#edf6fb}
+    .menu-btn.primary{background:#35596d;color:#fff;border-color:#35596d}
+    .menu-btn[disabled]{opacity:.42;box-shadow:none}
+    .save-note{min-height:27px;margin:10px 4px 0;text-align:center;font-size:17px;line-height:1.55;color:#607785}
+    .intro-note{margin:22px 2px 0;padding-top:17px;border-top:1px solid #bfd0da;text-align:center;font-size:17px;line-height:1.75;color:#506976}
+    @media(max-width:390px){
+      .survival-shell{padding-left:14px;padding-right:14px}
+      .hero{padding:20px 16px}
+      .hero h2{font-size:21px}
+      .status-card strong{font-size:17px}
+    }
+  </style>
+</head>
+<body>
+  <main class="survival-shell">
+    <header class="survival-head">
+      <a class="back-btn" href="story-menu.html" aria-label="物語選択へ戻る">←</a>
+      <h1>雪山サバイバル</h1>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true">🏔️</div>
+      <h2>何も持たず、雪山で生きる</h2>
+      <p>あなたは雪山にひとり。<br>まずは周囲を探し、生き残る準備をします。</p>
+    </section>
+
+    <section class="status" aria-label="最初に探せるもの">
+      <div class="status-card"><span aria-hidden="true">🌲</span><strong>枝</strong></div>
+      <div class="status-card"><span aria-hidden="true">🪨</span><strong>石</strong></div>
+      <div class="status-card"><span aria-hidden="true">🍄</span><strong>食料</strong></div>
+    </section>
+
+    <section class="menu" aria-label="サバイバルメニュー">
+      <button id="newGame" class="menu-btn primary" type="button">はじめから</button>
+      <button id="continueGame" class="menu-btn" type="button">続きから</button>
+      <p id="saveNote" class="save-note" aria-live="polite"></p>
+    </section>
+
+    <p class="intro-note">最初の目標は、落ちている枝や石を集めて<br>焚き火を起こすことです。</p>
+  </main>
+
+  <script>
+    const SAVE_KEY='englishGameSurvivalSaveV1';
+    const GAME_PAGE='survival%20game.html';
+    const continueBtn=document.getElementById('continueGame');
+    const saveNote=document.getElementById('saveNote');
+
+    function hasSave(){
+      try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
+    }
+
+    function refreshSaveState(){
+      const exists=hasSave();
+      continueBtn.disabled=!exists;
+      saveNote.textContent=exists?'セーブデータがあります。':'まだセーブデータはありません。';
+    }
+
+    document.getElementById('newGame').addEventListener('click',()=>{
+      try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+      location.href=GAME_PAGE+'?new=1';
+    });
+
+    continueBtn.addEventListener('click',()=>{
+      if(hasSave())location.href=GAME_PAGE;
+    });
+
+    refreshSaveState();
+  </script>
+</body>
+</html>
