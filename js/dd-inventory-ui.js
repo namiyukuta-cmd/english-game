@@ -42,26 +42,36 @@ window.DDInventoryUI = (() => {
     })[type] || 'アイテム';
   }
 
-  function priceText(price) {
+  function priceText(price, priceQuantity = 1) {
     if (!price || typeof price !== 'object') return '';
     const parts = ['gp', 'sp', 'cp']
       .filter(key => Number(price[key]) > 0)
       .map(key => `${formatNumber(price[key])} ${key.toUpperCase()}`);
-    return parts.join(' / ');
+    const amount = parts.join(' / ');
+    if (!amount) return '';
+    const quantity = Number(priceQuantity);
+    return Number.isFinite(quantity) && quantity > 1
+      ? `${formatNumber(quantity)}個あたり ${amount}`
+      : amount;
   }
 
   function inventoryRow(owned, data, extraClass = '', rightText = '') {
+    const quantity = owned.quantity || 1;
     return `
       <button
         class="inventory-row ${extraClass}"
         data-item-uid="${escapeHtml(owned.uid)}"
+        aria-label="${escapeHtml(`${data.name} ${data.ja || ''} 所持数 ${quantity}`)}"
         type="button"
       >
         <span class="inventory-name">
           <strong>${escapeHtml(data.name)}</strong>
           <small>${escapeHtml(data.ja || '')}</small>
         </span>
-        <span class="inventory-quantity">${escapeHtml(rightText || `×${owned.quantity || 1}`)}</span>
+        <span class="inventory-row-side">
+          ${rightText ? `<small class="inventory-row-meta">${escapeHtml(rightText)}</small>` : ''}
+          <span class="inventory-quantity">×${escapeHtml(quantity)}</span>
+        </span>
       </button>`;
   }
 
@@ -120,6 +130,51 @@ window.DDInventoryUI = (() => {
     return `<div class="item-stat"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
   }
 
+  function itemTextSection(title, value, extraClass = '') {
+    const text = String(value ?? '').trim();
+    if (!text) return '';
+    return `
+      <section class="item-text-section ${extraClass}">
+        <h3>${escapeHtml(title)}</h3>
+        <p>${escapeHtml(text)}</p>
+      </section>`;
+  }
+
+  function itemProperties(properties) {
+    if (!Array.isArray(properties) || !properties.length) return '';
+    return `
+      <section class="item-list-section item-properties">
+        <h3>特性</h3>
+        <ul>
+          ${properties.map(property => `<li>${escapeHtml(property)}</li>`).join('')}
+        </ul>
+      </section>`;
+  }
+
+  function packContents(contents) {
+    if (!Array.isArray(contents) || !contents.length) return '';
+    return `
+      <section class="item-list-section item-pack-contents">
+        <h3>パックの中身</h3>
+        <ul>
+          ${contents.map(content => {
+            const linked = content.itemId ? DDInventory.itemData(content.itemId) : null;
+            const name = linked?.name || content.name || content.itemId || 'Unknown Item';
+            const ja = linked?.ja || '';
+            const quantity = Number(content.quantity) > 0 ? Number(content.quantity) : 1;
+            return `
+              <li>
+                <span class="item-pack-name">
+                  <strong>${escapeHtml(name)}</strong>
+                  ${ja ? `<small>${escapeHtml(ja)}</small>` : ''}
+                </span>
+                <span class="item-pack-quantity">×${escapeHtml(formatNumber(quantity))}</span>
+              </li>`;
+          }).join('')}
+        </ul>
+      </section>`;
+  }
+
   function openItemDetail(uid) {
     if (!contentRoot || !window.DDInventory) return;
     const game = DDInventory.getGame();
@@ -132,12 +187,16 @@ window.DDInventoryUI = (() => {
     if (!data) return;
     const equippedEntry = (game.equipment || []).find(item => item.uid === uid);
     const canEquip = !['ammo', 'consumable', 'pack', 'book'].includes(data.type);
+    const description = data.descriptionJa || data.description || '';
+    const usage = data.usageJa || data.usage || '';
     let details = itemStat('種類', typeLabel(data.type));
     if (data.damage) details += itemStat('Damage', data.damage);
     if (data.ac != null) details += itemStat('AC', data.ac);
     if (data.acBonus != null) details += itemStat('AC Bonus', `+${data.acBonus}`);
-    if (data.weight != null) details += itemStat('Weight', `${formatNumber(data.weight)} lb`);
-    if (priceText(data.price)) details += itemStat('Price', priceText(data.price));
+    if (data.weight != null) details += itemStat('重量', `${formatNumber(data.weight)} lb`);
+    if (priceText(data.price, data.priceQuantity)) {
+      details += itemStat('価格', priceText(data.price, data.priceQuantity));
+    }
 
     contentRoot.innerHTML = `
       <button id="itemBackButton" class="item-back" type="button">← 所持品</button>
@@ -146,7 +205,11 @@ window.DDInventoryUI = (() => {
         <p class="item-ja">${escapeHtml(data.ja || '')}</p>
         <p class="item-owned-count">所持数 <strong>${owned.quantity || 1}</strong></p>
         ${equippedEntry ? `<p class="item-equipped-label">装備中：${escapeHtml(slotLabel(equippedEntry.slot))}</p>` : ''}
-        ${details}
+        ${itemTextSection('説明', description, 'item-description')}
+        ${itemTextSection('用途・使い方', usage, 'item-usage')}
+        <div class="item-stat-list">${details}</div>
+        ${itemProperties(data.properties)}
+        ${packContents(data.contents)}
         <div class="item-actions">
           ${canEquip ? (equippedEntry
             ? '<button id="unequipButton" type="button">装備を外す</button>'
