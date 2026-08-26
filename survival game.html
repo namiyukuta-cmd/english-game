@@ -167,9 +167,9 @@
     }
 
 
-    /* =====================================
+    /* =========================
        景色全体
-    ===================================== */
+    ========================= */
 
     .scene{
       position:relative;
@@ -188,10 +188,10 @@
     }
 
 
-    /* =====================================
+    /* =========================
        DIV 1
        背景画像
-    ===================================== */
+    ========================= */
 
     .scene-background{
       position:absolute;
@@ -211,10 +211,10 @@
     }
 
 
-    /* =====================================
+    /* =========================
        DIV 2
-       拾えるアイテム
-    ===================================== */
+       アイテム
+    ========================= */
 
     .scene-objects{
       position:absolute;
@@ -225,7 +225,6 @@
 
       pointer-events:none;
     }
-
 
     .scene-object{
       position:absolute;
@@ -246,7 +245,6 @@
       -webkit-tap-highlight-color:transparent;
     }
 
-
     .scene-object img{
       display:block;
 
@@ -258,7 +256,6 @@
       pointer-events:none;
     }
 
-
     .scene-object:active{
       transform:scale(.96);
     }
@@ -266,43 +263,41 @@
 
     /* =========================
        枝
+       小さく調整
     ========================= */
 
     #branchObject{
-      width:43%;
-
+      width:34%;
       aspect-ratio:1 / 1;
 
-      left:3%;
-      bottom:0%;
+      left:4%;
+      bottom:1%;
     }
 
 
     /* =========================
        石
+       小さく調整
     ========================= */
 
     #stoneObject{
-      width:27%;
-
+      width:20%;
       aspect-ratio:1 / 1;
 
-      right:7%;
-      bottom:7%;
+      right:8%;
+      bottom:8%;
     }
 
-
-    /* 拾った後 */
 
     .scene-object.collected{
       display:none;
     }
 
 
-    /* =====================================
+    /* =========================
        DIV 3
        タップ判定
-    ===================================== */
+    ========================= */
 
     .scene-hotspots{
       position:absolute;
@@ -313,7 +308,6 @@
 
       pointer-events:none;
     }
-
 
     .hotspot{
       position:absolute;
@@ -479,11 +473,6 @@
       text-align:center;
     }
 
-
-    /* =========================
-       ITEM一覧
-    ========================= */
-
     .item-list{
       min-height:55px;
 
@@ -521,7 +510,6 @@
       font-weight:900;
     }
 
-
     .close-button{
       width:100%;
 
@@ -552,15 +540,10 @@
 </head>
 
 
-
 <body>
 
 <main class="game">
 
-
-  <!-- =========================
-       上部
-  ========================== -->
 
   <header class="topbar">
 
@@ -581,10 +564,6 @@
   </header>
 
 
-
-  <!-- =========================
-       ステータス
-  ========================== -->
 
   <section class="status">
 
@@ -630,10 +609,6 @@
 
 
 
-  <!-- =====================================
-       景色
-  ====================================== -->
-
   <section class="scene">
 
 
@@ -642,11 +617,7 @@
     </div>
 
 
-
-    <!-- =========================
-         DIV 1
-         背景
-    ========================== -->
+    <!-- 背景 -->
 
     <div
       class="scene-background"
@@ -654,19 +625,13 @@
     ></div>
 
 
-
-    <!-- =========================
-         DIV 2
-         拾えるアイテム
-    ========================== -->
+    <!-- アイテム -->
 
     <div
       id="objectLayer"
       class="scene-objects"
     >
 
-
-      <!-- 枝 -->
 
       <button
         id="branchObject"
@@ -683,9 +648,6 @@
 
       </button>
 
-
-
-      <!-- 石 -->
 
       <button
         id="stoneObject"
@@ -706,11 +668,7 @@
     </div>
 
 
-
-    <!-- =========================
-         DIV 3
-         タップ判定
-    ========================== -->
+    <!-- タップ判定 -->
 
     <div
       id="hotspotLayer"
@@ -722,10 +680,6 @@
 
 
 
-  <!-- =========================
-       説明欄
-  ========================== -->
-
   <div
     id="message"
     class="message"
@@ -734,10 +688,6 @@
   </div>
 
 
-
-  <!-- =========================
-       下メニュー
-  ========================== -->
 
   <nav class="menu">
 
@@ -764,10 +714,6 @@
 </main>
 
 
-
-<!-- =========================
-     ITEM
-========================== -->
 
 <div
   id="itemModal"
@@ -807,22 +753,12 @@
 
 <script>
 
-  /* =========================
-     ゲーム時間
-  ========================= */
-
   let gameSeconds =
     8 * 60 * 60;
-
 
   let menuOpen =
     false;
 
-
-
-  /* =========================
-     所持品
-  ========================= */
 
   const inventory = {
 
@@ -833,36 +769,29 @@
   };
 
 
-
   function renderClock(){
 
     const total =
       Math.floor(gameSeconds);
 
-
     const day =
       Math.floor(total / 86400) + 1;
 
-
     const secondInDay =
       total % 86400;
-
 
     const hour =
       Math.floor(
         secondInDay / 3600
       );
 
-
     const minute =
       Math.floor(
         (secondInDay % 3600) / 60
       );
 
-
     const second =
       secondInDay % 60;
-
 
 
     document
@@ -889,21 +818,11 @@
   }
 
 
-
-  /* =========================
-     ゲーム時間
-
-     現実1秒
-     ↓
-     ゲーム内5秒
-  ========================= */
-
   setInterval(()=>{
 
     if(menuOpen){
       return;
     }
-
 
     if(
       document.visibilityState
@@ -913,19 +832,12 @@
       return;
     }
 
-
     gameSeconds += 5;
-
 
     renderClock();
 
   },1000);
 
-
-
-  /* =========================
-     メッセージ表示
-  ========================= */
 
   function setMessage(text){
 
@@ -937,11 +849,6 @@
   }
 
 
-
-  /* =========================
-     ITEM一覧更新
-  ========================= */
-
   function renderInventory(){
 
     const itemList =
@@ -949,9 +856,7 @@
         "itemList"
       );
 
-
     const rows = [];
-
 
 
     if(inventory.branch > 0){
@@ -975,7 +880,6 @@
     }
 
 
-
     if(inventory.stone > 0){
 
       rows.push(
@@ -997,7 +901,6 @@
     }
 
 
-
     if(rows.length === 0){
 
       itemList.textContent =
@@ -1008,17 +911,11 @@
     }
 
 
-
     itemList.innerHTML =
       rows.join("");
 
   }
 
-
-
-  /* =========================
-     枝を拾う
-  ========================= */
 
   document
     .getElementById(
@@ -1045,19 +942,15 @@
 
         inventory.branch += 1;
 
-
         branchObject
           .classList
           .add("collected");
 
-
         gameSeconds += 10;
-
 
         renderClock();
 
         renderInventory();
-
 
         setMessage(
           "細い枝を拾いました。"
@@ -1066,11 +959,6 @@
       }
     );
 
-
-
-  /* =========================
-     石を拾う
-  ========================= */
 
   document
     .getElementById(
@@ -1097,19 +985,15 @@
 
         inventory.stone += 1;
 
-
         stoneObject
           .classList
           .add("collected");
 
-
         gameSeconds += 10;
-
 
         renderClock();
 
         renderInventory();
-
 
         setMessage(
           "小石を拾いました。"
@@ -1118,11 +1002,6 @@
       }
     );
 
-
-
-  /* =========================
-     ITEM
-  ========================= */
 
   const itemModal =
     document.getElementById(
@@ -1140,9 +1019,7 @@
 
         menuOpen=true;
 
-
         renderInventory();
-
 
         itemModal
           .classList
@@ -1150,7 +1027,6 @@
 
       }
     );
-
 
 
   document
@@ -1163,7 +1039,6 @@
 
         menuOpen=false;
 
-
         itemModal
           .classList
           .remove("open");
@@ -1171,11 +1046,6 @@
       }
     );
 
-
-
-  /* =========================
-     周囲を見る
-  ========================= */
 
   document
     .getElementById(
@@ -1192,18 +1062,14 @@
 
         gameSeconds += 30;
 
-
         renderClock();
-
 
 
         const branchLeft =
           inventory.branch === 0;
 
-
         const stoneLeft =
           inventory.stone === 0;
-
 
 
         if(
@@ -1220,7 +1086,6 @@
         }
 
 
-
         if(branchLeft){
 
           setMessage(
@@ -1230,7 +1095,6 @@
           return;
 
         }
-
 
 
         if(stoneLeft){
@@ -1244,14 +1108,12 @@
         }
 
 
-
         setMessage(
           "雪の積もった針葉樹林です。正面には森の奥へ続く道が見えます。（30秒経過）"
         );
 
       }
     );
-
 
 
   renderClock();
