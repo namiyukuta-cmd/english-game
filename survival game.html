@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eaf4fa">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>雪山サバイバル</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#263845;background:#eaf4fa}
+    body{min-height:100dvh;background:linear-gradient(180deg,#f9fdff 0%,#edf6fb 48%,#dceaf2 100%)}
+    button,a{font:inherit}
+    button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .shell{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
+    .topbar{display:grid;grid-template-columns:48px 1fr 48px;align-items:center}
+    .topbar h1{margin:0;text-align:center;font-size:22px;line-height:1.25}
+    .back{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid #b7cbd7;border-radius:13px;background:#fff;color:#304957;text-decoration:none;font-size:22px;font-weight:800}
+    .scene{position:relative;min-height:210px;padding:20px 18px;border:1px solid #b8ccd7;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#d9edf7 0 53%,#f8fcfe 53% 100%);box-shadow:0 8px 22px rgba(38,67,84,.08)}
+    .mountains{position:absolute;left:0;right:0;top:48px;text-align:center;font-size:72px;letter-spacing:-18px;opacity:.82;pointer-events:none}
+    .trees{position:absolute;left:10px;right:10px;bottom:14px;display:flex;justify-content:space-around;font-size:47px;pointer-events:none}
+    .fire{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:54px;filter:drop-shadow(0 0 13px rgba(255,132,40,.45))}
+    .scene-text{position:relative;z-index:2;width:min(330px,88%);padding:12px 14px;border-radius:15px;background:rgba(255,255,255,.88);box-shadow:0 4px 12px rgba(38,67,84,.06)}
+    .scene-text strong{display:block;margin-bottom:5px;font-size:20px}
+    .scene-text p{margin:0;font-size:17px;line-height:1.55;color:#526a77}
+    .status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .status-card{padding:9px 6px;border:1px solid #c0d2dc;border-radius:14px;background:#fff;text-align:center}
+    .status-card small{display:block;margin-bottom:2px;font-size:17px;color:#607783}
+    .status-card strong{font-size:18px}
+    .message{min-height:58px;padding:11px 13px;border:1px solid #bfd1dc;border-radius:15px;background:#fff;font-size:17px;line-height:1.55;color:#3d5563}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .action-btn{min-height:58px;padding:9px;border:1px solid #9fb7c5;border-radius:16px;background:#fff;color:#294352;font-size:17px;font-weight:800;box-shadow:0 4px 12px rgba(38,67,84,.06)}
+    .action-btn:active{transform:translateY(1px);background:#edf6fb}
+    .action-btn.fire-btn{grid-column:1/-1;background:#35596d;color:#fff;border-color:#35596d}
+    .action-btn.fire-btn[disabled]{opacity:.45}
+    .inventory{padding:14px;border:1px solid #bfd1dc;border-radius:18px;background:rgba(255,255,255,.86)}
+    .inventory h2{margin:0 0 10px;font-size:19px}
+    .items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .item{padding:9px 5px;border-radius:13px;background:#eef6fa;text-align:center;font-size:17px;line-height:1.4}
+    .item strong{display:block;font-size:18px}
+    .goal{margin:0;padding:12px 13px;border-radius:15px;background:#f9fcfe;border:1px dashed #a9c1cf;font-size:17px;line-height:1.55;text-align:center;color:#526b79}
+    @media(max-width:370px){.shell{padding-left:10px;padding-right:10px}.scene{min-height:195px}.mountains{font-size:62px}.trees{font-size:42px}.action-btn{font-size:17px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="back" href="survival%20game_TOP.html" aria-label="サバイバルトップへ戻る">←</a>
+      <h1>雪山サバイバル</h1>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <section class="scene" aria-label="雪山">
+      <div class="mountains" aria-hidden="true">🏔️🏔️</div>
+      <div class="trees" aria-hidden="true"><span>🌲</span><span>🌲</span><span>🌲</span></div>
+      <div id="fireIcon" class="fire" aria-hidden="true" hidden>🔥</div>
+      <div class="scene-text">
+        <strong id="sceneTitle">雪山・針葉樹林</strong>
+        <p id="sceneDescription">雪の中に、折れた枝や石が見えます。まずは使えそうな物を集めましょう。</p>
+      </div>
+    </section>
+
+    <section class="status" aria-label="状態">
+      <div class="status-card"><small>体温</small><strong id="warmth">寒い</strong></div>
+      <div class="status-card"><small>空腹</small><strong id="hunger">平気</strong></div>
+      <div class="status-card"><small>焚き火</small><strong id="fireState">なし</strong></div>
+    </section>
+
+    <div id="message" class="message" aria-live="polite">何も持っていません。周囲を探してみましょう。</div>
+
+    <section class="actions" aria-label="行動">
+      <button id="pickBranch" class="action-btn" type="button">🌿 枝を拾う</button>
+      <button id="pickStone" class="action-btn" type="button">🪨 石を拾う</button>
+      <button id="findFood" class="action-btn" type="button">🫐 実を探す</button>
+      <button id="lookAround" class="action-btn" type="button">👀 周囲を見る</button>
+      <button id="makeFire" class="action-btn fire-btn" type="button">🔥 焚き火を作る<br>枝3・石4</button>
+    </section>
+
+    <section class="inventory" aria-label="所持品">
+      <h2>所持品</h2>
+      <div class="items">
+        <div class="item">🌿 枝<strong id="branchCount">0</strong></div>
+        <div class="item">🪨 石<strong id="stoneCount">0</strong></div>
+        <div class="item">🫐 実<strong id="foodCount">0</strong></div>
+      </div>
+    </section>
+
+    <p id="goal" class="goal">最初の目標：枝を3本、石を4個集めて焚き火を作る。</p>
+  </main>
+
+  <script>
+    const SAVE_KEY='englishGameSurvivalSaveV1';
+    const params=new URLSearchParams(location.search);
+
+    const defaultState={
+      branch:0,
+      stone:0,
+      food:0,
+      fire:false,
+      turns:0
+    };
+
+    let state={...defaultState};
+
+    function load(){
+      if(params.get('new')==='1'){
+        try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+        return;
+      }
+      try{
+        const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+        if(saved&&typeof saved==='object') state={...defaultState,...saved};
+      }catch(e){}
+    }
+
+    function save(){
+      try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+    }
+
+    function setMessage(text){
+      document.getElementById('message').textContent=text;
+    }
+
+    function render(){
+      document.getElementById('branchCount').textContent=state.branch;
+      document.getElementById('stoneCount').textContent=state.stone;
+      document.getElementById('foodCount').textContent=state.food;
+      document.getElementById('fireIcon').hidden=!state.fire;
+      document.getElementById('fireState').textContent=state.fire?'あり':'なし';
+      document.getElementById('warmth').textContent=state.fire?'暖かい':'寒い';
+      document.getElementById('hunger').textContent=state.food>=2?'少し安心':'平気';
+
+      const fireBtn=document.getElementById('makeFire');
+      fireBtn.disabled=state.fire;
+      fireBtn.innerHTML=state.fire?'🔥 焚き火が燃えている':'🔥 焚き火を作る<br>枝3・石4';
+
+      if(state.fire){
+        document.getElementById('sceneTitle').textContent='小さな焚き火';
+        document.getElementById('sceneDescription').textContent='火がつきました。凍える心配が少し減りました。次に何をするか考えられそうです。';
+        document.getElementById('goal').textContent='最初の目標達成：焚き火を起こした。';
+      }
+    }
+
+    function act(){
+      state.turns++;
+      save();
+      render();
+    }
+
+    document.getElementById('pickBranch').addEventListener('click',()=>{
+      state.branch++;
+      setMessage('雪の上から、乾いている枝を1本拾いました。');
+      act();
+    });
+
+    document.getElementById('pickStone').addEventListener('click',()=>{
+      state.stone++;
+      setMessage('雪から出ている石を1個拾いました。');
+      act();
+    });
+
+    document.getElementById('findFood').addEventListener('click',()=>{
+      const found=Math.random()<0.55;
+      if(found){
+        state.food++;
+        setMessage('雪の少ない木の根元で、小さな実を見つけました。');
+      }else{
+        setMessage('食べられそうな物を探しましたが、今回は見つかりませんでした。');
+      }
+      act();
+    });
+
+    document.getElementById('lookAround').addEventListener('click',()=>{
+      const texts=[
+        '針葉樹が続いています。少し先にも枝が落ちています。',
+        '雪の下から、いくつか石がのぞいています。',
+        '風が強くなっています。火を起こせる場所を作った方がよさそうです。',
+        '木々の向こうは白く霞んでいて、遠くまでは見えません。'
+      ];
+      setMessage(texts[Math.floor(Math.random()*texts.length)]);
+      act();
+    });
+
+    document.getElementById('makeFire').addEventListener('click',()=>{
+      if(state.fire){
+        setMessage('焚き火はすでに燃えています。');
+        return;
+      }
+      if(state.branch<3||state.stone<4){
+        const needBranch=Math.max(0,3-state.branch);
+        const needStone=Math.max(0,4-state.stone);
+        const missing=[];
+        if(needBranch)missing.push('枝あと'+needBranch+'本');
+        if(needStone)missing.push('石あと'+needStone+'個');
+        setMessage('まだ材料が足りません。'+missing.join('、')+'必要です。');
+        return;
+      }
+      state.branch-=3;
+      state.stone-=4;
+      state.fire=true;
+      setMessage('石で囲いを作り、枝を組みました。小さな火がつきました。');
+      act();
+    });
+
+    load();
+    render();
+    if(state.fire)setMessage('焚き火が燃れています。ここまでの進行は保存されています。');
+  </script>
+</body>
+</html>
