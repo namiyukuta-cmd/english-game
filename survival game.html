@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+
   <meta charset="utf-8">
 
   <meta
@@ -46,10 +47,8 @@
 
     button{
       touch-action:manipulation;
-
       -webkit-user-select:none;
       user-select:none;
-
       -webkit-tap-highlight-color:transparent;
     }
 
@@ -66,7 +65,7 @@
 
       padding:
         calc(5px + env(safe-area-inset-top))
-        7px
+        6px
         calc(5px + env(safe-area-inset-bottom));
 
       display:flex;
@@ -79,7 +78,7 @@
 
 
     /* =========================
-       TOP
+       上部
     ========================= */
 
     .topbar{
@@ -90,14 +89,13 @@
       grid-template-columns:
         36px
         52px
-        78px
+        80px
         minmax(0,1fr);
 
       align-items:center;
 
       gap:4px;
     }
-
 
     .back{
       width:36px;
@@ -121,7 +119,6 @@
       line-height:1;
     }
 
-
     .top-small{
       height:36px;
 
@@ -136,7 +133,7 @@
 
       background:#fff;
 
-      font-size:14px;
+      font-size:13px;
       line-height:1;
 
       font-weight:800;
@@ -144,13 +141,11 @@
       white-space:nowrap;
     }
 
-
     .place{
       min-width:0;
 
       overflow:hidden;
       text-overflow:ellipsis;
-      white-space:nowrap;
     }
 
 
@@ -162,16 +157,13 @@
       flex:0 0 auto;
 
       display:grid;
-
-      grid-template-columns:
-        repeat(3,1fr);
+      grid-template-columns:repeat(3,1fr);
 
       gap:4px;
     }
 
-
     .meter{
-      height:34px;
+      height:32px;
 
       min-width:0;
 
@@ -189,16 +181,14 @@
       background:#fff;
     }
 
-
     .meter-icon{
-      width:20px;
-      height:20px;
+      width:18px;
+      height:18px;
 
-      flex:0 0 20px;
+      flex:0 0 18px;
 
       overflow:visible;
     }
-
 
     .meter-outline{
       fill:none;
@@ -210,11 +200,10 @@
       stroke-linecap:round;
     }
 
-
     .meter-value{
       min-width:0;
 
-      font-size:14px;
+      font-size:13px;
       line-height:1;
 
       font-weight:900;
@@ -224,20 +213,17 @@
 
 
     /* =========================
-       背景画像エリア
-
-       横幅を少し短く
-       縦も以前より短め
+       背景
     ========================= */
 
     .scene{
       position:relative;
 
-      width:94%;
+      width:96%;
 
-      max-width:500px;
+      max-width:510px;
 
-      aspect-ratio:4 / 3;
+      aspect-ratio:1.25 / 1;
 
       margin:0 auto;
 
@@ -246,11 +232,10 @@
       overflow:hidden;
 
       border:1px solid #8c9296;
-      border-radius:12px;
+      border-radius:13px;
 
-      background:#d9dcde;
+      background:#ddd;
     }
-
 
     .scene-background{
       position:absolute;
@@ -263,15 +248,12 @@
       background-position:center;
       background-repeat:no-repeat;
 
-      transition:
-        opacity .12s ease;
-
       pointer-events:none;
     }
 
 
     /* =========================
-       拾える物
+       拾えるアイテム
     ========================= */
 
     .scene-objects{
@@ -283,7 +265,6 @@
 
       pointer-events:none;
     }
-
 
     .scene-object{
       position:absolute;
@@ -297,11 +278,10 @@
 
       background:transparent;
 
-      pointer-events:auto;
-
       cursor:pointer;
-    }
 
+      pointer-events:auto;
+    }
 
     .scene-object img{
       display:block;
@@ -314,80 +294,143 @@
       pointer-events:none;
     }
 
-
     .scene-object:active{
       transform:scale(.95);
     }
-
 
     .scene-object.hidden{
       display:none;
     }
 
-
     #branchObject{
-      width:28%;
+      width:27%;
 
       aspect-ratio:1 / 1;
 
-      left:5%;
+      left:4%;
       bottom:0;
     }
 
-
     #stoneObject{
-      width:17%;
+      width:16%;
 
       aspect-ratio:1 / 1;
 
-      right:9%;
+      right:8%;
       bottom:7%;
     }
 
 
     /* =========================
-       下部
-       メッセージ＋十字キー
+       説明文パネル
     ========================= */
 
-    .lower-row{
-      width:100%;
+    .scene-notice-shell{
+      position:absolute;
 
-      min-height:112px;
+      left:4%;
+      right:4%;
+      bottom:0;
 
-      flex:1 1 auto;
+      z-index:60;
 
-      display:grid;
+      transform:
+        translateY(
+          calc(100% - 25px)
+        );
 
-      grid-template-columns:
-        minmax(0,1fr)
-        116px;
+      transition:
+        transform .24s ease;
 
-      gap:5px;
+      pointer-events:none;
+    }
 
-      align-items:end;
+    .scene-notice-shell.open{
+      transform:translateY(0);
+    }
+
+    .scene-notice{
+      min-height:72px;
+      max-height:120px;
+
+      overflow:auto;
+
+      padding:9px 11px;
+
+      border:
+        1px solid
+        rgba(70,70,70,.55);
+
+      border-radius:
+        11px
+        11px
+        0
+        0;
+
+      background:
+        rgba(255,255,255,.93);
+
+      font-size:17px;
+      line-height:1.45;
+
+      font-weight:600;
+
+      white-space:pre-wrap;
+
+      pointer-events:auto;
+    }
+
+    .notice-tab{
+      width:54px;
+      height:25px;
+
+      margin:0 auto;
+
+      padding:0;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border:
+        1px solid
+        rgba(70,70,70,.55);
+
+      border-top:0;
+
+      border-radius:
+        0
+        0
+        9px
+        9px;
+
+      background:
+        rgba(220,220,220,.94);
+
+      color:#333;
+
+      font-size:16px;
+      font-weight:900;
+
+      pointer-events:auto;
     }
 
 
-    .message{
-      align-self:stretch;
+    /* =========================
+       十字キーの場所
+    ========================= */
 
-      min-height:84px;
+    .movement-row{
+      flex:1 1 auto;
 
-      padding:8px 9px;
+      min-height:142px;
 
       display:flex;
-      align-items:flex-start;
 
-      border:1px solid #aaa;
-      border-radius:11px;
+      align-items:flex-end;
+      justify-content:flex-end;
 
-      background:#fff;
-
-      font-size:17px;
-      line-height:1.42;
-
-      overflow:auto;
+      padding-right:4px;
     }
 
 
@@ -398,20 +441,17 @@
     .move-pad{
       position:relative;
 
-      width:116px;
-      height:116px;
+      width:138px;
+      height:138px;
 
-      flex:0 0 116px;
-
-      align-self:end;
+      flex:0 0 138px;
     }
-
 
     .direction{
       position:absolute;
 
-      width:44px;
-      height:44px;
+      width:54px;
+      height:54px;
 
       padding:0;
 
@@ -419,14 +459,18 @@
       align-items:center;
       justify-content:center;
 
-      border:1px solid rgba(50,50,50,.35);
-      border-radius:9px;
+      border:
+        1px solid
+        rgba(45,45,45,.38);
 
-      background:rgba(90,90,90,.55);
+      border-radius:11px;
 
-      color:#111;
+      background:
+        rgba(90,90,90,.58);
 
-      font-size:23px;
+      color:#222;
+
+      font-size:28px;
       line-height:1;
 
       font-weight:900;
@@ -437,65 +481,66 @@
         transform .08s ease;
     }
 
-
     .direction.active{
-      opacity:.82;
+      opacity:.86;
     }
-
 
     .direction.active:active{
       transform:scale(.92);
 
-      background:rgba(65,65,65,.72);
+      background:
+        rgba(60,60,60,.75);
     }
-
 
     .direction.inactive{
-      opacity:.16;
+      opacity:.14;
 
-      background:rgba(100,100,100,.34);
-
-      pointer-events:none;
+      background:
+        rgba(120,120,120,.28);
     }
 
+    .move-pad.locked
+    .direction.active{
+      opacity:.27;
+    }
 
     #moveUp{
       top:0;
-      left:36px;
+      left:42px;
     }
-
 
     #moveDown{
       bottom:0;
-      left:36px;
+      left:42px;
     }
-
 
     #moveLeft{
       left:0;
-      top:36px;
+      top:42px;
     }
-
 
     #moveRight{
       right:0;
-      top:36px;
+      top:42px;
     }
-
 
     .pad-center{
       position:absolute;
 
-      left:45px;
-      top:45px;
+      left:52px;
+      top:52px;
 
-      width:26px;
-      height:26px;
+      width:34px;
+      height:34px;
 
-      border:1px solid rgba(50,50,50,.25);
-      border-radius:8px;
+      border:
+        1px solid
+        rgba(45,45,45,.28);
 
-      background:rgba(90,90,90,.27);
+      border-radius:9px;
+
+      background:
+        rgba(90,90,90,.30);
 
       pointer-events:none;
     }
@@ -517,7 +562,6 @@
       gap:5px;
     }
 
-
     .menu-button{
       min-height:46px;
 
@@ -532,9 +576,162 @@
       font-weight:900;
     }
 
-
     .menu-button:active{
       background:#eee;
+    }
+
+
+    /* =========================
+       低体温
+       白い視界
+    ========================= */
+
+    .cold-vision{
+      position:fixed;
+
+      inset:0;
+
+      z-index:50;
+
+      pointer-events:none;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          var(--cold-opacity,0)
+        );
+
+      transition:
+        background .8s ease;
+    }
+
+
+    /* =========================
+       体力低下
+       赤い視界
+    ========================= */
+
+    .health-vision{
+      position:fixed;
+
+      inset:0;
+
+      z-index:51;
+
+      pointer-events:none;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(140,0,0,0) 30%,
+          rgba(
+            140,
+            0,
+            0,
+            var(--red-opacity,0)
+          )
+          100%
+        );
+
+      transition:
+        background .8s ease;
+    }
+
+
+    /* =========================
+       画面揺れ
+    ========================= */
+
+    @keyframes shakeLight{
+
+      0%{
+        transform:translate(0,0);
+      }
+
+      20%{
+        transform:translate(-2px,1px);
+      }
+
+      40%{
+        transform:translate(2px,-1px);
+      }
+
+      60%{
+        transform:translate(-1px,-1px);
+      }
+
+      80%{
+        transform:translate(1px,1px);
+      }
+
+      100%{
+        transform:translate(0,0);
+      }
+
+    }
+
+    @keyframes shakeHeavy{
+
+      0%{
+        transform:translate(0,0);
+      }
+
+      10%{
+        transform:translate(-4px,2px);
+      }
+
+      20%{
+        transform:translate(4px,-3px);
+      }
+
+      30%{
+        transform:translate(-3px,-2px);
+      }
+
+      40%{
+        transform:translate(4px,3px);
+      }
+
+      50%{
+        transform:translate(-4px,0);
+      }
+
+      60%{
+        transform:translate(3px,-3px);
+      }
+
+      70%{
+        transform:translate(-2px,3px);
+      }
+
+      80%{
+        transform:translate(3px,1px);
+      }
+
+      90%{
+        transform:translate(-2px,-1px);
+      }
+
+      100%{
+        transform:translate(0,0);
+      }
+
+    }
+
+    .game.shake-light{
+      animation:
+        shakeLight
+        .32s
+        linear;
+    }
+
+    .game.shake-heavy{
+      animation:
+        shakeHeavy
+        .48s
+        linear;
     }
 
 
@@ -559,11 +756,9 @@
       background:rgba(0,0,0,.5);
     }
 
-
     .modal.open{
       display:flex;
     }
-
 
     .modal-card{
       width:min(430px,100%);
@@ -579,13 +774,11 @@
       background:#fff;
     }
 
-
     .modal-card h2{
       margin:0 0 12px;
 
       font-size:22px;
     }
-
 
     .pause-note{
       margin:0 0 12px;
@@ -602,14 +795,12 @@
       text-align:center;
     }
 
-
     .item-list{
       min-height:55px;
 
       font-size:17px;
       line-height:1.6;
     }
-
 
     .item-row{
       min-height:50px;
@@ -625,17 +816,14 @@
       border-bottom:1px solid #ddd;
     }
 
-
     .item-row:last-child{
       border-bottom:0;
     }
-
 
     .item-name{
       font-size:17px;
       font-weight:700;
     }
-
 
     .item-count{
       flex:0 0 auto;
@@ -643,7 +831,6 @@
       font-size:17px;
       font-weight:900;
     }
-
 
     .close-button{
       width:100%;
@@ -680,14 +867,12 @@
 
       padding:20px;
 
-      background:rgba(0,0,0,.83);
+      background:rgba(0,0,0,.84);
     }
-
 
     .dead-modal.open{
       display:flex;
     }
-
 
     .dead-card{
       width:min(400px,100%);
@@ -701,7 +886,6 @@
       text-align:center;
     }
 
-
     .dead-title{
       margin:0;
 
@@ -709,14 +893,12 @@
       letter-spacing:.08em;
     }
 
-
     .dead-reason{
       margin:15px 0 20px;
 
       font-size:17px;
       line-height:1.5;
     }
-
 
     .restart-button{
       width:100%;
@@ -735,97 +917,80 @@
 
     @media(max-width:390px){
 
-      .game{
-        padding-left:5px;
-        padding-right:5px;
-      }
-
-
       .topbar{
         grid-template-columns:
           34px
           48px
-          74px
+          76px
           minmax(0,1fr);
       }
-
 
       .back{
         width:34px;
         height:34px;
       }
 
-
       .top-small{
         height:34px;
 
-        font-size:13px;
+        font-size:12px;
       }
-
 
       .meter{
-        height:32px;
+        height:30px;
       }
-
 
       .meter-icon{
-        width:18px;
-        height:18px;
+        width:17px;
+        height:17px;
 
-        flex-basis:18px;
+        flex-basis:17px;
       }
-
 
       .meter-value{
-        font-size:13px;
+        font-size:12px;
       }
 
-
-      .lower-row{
-        grid-template-columns:
-          minmax(0,1fr)
-          108px;
+      .movement-row{
+        min-height:134px;
       }
-
 
       .move-pad{
-        width:108px;
-        height:108px;
-      }
+        width:130px;
+        height:130px;
 
+        flex-basis:130px;
+      }
 
       .direction{
-        width:42px;
-        height:42px;
-      }
+        width:50px;
+        height:50px;
 
+        font-size:26px;
+      }
 
       #moveUp{
-        left:33px;
+        left:40px;
       }
-
 
       #moveDown{
-        left:33px;
+        left:40px;
       }
-
 
       #moveLeft{
-        top:33px;
+        top:40px;
       }
-
 
       #moveRight{
-        top:33px;
+        top:40px;
       }
 
-
       .pad-center{
-        left:42px;
-        top:42px;
+        left:49px;
+        top:49px;
 
-        width:24px;
-        height:24px;
+        width:32px;
+        height:32px;
       }
 
     }
@@ -838,7 +1003,10 @@
 <body>
 
 
-<main class="game">
+<main
+  id="game"
+  class="game"
+>
 
 
   <!-- =========================
@@ -1130,7 +1298,7 @@
 
 
   <!-- =========================
-       背景
+       景色
   ========================= -->
 
   <section class="scene">
@@ -1140,6 +1308,7 @@
       id="sceneBackground"
       class="scene-background"
     ></div>
+
 
 
     <div
@@ -1164,6 +1333,7 @@
       </button>
 
 
+
       <button
         id="stoneObject"
         class="scene-object"
@@ -1183,27 +1353,46 @@
     </div>
 
 
+
+    <!-- 説明パネル -->
+
+    <div
+      id="noticeShell"
+      class="scene-notice-shell"
+    >
+
+      <div
+        id="sceneNotice"
+        class="scene-notice"
+      ></div>
+
+
+      <button
+        id="noticeTab"
+        class="notice-tab"
+        type="button"
+        aria-label="説明を開閉"
+      >
+        ▲
+      </button>
+
+
+    </div>
+
+
   </section>
 
 
 
   <!-- =========================
-       説明＋十字キー
+       十字キー
   ========================= -->
 
-  <section class="lower-row">
+  <section class="movement-row">
 
 
     <div
-      id="message"
-      class="message"
-    >
-      雪の積もった針葉樹林です。足元に拾えそうな物があります。
-    </div>
-
-
-
-    <div
+      id="movePad"
       class="move-pad"
       aria-label="移動"
     >
@@ -1291,6 +1480,24 @@
 
 
 </main>
+
+
+
+<!-- 低体温の白い視界 -->
+
+<div
+  id="coldVision"
+  class="cold-vision"
+></div>
+
+
+
+<!-- 体力低下の赤い視界 -->
+
+<div
+  id="healthVision"
+  class="health-vision"
+></div>
 
 
 
@@ -1397,6 +1604,22 @@
   let gameOver =
     false;
 
+  let interactionLocked =
+    false;
+
+  let noticeOpen =
+    false;
+
+  let noticeTimer =
+    null;
+
+  let lastNotice =
+    "";
+
+
+  /* =========================
+     生存パラメータ
+  ========================= */
 
   let bodyTemperature =
     36.7;
@@ -1408,6 +1631,10 @@
     100;
 
 
+  /* =========================
+     ITEM
+  ========================= */
+
   const inventory = {
 
     branch:0,
@@ -1418,29 +1645,43 @@
 
 
   /* =========================
-     移動時の消耗
-
-     1回の移動
-     約3分
-
-     3回ほど進むと黄色
-     さらに3回ほどで赤
+     移動
   ========================= */
 
   const MOVE_SECONDS =
     180;
 
   const MOVE_TEMP_DROP =
-    0.60;
+    0.52;
 
   const MOVE_STAMINA_COST =
     1.0;
 
 
   /* =========================
-     背景マップ
+     警告済み状態
+  ========================= */
 
-     GitHubに現在ある画像を使用
+  const statusFlags = {
+
+    cold35:false,
+    cold33:false,
+    cold31:false,
+
+    hunger40:false,
+    hunger20:false,
+    hunger0:false,
+
+    stamina60:false,
+    stamina35:false,
+    stamina20:false,
+    stamina10:false
+
+  };
+
+
+  /* =========================
+     シーン
   ========================= */
 
   const SCENES = {
@@ -1455,10 +1696,10 @@
         "針葉樹林",
 
       message:
-        "雪の積もった針葉樹林です。足元に細い枝と小石があります。",
+        "雪の積もった針葉樹林です。\n足元に拾えそうな物があります。",
 
       look:
-        "雪深い林が続いています。今いる場所からは、人の気配も建物も見えません。",
+        "雪深い針葉樹林です。\n人の気配も建物も見当たりません。",
 
       objects:true,
 
@@ -1484,7 +1725,7 @@
         "雪を踏みながら林の奥へ進みます。",
 
       look:
-        "似たような木々が続いています。後ろには、今通ってきた道があります。",
+        "木々の間に細い道が続いています。",
 
       objects:false,
 
@@ -1507,10 +1748,10 @@
         "針葉樹林",
 
       message:
-        "さらに林の中を進みます。身体がかなり冷えてきました。",
+        "さらに雪深い林の中へ進みます。",
 
       look:
-        "前方にも道が続いています。右側にも進めそうな場所があります。",
+        "前方にも道が続いています。\n右にも進めそうな場所があります。",
 
       objects:false,
 
@@ -1533,10 +1774,10 @@
         "倒木",
 
       message:
-        "倒木が道をふさいでいます。この先へは進めません。",
+        "倒木が道を塞いでいます。\nこの先へは進めそうにありません。",
 
       look:
-        "雪をかぶった倒木が完全に行く手を遮っています。引き返すしかなさそうです。",
+        "大きな倒木が完全に行く手を遮っています。\n引き返した方がよさそうです。",
 
       objects:false,
 
@@ -1559,10 +1800,10 @@
         "針葉樹林",
 
       message:
-        "林の奥へ進みます。指先の感覚が鈍くなってきました。",
+        "林の奥へ進みます。\n指先が冷たくなってきました。",
 
       look:
-        "木々の間を抜ける道がまだ続いています。",
+        "まだ林が続いています。\n前へ進むことはできそうです。",
 
       objects:false,
 
@@ -1585,10 +1826,10 @@
         "林の奥",
 
       message:
-        "雪の中を進みます。寒さが身体の芯まで入り込んできます。",
+        "雪の中を進みます。\n身体の芯まで冷えてきます。",
 
       look:
-        "少し先まで見渡せますが、まだ建物は見えません。",
+        "少し先まで見渡せますが、建物は見えません。",
 
       objects:false,
 
@@ -1611,10 +1852,10 @@
         "林の奥",
 
       message:
-        "足を止めると一気に身体が冷えそうです。さらに進みます。",
+        "足を止めると、一気に身体が冷えそうです。",
 
       look:
-        "同じような林が続いています。ただ、前方は少し明るく見えます。",
+        "前方が少し明るく見えます。\n林の出口が近いのかもしれません。",
 
       objects:false,
 
@@ -1637,10 +1878,10 @@
         "林の出口",
 
       message:
-        "木々の密度が少し低くなってきました。林を抜けられそうです。",
+        "木々の密度が低くなってきました。\n林を抜けられそうです。",
 
       look:
-        "前方が開けています。何か人工物がないか確認しながら進みます。",
+        "前方が開けています。\nさらに先へ進めそうです。",
 
       objects:false,
 
@@ -1663,10 +1904,10 @@
         "林の外れ",
 
       message:
-        "林を抜けるように進みます。体温がかなり危険な状態です。",
+        "林を抜けるように進みます。\n寒さがかなり厳しくなってきました。",
 
       look:
-        "木々の向こうに開けた場所があります。もう少し先まで進めそうです。",
+        "木々の向こうに開けた場所があります。",
 
       objects:false,
 
@@ -1689,10 +1930,10 @@
         "山小屋付近",
 
       message:
-        "遠くに人工物が見えます。……山小屋のようです。",
+        "遠くに人工物が見えます。\n……山小屋のようです。",
 
       look:
-        "雪の向こうに小さな山小屋があります。辿り着ければ寒さをしのげるかもしれません。",
+        "雪の向こうに山小屋があります。\n中へ入れれば寒さをしのげるかもしれません。",
 
       objects:false,
 
@@ -1715,10 +1956,10 @@
         "山小屋",
 
       message:
-        "ようやく山小屋の前まで辿り着きました。雪の上に赤黒い跡が見えます。",
+        "ようやく山小屋の前まで辿り着きました。\n雪の上に赤黒い跡が見えます。",
 
       look:
-        "山小屋の周囲を確認します。誰かがここへ入ったような血の跡が残っています。",
+        "山小屋へ続く血の跡があります。\n誰かがここへ入ったようです。",
 
       objects:false,
 
@@ -1767,7 +2008,9 @@
   function renderClock(){
 
     const total =
-      Math.floor(gameSeconds);
+      Math.floor(
+        gameSeconds
+      );
 
     const day =
       Math.floor(
@@ -1784,7 +2027,11 @@
 
     const minute =
       Math.floor(
-        (secondInDay % 3600) / 60
+        (
+          secondInDay % 3600
+        )
+        /
+        60
       );
 
     const second =
@@ -1792,26 +2039,45 @@
 
 
     document
-      .getElementById("day")
+      .getElementById(
+        "day"
+      )
       .textContent =
         "Day." + day;
 
 
     document
-      .getElementById("clock")
+      .getElementById(
+        "clock"
+      )
       .textContent =
-        String(hour)
-          .padStart(2,"0")
+        String(
+          hour
+        )
+        .padStart(
+          2,
+          "0"
+        )
         +
         ":"
         +
-        String(minute)
-          .padStart(2,"0")
+        String(
+          minute
+        )
+        .padStart(
+          2,
+          "0"
+        )
         +
         ":"
         +
-        String(second)
-          .padStart(2,"0");
+        String(
+          second
+        )
+        .padStart(
+          2,
+          "0"
+        );
 
   }
 
@@ -1821,17 +2087,21 @@
   ========================= */
 
   function normalMeterColor(
-    percent
+    value
   ){
 
-    if(percent <= 20){
+    if(
+      value <= 20
+    ){
 
       return "#c62828";
 
     }
 
 
-    if(percent <= 40){
+    if(
+      value <= 40
+    ){
 
       return "#d6a000";
 
@@ -1845,14 +2115,18 @@
 
   function temperatureColor(){
 
-    if(bodyTemperature < 33){
+    if(
+      bodyTemperature < 33
+    ){
 
       return "#c62828";
 
     }
 
 
-    if(bodyTemperature < 35){
+    if(
+      bodyTemperature < 35
+    ){
 
       return "#d6a000";
 
@@ -1865,7 +2139,7 @@
 
 
   /* =========================
-     SVG塗り量
+     SVGメーター
   ========================= */
 
   function setSvgFillLevel(
@@ -1880,17 +2154,26 @@
         100
       );
 
+
     const height =
-      24 * value / 100;
+      24
+      *
+      value
+      /
+      100;
+
 
     const y =
-      24 - height;
+      24
+      -
+      height;
 
 
     const rect =
-      document.getElementById(
-        rectId
-      );
+      document
+        .getElementById(
+          rectId
+        );
 
 
     rect.setAttribute(
@@ -1946,7 +2229,8 @@
       .getElementById(
         "tempFill"
       )
-      .style.fill =
+      .style
+      .fill =
         temperatureColor();
 
 
@@ -1971,7 +2255,8 @@
       .getElementById(
         "hungerFill"
       )
-      .style.fill =
+      .style
+      .fill =
         normalMeterColor(
           hunger
         );
@@ -1997,7 +2282,8 @@
       .getElementById(
         "staminaFill"
       )
-      .style.fill =
+      .style
+      .fill =
         normalMeterColor(
           stamina
         );
@@ -2011,6 +2297,777 @@
         Math.round(
           stamina
         );
+
+
+    updateVisualEffects();
+
+  }
+
+
+  /* =========================
+     白い視界
+  ========================= */
+
+  function coldOpacity(){
+
+    if(
+      bodyTemperature >= 35
+    ){
+
+      return 0;
+
+    }
+
+
+    if(
+      bodyTemperature >= 33
+    ){
+
+      return (
+        (
+          35
+          -
+          bodyTemperature
+        )
+        /
+        2
+      )
+      *
+      0.09;
+
+    }
+
+
+    if(
+      bodyTemperature >= 31
+    ){
+
+      return (
+        0.09
+        +
+        (
+          (
+            33
+            -
+            bodyTemperature
+          )
+          /
+          2
+        )
+        *
+        0.13
+      );
+
+    }
+
+
+    if(
+      bodyTemperature >= 29
+    ){
+
+      return (
+        0.22
+        +
+        (
+          (
+            31
+            -
+            bodyTemperature
+          )
+          /
+          2
+        )
+        *
+        0.13
+      );
+
+    }
+
+
+    return 0.38;
+
+  }
+
+
+  /* =========================
+     赤い視界
+  ========================= */
+
+  function redOpacity(){
+
+    if(
+      stamina > 35
+    ){
+
+      return 0;
+
+    }
+
+
+    if(
+      stamina > 20
+    ){
+
+      return (
+        (
+          35
+          -
+          stamina
+        )
+        /
+        15
+      )
+      *
+      0.13;
+
+    }
+
+
+    if(
+      stamina > 10
+    ){
+
+      return (
+        0.13
+        +
+        (
+          (
+            20
+            -
+            stamina
+          )
+          /
+          10
+        )
+        *
+        0.14
+      );
+
+    }
+
+
+    return 0.34;
+
+  }
+
+
+  function updateVisualEffects(){
+
+    document
+      .getElementById(
+        "coldVision"
+      )
+      .style
+      .setProperty(
+        "--cold-opacity",
+        coldOpacity()
+      );
+
+
+    document
+      .getElementById(
+        "healthVision"
+      )
+      .style
+      .setProperty(
+        "--red-opacity",
+        redOpacity()
+      );
+
+  }
+
+
+  /* =========================
+     画面揺れ
+  ========================= */
+
+  function triggerShake(
+    strength="light"
+  ){
+
+    const game =
+      document
+        .getElementById(
+          "game"
+        );
+
+
+    game.classList.remove(
+      "shake-light",
+      "shake-heavy"
+    );
+
+
+    void game.offsetWidth;
+
+
+    if(
+      strength === "heavy"
+    ){
+
+      game.classList.add(
+        "shake-heavy"
+      );
+
+    }else{
+
+      game.classList.add(
+        "shake-light"
+      );
+
+    }
+
+
+    setTimeout(
+      ()=>{
+
+        game.classList.remove(
+          "shake-light",
+          "shake-heavy"
+        );
+
+      },
+      600
+    );
+
+  }
+
+
+  /* =========================
+     説明パネル
+  ========================= */
+
+  const noticeShell =
+    document
+      .getElementById(
+        "noticeShell"
+      );
+
+  const sceneNotice =
+    document
+      .getElementById(
+        "sceneNotice"
+      );
+
+  const noticeTab =
+    document
+      .getElementById(
+        "noticeTab"
+      );
+
+
+  function setNoticeOpen(
+    open
+  ){
+
+    noticeOpen =
+      open;
+
+
+    if(open){
+
+      noticeShell
+        .classList
+        .add(
+          "open"
+        );
+
+
+      noticeTab
+        .textContent =
+          "▼";
+
+    }else{
+
+      noticeShell
+        .classList
+        .remove(
+          "open"
+        );
+
+
+      noticeTab
+        .textContent =
+          "▲";
+
+    }
+
+  }
+
+
+  function showNotice(
+    text,
+    duration=4500
+  ){
+
+    if(
+      noticeTimer
+    ){
+
+      clearTimeout(
+        noticeTimer
+      );
+
+    }
+
+
+    lastNotice =
+      text;
+
+
+    sceneNotice
+      .textContent =
+        text;
+
+
+    /*
+      説明が開いている間は、
+      必ずゲーム時間を停止する。
+    */
+
+    interactionLocked =
+      true;
+
+
+    setNoticeOpen(
+      true
+    );
+
+
+    renderDirections();
+
+
+    noticeTimer =
+      setTimeout(
+        ()=>{
+
+          hideNotice();
+
+        },
+        duration
+      );
+
+  }
+
+
+  function hideNotice(){
+
+    if(
+      noticeTimer
+    ){
+
+      clearTimeout(
+        noticeTimer
+      );
+
+      noticeTimer =
+        null;
+
+    }
+
+
+    setNoticeOpen(
+      false
+    );
+
+
+    /*
+      説明を閉じた時だけ
+      通常移動画面へ戻る。
+    */
+
+    interactionLocked =
+      false;
+
+
+    renderDirections();
+
+  }
+
+
+  noticeTab
+    .addEventListener(
+      "click",
+      ()=>{
+
+
+        if(
+          noticeOpen
+        ){
+
+          hideNotice();
+
+          return;
+
+        }
+
+
+        if(
+          !lastNotice
+        ){
+
+          return;
+
+        }
+
+
+        /*
+          手動で読み返す場合も
+          ゲーム時間を停止する。
+        */
+
+        interactionLocked =
+          true;
+
+
+        sceneNotice
+          .textContent =
+            lastNotice;
+
+
+        setNoticeOpen(
+          true
+        );
+
+
+        renderDirections();
+
+
+        /*
+          手動で開いた説明は
+          勝手には閉じない。
+          タブを押して閉じる。
+        */
+
+        if(
+          noticeTimer
+        ){
+
+          clearTimeout(
+            noticeTimer
+          );
+
+          noticeTimer =
+            null;
+
+        }
+
+
+      }
+    );
+
+
+  /* =========================
+     状態警告
+  ========================= */
+
+  function collectStatusWarnings(){
+
+    const warnings =
+      [];
+
+
+    /* 体温 */
+
+    if(
+      bodyTemperature >= 35
+    ){
+
+      statusFlags.cold35 =
+        false;
+
+      statusFlags.cold33 =
+        false;
+
+      statusFlags.cold31 =
+        false;
+
+    }
+
+
+    if(
+      bodyTemperature < 35
+      &&
+      !statusFlags.cold35
+    ){
+
+      statusFlags.cold35 =
+        true;
+
+      warnings.push(
+        "身体が冷えてきました。"
+      );
+
+      triggerShake(
+        "light"
+      );
+
+    }
+
+
+    if(
+      bodyTemperature < 33
+      &&
+      !statusFlags.cold33
+    ){
+
+      statusFlags.cold33 =
+        true;
+
+      warnings.push(
+        "震えが止まりません。\nかなり身体が冷えています。"
+      );
+
+      triggerShake(
+        "heavy"
+      );
+
+    }
+
+
+    if(
+      bodyTemperature < 31
+      &&
+      !statusFlags.cold31
+    ){
+
+      statusFlags.cold31 =
+        true;
+
+      warnings.push(
+        "意識がぼんやりします。\n早く寒さをしのげる場所を探さなければ。"
+      );
+
+      triggerShake(
+        "heavy"
+      );
+
+    }
+
+
+    /* 空腹 */
+
+    if(
+      hunger > 40
+    ){
+
+      statusFlags.hunger40 =
+        false;
+
+      statusFlags.hunger20 =
+        false;
+
+      statusFlags.hunger0 =
+        false;
+
+    }
+
+
+    if(
+      hunger <= 40
+      &&
+      !statusFlags.hunger40
+    ){
+
+      statusFlags.hunger40 =
+        true;
+
+      warnings.push(
+        "空腹を強く感じます。"
+      );
+
+    }
+
+
+    if(
+      hunger <= 20
+      &&
+      !statusFlags.hunger20
+    ){
+
+      statusFlags.hunger20 =
+        true;
+
+      warnings.push(
+        "腹が痛みます。\n力が出ません。"
+      );
+
+    }
+
+
+    if(
+      hunger <= 0
+      &&
+      !statusFlags.hunger0
+    ){
+
+      statusFlags.hunger0 =
+        true;
+
+      warnings.push(
+        "何か食べなければ、身体がもちません。"
+      );
+
+    }
+
+
+    /* 体力 */
+
+    if(
+      stamina > 60
+    ){
+
+      statusFlags.stamina60 =
+        false;
+
+      statusFlags.stamina35 =
+        false;
+
+      statusFlags.stamina20 =
+        false;
+
+      statusFlags.stamina10 =
+        false;
+
+    }
+
+
+    if(
+      stamina <= 60
+      &&
+      !statusFlags.stamina60
+    ){
+
+      statusFlags.stamina60 =
+        true;
+
+      warnings.push(
+        "身体が重く感じます。"
+      );
+
+      triggerShake(
+        "light"
+      );
+
+    }
+
+
+    if(
+      stamina <= 35
+      &&
+      !statusFlags.stamina35
+    ){
+
+      statusFlags.stamina35 =
+        true;
+
+      warnings.push(
+        "かなり消耗しています。"
+      );
+
+    }
+
+
+    if(
+      stamina <= 20
+      &&
+      !statusFlags.stamina20
+    ){
+
+      statusFlags.stamina20 =
+        true;
+
+      warnings.push(
+        "立っているのもつらくなってきました。"
+      );
+
+      triggerShake(
+        "heavy"
+      );
+
+    }
+
+
+    if(
+      stamina <= 10
+      &&
+      !statusFlags.stamina10
+    ){
+
+      statusFlags.stamina10 =
+        true;
+
+      warnings.push(
+        "もうほとんど身体が動きません。"
+      );
+
+      triggerShake(
+        "heavy"
+      );
+
+    }
+
+
+    return warnings;
+
+  }
+
+
+  /* =========================
+     死亡
+  ========================= */
+
+  function checkDeath(){
+
+    if(
+      gameOver
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      stamina <= 0
+    ){
+
+      showDead(
+        "体力が尽きました。"
+      );
+
+    }
+
+  }
+
+
+  function showDead(
+    reason
+  ){
+
+    gameOver =
+      true;
+
+    interactionLocked =
+      true;
+
+
+    document
+      .getElementById(
+        "deadReason"
+      )
+      .textContent =
+        reason;
+
+
+    document
+      .getElementById(
+        "deadModal"
+      )
+      .classList
+      .add(
+        "open"
+      );
 
   }
 
@@ -2072,6 +3129,30 @@
 
 
     if(
+      bodyTemperature < 31
+    ){
+
+      stamina -=
+        0.55
+        *
+        minutes;
+
+    }
+
+
+    if(
+      bodyTemperature < 29
+    ){
+
+      stamina -=
+        1.20
+        *
+        minutes;
+
+    }
+
+
+    if(
       hunger <= 0
     ){
 
@@ -2099,15 +3180,20 @@
 
 
   /* =========================
-     時間を進める
+     時間経過
   ========================= */
 
   function advanceTime(
-    seconds
+    seconds,
+    showWarnings=true
   ){
 
-    if(gameOver){
-      return;
+    if(
+      gameOver
+    ){
+
+      return [];
+
     }
 
 
@@ -2122,119 +3208,101 @@
 
     renderClock();
 
+
+    if(
+      gameOver
+    ){
+
+      return [];
+
+    }
+
+
+    const warnings =
+      collectStatusWarnings();
+
+
+    if(
+      showWarnings
+      &&
+      warnings.length > 0
+    ){
+
+      showNotice(
+        warnings.join(
+          "\n\n"
+        ),
+        5000
+      );
+
+    }
+
+
+    return warnings;
+
   }
 
 
   /* =========================
      自動時間
 
-     現実1秒
-     =
-     ゲーム内5秒
-  ========================= */
+     通常の移動画面だけ進む。
 
-  setInterval(()=>{
-
-
-    if(menuOpen){
-      return;
-    }
-
-
-    if(gameOver){
-      return;
-    }
-
-
-    if(
-      document.visibilityState
-      !==
-      "visible"
-    ){
-      return;
-    }
-
-
-    advanceTime(
-      5
-    );
-
-
-  },1000);
-
-
-  /* =========================
+     説明
+     ITEM
      DEAD
+     その他の操作中
+     は停止。
   ========================= */
 
-  function checkDeath(){
-
-    if(gameOver){
-      return;
-    }
+  setInterval(
+    ()=>{
 
 
-    if(stamina <= 0){
+      if(
+        menuOpen
+        ||
+        gameOver
+        ||
+        interactionLocked
+        ||
+        noticeOpen
+      ){
 
-      showDead(
-        "体力が尽きました。"
+        return;
+
+      }
+
+
+      if(
+        document.visibilityState
+        !==
+        "visible"
+      ){
+
+        return;
+
+      }
+
+
+      advanceTime(
+        5,
+        true
       );
 
-    }
 
-  }
-
-
-  function showDead(
-    reason
-  ){
-
-    gameOver=true;
-
-
-    document
-      .getElementById(
-        "deadReason"
-      )
-      .textContent =
-        reason;
-
-
-    document
-      .getElementById(
-        "deadModal"
-      )
-      .classList
-      .add(
-        "open"
-      );
-
-  }
-
-
-  /* =========================
-     メッセージ
-  ========================= */
-
-  function setMessage(
-    text
-  ){
-
-    document
-      .getElementById(
-        "message"
-      )
-      .textContent =
-        text;
-
-  }
+    },
+    1000
+  );
 
 
   /* =========================
      シーン描画
   ========================= */
 
-  function renderScene(){
+  function renderScene(
+    showSceneMessage=true
+  ){
 
     const scene =
       SCENES[
@@ -2259,20 +3327,27 @@
         scene.place;
 
 
-    setMessage(
-      scene.message
-    );
-
-
     renderSceneObjects();
 
     renderDirections();
+
+
+    if(
+      showSceneMessage
+    ){
+
+      showNotice(
+        scene.message,
+        4300
+      );
+
+    }
 
   }
 
 
   /* =========================
-     アイテム描画
+     アイテム表示
   ========================= */
 
   function renderSceneObjects(){
@@ -2284,15 +3359,17 @@
 
 
     const branch =
-      document.getElementById(
-        "branchObject"
-      );
+      document
+        .getElementById(
+          "branchObject"
+        );
 
 
     const stone =
-      document.getElementById(
-        "stoneObject"
-      );
+      document
+        .getElementById(
+          "stoneObject"
+        );
 
 
     if(
@@ -2347,27 +3424,38 @@
      十字キー
   ========================= */
 
+  const movePad =
+    document
+      .getElementById(
+        "movePad"
+      );
+
+
   const directionButtons = {
 
     up:
-      document.getElementById(
-        "moveUp"
-      ),
+      document
+        .getElementById(
+          "moveUp"
+        ),
 
     down:
-      document.getElementById(
-        "moveDown"
-      ),
+      document
+        .getElementById(
+          "moveDown"
+        ),
 
     left:
-      document.getElementById(
-        "moveLeft"
-      ),
+      document
+        .getElementById(
+          "moveLeft"
+        ),
 
     right:
-      document.getElementById(
-        "moveRight"
-      )
+      document
+        .getElementById(
+          "moveRight"
+        )
 
   };
 
@@ -2378,6 +3466,24 @@
       SCENES[
         currentScene
       ];
+
+
+    const locked =
+      interactionLocked
+      ||
+      menuOpen
+      ||
+      gameOver
+      ||
+      noticeOpen;
+
+
+    movePad
+      .classList
+      .toggle(
+        "locked",
+        locked
+      );
 
 
     for(
@@ -2400,7 +3506,9 @@
         ];
 
 
-      if(target){
+      if(
+        target
+      ){
 
         button
           .classList
@@ -2414,10 +3522,6 @@
           .remove(
             "inactive"
           );
-
-
-        button.disabled =
-          false;
 
       }else{
 
@@ -2434,11 +3538,13 @@
             "inactive"
           );
 
-
-        button.disabled =
-          true;
-
       }
+
+
+      button.disabled =
+        locked
+        ||
+        !target;
 
     }
 
@@ -2449,6 +3555,39 @@
      移動
   ========================= */
 
+  function movementStaminaCost(){
+
+    if(
+      hunger <= 0
+    ){
+
+      return (
+        MOVE_STAMINA_COST
+        *
+        1.8
+      );
+
+    }
+
+
+    if(
+      hunger <= 20
+    ){
+
+      return (
+        MOVE_STAMINA_COST
+        *
+        1.5
+      );
+
+    }
+
+
+    return MOVE_STAMINA_COST;
+
+  }
+
+
   function move(
     direction
   ){
@@ -2457,8 +3596,14 @@
       gameOver
       ||
       menuOpen
+      ||
+      interactionLocked
+      ||
+      noticeOpen
     ){
+
       return;
+
     }
 
 
@@ -2474,13 +3619,17 @@
       ];
 
 
-    if(!target){
+    if(
+      !target
+    ){
+
       return;
+
     }
 
 
     stamina -=
-      MOVE_STAMINA_COST;
+      movementStaminaCost();
 
 
     stamina =
@@ -2495,13 +3644,19 @@
       MOVE_TEMP_DROP;
 
 
-    advanceTime(
-      MOVE_SECONDS
-    );
+    const warnings =
+      advanceTime(
+        MOVE_SECONDS,
+        false
+      );
 
 
-    if(gameOver){
+    if(
+      gameOver
+    ){
+
       return;
+
     }
 
 
@@ -2509,7 +3664,42 @@
       target;
 
 
-    renderScene();
+    renderScene(
+      false
+    );
+
+
+    const nextScene =
+      SCENES[
+        currentScene
+      ];
+
+
+    let text =
+      nextScene.message;
+
+
+    if(
+      warnings.length > 0
+    ){
+
+      text +=
+        "\n\n"
+        +
+        warnings.join(
+          "\n\n"
+        );
+
+    }
+
+
+    showNotice(
+      text,
+      warnings.length > 0
+        ? 5600
+        : 4300
+    );
+
 
     renderMeters();
 
@@ -2521,7 +3711,11 @@
     .addEventListener(
       "click",
       ()=>{
-        move("up");
+
+        move(
+          "up"
+        );
+
       }
     );
 
@@ -2531,7 +3725,11 @@
     .addEventListener(
       "click",
       ()=>{
-        move("down");
+
+        move(
+          "down"
+        );
+
       }
     );
 
@@ -2541,7 +3739,11 @@
     .addEventListener(
       "click",
       ()=>{
-        move("left");
+
+        move(
+          "left"
+        );
+
       }
     );
 
@@ -2551,13 +3753,17 @@
     .addEventListener(
       "click",
       ()=>{
-        move("right");
+
+        move(
+          "right"
+        );
+
       }
     );
 
 
   /* =========================
-     枝
+     枝を拾う
   ========================= */
 
   document
@@ -2572,11 +3778,19 @@
         if(
           gameOver
           ||
+          menuOpen
+          ||
+          interactionLocked
+          ||
+          noticeOpen
+          ||
           currentScene !== "start"
           ||
           inventory.branch > 0
         ){
+
           return;
+
         }
 
 
@@ -2596,9 +3810,11 @@
           );
 
 
-        advanceTime(
-          10
-        );
+        const warnings =
+          advanceTime(
+            10,
+            false
+          );
 
 
         renderSceneObjects();
@@ -2608,8 +3824,27 @@
         renderMeters();
 
 
-        setMessage(
-          "細い枝を拾いました。"
+        let text =
+          "細い枝を拾いました。";
+
+
+        if(
+          warnings.length > 0
+        ){
+
+          text +=
+            "\n\n"
+            +
+            warnings.join(
+              "\n\n"
+            );
+
+        }
+
+
+        showNotice(
+          text,
+          3800
         );
 
 
@@ -2618,7 +3853,7 @@
 
 
   /* =========================
-     小石
+     石を拾う
   ========================= */
 
   document
@@ -2633,11 +3868,19 @@
         if(
           gameOver
           ||
+          menuOpen
+          ||
+          interactionLocked
+          ||
+          noticeOpen
+          ||
           currentScene !== "start"
           ||
           inventory.stone > 0
         ){
+
           return;
+
         }
 
 
@@ -2657,9 +3900,11 @@
           );
 
 
-        advanceTime(
-          10
-        );
+        const warnings =
+          advanceTime(
+            10,
+            false
+          );
 
 
         renderSceneObjects();
@@ -2669,8 +3914,27 @@
         renderMeters();
 
 
-        setMessage(
-          "小石を拾いました。"
+        let text =
+          "小石を拾いました。";
+
+
+        if(
+          warnings.length > 0
+        ){
+
+          text +=
+            "\n\n"
+            +
+            warnings.join(
+              "\n\n"
+            );
+
+        }
+
+
+        showNotice(
+          text,
+          3800
         );
 
 
@@ -2685,9 +3949,10 @@
   function renderInventory(){
 
     const itemList =
-      document.getElementById(
-        "itemList"
-      );
+      document
+        .getElementById(
+          "itemList"
+        );
 
 
     const rows =
@@ -2744,16 +4009,18 @@
       rows.length === 0
     ){
 
-      itemList.textContent =
-        "まだ何も持っていません。";
+      itemList
+        .textContent =
+          "まだ何も持っていません。";
 
       return;
 
     }
 
 
-    itemList.innerHTML =
-      rows.join("");
+    itemList
+      .innerHTML =
+        rows.join("");
 
   }
 
@@ -2763,9 +4030,10 @@
   ========================= */
 
   const itemModal =
-    document.getElementById(
-      "itemModal"
-    );
+    document
+      .getElementById(
+        "itemModal"
+      );
 
 
   document
@@ -2777,12 +4045,17 @@
       ()=>{
 
 
-        if(gameOver){
+        if(
+          gameOver
+        ){
+
           return;
+
         }
 
 
-        menuOpen=true;
+        menuOpen =
+          true;
 
 
         renderInventory();
@@ -2793,6 +4066,9 @@
           .add(
             "open"
           );
+
+
+        renderDirections();
 
 
       }
@@ -2808,7 +4084,8 @@
       ()=>{
 
 
-        menuOpen=false;
+        menuOpen =
+          false;
 
 
         itemModal
@@ -2816,6 +4093,9 @@
           .remove(
             "open"
           );
+
+
+        renderDirections();
 
 
       }
@@ -2839,8 +4119,14 @@
           gameOver
           ||
           menuOpen
+          ||
+          interactionLocked
+          ||
+          noticeOpen
         ){
+
           return;
+
         }
 
 
@@ -2856,9 +4142,11 @@
           );
 
 
-        advanceTime(
-          30
-        );
+        const warnings =
+          advanceTime(
+            30,
+            false
+          );
 
 
         const scene =
@@ -2867,10 +4155,29 @@
           ];
 
 
-        setMessage(
+        let text =
           scene.look
           +
-          "（30秒経過）"
+          "\n\n30秒経過";
+
+
+        if(
+          warnings.length > 0
+        ){
+
+          text +=
+            "\n\n"
+            +
+            warnings.join(
+              "\n\n"
+            );
+
+        }
+
+
+        showNotice(
+          text,
+          4800
         );
 
 
@@ -2890,9 +4197,11 @@
       "click",
       ()=>{
 
+
         window
           .location
           .reload();
+
 
       }
     );
@@ -2908,7 +4217,15 @@
 
   renderInventory();
 
-  renderScene();
+  renderScene(
+    false
+  );
+
+
+  showNotice(
+    SCENES.start.message,
+    4500
+  );
 
 
 </script>
