@@ -24,7 +24,7 @@
     .status-card span{display:block;font-size:21px;line-height:1.2;margin-bottom:4px}
     .status-card strong{font-size:17px}
     .menu{display:grid;gap:13px;margin-top:auto;margin-bottom:auto}
-    .menu-btn{width:100%;min-height:62px;border:1px solid #9eb6c5;border-radius:17px;background:#fff;color:#294352;font-size:19px;font-weight:800;box-shadow:0 5px 14px rgba(38,67,84,.07);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+    .menu-btn{width:100%;min-height:62px;display:flex;align-items:center;justify-content:center;border:1px solid #9eb6c5;border-radius:17px;background:#fff;color:#294352;font-size:19px;font-weight:800;text-decoration:none;box-shadow:0 5px 14px rgba(38,67,84,.07);touch-action:manipulation;-webkit-user-select:none;user-select:none}
     .menu-btn:active{transform:translateY(1px);background:#edf6fb}
     .menu-btn.primary{background:#35596d;color:#fff;border-color:#35596d}
     .menu-btn[disabled]{opacity:.42;box-shadow:none}
@@ -59,7 +59,7 @@
     </section>
 
     <section class="menu" aria-label="サバイバルメニュー">
-      <button id="newGame" class="menu-btn primary" type="button">はじめから</button>
+      <a class="menu-btn primary" href="survival%20game.html?new=1">はじめから</a>
       <button id="continueGame" class="menu-btn" type="button">続きから</button>
       <p id="saveNote" class="save-note" aria-live="polite"></p>
     </section>
@@ -82,11 +82,6 @@
       continueBtn.disabled=!exists;
       saveNote.textContent=exists?'セーブデータがあります。':'まだセーブデータはありません。';
     }
-
-    document.getElementById('newGame').addEventListener('click',()=>{
-      try{localStorage.removeItem(SAVE_KEY);}catch(e){}
-      location.href=GAME_PAGE+'?new=1';
-    });
 
     continueBtn.addEventListener('click',()=>{
       if(hasSave())location.href=GAME_PAGE;
