@@ -78,7 +78,7 @@
 
 
     /* =========================
-       上部
+       TOP
     ========================= */
 
     .topbar{
@@ -157,7 +157,9 @@
       flex:0 0 auto;
 
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+
+      grid-template-columns:
+        repeat(3,1fr);
 
       gap:4px;
     }
@@ -214,6 +216,8 @@
 
     /* =========================
        背景
+
+       前より下へ長く
     ========================= */
 
     .scene{
@@ -223,7 +227,7 @@
 
       max-width:510px;
 
-      aspect-ratio:1.25 / 1;
+      aspect-ratio:1.10 / 1;
 
       margin:0 auto;
 
@@ -253,7 +257,7 @@
 
 
     /* =========================
-       拾えるアイテム
+       拾える物
     ========================= */
 
     .scene-objects{
@@ -308,7 +312,7 @@
       aspect-ratio:1 / 1;
 
       left:4%;
-      bottom:0;
+      bottom:1%;
     }
 
     #stoneObject{
@@ -317,74 +321,96 @@
       aspect-ratio:1 / 1;
 
       right:8%;
-      bottom:7%;
+      bottom:8%;
     }
 
 
     /* =========================
-       説明文パネル
+       説明パネル
+
+       左へ収納
     ========================= */
 
-    .scene-notice-shell{
+    .notice-shell{
       position:absolute;
 
-      left:4%;
-      right:4%;
-      bottom:0;
+      left:0;
+      bottom:5%;
 
       z-index:60;
 
+      width:92%;
+
+      min-height:92px;
+
       transform:
-        translateY(
-          calc(100% - 25px)
+        translateX(
+          calc(-100% + 42px)
         );
 
       transition:
-        transform .24s ease;
+        transform .25s ease;
 
       pointer-events:none;
     }
 
-    .scene-notice-shell.open{
-      transform:translateY(0);
+    .notice-shell.open{
+      transform:translateX(0);
     }
 
     .scene-notice{
-      min-height:72px;
-      max-height:120px;
+      position:relative;
+
+      width:100%;
+
+      min-height:92px;
+      max-height:148px;
+
+      padding:
+        12px
+        52px
+        12px
+        14px;
 
       overflow:auto;
 
-      padding:9px 11px;
-
       border:
         1px solid
-        rgba(70,70,70,.55);
+        rgba(70,70,70,.58);
+
+      border-left:0;
 
       border-radius:
-        11px
-        11px
         0
+        13px
+        13px
         0;
 
       background:
-        rgba(255,255,255,.93);
+        rgba(255,255,255,.94);
 
       font-size:17px;
-      line-height:1.45;
+      line-height:1.48;
 
-      font-weight:600;
+      font-weight:650;
 
       white-space:pre-wrap;
+
+      cursor:pointer;
 
       pointer-events:auto;
     }
 
-    .notice-tab{
-      width:54px;
-      height:25px;
+    .notice-toggle{
+      position:absolute;
 
-      margin:0 auto;
+      right:5px;
+      bottom:5px;
+
+      z-index:2;
+
+      width:34px;
+      height:34px;
 
       padding:0;
 
@@ -392,24 +418,17 @@
       align-items:center;
       justify-content:center;
 
-      border:
-        1px solid
-        rgba(70,70,70,.55);
-
-      border-top:0;
-
-      border-radius:
-        0
-        0
-        9px
-        9px;
+      border:1px solid #888;
+      border-radius:9px;
 
       background:
-        rgba(220,220,220,.94);
+        rgba(210,210,210,.96);
 
-      color:#333;
+      color:#222;
 
-      font-size:16px;
+      font-size:20px;
+      line-height:1;
+
       font-weight:900;
 
       pointer-events:auto;
@@ -417,41 +436,50 @@
 
 
     /* =========================
-       十字キーの場所
+       十字キー置き場
     ========================= */
 
     .movement-row{
       flex:1 1 auto;
 
-      min-height:142px;
+      min-height:168px;
 
       display:flex;
 
-      align-items:flex-end;
       justify-content:flex-end;
+      align-items:center;
 
-      padding-right:4px;
+      padding:
+        4px
+        10px
+        2px
+        0;
     }
 
 
     /* =========================
-       十字キー
+       独立型 十字キー
     ========================= */
 
     .move-pad{
-      position:relative;
+      display:grid;
 
-      width:138px;
-      height:138px;
+      grid-template-columns:
+        repeat(3,52px);
 
-      flex:0 0 138px;
+      grid-template-rows:
+        repeat(3,52px);
+
+      gap:7px;
+
+      width:max-content;
+      height:max-content;
     }
 
-    .direction{
-      position:absolute;
-
-      width:54px;
-      height:54px;
+    .direction,
+    .menu-key{
+      width:52px;
+      height:52px;
 
       padding:0;
 
@@ -461,108 +489,113 @@
 
       border:
         1px solid
-        rgba(45,45,45,.38);
+        rgba(45,45,45,.40);
 
-      border-radius:11px;
-
-      background:
-        rgba(90,90,90,.58);
+      border-radius:13px;
 
       color:#222;
 
-      font-size:28px;
-      line-height:1;
-
       font-weight:900;
+
+      line-height:1;
 
       transition:
         opacity .12s ease,
-        background .12s ease,
-        transform .08s ease;
+        transform .08s ease,
+        background .12s ease;
+    }
+
+    .direction{
+      background:
+        rgba(100,100,100,.56);
+
+      font-size:26px;
     }
 
     .direction.active{
-      opacity:.86;
+      opacity:.88;
     }
 
     .direction.active:active{
-      transform:scale(.92);
+      transform:scale(.91);
 
       background:
-        rgba(60,60,60,.75);
+        rgba(60,60,60,.73);
     }
 
     .direction.inactive{
-      opacity:.14;
+      opacity:.13;
 
       background:
-        rgba(120,120,120,.28);
+        rgba(130,130,130,.28);
+    }
+
+    .menu-key{
+      background:
+        rgba(82,82,82,.70);
+
+      color:#fff;
+
+      font-size:11px;
+
+      letter-spacing:.02em;
+    }
+
+    .menu-key:active{
+      transform:scale(.91);
     }
 
     .move-pad.locked
     .direction.active{
-      opacity:.27;
+      opacity:.23;
+    }
+
+    .move-pad.locked
+    .menu-key{
+      opacity:.42;
     }
 
     #moveUp{
-      top:0;
-      left:42px;
-    }
-
-    #moveDown{
-      bottom:0;
-      left:42px;
+      grid-column:2;
+      grid-row:1;
     }
 
     #moveLeft{
-      left:0;
-      top:42px;
+      grid-column:1;
+      grid-row:2;
+    }
+
+    #menuKey{
+      grid-column:2;
+      grid-row:2;
     }
 
     #moveRight{
-      right:0;
-      top:42px;
+      grid-column:3;
+      grid-row:2;
     }
 
-    .pad-center{
-      position:absolute;
-
-      left:52px;
-      top:52px;
-
-      width:34px;
-      height:34px;
-
-      border:
-        1px solid
-        rgba(45,45,45,.28);
-
-      border-radius:9px;
-
-      background:
-        rgba(90,90,90,.30);
-
-      pointer-events:none;
+    #moveDown{
+      grid-column:2;
+      grid-row:3;
     }
 
 
     /* =========================
-       下メニュー
+       周囲を見る
     ========================= */
 
-    .menu{
+    .bottom-actions{
       flex:0 0 auto;
 
       display:grid;
 
-      grid-template-columns:
-        1fr
-        1fr;
+      grid-template-columns:1fr;
 
       gap:5px;
     }
 
-    .menu-button{
+    .action-button{
       min-height:46px;
 
       border:1px solid #999;
@@ -576,8 +609,345 @@
       font-weight:900;
     }
 
-    .menu-button:active{
+    .action-button:active{
       background:#eee;
+    }
+
+
+    /* =========================
+       メニュー画面
+    ========================= */
+
+    .game-menu-overlay{
+      position:fixed;
+
+      inset:0;
+
+      z-index:120;
+
+      display:none;
+
+      align-items:center;
+      justify-content:center;
+
+      padding:
+        calc(15px + env(safe-area-inset-top))
+        12px
+        calc(15px + env(safe-area-inset-bottom));
+
+      background:
+        rgba(30,30,30,.54);
+    }
+
+    .game-menu-overlay.open{
+      display:flex;
+    }
+
+    .game-menu-window{
+      position:relative;
+
+      width:min(500px,100%);
+
+      height:min(620px,78dvh);
+
+      display:flex;
+      flex-direction:column;
+
+      border:
+        1px solid
+        #7f8386;
+
+      border-radius:15px;
+
+      background:#f7f7f7;
+
+      overflow:hidden;
+    }
+
+
+    /* =========================
+       ブラウザ風タブ
+    ========================= */
+
+    .menu-tabs-area{
+      position:relative;
+
+      flex:0 0 auto;
+
+      min-height:54px;
+
+      padding:
+        10px
+        48px
+        0
+        8px;
+
+      display:flex;
+      align-items:flex-end;
+
+      overflow-x:auto;
+
+      background:#dfe2e4;
+
+      border-bottom:
+        1px solid
+        #969a9d;
+
+      scrollbar-width:none;
+    }
+
+    .menu-tabs-area::-webkit-scrollbar{
+      display:none;
+    }
+
+    .menu-tab{
+      position:relative;
+
+      min-width:94px;
+      height:38px;
+
+      margin-right:-1px;
+
+      padding:0 12px;
+
+      border:
+        1px solid
+        #969a9d;
+
+      border-bottom:0;
+
+      border-radius:
+        10px
+        10px
+        0
+        0;
+
+      background:#cfd3d5;
+
+      color:#333;
+
+      font-size:14px;
+      font-weight:800;
+
+      white-space:nowrap;
+    }
+
+    .menu-tab.active{
+      z-index:2;
+
+      height:42px;
+
+      background:#fff;
+
+      color:#111;
+    }
+
+    .menu-tab.hidden{
+      display:none;
+    }
+
+    .menu-close{
+      position:absolute;
+
+      top:8px;
+      right:8px;
+
+      z-index:5;
+
+      width:36px;
+      height:36px;
+
+      padding:0;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border:
+        1px solid
+        #888;
+
+      border-radius:9px;
+
+      background:#fff;
+
+      color:#222;
+
+      font-size:20px;
+      font-weight:900;
+    }
+
+
+    /* =========================
+       メニュー内容
+    ========================= */
+
+    .menu-content{
+      flex:1 1 auto;
+
+      min-height:0;
+
+      padding:15px;
+
+      overflow:auto;
+
+      background:#fff;
+    }
+
+    .menu-panel{
+      display:none;
+    }
+
+    .menu-panel.active{
+      display:block;
+    }
+
+    .menu-panel-title{
+      margin:
+        0
+        0
+        12px;
+
+      font-size:21px;
+    }
+
+    .menu-panel-text{
+      margin:0;
+
+      font-size:17px;
+      line-height:1.6;
+    }
+
+    .empty-message{
+      padding:20px 8px;
+
+      text-align:center;
+
+      font-size:17px;
+
+      color:#555;
+    }
+
+
+    /* =========================
+       インベントリ
+    ========================= */
+
+    .item-list{
+      font-size:17px;
+      line-height:1.6;
+    }
+
+    .item-row{
+      min-height:52px;
+
+      padding:10px 4px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:12px;
+
+      border-bottom:
+        1px solid
+        #ddd;
+    }
+
+    .item-row:last-child{
+      border-bottom:0;
+    }
+
+    .item-name{
+      font-size:17px;
+      font-weight:700;
+    }
+
+    .item-count{
+      flex:0 0 auto;
+
+      font-size:17px;
+      font-weight:900;
+    }
+
+
+    /* =========================
+       地図
+    ========================= */
+
+    .map-placeholder{
+      min-height:260px;
+
+      padding:18px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border:
+        1px dashed
+        #aaa;
+
+      border-radius:12px;
+
+      background:#f5f5f5;
+
+      text-align:center;
+
+      font-size:17px;
+      line-height:1.6;
+    }
+
+
+    /* =========================
+       スキル
+    ========================= */
+
+    .skill-list{
+      display:grid;
+
+      gap:9px;
+    }
+
+    .skill-row{
+      padding:13px;
+
+      border:
+        1px solid
+        #bbb;
+
+      border-radius:10px;
+
+      background:#fafafa;
+
+      font-size:17px;
+      line-height:1.5;
+    }
+
+
+    /* =========================
+       クラフト
+    ========================= */
+
+    .craft-list{
+      display:grid;
+
+      gap:9px;
+    }
+
+    .craft-row{
+      padding:13px;
+
+      border:
+        1px solid
+        #bbb;
+
+      border-radius:10px;
+
+      background:#fafafa;
+
+      font-size:17px;
+      line-height:1.5;
     }
 
 
@@ -625,7 +995,7 @@
       background:
         radial-gradient(
           circle at center,
-          rgba(140,0,0,0) 30%,
+          rgba(140,0,0,0) 28%,
           rgba(
             140,
             0,
@@ -641,7 +1011,7 @@
 
 
     /* =========================
-       画面揺れ
+       揺れ
     ========================= */
 
     @keyframes shakeLight{
@@ -736,120 +1106,6 @@
 
 
     /* =========================
-       ITEM
-    ========================= */
-
-    .modal{
-      position:fixed;
-
-      inset:0;
-
-      z-index:100;
-
-      display:none;
-
-      align-items:center;
-      justify-content:center;
-
-      padding:18px;
-
-      background:rgba(0,0,0,.5);
-    }
-
-    .modal.open{
-      display:flex;
-    }
-
-    .modal-card{
-      width:min(430px,100%);
-
-      max-height:80dvh;
-
-      overflow:auto;
-
-      padding:16px;
-
-      border-radius:18px;
-
-      background:#fff;
-    }
-
-    .modal-card h2{
-      margin:0 0 12px;
-
-      font-size:22px;
-    }
-
-    .pause-note{
-      margin:0 0 12px;
-
-      padding:8px;
-
-      border-radius:10px;
-
-      background:#eee;
-
-      font-size:17px;
-      line-height:1.4;
-
-      text-align:center;
-    }
-
-    .item-list{
-      min-height:55px;
-
-      font-size:17px;
-      line-height:1.6;
-    }
-
-    .item-row{
-      min-height:50px;
-
-      padding:10px 4px;
-
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      gap:12px;
-
-      border-bottom:1px solid #ddd;
-    }
-
-    .item-row:last-child{
-      border-bottom:0;
-    }
-
-    .item-name{
-      font-size:17px;
-      font-weight:700;
-    }
-
-    .item-count{
-      flex:0 0 auto;
-
-      font-size:17px;
-      font-weight:900;
-    }
-
-    .close-button{
-      width:100%;
-
-      min-height:50px;
-
-      margin-top:14px;
-
-      border:1px solid #999;
-      border-radius:13px;
-
-      background:#fff;
-
-      font-size:17px;
-      font-weight:900;
-    }
-
-
-    /* =========================
        DEAD
     ========================= */
 
@@ -867,7 +1123,8 @@
 
       padding:20px;
 
-      background:rgba(0,0,0,.84);
+      background:
+        rgba(0,0,0,.84);
     }
 
     .dead-modal.open{
@@ -890,11 +1147,15 @@
       margin:0;
 
       font-size:34px;
+
       letter-spacing:.08em;
     }
 
     .dead-reason{
-      margin:15px 0 20px;
+      margin:
+        15px
+        0
+        20px;
 
       font-size:17px;
       line-height:1.5;
@@ -905,7 +1166,10 @@
 
       min-height:52px;
 
-      border:1px solid #777;
+      border:
+        1px solid
+        #777;
+
       border-radius:13px;
 
       background:#fff;
@@ -914,6 +1178,10 @@
       font-weight:900;
     }
 
+
+    /* =========================
+       小さい画面
+    ========================= */
 
     @media(max-width:390px){
 
@@ -951,46 +1219,46 @@
         font-size:12px;
       }
 
+      .scene{
+        width:97%;
+
+        aspect-ratio:1.10 / 1;
+      }
+
       .movement-row{
-        min-height:134px;
+        min-height:160px;
+
+        padding-right:5px;
       }
 
       .move-pad{
-        width:130px;
-        height:130px;
+        grid-template-columns:
+          repeat(3,50px);
 
-        flex-basis:130px;
+        grid-template-rows:
+          repeat(3,50px);
+
+        gap:6px;
+      }
+
+      .direction,
+      .menu-key{
+        width:50px;
+        height:50px;
       }
 
       .direction{
-        width:50px;
-        height:50px;
-
-        font-size:26px;
+        font-size:25px;
       }
 
-      #moveUp{
-        left:40px;
+      .menu-key{
+        font-size:10px;
       }
 
-      #moveDown{
-        left:40px;
-      }
+      .menu-tab{
+        min-width:88px;
 
-      #moveLeft{
-        top:40px;
-      }
-
-      #moveRight{
-        top:40px;
-      }
-
-      .pad-center{
-        left:49px;
-        top:49px;
-
-        width:32px;
-        height:32px;
+        font-size:13px;
       }
 
     }
@@ -1298,7 +1566,7 @@
 
 
   <!-- =========================
-       景色
+       背景
   ========================= -->
 
   <section class="scene">
@@ -1354,26 +1622,32 @@
 
 
 
-    <!-- 説明パネル -->
+    <!-- =========================
+         左収納 説明文
+    ========================= -->
 
     <div
       id="noticeShell"
-      class="scene-notice-shell"
+      class="notice-shell"
     >
+
 
       <div
         id="sceneNotice"
         class="scene-notice"
+        role="button"
+        tabindex="0"
+        aria-label="説明を閉じる"
       ></div>
 
 
       <button
-        id="noticeTab"
-        class="notice-tab"
+        id="noticeToggle"
+        class="notice-toggle"
         type="button"
-        aria-label="説明を開閉"
+        aria-label="説明を開く"
       >
-        ▲
+        ▶
       </button>
 
 
@@ -1385,7 +1659,7 @@
 
 
   <!-- =========================
-       十字キー
+       独立十字キー
   ========================= -->
 
   <section class="movement-row">
@@ -1418,10 +1692,14 @@
       </button>
 
 
-      <div
-        class="pad-center"
-        aria-hidden="true"
-      ></div>
+      <button
+        id="menuKey"
+        class="menu-key"
+        type="button"
+        aria-label="メニュー"
+      >
+        MENU
+      </button>
 
 
       <button
@@ -1452,24 +1730,15 @@
 
 
   <!-- =========================
-       下メニュー
+       行動
   ========================= -->
 
-  <nav class="menu">
-
-
-    <button
-      id="itemButton"
-      class="menu-button"
-      type="button"
-    >
-      ITEM
-    </button>
+  <nav class="bottom-actions">
 
 
     <button
       id="lookButton"
-      class="menu-button"
+      class="action-button"
       type="button"
     >
       周囲を見る
@@ -1483,7 +1752,9 @@
 
 
 
-<!-- 低体温の白い視界 -->
+<!-- =========================
+     白い視界
+========================== -->
 
 <div
   id="coldVision"
@@ -1492,7 +1763,9 @@
 
 
 
-<!-- 体力低下の赤い視界 -->
+<!-- =========================
+     赤い視界
+========================== -->
 
 <div
   id="healthVision"
@@ -1502,43 +1775,161 @@
 
 
 <!-- =========================
-     ITEM
+     MENU
 ========================== -->
 
 <div
-  id="itemModal"
-  class="modal"
+  id="gameMenu"
+  class="game-menu-overlay"
 >
 
 
-  <section class="modal-card">
+  <section class="game-menu-window">
 
 
-    <h2>
-      ITEM
-    </h2>
+    <div class="menu-tabs-area">
 
 
-    <p class="pause-note">
-      ITEMを開いている間、ゲーム内時間は止まります。
-    </p>
+      <button
+        class="menu-tab active"
+        type="button"
+        data-menu-tab="inventory"
+      >
+        インベントリ
+      </button>
 
 
-    <div
-      id="itemList"
-      class="item-list"
-    >
-      まだ何も持っていません。
+      <button
+        class="menu-tab hidden"
+        type="button"
+        data-menu-tab="map"
+      >
+        地図
+      </button>
+
+
+      <button
+        class="menu-tab hidden"
+        type="button"
+        data-menu-tab="skills"
+      >
+        スキル
+      </button>
+
+
+      <button
+        class="menu-tab hidden"
+        type="button"
+        data-menu-tab="craft"
+      >
+        クラフト
+      </button>
+
+
+      <button
+        id="menuClose"
+        class="menu-close"
+        type="button"
+        aria-label="メニューを閉じる"
+      >
+        ×
+      </button>
+
+
     </div>
 
 
-    <button
-      id="closeItem"
-      class="close-button"
-      type="button"
-    >
-      閉じる
-    </button>
+
+    <div class="menu-content">
+
+
+      <!-- インベントリ -->
+
+      <section
+        id="menuPanelInventory"
+        class="menu-panel active"
+      >
+
+        <h2 class="menu-panel-title">
+          インベントリ
+        </h2>
+
+        <div
+          id="inventoryList"
+          class="item-list"
+        >
+          まだ何も持っていません。
+        </div>
+
+      </section>
+
+
+
+      <!-- 地図 -->
+
+      <section
+        id="menuPanelMap"
+        class="menu-panel"
+      >
+
+        <h2 class="menu-panel-title">
+          地図
+        </h2>
+
+        <div class="map-placeholder">
+          まだ地図に記録された情報はありません。
+        </div>
+
+      </section>
+
+
+
+      <!-- スキル -->
+
+      <section
+        id="menuPanelSkills"
+        class="menu-panel"
+      >
+
+        <h2 class="menu-panel-title">
+          スキル
+        </h2>
+
+        <div class="skill-list">
+
+          <div class="skill-row">
+            まだ習得したサバイバル知識はありません。
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- クラフト -->
+
+      <section
+        id="menuPanelCraft"
+        class="menu-panel"
+      >
+
+        <h2 class="menu-panel-title">
+          クラフト
+        </h2>
+
+        <div class="craft-list">
+
+          <div class="craft-row">
+            まだ作り方を知っている物はありません。
+          </div>
+
+        </div>
+
+      </section>
+
+
+    </div>
 
 
   </section>
@@ -1598,23 +1989,40 @@
   let gameSeconds =
     8 * 60 * 60;
 
-  let menuOpen =
-    false;
 
   let gameOver =
     false;
 
-  let interactionLocked =
-    false;
 
   let noticeOpen =
     false;
 
+
   let noticeTimer =
     null;
 
+
   let lastNotice =
     "";
+
+
+  let menuOpen =
+    false;
+
+
+  let currentMenu =
+    null;
+
+
+  /*
+    男と出会った後に true にする。
+
+    trueになると
+    地図・スキル・クラフトが解放。
+  */
+
+  let metSurvivor =
+    false;
 
 
   /* =========================
@@ -1624,8 +2032,10 @@
   let bodyTemperature =
     36.7;
 
+
   let hunger =
     100;
+
 
   let stamina =
     100;
@@ -1651,15 +2061,17 @@
   const MOVE_SECONDS =
     180;
 
+
   const MOVE_TEMP_DROP =
     0.52;
+
 
   const MOVE_STAMINA_COST =
     1.0;
 
 
   /* =========================
-     警告済み状態
+     状態警告済み
   ========================= */
 
   const statusFlags = {
@@ -2002,6 +2414,28 @@
 
 
   /* =========================
+     現在ゲーム時間を
+     進めてよいか
+  ========================= */
+
+  function isGamePaused(){
+
+    return (
+      gameOver
+      ||
+      noticeOpen
+      ||
+      menuOpen
+      ||
+      document.visibilityState
+        !==
+        "visible"
+    );
+
+  }
+
+
+  /* =========================
      時計
   ========================= */
 
@@ -2012,18 +2446,22 @@
         gameSeconds
       );
 
+
     const day =
       Math.floor(
         total / 86400
       ) + 1;
 
+
     const secondInDay =
       total % 86400;
+
 
     const hour =
       Math.floor(
         secondInDay / 3600
       );
+
 
     const minute =
       Math.floor(
@@ -2033,6 +2471,7 @@
         /
         60
       );
+
 
     const second =
       secondInDay % 60;
@@ -2191,7 +2630,7 @@
 
 
   /* =========================
-     メーター表示
+     メーター描画
   ========================= */
 
   function renderMeters(){
@@ -2305,6 +2744,7 @@
 
 
   /* =========================
+     寒さ
      白い視界
   ========================= */
 
@@ -2390,6 +2830,7 @@
 
 
   /* =========================
+     体力
      赤い視界
   ========================= */
 
@@ -2478,7 +2919,7 @@
 
 
   /* =========================
-     画面揺れ
+     揺れ
   ========================= */
 
   function triggerShake(
@@ -2534,7 +2975,7 @@
 
 
   /* =========================
-     説明パネル
+     説明文
   ========================= */
 
   const noticeShell =
@@ -2543,17 +2984,48 @@
         "noticeShell"
       );
 
+
   const sceneNotice =
     document
       .getElementById(
         "sceneNotice"
       );
 
-  const noticeTab =
+
+  const noticeToggle =
     document
       .getElementById(
-        "noticeTab"
+        "noticeToggle"
       );
+
+
+  function updateNoticeButton(){
+
+    if(
+      noticeOpen
+    ){
+
+      noticeToggle.textContent =
+        "◀";
+
+      noticeToggle.setAttribute(
+        "aria-label",
+        "説明を閉じる"
+      );
+
+    }else{
+
+      noticeToggle.textContent =
+        "▶";
+
+      noticeToggle.setAttribute(
+        "aria-label",
+        "説明を開く"
+      );
+
+    }
+
+  }
 
 
   function setNoticeOpen(
@@ -2564,33 +3036,17 @@
       open;
 
 
-    if(open){
-
-      noticeShell
-        .classList
-        .add(
-          "open"
-        );
-
-
-      noticeTab
-        .textContent =
-          "▼";
-
-    }else{
-
-      noticeShell
-        .classList
-        .remove(
-          "open"
-        );
+    noticeShell
+      .classList
+      .toggle(
+        "open",
+        open
+      );
 
 
-      noticeTab
-        .textContent =
-          "▲";
+    updateNoticeButton();
 
-    }
+    renderDirections();
 
   }
 
@@ -2608,6 +3064,9 @@
         noticeTimer
       );
 
+      noticeTimer =
+        null;
+
     }
 
 
@@ -2620,22 +3079,15 @@
         text;
 
 
-    /*
-      説明が開いている間は、
-      必ずゲーム時間を停止する。
-    */
-
-    interactionLocked =
-      true;
-
-
     setNoticeOpen(
       true
     );
 
 
-    renderDirections();
-
+    /*
+      自動表示時は一定時間で収納。
+      表示中は時計停止。
+    */
 
     noticeTimer =
       setTimeout(
@@ -2670,22 +3122,85 @@
       false
     );
 
+  }
+
+
+  function reopenNotice(){
+
+    if(
+      !lastNotice
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      noticeTimer
+    ){
+
+      clearTimeout(
+        noticeTimer
+      );
+
+      noticeTimer =
+        null;
+
+    }
+
+
+    sceneNotice
+      .textContent =
+        lastNotice;
+
 
     /*
-      説明を閉じた時だけ
-      通常移動画面へ戻る。
+      手動で読み返した場合は
+      勝手に閉じない。
+
+      開いている間は
+      ゲーム時間停止。
     */
 
-    interactionLocked =
-      false;
-
-
-    renderDirections();
+    setNoticeOpen(
+      true
+    );
 
   }
 
 
-  noticeTab
+  noticeToggle
+    .addEventListener(
+      "click",
+      event=>{
+
+
+        event.stopPropagation();
+
+
+        if(
+          noticeOpen
+        ){
+
+          hideNotice();
+
+        }else{
+
+          reopenNotice();
+
+        }
+
+
+      }
+    );
+
+
+  /*
+    説明文自体をタップしても収納
+  */
+
+  sceneNotice
     .addEventListener(
       "click",
       ()=>{
@@ -2697,58 +3212,28 @@
 
           hideNotice();
 
-          return;
-
         }
 
 
-        if(
-          !lastNotice
-        ){
-
-          return;
-
-        }
+      }
+    );
 
 
-        /*
-          手動で読み返す場合も
-          ゲーム時間を停止する。
-        */
+  sceneNotice
+    .addEventListener(
+      "keydown",
+      event=>{
 
-        interactionLocked =
-          true;
-
-
-        sceneNotice
-          .textContent =
-            lastNotice;
-
-
-        setNoticeOpen(
-          true
-        );
-
-
-        renderDirections();
-
-
-        /*
-          手動で開いた説明は
-          勝手には閉じない。
-          タブを押して閉じる。
-        */
 
         if(
-          noticeTimer
+          event.key === "Enter"
+          ||
+          event.key === " "
         ){
 
-          clearTimeout(
-            noticeTimer
-          );
+          event.preventDefault();
 
-          noticeTimer =
-            null;
+          hideNotice();
 
         }
 
@@ -2767,7 +3252,9 @@
       [];
 
 
-    /* 体温 */
+    /* -------------------------
+       寒さ
+    ------------------------- */
 
     if(
       bodyTemperature >= 35
@@ -2794,9 +3281,11 @@
       statusFlags.cold35 =
         true;
 
+
       warnings.push(
         "身体が冷えてきました。"
       );
+
 
       triggerShake(
         "light"
@@ -2814,9 +3303,11 @@
       statusFlags.cold33 =
         true;
 
+
       warnings.push(
         "震えが止まりません。\nかなり身体が冷えています。"
       );
+
 
       triggerShake(
         "heavy"
@@ -2834,9 +3325,11 @@
       statusFlags.cold31 =
         true;
 
+
       warnings.push(
         "意識がぼんやりします。\n早く寒さをしのげる場所を探さなければ。"
       );
+
 
       triggerShake(
         "heavy"
@@ -2845,7 +3338,9 @@
     }
 
 
-    /* 空腹 */
+    /* -------------------------
+       空腹
+    ------------------------- */
 
     if(
       hunger > 40
@@ -2872,6 +3367,7 @@
       statusFlags.hunger40 =
         true;
 
+
       warnings.push(
         "空腹を強く感じます。"
       );
@@ -2887,6 +3383,7 @@
 
       statusFlags.hunger20 =
         true;
+
 
       warnings.push(
         "腹が痛みます。\n力が出ません。"
@@ -2904,6 +3401,7 @@
       statusFlags.hunger0 =
         true;
 
+
       warnings.push(
         "何か食べなければ、身体がもちません。"
       );
@@ -2911,7 +3409,9 @@
     }
 
 
-    /* 体力 */
+    /* -------------------------
+       体力
+    ------------------------- */
 
     if(
       stamina > 60
@@ -2941,9 +3441,11 @@
       statusFlags.stamina60 =
         true;
 
+
       warnings.push(
         "身体が重く感じます。"
       );
+
 
       triggerShake(
         "light"
@@ -2961,6 +3463,7 @@
       statusFlags.stamina35 =
         true;
 
+
       warnings.push(
         "かなり消耗しています。"
       );
@@ -2977,9 +3480,11 @@
       statusFlags.stamina20 =
         true;
 
+
       warnings.push(
         "立っているのもつらくなってきました。"
       );
+
 
       triggerShake(
         "heavy"
@@ -2997,9 +3502,11 @@
       statusFlags.stamina10 =
         true;
 
+
       warnings.push(
         "もうほとんど身体が動きません。"
       );
+
 
       triggerShake(
         "heavy"
@@ -3014,7 +3521,7 @@
 
 
   /* =========================
-     死亡
+     DEAD
   ========================= */
 
   function checkDeath(){
@@ -3048,8 +3555,10 @@
     gameOver =
       true;
 
-    interactionLocked =
-      true;
+
+    hideNotice();
+
+    closeGameMenu();
 
 
     document
@@ -3068,6 +3577,9 @@
       .add(
         "open"
       );
+
+
+    renderDirections();
 
   }
 
@@ -3246,13 +3758,7 @@
   /* =========================
      自動時間
 
-     通常の移動画面だけ進む。
-
-     説明
-     ITEM
-     DEAD
-     その他の操作中
-     は停止。
+     通常の移動画面だけ動く
   ========================= */
 
   setInterval(
@@ -3260,24 +3766,7 @@
 
 
       if(
-        menuOpen
-        ||
-        gameOver
-        ||
-        interactionLocked
-        ||
-        noticeOpen
-      ){
-
-        return;
-
-      }
-
-
-      if(
-        document.visibilityState
-        !==
-        "visible"
+        isGamePaused()
       ){
 
         return;
@@ -3301,7 +3790,7 @@
   ========================= */
 
   function renderScene(
-    showSceneMessage=true
+    showMessage=true
   ){
 
     const scene =
@@ -3333,7 +3822,7 @@
 
 
     if(
-      showSceneMessage
+      showMessage
     ){
 
       showNotice(
@@ -3347,7 +3836,7 @@
 
 
   /* =========================
-     アイテム表示
+     拾える物
   ========================= */
 
   function renderSceneObjects(){
@@ -3372,50 +3861,28 @@
         );
 
 
-    if(
-      scene.objects
-      &&
-      inventory.branch === 0
-    ){
-
-      branch
-        .classList
-        .remove(
-          "hidden"
-        );
-
-    }else{
-
-      branch
-        .classList
-        .add(
-          "hidden"
-        );
-
-    }
+    branch
+      .classList
+      .toggle(
+        "hidden",
+        !(
+          scene.objects
+          &&
+          inventory.branch === 0
+        )
+      );
 
 
-    if(
-      scene.objects
-      &&
-      inventory.stone === 0
-    ){
-
-      stone
-        .classList
-        .remove(
-          "hidden"
-        );
-
-    }else{
-
-      stone
-        .classList
-        .add(
-          "hidden"
-        );
-
-    }
+    stone
+      .classList
+      .toggle(
+        "hidden",
+        !(
+          scene.objects
+          &&
+          inventory.stone === 0
+        )
+      );
 
   }
 
@@ -3469,13 +3936,11 @@
 
 
     const locked =
-      interactionLocked
-      ||
-      menuOpen
-      ||
       gameOver
       ||
-      noticeOpen;
+      noticeOpen
+      ||
+      menuOpen;
 
 
     movePad
@@ -3506,39 +3971,22 @@
         ];
 
 
-      if(
-        target
-      ){
-
-        button
-          .classList
-          .add(
-            "active"
-          );
-
-
-        button
-          .classList
-          .remove(
-            "inactive"
-          );
-
-      }else{
-
-        button
-          .classList
-          .remove(
-            "active"
-          );
+      button
+        .classList
+        .toggle(
+          "active",
+          Boolean(
+            target
+          )
+        );
 
 
-        button
-          .classList
-          .add(
-            "inactive"
-          );
-
-      }
+      button
+        .classList
+        .toggle(
+          "inactive",
+          !target
+        );
 
 
       button.disabled =
@@ -3548,11 +3996,21 @@
 
     }
 
+
+    document
+      .getElementById(
+        "menuKey"
+      )
+      .disabled =
+        gameOver
+        ||
+        noticeOpen;
+
   }
 
 
   /* =========================
-     移動
+     移動体力消費
   ========================= */
 
   function movementStaminaCost(){
@@ -3588,6 +4046,10 @@
   }
 
 
+  /* =========================
+     移動
+  ========================= */
+
   function move(
     direction
   ){
@@ -3595,11 +4057,9 @@
     if(
       gameOver
       ||
-      menuOpen
-      ||
-      interactionLocked
-      ||
       noticeOpen
+      ||
+      menuOpen
     ){
 
       return;
@@ -3763,7 +4223,7 @@
 
 
   /* =========================
-     枝を拾う
+     枝
   ========================= */
 
   document
@@ -3778,11 +4238,9 @@
         if(
           gameOver
           ||
-          menuOpen
-          ||
-          interactionLocked
-          ||
           noticeOpen
+          ||
+          menuOpen
           ||
           currentScene !== "start"
           ||
@@ -3853,7 +4311,7 @@
 
 
   /* =========================
-     石を拾う
+     石
   ========================= */
 
   document
@@ -3868,11 +4326,9 @@
         if(
           gameOver
           ||
-          menuOpen
-          ||
-          interactionLocked
-          ||
           noticeOpen
+          ||
+          menuOpen
           ||
           currentScene !== "start"
           ||
@@ -3943,166 +4399,6 @@
 
 
   /* =========================
-     ITEM一覧
-  ========================= */
-
-  function renderInventory(){
-
-    const itemList =
-      document
-        .getElementById(
-          "itemList"
-        );
-
-
-    const rows =
-      [];
-
-
-    if(
-      inventory.branch > 0
-    ){
-
-      rows.push(
-        `
-          <div class="item-row">
-
-            <span class="item-name">
-              細い枝
-            </span>
-
-            <span class="item-count">
-              × ${inventory.branch}
-            </span>
-
-          </div>
-        `
-      );
-
-    }
-
-
-    if(
-      inventory.stone > 0
-    ){
-
-      rows.push(
-        `
-          <div class="item-row">
-
-            <span class="item-name">
-              小石
-            </span>
-
-            <span class="item-count">
-              × ${inventory.stone}
-            </span>
-
-          </div>
-        `
-      );
-
-    }
-
-
-    if(
-      rows.length === 0
-    ){
-
-      itemList
-        .textContent =
-          "まだ何も持っていません。";
-
-      return;
-
-    }
-
-
-    itemList
-      .innerHTML =
-        rows.join("");
-
-  }
-
-
-  /* =========================
-     ITEM
-  ========================= */
-
-  const itemModal =
-    document
-      .getElementById(
-        "itemModal"
-      );
-
-
-  document
-    .getElementById(
-      "itemButton"
-    )
-    .addEventListener(
-      "click",
-      ()=>{
-
-
-        if(
-          gameOver
-        ){
-
-          return;
-
-        }
-
-
-        menuOpen =
-          true;
-
-
-        renderInventory();
-
-
-        itemModal
-          .classList
-          .add(
-            "open"
-          );
-
-
-        renderDirections();
-
-
-      }
-    );
-
-
-  document
-    .getElementById(
-      "closeItem"
-    )
-    .addEventListener(
-      "click",
-      ()=>{
-
-
-        menuOpen =
-          false;
-
-
-        itemModal
-          .classList
-          .remove(
-            "open"
-          );
-
-
-        renderDirections();
-
-
-      }
-    );
-
-
-  /* =========================
      周囲を見る
   ========================= */
 
@@ -4118,11 +4414,9 @@
         if(
           gameOver
           ||
-          menuOpen
-          ||
-          interactionLocked
-          ||
           noticeOpen
+          ||
+          menuOpen
         ){
 
           return;
@@ -4186,7 +4480,486 @@
 
 
   /* =========================
-     最初から
+     インベントリ
+  ========================= */
+
+  function renderInventory(){
+
+    const list =
+      document
+        .getElementById(
+          "inventoryList"
+        );
+
+
+    const rows =
+      [];
+
+
+    if(
+      inventory.branch > 0
+    ){
+
+      rows.push(
+        `
+          <div class="item-row">
+
+            <span class="item-name">
+              細い枝
+            </span>
+
+            <span class="item-count">
+              × ${inventory.branch}
+            </span>
+
+          </div>
+        `
+      );
+
+    }
+
+
+    if(
+      inventory.stone > 0
+    ){
+
+      rows.push(
+        `
+          <div class="item-row">
+
+            <span class="item-name">
+              小石
+            </span>
+
+            <span class="item-count">
+              × ${inventory.stone}
+            </span>
+
+          </div>
+        `
+      );
+
+    }
+
+
+    if(
+      rows.length === 0
+    ){
+
+      list.innerHTML =
+        `
+          <div class="empty-message">
+            まだ何も持っていません。
+          </div>
+        `;
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      rows.join("");
+
+  }
+
+
+  /* =========================
+     メニュー解放
+  ========================= */
+
+  function getAvailableMenus(){
+
+    if(
+      metSurvivor
+    ){
+
+      return [
+        "inventory",
+        "map",
+        "skills",
+        "craft"
+      ];
+
+    }
+
+
+    return [
+      "inventory"
+    ];
+
+  }
+
+
+  function renderMenuUnlocks(){
+
+    const unlockable =
+      [
+        "map",
+        "skills",
+        "craft"
+      ];
+
+
+    unlockable
+      .forEach(
+        menuName=>{
+
+
+          const tab =
+            document
+              .querySelector(
+                `[data-menu-tab="${menuName}"]`
+              );
+
+
+          tab
+            .classList
+            .toggle(
+              "hidden",
+              !metSurvivor
+            );
+
+
+        }
+      );
+
+  }
+
+
+  /*
+    男と出会った時に
+    この関数を呼べば解放される。
+  */
+
+  function unlockSurvivorMenus(){
+
+    metSurvivor =
+      true;
+
+
+    renderMenuUnlocks();
+
+  }
+
+
+  /* =========================
+     メニュー表示
+  ========================= */
+
+  const gameMenu =
+    document
+      .getElementById(
+        "gameMenu"
+      );
+
+
+  const menuTabs =
+    document
+      .querySelectorAll(
+        ".menu-tab"
+      );
+
+
+  const menuPanels = {
+
+    inventory:
+      document.getElementById(
+        "menuPanelInventory"
+      ),
+
+    map:
+      document.getElementById(
+        "menuPanelMap"
+      ),
+
+    skills:
+      document.getElementById(
+        "menuPanelSkills"
+      ),
+
+    craft:
+      document.getElementById(
+        "menuPanelCraft"
+      )
+
+  };
+
+
+  function selectMenu(
+    menuName
+  ){
+
+    const available =
+      getAvailableMenus();
+
+
+    if(
+      !available.includes(
+        menuName
+      )
+    ){
+
+      return;
+
+    }
+
+
+    currentMenu =
+      menuName;
+
+
+    menuTabs
+      .forEach(
+        tab=>{
+
+
+          tab
+            .classList
+            .toggle(
+              "active",
+              tab.dataset.menuTab
+                ===
+                menuName
+            );
+
+
+        }
+      );
+
+
+    Object
+      .entries(
+        menuPanels
+      )
+      .forEach(
+        (
+          [
+            name,
+            panel
+          ]
+        )=>{
+
+
+          panel
+            .classList
+            .toggle(
+              "active",
+              name === menuName
+            );
+
+
+        }
+      );
+
+
+    if(
+      menuName === "inventory"
+    ){
+
+      renderInventory();
+
+    }
+
+  }
+
+
+  function openGameMenu(
+    menuName="inventory"
+  ){
+
+    if(
+      gameOver
+      ||
+      noticeOpen
+    ){
+
+      return;
+
+    }
+
+
+    menuOpen =
+      true;
+
+
+    renderMenuUnlocks();
+
+
+    gameMenu
+      .classList
+      .add(
+        "open"
+      );
+
+
+    selectMenu(
+      menuName
+    );
+
+
+    renderDirections();
+
+  }
+
+
+  function closeGameMenu(){
+
+    menuOpen =
+      false;
+
+
+    currentMenu =
+      null;
+
+
+    gameMenu
+      .classList
+      .remove(
+        "open"
+      );
+
+
+    renderDirections();
+
+  }
+
+
+  /* =========================
+     MENU中央キー
+
+     インベントリ
+     ↓
+     地図
+     ↓
+     スキル
+     ↓
+     クラフト
+     ↓
+     閉じる
+  ========================= */
+
+  document
+    .getElementById(
+      "menuKey"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
+
+
+        if(
+          gameOver
+          ||
+          noticeOpen
+        ){
+
+          return;
+
+        }
+
+
+        const available =
+          getAvailableMenus();
+
+
+        if(
+          !menuOpen
+        ){
+
+          openGameMenu(
+            available[0]
+          );
+
+          return;
+
+        }
+
+
+        const index =
+          available.indexOf(
+            currentMenu
+          );
+
+
+        const nextIndex =
+          index + 1;
+
+
+        if(
+          nextIndex
+          >=
+          available.length
+        ){
+
+          closeGameMenu();
+
+          return;
+
+        }
+
+
+        selectMenu(
+          available[
+            nextIndex
+          ]
+        );
+
+
+      }
+    );
+
+
+  /* =========================
+     上部タブ
+  ========================= */
+
+  menuTabs
+    .forEach(
+      tab=>{
+
+
+        tab
+          .addEventListener(
+            "click",
+            ()=>{
+
+
+              selectMenu(
+                tab.dataset.menuTab
+              );
+
+
+            }
+          );
+
+
+      }
+    );
+
+
+  /* =========================
+     Xで閉じる
+  ========================= */
+
+  document
+    .getElementById(
+      "menuClose"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
+
+
+        closeGameMenu();
+
+
+      }
+    );
+
+
+  /* =========================
+     DEAD 最初から
   ========================= */
 
   document
@@ -4216,6 +4989,8 @@
   renderMeters();
 
   renderInventory();
+
+  renderMenuUnlocks();
 
   renderScene(
     false
