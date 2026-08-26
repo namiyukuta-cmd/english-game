@@ -56,7 +56,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 .skill-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 7px;padding:6px 8px;border:1px solid #a48a64;border-radius:6px;background:#e1c9a2;font-size:13px;font-weight:700}
 .skill-legend{font-size:11px;font-weight:600;color:#70583f;text-align:right;white-space:nowrap}
 .skill-list{border:1px solid #ad936d;border-radius:7px;overflow:hidden;background:#f8ead0}
-.skill-row{padding:4px 6px;border-bottom:1px solid #d1b891;background:#f8ead0}
+.skill-row{padding:4px 6px 5px;border-bottom:1px solid #d1b891;background:#f8ead0}
 .skill-row:last-child{border-bottom:0}
 .skill-main{display:grid;grid-template-columns:minmax(0,1fr) 40px 44px 24px;gap:5px;align-items:center;min-height:30px}
 .skill-name{min-width:0;font-size:14px;font-weight:850;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -66,11 +66,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 .skill-prof{width:21px;height:21px;border:2px dashed #927b5f;border-radius:50%;justify-self:center;display:grid;place-items:center;color:#f5e8d2;font-size:9px;font-weight:900}
 .skill-prof.on{border-style:solid;border-color:#6d352a;background:#8a3d31}
 .skill-prof.expertise{border-style:double;border-width:3px;border-color:#6d352a;background:#8a3d31}
-.skill-explanations{margin-top:14px;padding-top:10px;border-top:2px solid #a98d67}
-.skill-explanations h3{margin:0 0 7px;font-size:16px;color:#4a3828}
-.skill-explanation{padding:7px 2px;border-bottom:1px solid #d5bd98;color:#5d4934;font-size:14px;line-height:1.5}
-.skill-explanation:last-child{border-bottom:0}
-.skill-explanation strong{color:#3f3022}
+.skill-desc-inline{margin-top:1px;padding:0 2px 1px;color:#6b543c;font-size:11px;line-height:1.35}
 
 @media(max-width:430px){
   #topBar{grid-template-columns:50px minmax(0,1fr) 104px}
@@ -84,6 +80,7 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   .skill-main{grid-template-columns:minmax(0,1fr) 38px 42px 22px;gap:4px}
   .skill-name{font-size:13px}
   .skill-name small{font-size:10px}
+  .skill-desc-inline{font-size:10px}
 }
 </style>
 </head>
@@ -260,17 +257,18 @@ function renderSkillWindow(){
     const profClass=isExpert?'skill-prof expertise':isProficient?'skill-prof on':'skill-prof';
     const profMark=isExpert?'E':isProficient?'●':'';
     const profLabel=isExpert?'Expertise':isProficient?'習熟':'未習熟';
-    return `<div class="skill-row"><div class="skill-main">
-      <div class="skill-name">${escHtml(skill.name)}<small>${escHtml(skill.ja)}</small></div>
-      <div class="skill-ability">${skill.ability.toUpperCase()}</div>
-      <div class="skill-mod">${fmtMod(total)}</div>
-      <div class="${profClass}" aria-label="${profLabel}" title="${profLabel}">${profMark}</div>
-    </div></div>`;
+    return `<div class="skill-row">
+      <div class="skill-main">
+        <div class="skill-name">${escHtml(skill.name)}<small>${escHtml(skill.ja)}</small></div>
+        <div class="skill-ability">${skill.ability.toUpperCase()}</div>
+        <div class="skill-mod">${fmtMod(total)}</div>
+        <div class="${profClass}" aria-label="${profLabel}" title="${profLabel}">${profMark}</div>
+      </div>
+      <div class="skill-desc-inline">${escHtml(skill.desc)}</div>
+    </div>`;
   }).join('');
 
-  const explanations=skillDefs.map(skill=>`<div class="skill-explanation"><strong>${escHtml(skill.ja)}（${escHtml(skill.name)}）</strong><br>${escHtml(skill.desc)}</div>`).join('');
-
-  return `<div class="skill-summary"><span>Lv.${level}　習熟ボーナス ${fmtMod(proficiencyBonus)}</span><span class="skill-legend">● 習熟　E Expertise</span></div><div class="skill-list">${rows}</div><section class="skill-explanations"><h3>技能の説明</h3>${explanations}</section>`;
+  return `<div class="skill-summary"><span>Lv.${level}　習熟ボーナス ${fmtMod(proficiencyBonus)}</span><span class="skill-legend">● 習熟　E Expertise</span></div><div class="skill-list">${rows}</div>`;
 }
 
 document.querySelectorAll('.menu-button').forEach(button=>{
