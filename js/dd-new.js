@@ -315,6 +315,17 @@
       <div class="summary-abilities">${abilityIds.map(id=>`<div><small>${esc(id.toUpperCase())}</small><strong>${final[id]}</strong><span>${fmtMod(modifier(final[id]))}</span></div>`).join('')}</div>`;
   }
 
+  function replaceStartingItem(name, choices){
+    const text=String(name||'');
+    if(text.includes('Artisan’s Tools または Musical Instrument（1つ選択）')){
+      return choices.toolProficiency||'Artisan’s Tools or Musical Instrument';
+    }
+    if(text.includes('Musical Instrument（1つ選択）')){
+      return choices.startingInstrument||choices.instrumentProficiencies?.[0]||'Musical Instrument';
+    }
+    return text;
+  }
+
   function makeGame(){
     const c=currentClass(), b=currentBackground(), s=currentSpecies(), extra=currentExtra();
     const base=readBaseAbilities(), bonus=getBackgroundBonuses();
@@ -329,12 +340,13 @@
     if(currentClassId()==='Rogue' && choices.thievesCantLanguage) languages.push("Thieves' Cant",choices.thievesCantLanguage);
     if(currentClassId()==='Druid') languages.push('Druidic');
     const feats=[b.feat,...(s.humanExtra?[$('humanFeat').value]:[])];
-    const inventory=[...classEq.items,...bgEq.items];
+    const inventoryNames=[...classEq.items,...bgEq.items].map(name=>replaceStartingItem(name,choices));
+    const inventory=DDInventory.createItems(inventoryNames);
     const pending=[...(b.pending||[])];
     if(s.humanExtra && ['Magic Initiate','Skilled'].includes($('humanFeat').value)) pending.push(`Human Origin Feat「${$('humanFeat').value}」の詳細選択`);
     return {
       id,
-      meta:{saveFormat:2,rules:'SRD 5.2.1',createdAt:new Date().toISOString(),updatedAt:null},
+      meta:{saveFormat:2,inventoryFormat:1,rules:'SRD 5.2.1',createdAt:new Date().toISOString(),updatedAt:null},
       character:{
         id,name:$('name').value.trim(),level:1,xp:0,className:currentClassId(),classNameJa:c.ja,
         hitDie:`d${c.hitDie}`,proficiencyBonus:2,primaryAbility:c.primary,saveProficiencies:c.saves,
@@ -346,7 +358,7 @@
         portrait:$('portrait').value.trim(),notes:$('characterNotes').value.trim(),pendingChoices:pending
       },
       currency:{gp:(classEq.gp||0)+(bgEq.gp||0),sp:0,cp:0},
-      inventory:inventory.map((name,i)=>({id:`start-${i+1}`,name,source:i<classEq.items.length?'class':'background'})),
+      inventory,
       equipment:[],quests:[],npcs:[],world:{discoveredLocations:[],activeEvents:[]},
       current:{location:'未設定',scene:'start',day:1,time:'朝',background:''},currentNpc:null,log:[]
     };

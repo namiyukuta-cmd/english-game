@@ -207,6 +207,9 @@
     if (data.background?.gamingSet) {
       game.character.toolProficiencies = (game.character.toolProficiencies || []).filter(v => !String(v).startsWith('Gaming Set'));
       game.character.toolProficiencies.push(`Gaming Set: ${data.background.gamingSet}`);
+      const gamingSetId = window.DDInventory?.resolveItemId(data.background.gamingSet, false);
+      const ownedGamingSet = (game.inventory || []).find(item => item.itemId === 'gaming_set');
+      if (gamingSetId && ownedGamingSet) ownedGamingSet.itemId = gamingSetId;
     }
 
     if (data.human?.feat === 'Skilled') {

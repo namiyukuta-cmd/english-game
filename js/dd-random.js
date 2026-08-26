@@ -158,11 +158,11 @@
 
   function replaceStartingItem(name, classChoices, originChoices) {
     const text = String(name);
-    if (text.includes('Musical Instrument（1つ選択）')) {
-      return classChoices.startingInstrument || classChoices.instrumentProficiencies?.[0] || 'Musical Instrument';
-    }
     if (text.includes('Artisan’s Tools または Musical Instrument（1つ選択）')) {
       return classChoices.toolProficiency || 'Tool';
+    }
+    if (text.includes('Musical Instrument（1つ選択）')) {
+      return classChoices.startingInstrument || classChoices.instrumentProficiencies?.[0] || 'Musical Instrument';
     }
     if (text === 'Gaming Set' || text.includes('Gaming Set（1種類選択）')) {
       return originChoices.background?.gamingSet ? `Gaming Set: ${originChoices.background.gamingSet}` : 'Gaming Set';
@@ -245,17 +245,13 @@
     const feats = unique([background.feat, humanFeat]);
     const classItems = (classEquipment.items || []).map(name => replaceStartingItem(name, classResolved.choices, originResolved.originChoices));
     const backgroundItems = (backgroundEquipment.items || []).map(name => replaceStartingItem(name, classResolved.choices, originResolved.originChoices));
-    const inventory = [...classItems,...backgroundItems].map((name,index) => ({
-      id:`start-${index+1}`,
-      name,
-      source:index < classItems.length ? 'class' : 'background'
-    }));
+    const inventory = DDInventory.createItems([...classItems,...backgroundItems]);
 
     const id = crypto.randomUUID ? crypto.randomUUID() : `dd-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 
     return {
       id,
-      meta:{saveFormat:2,rules:'SRD 5.2.1',createdAt:new Date().toISOString(),updatedAt:null,creation:'random'},
+      meta:{saveFormat:2,inventoryFormat:1,rules:'SRD 5.2.1',createdAt:new Date().toISOString(),updatedAt:null,creation:'random'},
       character:{
         id,
         name:generateName(),
@@ -336,7 +332,11 @@
 
     const classRows = classChoiceRows(game);
     const origin = originRows(game);
-    const items = game.inventory.map(item => item.name);
+    const items = game.inventory.map(item => {
+      const data = DDInventory.itemData(item.itemId);
+      const quantity = Number(item.quantity || 1);
+      return `${data?.name || item.itemId}${quantity !== 1 ? ` ×${quantity}` : ''}`;
+    });
 
     sheet.innerHTML = `
       <h2 class="name">${esc(c.name)}</h2>
