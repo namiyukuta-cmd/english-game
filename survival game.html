@@ -1,314 +1,896 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#edf6fb">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>雪山サバイバル</title>
-  <style>
-    *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#253947;background:#dfeaf1}
-    body{min-height:100dvh;background:linear-gradient(180deg,#f2f9fd 0%,#e0edf4 100%)}
-    button,a{font:inherit}
-    button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>雪山サバイバル</title>
 
-    .shell{width:min(100%,540px);height:100dvh;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 9px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;overflow:hidden}
-    .topbar{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;flex:0 0 auto}
-    .back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #b8cad6;border-radius:13px;background:#fff;color:#304957;text-decoration:none;font-size:22px;font-weight:900}
-    .title{margin:0;text-align:center;font-size:20px;font-weight:900}
+<style>
+*{
+  box-sizing:border-box;
+}
 
-    .info-row{display:grid;grid-template-columns:1.25fr repeat(3,.75fr);gap:5px;flex:0 0 auto}
-    .info{min-height:42px;padding:5px 4px;border:1px solid #c2d4de;border-radius:11px;background:rgba(255,255,255,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-    .info.time{background:#35596d;color:#fff;border-color:#35596d}
-    .info small{display:block;font-size:17px;line-height:1.05;opacity:.78}
-    .info strong{display:block;margin-top:2px;font-size:17px;line-height:1.08;white-space:nowrap}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  background:#dfeaf2;
+  color:#263845;
+}
 
-    .field-wrap{position:relative;min-height:0;flex:1 1 auto;border:2px solid #b8cdd9;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 6px 18px rgba(45,75,92,.08)}
-    .field{position:absolute;inset:0;overflow:hidden;transition:background .25s ease}
-    .field.area-forest{background:radial-gradient(ellipse at 15% 18%,#fff 0 42px,transparent 43px),radial-gradient(ellipse at 72% 13%,#fff 0 58px,transparent 59px),radial-gradient(ellipse at 45% 72%,rgba(255,255,255,.9) 0 70px,transparent 71px),linear-gradient(180deg,#f9fdff 0%,#edf6fb 45%,#f8fcff 100%)}
-    .field.area-snowfield{background:radial-gradient(ellipse at 52% 32%,rgba(255,255,255,.95) 0 90px,transparent 91px),linear-gradient(160deg,#ffffff 0%,#edf7fc 55%,#dcecf5 100%)}
-    .field.area-river{background:linear-gradient(110deg,transparent 0 31%,rgba(193,226,241,.86) 32% 66%,transparent 67%),linear-gradient(180deg,#f9fdff 0%,#e8f3f8 100%)}
-    .field.area-rock{background:radial-gradient(circle at 18% 72%,#d8e1e6 0 34px,transparent 35px),radial-gradient(circle at 78% 24%,#cbd8df 0 44px,transparent 45px),linear-gradient(180deg,#f7fbfd 0%,#e2ebf0 100%)}
-    .field::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(165deg,rgba(155,190,209,.08) 0 1px,transparent 1px 38px);pointer-events:none}
+body{
+  min-height:100dvh;
+}
 
-    .area-label{position:absolute;left:50%;top:7px;transform:translateX(-50%);z-index:10;padding:5px 9px;border:1px solid #d5e2ea;border-radius:10px;background:rgba(255,255,255,.92);font-size:17px;font-weight:800;white-space:nowrap;pointer-events:none}
-    .decor{position:absolute;line-height:1;pointer-events:none;z-index:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.11))}
-    .ground-item{position:absolute;width:46px;height:46px;margin-left:-23px;margin-top:-23px;padding:0;border:0;background:transparent;display:grid;place-items:center;font-size:27px;line-height:1;z-index:4;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12))}
-    .ground-item::after{content:"";position:absolute;left:7px;right:7px;bottom:3px;height:7px;border-radius:50%;background:rgba(83,107,121,.12);z-index:-1}
-    .ground-item:active{transform:scale(.94)}
+.game{
+  width:min(100%,540px);
+  min-height:100dvh;
+  margin:auto;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 
-    .exit{position:absolute;z-index:7;min-width:92px;min-height:44px;padding:7px 10px;border:1px solid #98b4c4;border-radius:14px;background:rgba(255,255,255,.94);color:#294553;font-size:17px;font-weight:900;box-shadow:0 4px 12px rgba(45,75,92,.10);transform:translate(-50%,-50%)}
-    .exit:active{background:#e9f4fa}
+/* 上の情報 */
+.status{
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:6px;
+}
 
-    .campfire{position:absolute;width:52px;height:52px;margin-left:-26px;margin-top:-34px;display:grid;place-items:center;font-size:34px;line-height:1;z-index:5;pointer-events:none;filter:drop-shadow(0 0 8px rgba(255,136,35,.55));animation:fireGlow .8s ease-in-out infinite alternate}
-    .campfire[hidden]{display:none}
-    .campfire::after{content:"";position:absolute;left:8px;right:8px;bottom:4px;height:8px;border-radius:50%;background:rgba(73,91,102,.18);z-index:-1}
-    @keyframes fireGlow{from{transform:scale(.96)}to{transform:scale(1.05)}}
+.status-box{
+  padding:8px 5px;
+  border:1px solid #b8cad5;
+  border-radius:12px;
+  background:white;
+  text-align:center;
+}
 
-    .player{position:absolute;width:46px;height:58px;margin-left:-23px;margin-top:-45px;z-index:6;transition-property:left,top;transition-timing-function:linear;filter:drop-shadow(0 3px 2px rgba(49,67,77,.22));pointer-events:none}
-    .player.walking{animation:bob .25s ease-in-out infinite alternate}
-    @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
-    .hood{position:absolute;left:5px;top:0;width:36px;height:35px;border-radius:50% 50% 46% 46%;background:#d76d83;border:2px solid #7d4855;z-index:3}
-    .hood::before{content:"";position:absolute;left:5px;top:5px;width:22px;height:22px;border-radius:50%;background:#ffe5cf;border:1px solid #b98a78}
-    .hair{position:absolute;left:11px;top:7px;width:24px;height:10px;border-radius:50% 50% 35% 35%;background:#5b443d;z-index:4;clip-path:polygon(0 0,100% 0,92% 65%,75% 42%,60% 80%,43% 45%,25% 78%,8% 55%)}
-    .eye{position:absolute;top:17px;width:3px;height:4px;border-radius:50%;background:#493238;z-index:5}
-    .eye.left{left:16px}.eye.right{right:16px}
-    .cheek{position:absolute;top:22px;width:5px;height:3px;border-radius:50%;background:#f3a2a8;z-index:5;opacity:.7}
-    .cheek.left{left:11px}.cheek.right{right:11px}
-    .scarf{position:absolute;left:8px;top:30px;width:30px;height:8px;border-radius:6px;background:#f0bf57;border:1px solid #9a7237;z-index:5}
-    .scarf::after{content:"";position:absolute;right:1px;top:5px;width:8px;height:15px;border-radius:0 0 5px 5px;background:#f0bf57;border:1px solid #9a7237;border-top:0;transform:rotate(-10deg)}
-    .coat{position:absolute;left:8px;top:34px;width:30px;height:20px;border-radius:9px 9px 7px 7px;background:#7ba7c5;border:2px solid #476d86;z-index:2}
-    .coat::before{content:"";position:absolute;left:13px;top:1px;width:2px;height:15px;background:#d6e9f4}
-    .leg{position:absolute;top:51px;width:8px;height:7px;border-radius:0 0 4px 4px;background:#554b50;z-index:1}
-    .leg.left{left:12px}.leg.right{right:12px}
+.status-box small{
+  display:block;
+  font-size:17px;
+}
 
-    .pickup-ring{position:absolute;width:54px;height:54px;margin-left:-27px;margin-top:-27px;border:2px solid rgba(79,128,153,.55);border-radius:50%;z-index:3;pointer-events:none;animation:ring .65s ease-out infinite;display:none}
-    .pickup-ring.show{display:block}
-    @keyframes ring{from{transform:scale(.65);opacity:.8}to{transform:scale(1.15);opacity:0}}
+.status-box strong{
+  display:block;
+  margin-top:3px;
+  font-size:18px;
+}
 
-    .message{flex:0 0 auto;min-height:48px;padding:8px 11px;border:1px solid #c3d5df;border-radius:13px;background:#fff;font-size:17px;line-height:1.35;display:flex;align-items:center}
-    .bottom-menu{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px;flex:0 0 auto}
-    .menu-btn{min-height:50px;padding:6px;border:1px solid #9eb7c5;border-radius:14px;background:#fff;color:#294352;font-size:17px;font-weight:900}
-    .menu-btn:active{transform:translateY(1px);background:#edf6fb}
-    .menu-btn.fire{background:#35596d;color:#fff;border-color:#35596d}
+/* 一人称の景色 */
+.scene{
+  position:relative;
+  width:100%;
+  height:500px;
+  overflow:hidden;
+  border:2px solid #b6cbd8;
+  border-radius:17px;
 
-    .modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,42,52,.42)}
-    .modal.open{display:flex}
-    .modal-card{width:min(440px,100%);max-height:80dvh;overflow:auto;padding:16px;border:2px solid #b8cdd9;border-radius:20px;background:#fafdff;box-shadow:0 22px 70px rgba(23,44,56,.28)}
-    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .modal-head h2{margin:0;font-size:22px}
-    .close-btn{width:44px;height:44px;border:1px solid #b7cad5;border-radius:13px;background:#fff;font-size:22px;font-weight:900}
-    .pause-note{margin:0 0 12px;padding:8px 10px;border-radius:12px;background:#eaf3f8;font-size:17px;line-height:1.4;color:#536c79;text-align:center}
-    .item-list{display:grid;gap:8px}
-    .item-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:11px;border:1px solid #cadae3;border-radius:14px;background:#fff;font-size:17px}
-    .item-row .icon{font-size:26px;text-align:center}
-    .item-row strong{font-size:18px}.item-row .count{font-size:20px;font-weight:900}
-    .empty-note{font-size:17px;line-height:1.5;color:#607784;text-align:center;padding:12px}
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
 
-    @media(max-width:390px){.shell{padding-left:6px;padding-right:6px;gap:5px}.title{font-size:19px}.info-row{gap:4px}.info{padding-left:2px;padding-right:2px}.message{min-height:44px}.menu-btn{min-height:47px}.exit{min-width:86px;padding-left:8px;padding-right:8px}}
-  </style>
+  /* 画像がまだ無い時の仮背景 */
+  background-color:#edf6fb;
+}
+
+.scene-title{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+
+  padding:7px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.9);
+
+  font-size:18px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+/* 景色の中のタップ場所 */
+.hotspot{
+  position:absolute;
+  min-width:70px;
+  min-height:48px;
+
+  border:1px solid rgba(80,110,125,.7);
+  border-radius:13px;
+
+  background:rgba(255,255,255,.78);
+
+  font-size:17px;
+  font-weight:800;
+
+  color:#294352;
+
+  touch-action:manipulation;
+}
+
+.hotspot:active{
+  transform:scale(.97);
+}
+
+/* 下の文章 */
+.message{
+  min-height:72px;
+  padding:12px;
+
+  border:1px solid #b8cad5;
+  border-radius:15px;
+
+  background:white;
+
+  font-size:17px;
+  line-height:1.6;
+}
+
+.menu{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.menu button{
+  min-height:54px;
+
+  border:1px solid #9fb6c4;
+  border-radius:14px;
+
+  background:white;
+
+  font-size:17px;
+  font-weight:900;
+}
+
+/* ITEM */
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:rgba(20,35,45,.45);
+
+  z-index:100;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-card{
+  width:min(420px,100%);
+  padding:18px;
+
+  border-radius:20px;
+  background:white;
+}
+
+.modal-card h2{
+  margin-top:0;
+  font-size:22px;
+}
+
+.item-row{
+  padding:12px 0;
+  border-bottom:1px solid #ddd;
+
+  font-size:18px;
+}
+
+.close{
+  width:100%;
+  min-height:50px;
+
+  margin-top:15px;
+
+  border:1px solid #aaa;
+  border-radius:13px;
+
+  background:white;
+
+  font-size:17px;
+  font-weight:900;
+}
+</style>
 </head>
+
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <a class="back" href="survival%20game_TOP.html" aria-label="サバイバルトップへ戻る">←</a>
-      <h1 class="title">雪山サバイバル</h1>
-      <span aria-hidden="true"></span>
-    </header>
 
-    <section class="info-row" aria-label="状態">
-      <div class="info time"><small>1日目</small><strong id="clock">08:00:00</strong></div>
-      <div class="info"><small>体温</small><strong id="warmth">寒い</strong></div>
-      <div class="info"><small>空腹</small><strong id="hunger">平気</strong></div>
-      <div class="info"><small>火</small><strong id="fireState">なし</strong></div>
-    </section>
+<main class="game">
 
-    <section class="field-wrap">
-      <div id="field" class="field area-forest" aria-label="雪山フィールド。タップした場所へ移動します。">
-        <div id="areaLabel" class="area-label">雪山・針葉樹林</div>
-        <div id="decorLayer"></div>
-        <div id="itemLayer"></div>
-        <div id="exitLayer"></div>
-        <div id="pickupRing" class="pickup-ring" aria-hidden="true"></div>
-        <div id="campfire" class="campfire" hidden aria-hidden="true">🔥</div>
-        <div id="player" class="player" aria-label="主人公">
-          <div class="hood"></div><div class="hair"></div>
-          <div class="eye left"></div><div class="eye right"></div>
-          <div class="cheek left"></div><div class="cheek right"></div>
-          <div class="scarf"></div><div class="coat"></div>
-          <div class="leg left"></div><div class="leg right"></div>
-        </div>
-      </div>
-    </section>
+  <section class="status">
 
-    <div id="message" class="message" aria-live="polite">雪の上を調べて、生き残るための物を集めましょう。</div>
+    <div class="status-box">
+      <small id="day">1日目</small>
+      <strong id="clock">08:00:00</strong>
+    </div>
 
-    <nav class="bottom-menu" aria-label="メニュー">
-      <button id="itemBtn" class="menu-btn" type="button">🎒 ITEM</button>
-      <button id="lookBtn" class="menu-btn" type="button">👀 周囲</button>
-      <button id="fireBtn" class="menu-btn fire" type="button">🔥 焚き火</button>
-    </nav>
-  </main>
+    <div class="status-box">
+      <small>体温</small>
+      <strong>寒い</strong>
+    </div>
 
-  <div id="itemModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="itemTitle">
-    <section class="modal-card">
-      <header class="modal-head"><h2 id="itemTitle">ITEM</h2><button id="closeItem" class="close-btn" type="button" aria-label="閉じる">×</button></header>
-      <p class="pause-note">ITEMを開いている間、ゲーム内時間は止まります。</p>
-      <div id="itemList" class="item-list"></div>
-    </section>
+    <div class="status-box">
+      <small>現在地</small>
+      <strong id="placeName">針葉樹林</strong>
+    </div>
+
+  </section>
+
+
+  <!-- 一人称の景色 -->
+  <section id="scene" class="scene">
+
+    <div id="sceneTitle" class="scene-title">
+      針葉樹林
+    </div>
+
+    <!-- JSでここにタップ場所が追加される -->
+
+  </section>
+
+
+  <div id="message" class="message">
+    雪の積もった針葉樹林です。
   </div>
 
-  <script>
-    const SAVE_KEY='englishGameSurvivalSaveV2';
-    const PASSIVE_GAME_SECONDS=5;
-    const MOVE_SECONDS_PER_PIXEL=.55;
-    const AREA_CHANGE_SECONDS=120;
-    const START_TIME_SECONDS=8*60*60;
 
-    const AREAS={
-      forest:{
-        name:'雪山・針葉樹林',className:'area-forest',cold:'寒い',description:'針葉樹が密集しています。枝を集めやすく、風も少し弱い場所です。',
-        decor:[['🌲',8,18,40],['🌲',26,9,34],['🌲',89,20,42],['🌲',78,48,34],['🌲',9,78,42],['🌲',33,67,34],['🌲',90,82,40]],
-        items:[['b1','branch','🪾',22,27],['s1','stone','🪨',59,21],['b2','branch','🪾',43,45],['s2','stone','🪨',73,49],['s3','stone','🪨',20,64],['b3','branch','🪾',58,73],['s4','stone','🪨',78,76]],
-        exits:[
-          {label:'↑ 雪原へ',to:'snowfield',x:50,y:11,enterX:50,enterY:87},
-          {label:'凍った川 →',to:'river',x:86,y:58,enterX:13,enterY:58}
-        ]
+  <nav class="menu">
+
+    <button id="itemButton">
+      🎒 ITEM
+    </button>
+
+    <button id="lookButton">
+      👀 周囲を見る
+    </button>
+
+  </nav>
+
+</main>
+
+
+<!-- ITEM画面 -->
+<div id="itemModal" class="modal">
+
+  <section class="modal-card">
+
+    <h2>ITEM</h2>
+
+    <div id="itemList"></div>
+
+    <button id="closeItem" class="close">
+      閉じる
+    </button>
+
+  </section>
+
+</div>
+
+
+<script>
+
+/* =========================
+   景色データ
+========================= */
+
+const SCENES = {
+
+  forest: {
+
+    name:"針葉樹林",
+
+    /*
+      後で背景PNGを作ったら、
+
+      assets/survival/forest_01.png
+
+      のように置く
+    */
+
+    background:"",
+
+    description:
+      "雪の積もった針葉樹林です。少し先に倒木が見えます。",
+
+    hotspots:[
+
+      {
+        id:"branch01",
+        label:"🪾 細い枝",
+        x:12,
+        y:72,
+
+        type:"item",
+        item:"branch",
+
+        time:20,
+
+        text:"足元の細い枝を拾いました。"
       },
-      snowfield:{
-        name:'吹きさらしの雪原',className:'area-snowfield',cold:'とても寒い',description:'木が少なく、風を遮るものがありません。遠くまで見渡せます。',
-        decor:[['❄️',16,23,24],['❄️',74,17,22],['🌲',8,78,32],['🌲',91,70,31],['❄️',55,62,20]],
-        items:[['s1','stone','🪨',28,34],['b1','branch','🪾',69,42],['s2','stone','🪨',55,70]],
-        exits:[
-          {label:'↑ 岩場へ',to:'rock',x:50,y:11,enterX:50,enterY:87},
-          {label:'↓ 針葉樹林',to:'forest',x:50,y:89,enterX:50,enterY:14}
-        ]
+
+      {
+        id:"fallenTree",
+        label:"倒木",
+        x:42,
+        y:45,
+
+        type:"move",
+        scene:"fallenTree",
+
+        time:120,
+
+        text:"雪を踏みながら倒木へ向かいます。"
       },
-      river:{
-        name:'凍った川',className:'area-river',cold:'かなり寒い',description:'厚い氷に覆われた川です。岸には流木や小石が残っています。',
-        decor:[['🧊',42,24,28],['🧊',58,57,30],['🌲',8,20,35],['🌲',91,79,34],['🧊',47,80,24]],
-        items:[['b1','branch','🪾',27,32],['s1','stone','🪨',72,30],['b2','branch','🪾',67,69],['s2','stone','🪨',24,72]],
-        exits:[{label:'← 針葉樹林',to:'forest',x:12,y:55,enterX:87,enterY:55}]
-      },
-      rock:{
-        name:'風の弱い岩場',className:'area-rock',cold:'寒い',description:'大きな岩が風を遮っています。石を集めやすい場所です。',
-        decor:[['🪨',12,25,42],['🪨',84,26,48],['🪨',18,75,38],['🌲',88,75,31],['🪨',70,61,34]],
-        items:[['s1','stone','🪨',34,25],['s2','stone','🪨',62,37],['s3','stone','🪨',39,65],['b1','branch','🪾',70,76]],
-        exits:[{label:'↓ 雪原へ',to:'snowfield',x:50,y:89,enterX:50,enterY:14}]
+
+      {
+        id:"river",
+        label:"凍った川 →",
+        x:72,
+        y:63,
+
+        type:"move",
+        scene:"river",
+
+        time:420,
+
+        text:"木々の間を抜け、凍った川へ向かいます。"
       }
-    };
 
-    const field=document.getElementById('field');
-    const areaLabel=document.getElementById('areaLabel');
-    const decorLayer=document.getElementById('decorLayer');
-    const itemLayer=document.getElementById('itemLayer');
-    const exitLayer=document.getElementById('exitLayer');
-    const player=document.getElementById('player');
-    const pickupRing=document.getElementById('pickupRing');
-    const campfire=document.getElementById('campfire');
-    const message=document.getElementById('message');
-    const itemModal=document.getElementById('itemModal');
-    const itemList=document.getElementById('itemList');
-    const fireBtn=document.getElementById('fireBtn');
-    const params=new URLSearchParams(location.search);
+    ]
 
-    const defaultState={currentArea:'forest',xPct:50,yPct:85,branch:0,stone:0,food:0,collected:[],campfires:{},gameSeconds:START_TIME_SECONDS};
-    let state={...defaultState,campfires:{}};
-    let moving=false,menuOpen=false,moveTimer=null,saveTick=0;
+  },
 
-    function load(){
-      if(params.get('new')==='1'){try{localStorage.removeItem(SAVE_KEY)}catch(e){};return}
-      try{
-        const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
-        if(saved&&typeof saved==='object'){
-          state={...defaultState,...saved,campfires:{...(saved.campfires||{})}};
-          if(!AREAS[state.currentArea])state.currentArea='forest';
-          if(Array.isArray(saved.collected))state.collected=saved.collected.map(id=>String(id).includes(':')?id:'forest:'+id);
-          if(saved.fire&&!state.campfires.forest){state.campfires.forest={xPct:saved.fireXPct??50,yPct:saved.fireYPct??70}}
-        }
-      }catch(e){}
+
+  fallenTree: {
+
+    name:"倒木のそば",
+
+    background:"",
+
+    description:
+      "大きな針葉樹が雪の上に倒れています。折れた枝がいくつもあります。",
+
+    hotspots:[
+
+      {
+        id:"branch02",
+        label:"🪾 太い枝",
+        x:32,
+        y:57,
+
+        type:"item",
+        item:"branch",
+
+        time:35,
+
+        text:"倒木から太い枝を拾いました。"
+      },
+
+      {
+        id:"stone01",
+        label:"🪨 小石",
+        x:72,
+        y:72,
+
+        type:"item",
+        item:"stone",
+
+        time:25,
+
+        text:"雪の中から小石を拾いました。"
+      },
+
+      {
+        id:"backForest",
+        label:"← 森へ戻る",
+        x:5,
+        y:12,
+
+        type:"move",
+        scene:"forest",
+
+        time:120,
+
+        text:"元いた森へ戻ります。"
+      }
+
+    ]
+
+  },
+
+
+  river: {
+
+    name:"凍った川",
+
+    background:"",
+
+    description:
+      "川は厚い氷に覆われています。岸には流木が引っかかっています。",
+
+    hotspots:[
+
+      {
+        id:"driftwood",
+        label:"🪾 流木",
+        x:60,
+        y:54,
+
+        type:"item",
+        item:"branch",
+
+        time:80,
+
+        text:"岸まで歩き、流木を拾いました。"
+      },
+
+      {
+        id:"ice",
+        label:"🧊 氷",
+        x:37,
+        y:67,
+
+        type:"look",
+
+        time:30,
+
+        text:"川の表面はかなり厚く凍っています。"
+      },
+
+      {
+        id:"backForest",
+        label:"← 森へ戻る",
+        x:5,
+        y:12,
+
+        type:"move",
+        scene:"forest",
+
+        time:420,
+
+        text:"針葉樹林へ戻ります。"
+      }
+
+    ]
+
+  }
+
+};
+
+
+/* =========================
+   ゲーム状態
+========================= */
+
+let state = {
+
+  currentScene:"forest",
+
+  branch:0,
+  stone:0,
+
+  collected:[],
+
+  gameSeconds:8 * 60 * 60
+
+};
+
+let menuOpen=false;
+
+
+/* =========================
+   景色表示
+========================= */
+
+const sceneElement=
+  document.getElementById("scene");
+
+const messageElement=
+  document.getElementById("message");
+
+
+function renderScene(){
+
+  const data =
+    SCENES[state.currentScene];
+
+  document.getElementById("sceneTitle")
+    .textContent=data.name;
+
+  document.getElementById("placeName")
+    .textContent=data.name;
+
+
+  /*
+    背景画像
+  */
+
+  if(data.background){
+
+    sceneElement.style.backgroundImage =
+      `url("${data.background}")`;
+
+  }else{
+
+    /*
+      画像が無い間の仮背景
+    */
+
+    sceneElement.style.backgroundImage =
+      "linear-gradient(180deg,#dcecf6 0%,#f8fcff 60%,#eef6fb 100%)";
+
+  }
+
+
+  /*
+    古いhotspot削除
+  */
+
+  sceneElement
+    .querySelectorAll(".hotspot")
+    .forEach(el=>el.remove());
+
+
+  /*
+    新しいhotspot作成
+  */
+
+  data.hotspots.forEach(hotspot=>{
+
+    /*
+      拾った物は再表示しない
+    */
+
+    if(
+      hotspot.type==="item" &&
+      state.collected.includes(hotspot.id)
+    ){
+      return;
     }
-    function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
-    function setMessage(text){message.textContent=text}
-    function area(){return AREAS[state.currentArea]}
-    function itemKey(id){return state.currentArea+':'+id}
 
-    function formatDuration(total){total=Math.max(0,Math.round(total));const m=Math.floor(total/60),s=total%60;if(!m)return s+'秒';return s?m+'分'+s+'秒':m+'分'}
-    function advanceTime(seconds){state.gameSeconds+=Math.max(0,Math.round(seconds));renderClock()}
-    function renderClock(){const total=Math.floor(state.gameSeconds),day=Math.floor(total/86400)+1,sec=((total%86400)+86400)%86400,h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;document.querySelector('.info.time small').textContent=day+'日目';document.getElementById('clock').textContent=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':')}
 
-    function renderArea(){
-      const a=area();
-      field.className='field '+a.className;
-      areaLabel.textContent=a.name;
-      decorLayer.innerHTML=a.decor.map(([icon,x,y,size])=>`<span class="decor" style="left:${x}%;top:${y}%;font-size:${size}px;transform:translate(-50%,-50%)">${icon}</span>`).join('');
-      itemLayer.innerHTML=a.items.filter(([id])=>!state.collected.includes(itemKey(id))).map(([id,kind,icon,x,y])=>`<button class="ground-item" data-id="${id}" data-kind="${kind}" data-x="${x}" data-y="${y}" style="left:${x}%;top:${y}%" aria-label="${kind==='branch'?'枝':'小石'}">${icon}</button>`).join('');
-      exitLayer.innerHTML=a.exits.map((e,i)=>`<button class="exit" data-exit="${i}" style="left:${e.x}%;top:${e.y}%">${e.label}</button>`).join('');
-      renderCampfire();
-      renderStatus();
+    const button =
+      document.createElement("button");
+
+    button.className="hotspot";
+
+    button.textContent=
+      hotspot.label;
+
+    button.style.left=
+      hotspot.x+"%";
+
+    button.style.top=
+      hotspot.y+"%";
+
+
+    button.addEventListener(
+      "click",
+      ()=>activateHotspot(hotspot)
+    );
+
+
+    sceneElement.appendChild(button);
+
+  });
+
+
+  messageElement.textContent=
+    data.description;
+
+}
+
+
+/* =========================
+   景色の中をタップ
+========================= */
+
+function activateHotspot(hotspot){
+
+  if(menuOpen)return;
+
+
+  /* 時間を進める */
+
+  advanceTime(hotspot.time);
+
+
+  /*
+    アイテム
+  */
+
+  if(hotspot.type==="item"){
+
+    state.collected.push(
+      hotspot.id
+    );
+
+
+    if(hotspot.item==="branch"){
+
+      state.branch++;
+
     }
 
-    function renderPlayer(){const rect=field.getBoundingClientRect();player.style.left=rect.width*(state.xPct/100)+'px';player.style.top=rect.height*(state.yPct/100)+'px'}
-    function renderCampfire(){const fire=state.campfires[state.currentArea];if(!fire){campfire.hidden=true;return}campfire.hidden=false;campfire.style.left=fire.xPct+'%';campfire.style.top=fire.yPct+'%'}
-    function distancePct(a,b){return Math.hypot(a.xPct-b.xPct,a.yPct-b.yPct)}
-    function renderStatus(){
-      const fire=state.campfires[state.currentArea];
-      const nearFire=fire&&distancePct({xPct:state.xPct,yPct:state.yPct},fire)<18;
-      document.getElementById('warmth').textContent=nearFire?'暖かい':area().cold;
-      document.getElementById('hunger').textContent=state.food>=2?'少し安心':'平気';
-      document.getElementById('fireState').textContent=fire?'あり':'なし';
-      fireBtn.textContent=fire?'🔥 火あり':'🔥 焚き火';
-    }
-    function renderInventory(){const rows=[];if(state.branch>0)rows.push(`<div class="item-row"><span class="icon">🪾</span><strong>枝</strong><span class="count">× ${state.branch}</span></div>`);if(state.stone>0)rows.push(`<div class="item-row"><span class="icon">🪨</span><strong>小石</strong><span class="count">× ${state.stone}</span></div>`);if(state.food>0)rows.push(`<div class="item-row"><span class="icon">🫐</span><strong>実</strong><span class="count">× ${state.food}</span></div>`);itemList.innerHTML=rows.length?rows.join(''):'<div class="empty-note">まだ何も持っていません。</div>'}
-    function render(){renderArea();renderPlayer();renderClock();if(menuOpen)renderInventory()}
 
-    function getPlayerPixel(){const r=field.getBoundingClientRect();return{x:r.width*state.xPct/100,y:r.height*state.yPct/100}}
-    function targetFromPct(xPct,yPct){const r=field.getBoundingClientRect();return{x:r.width*xPct/100,y:r.height*yPct/100,xPct,yPct}}
-    function fieldPointFromEvent(e){const r=field.getBoundingClientRect(),x=Math.max(24,Math.min(r.width-24,e.clientX-r.left)),y=Math.max(55,Math.min(r.height-18,e.clientY-r.top));return{x,y,xPct:x/r.width*100,yPct:y/r.height*100}}
-    function showTargetRing(t){pickupRing.style.left=t.x+'px';pickupRing.style.top=t.y+'px';pickupRing.classList.add('show')}
-    function hideTargetRing(){pickupRing.classList.remove('show')}
+    if(hotspot.item==="stone"){
 
-    function moveTo(target,onArrive=null,showRing=false){
-      if(menuOpen||moving)return;
-      if(moveTimer)clearTimeout(moveTimer);
-      const from=getPlayerPixel(),distance=Math.hypot(target.x-from.x,target.y-from.y);
-      if(distance<3){if(onArrive)onArrive();return}
-      moving=true;
-      const travelSeconds=Math.max(1,Math.round(distance*MOVE_SECONDS_PER_PIXEL));
-      const animMs=Math.max(260,Math.min(1400,distance*4.2));
-      player.classList.add('walking');player.style.transitionDuration=animMs+'ms';
-      state.xPct=target.xPct;state.yPct=target.yPct;renderPlayer();renderStatus();
-      showRing?showTargetRing(target):hideTargetRing();
-      setMessage('雪の上を歩いています……');
-      moveTimer=setTimeout(()=>{moving=false;player.classList.remove('walking');hideTargetRing();advanceTime(travelSeconds);if(onArrive)onArrive(travelSeconds);else{setMessage(formatDuration(travelSeconds)+'歩きました。');renderStatus()}save()},animMs);
+      state.stone++;
+
     }
 
-    function collectItem(el,travelSeconds=0){
-      const id=el.dataset.id,key=itemKey(id);if(state.collected.includes(key))return;
-      state.collected.push(key);
-      if(el.dataset.kind==='branch'){state.branch++;setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'枝を1本拾いました。')}
-      else{state.stone++;setMessage((travelSeconds?formatDuration(travelSeconds)+'歩いて、':'')+'小石を1個拾いました。')}
-      renderArea();renderPlayer();save();
-    }
 
-    function changeArea(exit,travelSeconds){
-      const oldName=area().name;
-      advanceTime(AREA_CHANGE_SECONDS);
-      state.currentArea=exit.to;state.xPct=exit.enterX;state.yPct=exit.enterY;
-      render();
-      setMessage(oldName+'から「'+area().name+'」へ移動しました。移動に'+formatDuration(travelSeconds+AREA_CHANGE_SECONDS)+'かかりました。');
-      save();
-    }
+    messageElement.textContent =
+      hotspot.text +
+      "（"+formatDuration(hotspot.time)+"経過）";
 
-    field.addEventListener('click',e=>{
-      const item=e.target.closest('.ground-item');
-      if(item){e.preventDefault();e.stopPropagation();moveTo(targetFromPct(Number(item.dataset.x),Number(item.dataset.y)),t=>collectItem(item,t),true);return}
-      const exitBtn=e.target.closest('.exit');
-      if(exitBtn){e.preventDefault();e.stopPropagation();const ex=area().exits[Number(exitBtn.dataset.exit)];moveTo(targetFromPct(ex.x,ex.y),t=>changeArea(ex,t),true);return}
-      moveTo(fieldPointFromEvent(e));
-    });
 
-    document.getElementById('itemBtn').addEventListener('click',()=>{if(moving)return;menuOpen=true;renderInventory();itemModal.classList.add('open')});
-    function closeInventory(){menuOpen=false;itemModal.classList.remove('open');save()}
-    document.getElementById('closeItem').addEventListener('click',closeInventory);
-    itemModal.addEventListener('click',e=>{if(e.target===itemModal)closeInventory()});
+    renderScene();
 
-    document.getElementById('lookBtn').addEventListener('click',()=>{if(moving||menuOpen)return;advanceTime(30);const a=area();const extras={forest:['木の根元に枝が落ちています。','木々が風を少し遮っています。'],snowfield:['風が強く、足跡がすぐ薄れていきます。','遠くまで白い雪原が続いています。'],river:['氷の下に水の流れが見えます。','岸辺に流木が引っかかっています。'],rock:['岩陰は少し風が弱いです。','足元には大小の石があります。']};const arr=[a.description,...extras[state.currentArea]];setMessage(arr[Math.floor(Math.random()*arr.length)]+'（30秒経過）');save()});
+    return;
 
-    fireBtn.addEventListener('click',()=>{
-      if(moving||menuOpen)return;
-      if(state.campfires[state.currentArea]){setMessage('この場所には、すでに焚き火があります。');return}
-      if(state.branch<3||state.stone<4){const need=[];if(state.branch<3)need.push('枝あと'+(3-state.branch)+'本');if(state.stone<4)need.push('小石あと'+(4-state.stone)+'個');setMessage('材料が足りません。'+need.join('、')+'必要です。');return}
-      state.branch-=3;state.stone-=4;state.campfires[state.currentArea]={xPct:state.xPct,yPct:state.yPct};advanceTime(120);renderCampfire();renderStatus();setMessage('この場所に焚き火を作りました。（2分経過）');save();
-    });
+  }
 
-    setInterval(()=>{if(document.visibilityState!=='visible'||menuOpen||moving)return;advanceTime(PASSIVE_GAME_SECONDS);saveTick++;if(saveTick>=5){saveTick=0;save()}},1000);
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save()});
-    window.addEventListener('beforeunload',save);
-    window.addEventListener('resize',()=>{renderPlayer();renderCampfire()});
 
-    load();render();setMessage(area().description+' 出口をタップすると別の場所へ歩いて移動できます。');
-  </script>
+  /*
+    移動
+  */
+
+  if(hotspot.type==="move"){
+
+    messageElement.textContent=
+      hotspot.text;
+
+
+    /*
+      少しだけ間を置いて
+      景色を切り替える
+    */
+
+    setTimeout(()=>{
+
+      state.currentScene=
+        hotspot.scene;
+
+      renderScene();
+
+    },400);
+
+    return;
+
+  }
+
+
+  /*
+    調べるだけ
+  */
+
+  if(hotspot.type==="look"){
+
+    messageElement.textContent =
+      hotspot.text +
+      "（"+formatDuration(hotspot.time)+"経過）";
+
+  }
+
+}
+
+
+/* =========================
+   時間
+========================= */
+
+function advanceTime(seconds){
+
+  state.gameSeconds += seconds;
+
+  renderClock();
+
+}
+
+
+function renderClock(){
+
+  const total =
+    Math.floor(state.gameSeconds);
+
+  const day =
+    Math.floor(total / 86400) + 1;
+
+  const sec =
+    total % 86400;
+
+  const hour =
+    Math.floor(sec / 3600);
+
+  const minute =
+    Math.floor(
+      (sec % 3600) / 60
+    );
+
+  const second =
+    sec % 60;
+
+
+  document.getElementById("day")
+    .textContent =
+      day+"日目";
+
+
+  document.getElementById("clock")
+    .textContent =
+      [
+        hour,
+        minute,
+        second
+      ]
+      .map(
+        n=>String(n).padStart(2,"0")
+      )
+      .join(":");
+
+}
+
+
+function formatDuration(seconds){
+
+  if(seconds < 60){
+
+    return seconds+"秒";
+
+  }
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const rest =
+    seconds % 60;
+
+
+  if(rest===0){
+
+    return minutes+"分";
+
+  }
+
+  return minutes+"分"+rest+"秒";
+
+}
+
+
+/* =========================
+   何もしなくても時間経過
+========================= */
+
+setInterval(()=>{
+
+  /*
+    ITEMを開いている時は止める
+  */
+
+  if(menuOpen)return;
+
+
+  /*
+    現実1秒
+    ↓
+    ゲーム内5秒
+  */
+
+  advanceTime(5);
+
+},1000);
+
+
+/* =========================
+   ITEM
+========================= */
+
+const itemModal =
+  document.getElementById("itemModal");
+
+
+document
+  .getElementById("itemButton")
+  .addEventListener("click",()=>{
+
+    menuOpen=true;
+
+    renderItems();
+
+    itemModal.classList.add("open");
+
+  });
+
+
+document
+  .getElementById("closeItem")
+  .addEventListener("click",()=>{
+
+    menuOpen=false;
+
+    itemModal.classList.remove("open");
+
+  });
+
+
+function renderItems(){
+
+  const list =
+    document.getElementById("itemList");
+
+  const items=[];
+
+
+  if(state.branch){
+
+    items.push(
+      `<div class="item-row">
+        🪾 枝　×${state.branch}
+      </div>`
+    );
+
+  }
+
+
+  if(state.stone){
+
+    items.push(
+      `<div class="item-row">
+        🪨 小石　×${state.stone}
+      </div>`
+    );
+
+  }
+
+
+  list.innerHTML =
+    items.length
+      ? items.join("")
+      : `<div class="item-row">
+          何も持っていません。
+        </div>`;
+
+}
+
+
+/* =========================
+   周囲を見る
+========================= */
+
+document
+  .getElementById("lookButton")
+  .addEventListener("click",()=>{
+
+    if(menuOpen)return;
+
+    advanceTime(30);
+
+    messageElement.textContent =
+      SCENES[state.currentScene].description +
+      "（30秒経過）";
+
+  });
+
+
+/* =========================
+   開始
+========================= */
+
+renderScene();
+renderClock();
+
+</script>
+
 </body>
 </html>
