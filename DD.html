@@ -40,7 +40,6 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
 #actionArea{position:relative;z-index:15;min-height:68px;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:7px 50px calc(7px + env(safe-area-inset-bottom)) 7px;background:#30241b;border-top:1px solid #71593f}
 .action-button{min-width:60px;min-height:44px;border:1px solid #806849;border-radius:7px;background:#ead4ae;color:#352719;padding:6px 9px;font-size:14px;font-weight:800}
 
-/* 右下メニュー。矢印は同じ1個のボタン。メニュー本体は右からスライドして出る */
 #menuDock{position:absolute;z-index:70;right:0;bottom:calc(76px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:5px;overflow:visible}
 #sideMenuItems{width:80px;display:flex;flex-direction:column;gap:5px;padding:6px 6px 6px 0;border:1px solid #6d553d;border-right:none;border-radius:9px 0 0 9px;background:rgba(45,33,24,.97);box-shadow:-4px 4px 12px rgba(0,0,0,.25);transform:translateX(100%);opacity:0;pointer-events:none;transition:transform .18s ease-out,opacity .14s ease-out}
 #menuDock.open #sideMenuItems{transform:translateX(0);opacity:1;pointer-events:auto}
@@ -138,7 +137,38 @@ button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transp
   </div>
 </div>
 
+<script src="js/dd-github.js?v=20260826-1"></script>
+<script src="js/dd-save.js?v=20260826-1"></script>
 <script>
+const topButton=document.getElementById('topButton');
+const loadButton=document.getElementById('loadButton');
+const saveButton=document.getElementById('saveButton');
+
+topButton.addEventListener('click',()=>{
+  location.href='DD_top.html';
+});
+
+loadButton.addEventListener('click',()=>{
+  location.href='DD_saves.html';
+});
+
+saveButton.addEventListener('click',async()=>{
+  if(saveButton.disabled)return;
+  saveButton.disabled=true;
+  try{
+    const raw=localStorage.getItem('ddActiveGame');
+    if(!raw)throw new Error('セーブするゲームデータがありません。');
+    const game=JSON.parse(raw);
+    const saved=await DDSave.openSaveDialog(game);
+    localStorage.setItem('ddActiveGame',JSON.stringify(saved));
+  }catch(error){
+    if(error&&error.message==='セーブをキャンセルしました。')return;
+    alert(error&&error.message?error.message:'セーブに失敗しました。');
+  }finally{
+    saveButton.disabled=false;
+  }
+});
+
 const menuDock=document.getElementById('menuDock');
 const menuToggleButton=document.getElementById('menuToggleButton');
 
