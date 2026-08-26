@@ -12,7 +12,6 @@
 
   <title>雪山サバイバル</title>
 
-
   <style>
 
     *{
@@ -53,7 +52,6 @@
     }
 
 
-
     /* =========================
        ゲーム全体
     ========================= */
@@ -78,27 +76,29 @@
     }
 
 
-
     /* =========================
        上部
+       タイトルなし
     ========================= */
 
     .topbar{
       display:grid;
 
       grid-template-columns:
-        44px
+        46px
         1fr
-        44px;
+        auto;
 
       align-items:center;
+
+      gap:7px;
 
       flex:0 0 auto;
     }
 
     .back{
-      width:42px;
-      height:42px;
+      width:44px;
+      height:44px;
 
       display:flex;
       align-items:center;
@@ -112,60 +112,51 @@
       color:#222;
       text-decoration:none;
 
-      font-size:22px;
+      font-size:28px;
       font-weight:900;
-    }
 
-    .title{
-      margin:0;
-
-      text-align:center;
-
-      font-size:20px;
-      font-weight:900;
-    }
-
-
-
-    /* =========================
-       日時・現在地
-    ========================= */
-
-    .world-status{
-      min-height:38px;
-
-      padding:4px 9px;
-
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-
-      gap:8px;
-
-      border:1px solid #aaa;
-      border-radius:11px;
-
-      background:#fff;
-
-      flex:0 0 auto;
-
-      font-size:17px;
-      font-weight:700;
+      line-height:1;
     }
 
     .world-time{
+      height:44px;
+
+      padding:0 10px;
+
+      display:flex;
+      align-items:center;
+
+      border:1px solid #aaa;
+      border-radius:12px;
+
+      background:#fff;
+
+      font-size:17px;
+      font-weight:900;
+
       white-space:nowrap;
     }
 
     .world-place{
-      overflow:hidden;
+      min-width:110px;
+      height:44px;
+
+      padding:0 10px;
+
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+
+      border:1px solid #aaa;
+      border-radius:12px;
+
+      background:#fff;
+
+      font-size:17px;
+      font-weight:900;
 
       white-space:nowrap;
-      text-overflow:ellipsis;
-
-      text-align:right;
     }
-
 
 
     /* =========================
@@ -185,15 +176,15 @@
 
     .meter{
       min-width:0;
-      min-height:67px;
+      height:50px;
 
-      padding:5px 6px;
+      padding:4px 7px;
 
       display:flex;
       align-items:center;
       justify-content:center;
 
-      gap:5px;
+      gap:7px;
 
       border:1px solid #aaa;
       border-radius:12px;
@@ -202,10 +193,10 @@
     }
 
     .meter-icon{
-      width:38px;
-      height:38px;
+      width:29px;
+      height:29px;
 
-      flex:0 0 38px;
+      flex:0 0 29px;
 
       overflow:visible;
     }
@@ -220,30 +211,8 @@
       stroke-linecap:round;
     }
 
-    .meter-fill{
-      fill:#151515;
-    }
-
-    .meter-text{
-      min-width:0;
-
-      display:flex;
-      flex-direction:column;
-
-      justify-content:center;
-    }
-
-    .meter-label{
-      font-size:17px;
-      line-height:1;
-
-      font-weight:700;
-
-      white-space:nowrap;
-    }
-
     .meter-value{
-      margin-top:4px;
+      min-width:0;
 
       font-size:17px;
       line-height:1;
@@ -252,7 +221,6 @@
 
       white-space:nowrap;
     }
-
 
 
     /* =========================
@@ -277,7 +245,6 @@
     }
 
 
-
     /* =========================
        DIV 1
        背景
@@ -299,7 +266,6 @@
 
       pointer-events:none;
     }
-
 
 
     /* =========================
@@ -356,7 +322,6 @@
     }
 
 
-
     /* =========================
        枝
     ========================= */
@@ -371,7 +336,6 @@
     }
 
 
-
     /* =========================
        石
     ========================= */
@@ -384,7 +348,6 @@
       right:8%;
       bottom:8%;
     }
-
 
 
     /* =========================
@@ -413,7 +376,6 @@
 
       pointer-events:auto;
     }
-
 
 
     /* =========================
@@ -446,7 +408,6 @@
     }
 
 
-
     /* =========================
        説明欄
     ========================= */
@@ -469,7 +430,6 @@
       font-size:17px;
       line-height:1.45;
     }
-
 
 
     /* =========================
@@ -509,9 +469,8 @@
     }
 
 
-
     /* =========================
-       モーダル
+       ITEM
     ========================= */
 
     .modal{
@@ -570,12 +529,6 @@
       text-align:center;
     }
 
-
-
-    /* =========================
-       ITEM一覧
-    ========================= */
-
     .item-list{
       min-height:55px;
 
@@ -630,9 +583,8 @@
     }
 
 
-
     /* =========================
-       DEAD画面
+       DEAD
     ========================= */
 
     .dead-modal{
@@ -697,7 +649,6 @@
     }
 
 
-
     @media(max-width:390px){
 
       .game{
@@ -706,17 +657,20 @@
       }
 
       .meter{
+        gap:4px;
         padding-left:4px;
         padding-right:4px;
-
-        gap:3px;
       }
 
       .meter-icon{
-        width:34px;
-        height:34px;
+        width:27px;
+        height:27px;
 
-        flex-basis:34px;
+        flex-basis:27px;
+      }
+
+      .world-place{
+        min-width:105px;
       }
 
     }
@@ -738,6 +692,7 @@
 
   <header class="topbar">
 
+
     <a
       class="back"
       href="survival%20game_TOP.html"
@@ -746,27 +701,14 @@
       ←
     </a>
 
-    <h1 class="title">
-      雪山サバイバル
-    </h1>
-
-    <span></span>
-
-  </header>
-
-
-
-  <!-- =========================
-       日時・現在地
-  ========================= -->
-
-  <section class="world-status">
 
     <div class="world-time">
 
       <span id="day">
         1日目
       </span>
+
+      &nbsp;
 
       <span id="clock">
         08:00
@@ -782,7 +724,8 @@
       針葉樹林
     </div>
 
-  </section>
+
+  </header>
 
 
 
@@ -827,7 +770,6 @@
 
         <path
           id="tempFill"
-          class="meter-fill"
           clip-path="url(#tempClip)"
           d="
             M12 2
@@ -863,19 +805,11 @@
       </svg>
 
 
-      <div class="meter-text">
-
-        <div class="meter-label">
-          体温
-        </div>
-
-        <div
-          id="tempValue"
-          class="meter-value"
-        >
-          36.7℃
-        </div>
-
+      <div
+        id="tempValue"
+        class="meter-value"
+      >
+        36.7℃
       </div>
 
     </div>
@@ -916,7 +850,6 @@
 
         <path
           id="hungerFill"
-          class="meter-fill"
           clip-path="url(#hungerClip)"
           d="
             M12 7
@@ -956,19 +889,11 @@
       </svg>
 
 
-      <div class="meter-text">
-
-        <div class="meter-label">
-          空腹
-        </div>
-
-        <div
-          id="hungerValue"
-          class="meter-value"
-        >
-          100
-        </div>
-
+      <div
+        id="hungerValue"
+        class="meter-value"
+      >
+        100
       </div>
 
     </div>
@@ -1009,7 +934,6 @@
 
         <path
           id="staminaFill"
-          class="meter-fill"
           clip-path="url(#staminaClip)"
           d="
             M12 21
@@ -1041,19 +965,11 @@
       </svg>
 
 
-      <div class="meter-text">
-
-        <div class="meter-label">
-          体力
-        </div>
-
-        <div
-          id="staminaValue"
-          class="meter-value"
-        >
-          100
-        </div>
-
+      <div
+        id="staminaValue"
+        class="meter-value"
+      >
+        100
       </div>
 
     </div>
@@ -1093,8 +1009,6 @@
     >
 
 
-      <!-- 枝 -->
-
       <button
         id="branchObject"
         class="scene-object"
@@ -1111,8 +1025,6 @@
       </button>
 
 
-
-      <!-- 石 -->
 
       <button
         id="stoneObject"
@@ -1247,8 +1159,7 @@
     <p
       id="deadReason"
       class="dead-reason"
-    >
-    </p>
+    ></p>
 
     <button
       id="restartButton"
@@ -1274,14 +1185,11 @@
   let gameSeconds =
     8 * 60 * 60;
 
-
   let menuOpen =
     false;
 
-
   let gameOver =
     false;
-
 
 
   /* =========================
@@ -1291,14 +1199,11 @@
   let bodyTemperature =
     36.7;
 
-
   let hunger =
     100;
 
-
   let stamina =
     100;
-
 
 
   /* =========================
@@ -1312,7 +1217,6 @@
     stone:0
 
   };
-
 
 
   /* =========================
@@ -1336,7 +1240,6 @@
   }
 
 
-
   /* =========================
      時計
   ========================= */
@@ -1346,20 +1249,16 @@
     const total =
       Math.floor(gameSeconds);
 
-
     const day =
       Math.floor(total / 86400) + 1;
 
-
     const secondInDay =
       total % 86400;
-
 
     const hour =
       Math.floor(
         secondInDay / 3600
       );
-
 
     const minute =
       Math.floor(
@@ -1387,9 +1286,8 @@
   }
 
 
-
   /* =========================
-     メーター色
+     色
   ========================= */
 
   function normalMeterColor(
@@ -1402,18 +1300,15 @@
 
     }
 
-
     if(percent <= 40){
 
       return "#d6a000";
 
     }
 
-
     return "#151515";
 
   }
-
 
 
   function temperatureColor(){
@@ -1424,22 +1319,19 @@
 
     }
 
-
     if(bodyTemperature < 35){
 
       return "#d6a000";
 
     }
 
-
     return "#151515";
 
   }
 
 
-
   /* =========================
-     SVGの中身を減らす
+     SVGの塗り量
   ========================= */
 
   function setSvgFillLevel(
@@ -1454,26 +1346,21 @@
         100
       );
 
-
     const height =
       24 * value / 100;
 
-
     const y =
       24 - height;
-
 
     const rect =
       document.getElementById(
         rectId
       );
 
-
     rect.setAttribute(
       "y",
       y
     );
-
 
     rect.setAttribute(
       "height",
@@ -1483,7 +1370,6 @@
   }
 
 
-
   /* =========================
      メーター表示
   ========================= */
@@ -1491,12 +1377,7 @@
   function renderMeters(){
 
 
-    /* -------------------------
-       体温
-
-       36.8℃付近を満タン
-       28℃付近を空
-    ------------------------- */
+    /* 体温 */
 
     const temperaturePercent =
       clamp(
@@ -1530,10 +1411,8 @@
       .getElementById(
         "tempFill"
       )
-      .setAttribute(
-        "fill",
-        temperatureColor()
-      );
+      .style.fill =
+        temperatureColor();
 
 
     document
@@ -1547,10 +1426,7 @@
         "℃";
 
 
-
-    /* -------------------------
-       空腹
-    ------------------------- */
+    /* 空腹 */
 
     setSvgFillLevel(
       "hungerClipRect",
@@ -1562,12 +1438,10 @@
       .getElementById(
         "hungerFill"
       )
-      .setAttribute(
-        "fill",
+      .style.fill =
         normalMeterColor(
           hunger
-        )
-      );
+        );
 
 
     document
@@ -1580,10 +1454,7 @@
         );
 
 
-
-    /* -------------------------
-       体力
-    ------------------------- */
+    /* 体力 */
 
     setSvgFillLevel(
       "staminaClipRect",
@@ -1595,12 +1466,10 @@
       .getElementById(
         "staminaFill"
       )
-      .setAttribute(
-        "fill",
+      .style.fill =
         normalMeterColor(
           stamina
-        )
-      );
+        );
 
 
     document
@@ -1615,7 +1484,6 @@
   }
 
 
-
   /* =========================
      死亡判定
   ========================= */
@@ -1627,9 +1495,6 @@
     }
 
 
-
-    /* 体力ゼロ */
-
     if(stamina <= 0){
 
       showDead(
@@ -1637,11 +1502,9 @@
       );
 
       return;
+
     }
 
-
-
-    /* 極端な低体温 */
 
     if(bodyTemperature <= 28){
 
@@ -1654,9 +1517,8 @@
   }
 
 
-
   /* =========================
-     DEAD表示
+     DEAD
   ========================= */
 
   function showDead(
@@ -1684,9 +1546,8 @@
   }
 
 
-
   /* =========================
-     時間経過による消耗
+     生存消耗
   ========================= */
 
   function applySurvivalDrain(
@@ -1697,12 +1558,7 @@
       seconds / 60;
 
 
-
-    /* -------------------------
-       現在は屋外
-
-       体温が徐々に低下
-    ------------------------- */
+    /* 屋外なので体温低下 */
 
     bodyTemperature -=
       0.008
@@ -1710,16 +1566,12 @@
       minutes;
 
 
-
-    /* -------------------------
-       空腹
-    ------------------------- */
+    /* 空腹 */
 
     hunger -=
       0.10
       *
       minutes;
-
 
 
     hunger =
@@ -1730,10 +1582,7 @@
       );
 
 
-
-    /* -------------------------
-       低体温による体力低下
-    ------------------------- */
+    /* 低体温 */
 
     if(
       bodyTemperature < 35
@@ -1759,12 +1608,7 @@
     }
 
 
-
-    /* -------------------------
-       空腹0でも即死しない
-
-       代わりに体力が減る
-    ------------------------- */
+    /* 空腹0 */
 
     if(
       hunger <= 0
@@ -1778,7 +1622,6 @@
     }
 
 
-
     stamina =
       clamp(
         stamina,
@@ -1789,11 +1632,9 @@
 
     renderMeters();
 
-
     checkDeath();
 
   }
-
 
 
   /* =========================
@@ -1823,7 +1664,6 @@
   }
 
 
-
   /* =========================
      自動時間経過
 
@@ -1838,11 +1678,9 @@
       return;
     }
 
-
     if(gameOver){
       return;
     }
-
 
     if(
       document.visibilityState
@@ -1858,7 +1696,6 @@
     );
 
   },1000);
-
 
 
   /* =========================
@@ -1879,7 +1716,6 @@
   }
 
 
-
   /* =========================
      ITEM一覧
   ========================= */
@@ -1891,10 +1727,8 @@
         "itemList"
       );
 
-
     const rows =
       [];
-
 
 
     if(
@@ -1920,7 +1754,6 @@
     }
 
 
-
     if(
       inventory.stone > 0
     ){
@@ -1944,7 +1777,6 @@
     }
 
 
-
     if(
       rows.length === 0
     ){
@@ -1952,18 +1784,15 @@
       itemList.textContent =
         "まだ何も持っていません。";
 
-
       return;
 
     }
-
 
 
     itemList.innerHTML =
       rows.join("");
 
   }
-
 
 
   /* =========================
@@ -2032,7 +1861,6 @@
 
         renderInventory();
 
-
         renderMeters();
 
 
@@ -2042,7 +1870,6 @@
 
       }
     );
-
 
 
   /* =========================
@@ -2111,7 +1938,6 @@
 
         renderInventory();
 
-
         renderMeters();
 
 
@@ -2121,7 +1947,6 @@
 
       }
     );
-
 
 
   /* =========================
@@ -2164,7 +1989,6 @@
     );
 
 
-
   document
     .getElementById(
       "closeItem"
@@ -2185,7 +2009,6 @@
 
       }
     );
-
 
 
   /* =========================
@@ -2227,14 +2050,12 @@
         );
 
 
-
         const branchLeft =
           inventory.branch === 0;
 
 
         const stoneLeft =
           inventory.stone === 0;
-
 
 
         if(
@@ -2247,11 +2068,9 @@
             "足元に細い枝と小石があります。正面には森の奥へ続く道が見えます。（30秒経過）"
           );
 
-
           return;
 
         }
-
 
 
         if(
@@ -2262,11 +2081,9 @@
             "足元に細い枝があります。正面には森の奥へ続く道が見えます。（30秒経過）"
           );
 
-
           return;
 
         }
-
 
 
         if(
@@ -2277,11 +2094,9 @@
             "足元に小石があります。正面には森の奥へ続く道が見えます。（30秒経過）"
           );
 
-
           return;
 
         }
-
 
 
         setMessage(
@@ -2290,7 +2105,6 @@
 
       }
     );
-
 
 
   /* =========================
@@ -2309,7 +2123,6 @@
 
       }
     );
-
 
 
   /* =========================
