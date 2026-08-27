@@ -8,8 +8,8 @@
 
   const ASSETS = Object.freeze({
     cabinInterior: 'assets/survival/cabin_interior_01.png',
-    grantCabinEyesClosed: 'assets/survival/grant_mercer_cabin_eyes_closed.png',
-    grantCabinEyesOpen: 'assets/survival/grant_mercer_cabin_eyes_open.png',
+    grantCabinEyesClosed: 'assets/survival/grant_mercer_cabin_eyes_closed.jpg',
+    grantCabinEyesOpen: 'assets/survival/grant_mercer_cabin_eyes_open.jpg',
     grantNormal: 'assets/survival/grant_normal.png'
   });
 
@@ -38,7 +38,7 @@
           type: 'eventImage',
           image: ASSETS.grantCabinEyesOpen,
           speaker: '？？？',
-          text: '……誰だ？'
+          text: '誰だ？'
         },
         {
           type: 'returnToScene',
