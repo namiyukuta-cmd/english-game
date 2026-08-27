@@ -4,7 +4,9 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'survival_game_completed_events_v2';
+  // survival_event.html → survival_room.html の新構成用。
+  // 旧構成のテスト完了状態は引き継がない。
+  const STORAGE_KEY = 'survival_game_completed_events_v3';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
 
   const ASSETS = Object.freeze({
