@@ -25,38 +25,26 @@
       lockMovement: true,
       pauseGameTime: true,
 
-      steps: [
-        {
-          type: 'background',
-          image: ASSETS.cabinInterior
-        },
+      // survival_event.html で再生する導入カット。
+      // 「中に入る」直後は通常画面の立ち絵を出さず、まずここを再生する。
+      eventPageSteps: [
         {
           type: 'eventImage',
           image: ASSETS.grantCabinEyesClosed,
-          text: '……人がいる。'
+          text: '誰だ？'
         },
         {
           type: 'eventImage',
           image: ASSETS.grantCabinEyesOpen,
-          speaker: '？？？',
-          text: '誰だ？'
+          text: '…。'
         },
         {
-          type: 'returnToScene',
-          background: ASSETS.cabinInterior
-        },
-        {
-          type: 'showCharacter',
-          characterId: 'grant_mercer',
-          image: ASSETS.grantNormal,
-          position: 'center',
-          tappable: true
-        },
-        {
-          type: 'setFlag',
-          flag: 'metSurvivor',
-          value: true
-        },
+          type: 'returnToGame'
+        }
+      ],
+
+      // 導入カット終了後、survival game.html に戻ってから会話へ入る。
+      steps: [
         {
           type: 'startDialogue'
         }
@@ -175,6 +163,12 @@
     return EVENTS[eventId] || null;
   }
 
+  function getEventPageSteps(eventId) {
+    const event = getEvent(eventId);
+    if (!event || !Array.isArray(event.eventPageSteps)) return [];
+    return event.eventPageSteps;
+  }
+
   function getDialogueNode(eventId, nodeId) {
     const event = getEvent(eventId);
     if (!event || !event.dialogue || !event.dialogue.nodes) return null;
@@ -216,6 +210,7 @@
     assets: ASSETS,
     events: EVENTS,
     getEvent,
+    getEventPageSteps,
     getDialogueNode,
     shouldRun,
     isCompleted,
