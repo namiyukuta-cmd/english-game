@@ -25,8 +25,6 @@
       lockMovement: true,
       pauseGameTime: true,
 
-      // 現在のイベントランナーで使用している導入部分。
-      // 会話分岐は下の dialogue に保持し、HTML側から接続する。
       steps: [
         {
           type: 'background',
@@ -60,7 +58,7 @@
           value: true
         },
         {
-          type: 'completeEvent'
+          type: 'startDialogue'
         }
       ],
 
