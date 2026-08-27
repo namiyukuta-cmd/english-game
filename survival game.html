@@ -18,13 +18,8 @@ html,body{
   color:#202427;
 }
 
-body{
-  min-height:100dvh;
-}
-
-button,a{
-  font:inherit;
-}
+body{min-height:100dvh}
+button,a{font:inherit}
 
 button{
   touch-action:manipulation;
@@ -100,6 +95,43 @@ button{
 
 
 /* =========================
+   気温・天気
+========================= */
+
+.environment-bar{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+}
+
+.environment-card{
+  height:32px;
+  padding:0 9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:1px solid #aaa;
+  border-radius:9px;
+  background:#f8f8f8;
+  white-space:nowrap;
+}
+
+.environment-label{
+  font-size:13px;
+  color:#555;
+  font-weight:800;
+}
+
+.environment-value{
+  font-size:15px;
+  color:#222;
+  font-weight:900;
+}
+
+
+/* =========================
    メーター
 ========================= */
 
@@ -161,8 +193,8 @@ button{
 .scene{
   position:relative;
   width:100%;
-  height:min(61dvh,570px);
-  min-height:490px;
+  height:min(58dvh,550px);
+  min-height:455px;
   overflow:hidden;
   border:1px solid #8c9296;
   border-radius:13px;
@@ -261,33 +293,22 @@ button{
 
 .character-sprite{
   position:absolute;
-
   left:50%;
   top:50%;
-
   transform:translate(-50%,-50%);
-
   width:min(66%,340px);
   height:min(82%,470px);
-
   padding:0;
-
   display:none;
-
   pointer-events:auto;
-
   border:3px solid #87652c;
   border-radius:3px;
-
   outline:1px solid #c7a253;
   outline-offset:-8px;
-
   background:#f5f0e2;
-
   box-shadow:
     0 7px 18px rgba(0,0,0,.22),
     inset 0 0 0 1px rgba(255,255,255,.85);
-
   overflow:hidden;
 }
 
@@ -306,25 +327,15 @@ button{
 
 .character-sprite img{
   position:absolute;
-
   left:50%;
   top:53%;
-
   width:142%;
   height:142%;
-
   transform:translate(-50%,-50%);
-
   object-fit:contain;
   object-position:center;
-
   pointer-events:none;
-
-  filter:
-    drop-shadow(
-      0 3px 3px
-      rgba(0,0,0,.16)
-    );
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.16));
 }
 
 
@@ -365,7 +376,6 @@ button{
   padding:0;
   border:2px solid rgba(104,139,156,.88);
   border-radius:7px;
-
   background:
     linear-gradient(
       120deg,
@@ -375,11 +385,9 @@ button{
       rgba(210,235,246,.18) 58%,
       rgba(255,255,255,.02) 90%
     );
-
   box-shadow:
     0 0 7px rgba(187,226,242,.75),
     inset 0 0 8px rgba(255,255,255,.18);
-
   overflow:hidden;
 }
 
@@ -395,7 +403,6 @@ button{
   width:38%;
   height:160%;
   transform:rotate(13deg);
-
   background:
     linear-gradient(
       to right,
@@ -403,18 +410,12 @@ button{
       rgba(255,255,255,.34),
       transparent
     );
-
   animation:doorSheen 3.2s ease-in-out infinite;
 }
 
 @keyframes doorSheen{
-  0%,55%{
-    left:-70%;
-  }
-
-  82%,100%{
-    left:135%;
-  }
+  0%,55%{left:-70%}
+  82%,100%{left:135%}
 }
 
 
@@ -424,57 +425,32 @@ button{
 
 .message-panel{
   position:absolute;
-
   left:9px;
-
-  /*
-    方向キーより上へ置く
-  */
   top:calc(100% - 258px);
-
   z-index:30;
-
-  /*
-    横長
-  */
   width:calc(100% - 18px);
-
   height:120px;
-
   padding:
     13px
     14px
     42px
     14px;
-
   overflow:hidden;
-
   border:1px solid #979797;
   border-radius:14px;
-
   background:rgba(255,255,255,.96);
-
-  box-shadow:
-    0 4px 12px
-    rgba(0,0,0,.10);
-
+  box-shadow:0 4px 12px rgba(0,0,0,.10);
   transition:
     width .20s ease,
     height .20s ease,
     top .20s ease;
-
   cursor:pointer;
 }
 
 .message-panel.closed{
   width:60px;
   height:54px;
-
-  /*
-    閉じたボタンも方向キーに重ならない
-  */
   top:calc(100% - 180px);
-
   padding:0;
 }
 
@@ -486,70 +462,43 @@ button{
 
 .message-text{
   height:64px;
-
   overflow:hidden;
-
   font-size:17px;
   line-height:1.42;
-
   font-weight:650;
-
   white-space:pre-wrap;
   word-break:break-word;
-
   pointer-events:none;
 }
 
 .message-progress{
   position:absolute;
-
   left:62px;
   bottom:13px;
-
   font-size:12px;
   line-height:1;
-
   color:#666;
-
   font-weight:700;
-
   pointer-events:none;
 }
 
-
-/*
-  「次へ」ボタンは無し。
-
-  選択がある時だけ
-  このボタンが出る。
-*/
 .message-choice{
   position:absolute;
-
   right:12px;
   bottom:9px;
-
   min-width:132px;
   height:38px;
-
   padding:0 16px;
-
   border:2px solid #93651f;
   border-radius:10px;
-
   background:
     linear-gradient(
       180deg,
       #fff6df 0%,
       #e8c16e 100%
     );
-
-  box-shadow:
-    0 2px 8px
-    rgba(106,70,17,.25);
-
+  box-shadow:0 2px 8px rgba(106,70,17,.25);
   color:#3b2506;
-
   font-size:16px;
   font-weight:900;
 }
@@ -558,37 +507,23 @@ button{
   display:none;
 }
 
-
-/*
-  ◀ / ▶ は会話DIVの中
-*/
 .message-toggle{
   position:absolute;
-
   left:10px;
   bottom:8px;
-
   z-index:3;
-
   width:40px;
   height:36px;
-
   padding:0;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   border:1px solid #888;
   border-radius:8px;
-
   background:#d7d8d9;
-
   color:#222;
-
   font-size:18px;
   line-height:1;
-
   font-weight:900;
 }
 
@@ -602,7 +537,6 @@ button{
   inset:0;
   z-index:50;
   pointer-events:none;
-
   background:
     rgba(
       255,
@@ -617,7 +551,6 @@ button{
   inset:0;
   z-index:51;
   pointer-events:none;
-
   background:
     radial-gradient(
       circle at center,
@@ -639,64 +572,41 @@ button{
 
 .control-cluster{
   position:absolute;
-
-  /*
-    右端から離して
-    全体を少し左へ
-  */
   right:42px;
-
   bottom:
     calc(
       8px
       +
       env(safe-area-inset-bottom)
     );
-
   z-index:42;
-
   width:128px;
   height:160px;
 }
 
-
-/*
-  目は↑の右上。
-  右矢印には重ならない。
-*/
 .look-button{
   position:absolute;
-
   top:0;
   right:0;
-
   width:42px;
   height:42px;
-
   margin:0;
   padding:0;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   border:1px solid #8d8d8d;
   border-radius:11px;
-
   background:rgba(255,255,255,.88);
-
   color:#252525;
 }
 
 .look-button svg{
   width:25px;
   height:25px;
-
   fill:none;
-
   stroke:currentColor;
   stroke-width:1.8;
-
   stroke-linecap:round;
   stroke-linejoin:round;
 }
@@ -707,18 +617,11 @@ button{
 
 .move-pad{
   position:absolute;
-
   left:0;
   top:42px;
-
   display:grid;
-
-  grid-template-columns:
-    repeat(3,36px);
-
-  grid-template-rows:
-    repeat(3,36px);
-
+  grid-template-columns:repeat(3,36px);
+  grid-template-rows:repeat(3,36px);
   gap:5px;
 }
 
@@ -726,19 +629,12 @@ button{
 .menu-key{
   width:36px;
   height:36px;
-
   padding:0;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
-  border:
-    1px solid
-    rgba(55,55,55,.38);
-
+  border:1px solid rgba(55,55,55,.38);
   border-radius:10px;
-
   font-weight:900;
   line-height:1;
 }
@@ -801,12 +697,10 @@ button{
   display:none;
   align-items:center;
   justify-content:center;
-
   padding:
     calc(15px + env(safe-area-inset-top))
     12px
     calc(15px + env(safe-area-inset-bottom));
-
   background:rgba(30,30,30,.54);
 }
 
@@ -999,6 +893,18 @@ button{
     font-size:12px;
   }
 
+  .environment-card{
+    height:30px;
+  }
+
+  .environment-label{
+    font-size:12px;
+  }
+
+  .environment-value{
+    font-size:14px;
+  }
+
   .meter{
     height:30px;
   }
@@ -1008,7 +914,7 @@ button{
   }
 
   .scene{
-    min-height:470px;
+    min-height:440px;
   }
 
   .character-sprite{
@@ -1020,7 +926,6 @@ button{
     right:34px;
   }
 }
-
 </style>
 </head>
 
@@ -1031,30 +936,65 @@ button{
 
 <header class="topbar">
 
-  <a
-    class="back"
-    href="survival%20game_TOP.html"
-    aria-label="戻る"
-  >
-    ←
-  </a>
+<a
+  class="back"
+  href="survival%20game_TOP.html"
+  aria-label="戻る"
+>
+←
+</a>
 
-  <div id="day" class="top-small">
-    Day.1
-  </div>
+<div id="day" class="top-small">
+Day.1
+</div>
 
-  <div id="clock" class="top-small">
-    08:00:00
-  </div>
+<div id="clock" class="top-small">
+08:00:00
+</div>
 
-  <div
-    id="currentPlace"
-    class="top-small place"
-  >
-    針葉樹林
-  </div>
+<div
+  id="currentPlace"
+  class="top-small place"
+>
+針葉樹林
+</div>
 
 </header>
+
+
+<section class="environment-bar">
+
+<div class="environment-card">
+<span
+  id="temperatureLabel"
+  class="environment-label"
+>
+気温
+</span>
+
+<span
+  id="ambientTemperature"
+  class="environment-value"
+>
+-8℃
+</span>
+</div>
+
+
+<div class="environment-card">
+<span class="environment-label">
+天気
+</span>
+
+<span
+  id="weatherValue"
+  class="environment-value"
+>
+雪
+</span>
+</div>
+
+</section>
 
 
 <section class="meters">
@@ -1087,13 +1027,14 @@ button{
   class="meter-outline"
   d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
 ></path>
+
 </svg>
 
 <div
   id="tempValue"
   class="meter-value"
 >
-36.7℃
+体温 36.7℃
 </div>
 
 </div>
@@ -1127,6 +1068,7 @@ button{
   class="meter-outline"
   d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"
 ></path>
+
 </svg>
 
 <div
@@ -1167,6 +1109,7 @@ button{
   class="meter-outline"
   d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
 ></path>
+
 </svg>
 
 <div
@@ -1582,6 +1525,9 @@ const inventory =
   {};
 
 
+const NORMAL_BODY_TEMPERATURE =
+  36.7;
+
 const MOVE_SECONDS =
   180;
 
@@ -1590,6 +1536,16 @@ const MOVE_TEMP_DROP =
 
 const MOVE_STAMINA_COST =
   1;
+
+const OUTDOOR_PASSIVE_TEMP_DROP =
+  .008;
+
+/*
+  山小屋で1分経過するごとに
+  体温が0.03℃回復する。
+*/
+const CABIN_BODY_TEMP_RECOVERY =
+  .03;
 
 
 const DOOR_META = {
@@ -1615,6 +1571,15 @@ start:{
 
   place:
     '針葉樹林',
+
+  ambientTemperature:
+    -8,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     '雪の積もった針葉樹林です。',
@@ -1662,6 +1627,15 @@ forest1:{
   place:
     '針葉樹林',
 
+  ambientTemperature:
+    -8,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
+
   messages:[
     '雪を踏みながら林の奥へ進みます。'
   ],
@@ -1689,6 +1663,15 @@ forest2:{
 
   place:
     '針葉樹林',
+
+  ambientTemperature:
+    -9,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     'さらに雪深い林の中へ進みます。'
@@ -1726,6 +1709,15 @@ deadend:{
   place:
     '倒木',
 
+  ambientTemperature:
+    -9,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
+
   messages:[
     '大きな倒木があります。',
     'この先へは進めそうにありません。'
@@ -1755,6 +1747,15 @@ forest3:{
 
   place:
     '針葉樹林',
+
+  ambientTemperature:
+    -9,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     '林の奥へ進みます。',
@@ -1793,6 +1794,15 @@ forest4:{
   place:
     '林の奥',
 
+  ambientTemperature:
+    -10,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
+
   messages:[
     '雪の中を進みます。',
     '身体の芯まで冷えてきます。'
@@ -1823,6 +1833,15 @@ forest5:{
   place:
     '林の奥',
 
+  ambientTemperature:
+    -10,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
+
   messages:[
     '足を止めると、一気に身体が冷えそうです。'
   ],
@@ -1851,6 +1870,15 @@ forest6:{
 
   place:
     '林の出口',
+
+  ambientTemperature:
+    -10,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     '木々の密度が低くなってきました。',
@@ -1882,6 +1910,15 @@ forest7:{
   place:
     '林の外れ',
 
+  ambientTemperature:
+    -11,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
+
   messages:[
     '林を抜けるように進みます。',
     '寒さがかなり厳しくなってきました。'
@@ -1910,6 +1947,15 @@ cabinDistance:{
 
   place:
     '山小屋付近',
+
+  ambientTemperature:
+    -11,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     '遠くに人工物が見えます。',
@@ -1940,6 +1986,15 @@ cabinFront:{
 
   place:
     '山小屋',
+
+  ambientTemperature:
+    -11,
+
+  weather:
+    '雪',
+
+  indoors:
+    false,
 
   messages:[
     'ようやく山小屋の前まで辿り着きました。',
@@ -1973,6 +2028,19 @@ cabinInside:{
   place:
     '山小屋・1階',
 
+  /*
+    グラントが薪ストーブを
+    つけていたので室内は暖かい
+  */
+  ambientTemperature:
+    18,
+
+  weather:
+    '雪',
+
+  indoors:
+    true,
+
   messages:[
     '山小屋の中へ入りました。'
   ],
@@ -1983,8 +2051,6 @@ cabinInside:{
   ],
 
   items:[],
-
-  inside:true,
 
   moves:{
     up:null,
@@ -2068,6 +2134,21 @@ const grantCharacterImage =
     'grantCharacterImage'
   );
 
+const temperatureLabel =
+  document.getElementById(
+    'temperatureLabel'
+  );
+
+const ambientTemperature =
+  document.getElementById(
+    'ambientTemperature'
+  );
+
+const weatherValue =
+  document.getElementById(
+    'weatherValue'
+  );
+
 
 function clamp(
   value,
@@ -2113,6 +2194,40 @@ function isPaused(){
 
 }
 
+
+/* =========================
+   気温・天気表示
+========================= */
+
+function renderEnvironment(){
+
+  const scene =
+    getScene();
+
+
+  temperatureLabel.textContent =
+    scene.indoors
+      ?
+      '室温'
+      :
+      '気温';
+
+
+  ambientTemperature.textContent =
+    scene.ambientTemperature
+    +
+    '℃';
+
+
+  weatherValue.textContent =
+    scene.weather;
+
+}
+
+
+/* =========================
+   時計
+========================= */
 
 function renderClock(){
 
@@ -2197,6 +2312,10 @@ function renderClock(){
 
 }
 
+
+/* =========================
+   メーター
+========================= */
 
 function setFillLevel(
   id,
@@ -2314,6 +2433,8 @@ function renderMeters(){
   document.getElementById(
     'tempValue'
   ).textContent =
+    '体温 '
+    +
     bodyTemperature.toFixed(
       1
     )
@@ -2556,28 +2677,16 @@ function reopenMessage(){
 }
 
 
-/*
-  会話DIVをタップした時
-
-  次の文章あり
-  → 次の文章
-
-  最後でfinalActionあり
-  → 実行
-
-  最後で何も無し
-  → 閉じる
-
-  選択肢がある場合
-  → DIVタップでは決定しない
-*/
 function advanceMessage(){
 
   if(
     !messagePages.length
   ){
+
     hideMessage();
+
     return;
+
   }
 
 
@@ -2627,13 +2736,7 @@ function advanceMessage(){
   if(
     hasChoice
   ){
-
-    /*
-      選択肢がある時は
-      選択ボタンを押すまで待つ
-    */
     return;
-
   }
 
 
@@ -2664,9 +2767,6 @@ function advanceMessage(){
 }
 
 
-/*
-  横長の会話DIV本体をタップ
-*/
 messagePanel.addEventListener(
   'click',
   event=>{
@@ -2693,12 +2793,6 @@ messagePanel.addEventListener(
 );
 
 
-/*
-  ◀ / ▶
-
-  文は進めない。
-  開閉だけ。
-*/
 messageToggle.addEventListener(
   'click',
   event=>{
@@ -2718,9 +2812,6 @@ messageToggle.addEventListener(
 );
 
 
-/*
-  選択肢
-*/
 messageChoice.addEventListener(
   'click',
   event=>{
@@ -2766,7 +2857,7 @@ messageChoice.addEventListener(
 
 
 /* =========================
-   時間・ステータス
+   時間・体温
 ========================= */
 
 function applyDrain(
@@ -2779,12 +2870,45 @@ function applyDrain(
     60;
 
 
-  bodyTemperature -=
-    .008
-    *
-    minutes;
+  const scene =
+    getScene();
 
 
+  /*
+    室外
+    → 体温が下がる
+
+    山小屋
+    → 暖かいので体温が回復
+  */
+  if(
+    scene.indoors
+  ){
+
+    bodyTemperature =
+      Math.min(
+        NORMAL_BODY_TEMPERATURE,
+
+        bodyTemperature
+        +
+        CABIN_BODY_TEMP_RECOVERY
+        *
+        minutes
+      );
+
+  }else{
+
+    bodyTemperature -=
+      OUTDOOR_PASSIVE_TEMP_DROP
+      *
+      minutes;
+
+  }
+
+
+  /*
+    空腹は屋内でも進む
+  */
   hunger =
     clamp(
       hunger
@@ -2797,10 +2921,11 @@ function applyDrain(
     );
 
 
+  /*
+    低体温なら体力を消耗
+  */
   if(
-    bodyTemperature
-    <
-    35
+    bodyTemperature < 35
   ){
 
     stamina -=
@@ -2812,9 +2937,7 @@ function applyDrain(
 
 
   if(
-    bodyTemperature
-    <
-    33
+    bodyTemperature < 33
   ){
 
     stamina -=
@@ -2826,9 +2949,7 @@ function applyDrain(
 
 
   if(
-    bodyTemperature
-    <
-    31
+    bodyTemperature < 31
   ){
 
     stamina -=
@@ -2840,13 +2961,23 @@ function applyDrain(
 
 
   if(
-    bodyTemperature
-    <
-    29
+    bodyTemperature < 29
   ){
 
     stamina -=
       1.20
+      *
+      minutes;
+
+  }
+
+
+  if(
+    hunger <= 0
+  ){
+
+    stamina -=
+      .25
       *
       minutes;
 
@@ -2925,6 +3056,8 @@ function renderScene(){
     scene.image
   );
 
+
+  renderEnvironment();
 
   renderSceneItems();
 
@@ -3498,6 +3631,8 @@ function runSurvivalEvent(
     }
 
 
+    renderMenuUnlocks();
+
     renderCharacter();
 
     renderDirections();
@@ -3878,8 +4013,17 @@ function move(
     );
 
 
-  bodyTemperature -=
-    MOVE_TEMP_DROP;
+  /*
+    外を歩く時の急な体温低下
+  */
+  if(
+    !getScene().indoors
+  ){
+
+    bodyTemperature -=
+      MOVE_TEMP_DROP;
+
+  }
 
 
   advanceTime(
@@ -3903,6 +4047,10 @@ function move(
 
 }
 
+
+/* =========================
+   方向キーイベント
+========================= */
 
 Object.entries(
   directionButtons
@@ -4237,6 +4385,15 @@ for(
 
 /* =========================
    通常時間
+
+   外：
+   体温低下
+
+   山小屋：
+   体温回復
+
+   会話・MENU・イベント中：
+   時間停止
 ========================= */
 
 setInterval(
@@ -4244,15 +4401,6 @@ setInterval(
 
     if(
       isPaused()
-    ){
-      return;
-    }
-
-
-    if(
-      currentScene
-      ===
-      'cabinInside'
     ){
       return;
     }
@@ -4302,6 +4450,8 @@ if(
 ========================= */
 
 renderClock();
+
+renderEnvironment();
 
 renderMeters();
 
