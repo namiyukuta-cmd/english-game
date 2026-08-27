@@ -1,157 +1,232 @@
 // 雪山サバイバルゲーム 共通インベントリ管理
-// 収納とプレイヤー所持品のスロット移動を共通化する。
-// 操作方式：アイテムをタップ → 移動先スロットをタップ。
+// 新仕様：通常アイテムは「個数 + 重量」で管理し、衣類は装備として別管理する。
+// 収納（タンス・棚・冷蔵庫など）は共通の数量データとして扱う。
 
 (function () {
   'use strict';
 
   const STORAGE_KEY = 'survival_inventory_state_v1';
-  const BASE_PLAYER_CAPACITY = 5;
+  const STATE_VERSION = 2;
 
-  const DEFAULT_CONTAINERS = Object.freeze({
-    player: {
-      id: 'player',
-      name: '自分のインベントリ',
-      capacity: BASE_PLAYER_CAPACITY,
-      slots: []
-    },
+  // 暫定の基礎積載量。後からゲームバランスに合わせて変更可能。
+  const BASE_PLAYER_MAX_WEIGHT = 5.0;
+
+  const EQUIPMENT_SLOTS = Object.freeze({
+    head: '頭',
+    neck: '首',
+    clothes: '服',
+    coat: 'コート',
+    pants: 'ズボン',
+    shoes: '靴',
+    hands: '手'
+  });
+
+  const DEFAULT_STORAGES = Object.freeze({
     wardrobe: {
       id: 'wardrobe',
       name: '洋服箪笥',
-      capacity: 8,
-      slots: [
-        { itemId: 'winter_coat_old_01', qty: 1 },
-        { itemId: 'wool_sweater_01', qty: 1 },
-        { itemId: 'winter_gloves_01', qty: 1 },
-        { itemId: 'knit_cap_01', qty: 1 },
-        { itemId: 'backpack_old_01', qty: 1 }
-      ]
+      items: {
+        winter_coat_old_01: 1,
+        wool_sweater_01: 1,
+        winter_gloves_01: 1,
+        knit_cap_01: 1,
+        backpack_old_01: 1
+      }
     },
     fridge: {
       id: 'fridge',
       name: '冷蔵庫',
-      capacity: 12,
-      slots: []
+      items: {}
     },
     foodShelf: {
       id: 'foodShelf',
       name: '食料棚',
-      capacity: 12,
-      slots: []
+      items: {}
     },
     atticStorage: {
       id: 'atticStorage',
       name: '屋根裏収納',
-      capacity: 12,
-      slots: []
+      items: {}
     },
     basementStorage: {
       id: 'basementStorage',
       name: '地下収納',
-      capacity: 12,
-      slots: []
+      items: {}
     },
     shedStorage: {
       id: 'shedStorage',
       name: '物置',
-      capacity: 16,
-      slots: []
+      items: {}
     }
   });
 
-  let selected = null;
   const listeners = new Set();
+  let selected = null;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
   }
 
-  function emptySlots(capacity) {
-    return Array.from({ length: Math.max(0, Number(capacity) || 0) }, () => null);
+  function normalizeQty(value) {
+    const qty = Math.floor(Number(value) || 0);
+    return Math.max(0, qty);
   }
 
-  function normalizeSlot(slot) {
-    if (!slot || !slot.itemId) return null;
-    return {
-      itemId: String(slot.itemId),
-      qty: Math.max(1, Math.floor(Number(slot.qty) || 1))
-    };
+  function normalizeWeight(value) {
+    const weight = Number(value);
+    if (!Number.isFinite(weight) || weight < 0) return 0;
+    return weight;
   }
 
-  function makeContainer(def) {
-    const capacity = Math.max(0, Math.floor(Number(def.capacity) || 0));
-    const slots = emptySlots(capacity);
-    (def.slots || []).slice(0, capacity).forEach((slot, index) => {
-      slots[index] = normalizeSlot(slot);
+  function normalizeItemMap(raw) {
+    const result = {};
+    if (!raw || typeof raw !== 'object') return result;
+
+    Object.entries(raw).forEach(([itemId, qty]) => {
+      const normalized = normalizeQty(qty);
+      if (normalized > 0) result[String(itemId)] = normalized;
     });
-    return {
-      id: String(def.id),
-      name: String(def.name || def.id),
-      capacity,
-      slots
-    };
+
+    return result;
+  }
+
+  function makeDefaultEquipment() {
+    const equipment = {};
+    Object.keys(EQUIPMENT_SLOTS).forEach(slotId => {
+      equipment[slotId] = null;
+    });
+    return equipment;
+  }
+
+  function makeDefaultStorages() {
+    const storages = {};
+    Object.values(DEFAULT_STORAGES).forEach(def => {
+      storages[def.id] = {
+        id: def.id,
+        name: def.name,
+        items: normalizeItemMap(def.items)
+      };
+    });
+    return storages;
   }
 
   function makeDefaultState() {
-    const containers = {};
-    Object.values(DEFAULT_CONTAINERS).forEach(def => {
-      containers[def.id] = makeContainer(def);
-    });
     return {
-      version: 1,
-      playerBaseCapacity: BASE_PLAYER_CAPACITY,
-      playerBonusCapacity: 0,
-      containers
+      version: STATE_VERSION,
+      player: {
+        baseMaxWeight: BASE_PLAYER_MAX_WEIGHT,
+        bonusMaxWeight: 0,
+        items: {},
+        equipment: makeDefaultEquipment()
+      },
+      storages: makeDefaultStorages()
     };
   }
 
+  function addToItemMap(map, itemId, qty) {
+    const id = String(itemId || '');
+    const amount = normalizeQty(qty);
+    if (!id || amount <= 0) return false;
+    map[id] = normalizeQty(map[id]) + amount;
+    return true;
+  }
+
+  function removeFromItemMap(map, itemId, qty) {
+    const id = String(itemId || '');
+    const amount = normalizeQty(qty);
+    const current = normalizeQty(map[id]);
+    if (!id || amount <= 0 || current < amount) return false;
+
+    const next = current - amount;
+    if (next > 0) map[id] = next;
+    else delete map[id];
+    return true;
+  }
+
+  function slotsToItemMap(slots) {
+    const map = {};
+    if (!Array.isArray(slots)) return map;
+
+    slots.forEach(slot => {
+      if (!slot || !slot.itemId) return;
+      addToItemMap(map, slot.itemId, slot.qty || 1);
+    });
+
+    return map;
+  }
+
+  function migrateLegacyState(raw) {
+    const next = makeDefaultState();
+    if (!raw || typeof raw !== 'object') return next;
+
+    const containers = raw.containers && typeof raw.containers === 'object'
+      ? raw.containers
+      : {};
+
+    if (containers.player) {
+      next.player.items = slotsToItemMap(containers.player.slots);
+    }
+
+    Object.entries(containers).forEach(([id, container]) => {
+      if (id === 'player' || !container || typeof container !== 'object') return;
+
+      if (!next.storages[id]) {
+        next.storages[id] = {
+          id,
+          name: String(container.name || id),
+          items: {}
+        };
+      }
+
+      next.storages[id].name = String(container.name || next.storages[id].name || id);
+      next.storages[id].items = slotsToItemMap(container.slots);
+    });
+
+    return next;
+  }
+
   function normalizeState(raw) {
-    const base = makeDefaultState();
-    if (!raw || typeof raw !== 'object') return base;
+    if (!raw || typeof raw !== 'object') return makeDefaultState();
 
-    const bonus = Math.max(0, Math.floor(Number(raw.playerBonusCapacity) || 0));
-    base.playerBonusCapacity = bonus;
-
-    if (raw.containers && typeof raw.containers === 'object') {
-      Object.keys(raw.containers).forEach(id => {
-        const incoming = raw.containers[id];
-        if (!incoming || typeof incoming !== 'object') return;
-
-        const fallback = base.containers[id] || {
-          id,
-          name: incoming.name || id,
-          capacity: incoming.capacity || 0,
-          slots: []
-        };
-
-        const capacity = id === 'player'
-          ? BASE_PLAYER_CAPACITY + bonus
-          : Math.max(0, Math.floor(Number(incoming.capacity || fallback.capacity) || 0));
-
-        const merged = {
-          id,
-          name: String(incoming.name || fallback.name || id),
-          capacity,
-          slots: emptySlots(capacity)
-        };
-
-        const sourceSlots = Array.isArray(incoming.slots) ? incoming.slots : fallback.slots;
-        sourceSlots.slice(0, capacity).forEach((slot, index) => {
-          merged.slots[index] = normalizeSlot(slot);
-        });
-        base.containers[id] = merged;
-      });
+    if (Number(raw.version) !== STATE_VERSION || !raw.player || !raw.storages) {
+      return migrateLegacyState(raw);
     }
 
-    const player = base.containers.player;
-    player.capacity = BASE_PLAYER_CAPACITY + bonus;
-    if (player.slots.length < player.capacity) {
-      while (player.slots.length < player.capacity) player.slots.push(null);
-    } else if (player.slots.length > player.capacity) {
-      player.slots.length = player.capacity;
+    const next = makeDefaultState();
+
+    next.player.baseMaxWeight = normalizeWeight(raw.player.baseMaxWeight);
+    if (next.player.baseMaxWeight <= 0) {
+      next.player.baseMaxWeight = BASE_PLAYER_MAX_WEIGHT;
     }
 
-    return base;
+    next.player.bonusMaxWeight = normalizeWeight(raw.player.bonusMaxWeight);
+    next.player.items = normalizeItemMap(raw.player.items);
+
+    const incomingEquipment = raw.player.equipment && typeof raw.player.equipment === 'object'
+      ? raw.player.equipment
+      : {};
+
+    Object.keys(EQUIPMENT_SLOTS).forEach(slotId => {
+      const itemId = incomingEquipment[slotId];
+      next.player.equipment[slotId] = itemId ? String(itemId) : null;
+    });
+
+    Object.entries(raw.storages).forEach(([id, storage]) => {
+      if (!storage || typeof storage !== 'object') return;
+
+      if (!next.storages[id]) {
+        next.storages[id] = {
+          id,
+          name: String(storage.name || id),
+          items: {}
+        };
+      }
+
+      next.storages[id].name = String(storage.name || next.storages[id].name || id);
+      next.storages[id].items = normalizeItemMap(storage.items);
+    });
+
+    return next;
   }
 
   function readState() {
@@ -166,6 +241,19 @@
 
   let state = readState();
 
+  function emit() {
+    const snapshot = getState();
+    const selection = getSelection();
+
+    listeners.forEach(listener => {
+      try {
+        listener(snapshot, selection);
+      } catch (error) {
+        console.error('[survival-inventory] listener error', error);
+      }
+    });
+  }
+
   function save() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -175,64 +263,435 @@
     emit();
   }
 
-  function emit() {
-    const snapshot = getState();
-    listeners.forEach(listener => {
-      try { listener(snapshot, getSelection()); }
-      catch (error) { console.error('[survival-inventory] listener error', error); }
-    });
-  }
-
   function getState() {
     return clone(state);
   }
 
+  function getItemData(itemId) {
+    const id = String(itemId || '');
+    if (!id) return null;
+
+    const source = window.SURVIVAL_ITEMS;
+    if (!source) return null;
+
+    try {
+      if (typeof source.get === 'function') {
+        const item = source.get(id);
+        if (item) return item;
+      }
+
+      if (typeof source.getItem === 'function') {
+        const item = source.getItem(id);
+        if (item) return item;
+      }
+
+      if (Array.isArray(source)) {
+        return source.find(item => item && String(item.id) === id) || null;
+      }
+
+      if (Array.isArray(source.items)) {
+        return source.items.find(item => item && String(item.id) === id) || null;
+      }
+
+      if (source.byId && source.byId[id]) {
+        return source.byId[id];
+      }
+
+      if (source[id] && typeof source[id] === 'object') {
+        return source[id];
+      }
+    } catch (error) {
+      console.warn('[survival-inventory] アイテムデータ取得に失敗しました。', error);
+    }
+
+    return null;
+  }
+
+  function getItemWeight(itemId) {
+    const item = getItemData(itemId);
+    return item ? normalizeWeight(item.weight) : 0;
+  }
+
+  function getPlayerWeight() {
+    return Object.entries(state.player.items).reduce((total, entry) => {
+      const itemId = entry[0];
+      const qty = entry[1];
+      return total + getItemWeight(itemId) * qty;
+    }, 0);
+  }
+
+  function getPlayerMaxWeight() {
+    return normalizeWeight(state.player.baseMaxWeight) + normalizeWeight(state.player.bonusMaxWeight);
+  }
+
+  function getPlayerRemainingWeight() {
+    return Math.max(0, getPlayerMaxWeight() - getPlayerWeight());
+  }
+
+  function canCarry(itemId, qty) {
+    const amount = normalizeQty(qty || 1);
+    if (amount <= 0) return { ok: false, reason: 'invalid_quantity' };
+
+    const addedWeight = getItemWeight(itemId) * amount;
+    const currentWeight = getPlayerWeight();
+    const maxWeight = getPlayerMaxWeight();
+
+    if (currentWeight + addedWeight > maxWeight + 1e-9) {
+      return {
+        ok: false,
+        reason: 'weight_over',
+        currentWeight,
+        addedWeight,
+        maxWeight
+      };
+    }
+
+    return {
+      ok: true,
+      currentWeight,
+      addedWeight,
+      maxWeight,
+      nextWeight: currentWeight + addedWeight
+    };
+  }
+
+  function getPlayerItems() {
+    return clone(state.player.items);
+  }
+
+  function getEquipment() {
+    return clone(state.player.equipment);
+  }
+
+  function getStorage(storageId) {
+    const storage = state.storages[String(storageId)];
+    return storage ? clone(storage) : null;
+  }
+
+  const LEGACY_CAPACITIES = Object.freeze({
+    player: 5,
+    wardrobe: 8,
+    fridge: 12,
+    foodShelf: 12,
+    atticStorage: 12,
+    basementStorage: 12,
+    shedStorage: 16
+  });
+
+  function makeLegacySlots(itemMap, minimumCapacity) {
+    const slots = [];
+
+    Object.entries(itemMap || {}).forEach(([itemId, qty]) => {
+      const amount = normalizeQty(qty);
+      for (let i = 0; i < amount; i += 1) {
+        slots.push({ itemId, qty: 1 });
+      }
+    });
+
+    const capacity = Math.max(normalizeQty(minimumCapacity), slots.length);
+    while (slots.length < capacity) slots.push(null);
+
+    return { capacity, slots };
+  }
+
   function getContainer(containerId) {
-    const container = state.containers[containerId];
-    return container ? clone(container) : null;
+    const id = String(containerId || '');
+
+    if (id === 'player') {
+      const legacy = makeLegacySlots(state.player.items, LEGACY_CAPACITIES.player);
+      return {
+        id: 'player',
+        name: '自分のインベントリ',
+        items: clone(state.player.items),
+        currentWeight: getPlayerWeight(),
+        maxWeight: getPlayerMaxWeight(),
+        // 旧HTMLが新HTMLへ切り替わるまでの互換表示用。
+        capacity: legacy.capacity,
+        slots: legacy.slots
+      };
+    }
+
+    const storage = getStorage(id);
+    if (!storage) return null;
+
+    const legacy = makeLegacySlots(storage.items, LEGACY_CAPACITIES[id] || 0);
+    return Object.assign(storage, {
+      // 旧HTMLが新HTMLへ切り替わるまでの互換表示用。
+      capacity: legacy.capacity,
+      slots: legacy.slots
+    });
   }
 
   function getSlot(containerId, slotIndex) {
-    const container = state.containers[containerId];
+    const container = getContainer(containerId);
     const index = Number(slotIndex);
-    if (!container || !Number.isInteger(index) || index < 0 || index >= container.capacity) return null;
+    if (!container || !Number.isInteger(index) || index < 0 || index >= container.slots.length) return null;
     return container.slots[index] ? clone(container.slots[index]) : null;
   }
 
   function ensureContainer(containerId, options) {
-    const id = String(containerId);
-    if (state.containers[id]) return getContainer(id);
-    const opts = options || {};
-    state.containers[id] = makeContainer({
-      id,
-      name: opts.name || id,
-      capacity: opts.capacity || 0,
-      slots: opts.slots || []
-    });
-    save();
-    return getContainer(id);
+    const id = String(containerId || '');
+    if (!id || id === 'player') return getContainer(id);
+
+    if (!state.storages[id]) {
+      const opts = options || {};
+      state.storages[id] = {
+        id,
+        name: String(opts.name || id),
+        items: normalizeItemMap(opts.items)
+      };
+      save();
+    }
+
+    return getStorage(id);
   }
 
-  function select(containerId, slotIndex) {
-    const container = state.containers[containerId];
-    const index = Number(slotIndex);
-    if (!container || !Number.isInteger(index) || index < 0 || index >= container.capacity) {
+  function getItemQuantity(containerId, itemId) {
+    const id = String(containerId || '');
+    const item = String(itemId || '');
+    if (!item) return 0;
+
+    if (id === 'player') return normalizeQty(state.player.items[item]);
+
+    const storage = state.storages[id];
+    return storage ? normalizeQty(storage.items[item]) : 0;
+  }
+
+  function addItem(containerId, itemId, qty) {
+    const id = String(containerId || '');
+    const item = String(itemId || '');
+    const amount = normalizeQty(qty || 1);
+
+    if (!item || amount <= 0) return { ok: false, reason: 'invalid_item' };
+
+    if (id === 'player') {
+      const carry = canCarry(item, amount);
+      if (!carry.ok) return carry;
+
+      addToItemMap(state.player.items, item, amount);
+      save();
+
+      return {
+        ok: true,
+        containerId: 'player',
+        itemId: item,
+        qty: amount,
+        currentWeight: getPlayerWeight(),
+        maxWeight: getPlayerMaxWeight()
+      };
+    }
+
+    const storage = state.storages[id];
+    if (!storage) return { ok: false, reason: 'container_not_found' };
+
+    addToItemMap(storage.items, item, amount);
+    save();
+
+    return {
+      ok: true,
+      containerId: id,
+      itemId: item,
+      qty: amount
+    };
+  }
+
+  function removeItem(containerId, itemId, qty) {
+    const id = String(containerId || '');
+    const item = String(itemId || '');
+    const amount = normalizeQty(qty || 1);
+
+    if (!item || amount <= 0) return { ok: false, reason: 'invalid_item' };
+
+    if (id === 'player') {
+      if (!removeFromItemMap(state.player.items, item, amount)) {
+        return { ok: false, reason: 'not_enough' };
+      }
+      save();
+      return { ok: true, containerId: 'player', itemId: item, qty: amount };
+    }
+
+    const storage = state.storages[id];
+    if (!storage) return { ok: false, reason: 'container_not_found' };
+
+    if (!removeFromItemMap(storage.items, item, amount)) {
+      return { ok: false, reason: 'not_enough' };
+    }
+
+    save();
+    return { ok: true, containerId: id, itemId: item, qty: amount };
+  }
+
+  function moveItem(sourceContainerId, targetContainerId, itemId, qty) {
+    const sourceId = String(sourceContainerId || '');
+    const targetId = String(targetContainerId || '');
+    const item = String(itemId || '');
+    const amount = normalizeQty(qty || 1);
+
+    if (!sourceId || !targetId || !item || amount <= 0) {
+      return { ok: false, reason: 'invalid_move' };
+    }
+
+    if (sourceId === targetId) return { ok: true, moved: 0 };
+
+    if (getItemQuantity(sourceId, item) < amount) {
+      return { ok: false, reason: 'not_enough' };
+    }
+
+    if (targetId === 'player') {
+      const carry = canCarry(item, amount);
+      if (!carry.ok) return carry;
+    } else if (!state.storages[targetId]) {
+      return { ok: false, reason: 'container_not_found' };
+    }
+
+    if (sourceId === 'player') {
+      removeFromItemMap(state.player.items, item, amount);
+    } else {
+      const source = state.storages[sourceId];
+      if (!source) return { ok: false, reason: 'container_not_found' };
+      removeFromItemMap(source.items, item, amount);
+    }
+
+    if (targetId === 'player') {
+      addToItemMap(state.player.items, item, amount);
+    } else {
+      addToItemMap(state.storages[targetId].items, item, amount);
+    }
+
+    selected = null;
+    save();
+
+    return {
+      ok: true,
+      itemId: item,
+      qty: amount,
+      sourceContainerId: sourceId,
+      targetContainerId: targetId
+    };
+  }
+
+  function isEquipmentSlot(slotId) {
+    return Object.prototype.hasOwnProperty.call(EQUIPMENT_SLOTS, String(slotId || ''));
+  }
+
+  function equipFromStorage(storageId, itemId, slotId) {
+    const storage = state.storages[String(storageId || '')];
+    const item = String(itemId || '');
+    const slot = String(slotId || '');
+
+    if (!storage) return { ok: false, reason: 'container_not_found' };
+    if (!item || getItemQuantity(storage.id, item) < 1) return { ok: false, reason: 'not_enough' };
+    if (!isEquipmentSlot(slot)) return { ok: false, reason: 'invalid_equipment_slot' };
+
+    removeFromItemMap(storage.items, item, 1);
+
+    const previousItemId = state.player.equipment[slot];
+    if (previousItemId) addToItemMap(storage.items, previousItemId, 1);
+
+    state.player.equipment[slot] = item;
+    selected = null;
+    save();
+
+    return {
+      ok: true,
+      slotId: slot,
+      itemId: item,
+      previousItemId: previousItemId || null,
+      storageId: storage.id
+    };
+  }
+
+  function unequipToStorage(slotId, storageId) {
+    const slot = String(slotId || '');
+    const storage = state.storages[String(storageId || '')];
+
+    if (!isEquipmentSlot(slot)) return { ok: false, reason: 'invalid_equipment_slot' };
+    if (!storage) return { ok: false, reason: 'container_not_found' };
+
+    const itemId = state.player.equipment[slot];
+    if (!itemId) return { ok: false, reason: 'equipment_empty' };
+
+    state.player.equipment[slot] = null;
+    addToItemMap(storage.items, itemId, 1);
+    selected = null;
+    save();
+
+    return {
+      ok: true,
+      slotId: slot,
+      itemId,
+      storageId: storage.id
+    };
+  }
+
+  function setPlayerBaseMaxWeight(weight) {
+    const value = normalizeWeight(weight);
+    if (value <= 0) return { ok: false, reason: 'invalid_weight' };
+
+    if (getPlayerWeight() > value + state.player.bonusMaxWeight + 1e-9) {
+      return { ok: false, reason: 'current_weight_over_new_limit' };
+    }
+
+    state.player.baseMaxWeight = value;
+    save();
+    return { ok: true, maxWeight: getPlayerMaxWeight() };
+  }
+
+  function setPlayerBonusWeight(weight) {
+    const value = normalizeWeight(weight);
+
+    if (getPlayerWeight() > state.player.baseMaxWeight + value + 1e-9) {
+      return { ok: false, reason: 'current_weight_over_new_limit' };
+    }
+
+    state.player.bonusMaxWeight = value;
+    save();
+    return { ok: true, maxWeight: getPlayerMaxWeight() };
+  }
+
+  // 旧コード互換。旧「追加スロット」の値を、そのまま追加kgとして扱う。
+  // 新コードでは setPlayerBonusWeight() を使用する。
+  function setPlayerBonusCapacity(value) {
+    return setPlayerBonusWeight(value);
+  }
+
+  // 新UI用：itemIdで選択する。
+  function selectItem(containerId, itemId) {
+    const id = String(containerId || '');
+    const item = String(itemId || '');
+
+    if (!item || getItemQuantity(id, item) <= 0) {
       selected = null;
       emit();
-      return { ok: false, reason: 'invalid_slot' };
+      return { ok: false, reason: 'item_not_found' };
     }
-    if (!container.slots[index]) {
-      selected = null;
-      emit();
-      return { ok: false, reason: 'empty_slot' };
-    }
-    selected = { containerId, slotIndex: index };
+
+    selected = { containerId: id, itemId: item };
     emit();
     return { ok: true, selection: getSelection() };
   }
 
+  // 旧UI互換：slotIndexからitemIdへ変換して選択する。
+  function select(containerId, slotIndex) {
+    const slot = getSlot(containerId, slotIndex);
+    if (!slot) {
+      selected = null;
+      emit();
+      return { ok: false, reason: 'empty_slot' };
+    }
+    return selectItem(containerId, slot.itemId);
+  }
+
+  // 旧UI互換：移動先slotIndexは新仕様では使用しない。
+  function move(sourceContainerId, sourceSlotIndex, targetContainerId, targetSlotIndex) {
+    void targetSlotIndex;
+    const slot = getSlot(sourceContainerId, sourceSlotIndex);
+    if (!slot) return { ok: false, reason: 'empty_source' };
+    return moveItem(sourceContainerId, targetContainerId, slot.itemId, 1);
+  }
+
   function getSelection() {
-    return selected ? { containerId: selected.containerId, slotIndex: selected.slotIndex } : null;
+    return selected ? clone(selected) : null;
   }
 
   function clearSelection() {
@@ -240,63 +699,17 @@
     emit();
   }
 
-  function move(sourceContainerId, sourceSlotIndex, targetContainerId, targetSlotIndex) {
-    const source = state.containers[sourceContainerId];
-    const target = state.containers[targetContainerId];
-    const s = Number(sourceSlotIndex);
-    const t = Number(targetSlotIndex);
-
-    if (!source || !target) return { ok: false, reason: 'container_not_found' };
-    if (!Number.isInteger(s) || s < 0 || s >= source.capacity) return { ok: false, reason: 'invalid_source' };
-    if (!Number.isInteger(t) || t < 0 || t >= target.capacity) return { ok: false, reason: 'invalid_target' };
-    if (!source.slots[s]) return { ok: false, reason: 'empty_source' };
-    if (target.slots[t]) return { ok: false, reason: 'target_occupied' };
-
-    target.slots[t] = source.slots[s];
-    source.slots[s] = null;
-    selected = null;
-    save();
-    return { ok: true };
-  }
-
-  function moveSelectedTo(targetContainerId, targetSlotIndex) {
+  function moveSelectedTo(targetContainerId, qty) {
     if (!selected) return { ok: false, reason: 'nothing_selected' };
-    return move(selected.containerId, selected.slotIndex, targetContainerId, targetSlotIndex);
-  }
-
-  function setPlayerBonusCapacity(bonusSlots) {
-    const bonus = Math.max(0, Math.floor(Number(bonusSlots) || 0));
-    const player = state.containers.player;
-    const newCapacity = BASE_PLAYER_CAPACITY + bonus;
-
-    if (newCapacity < player.capacity) {
-      for (let i = newCapacity; i < player.capacity; i++) {
-        if (player.slots[i]) return { ok: false, reason: 'slots_not_empty' };
-      }
-    }
-
-    state.playerBonusCapacity = bonus;
-    player.capacity = newCapacity;
-    while (player.slots.length < newCapacity) player.slots.push(null);
-    if (player.slots.length > newCapacity) player.slots.length = newCapacity;
-    save();
-    return { ok: true, capacity: newCapacity };
-  }
-
-  function addItem(containerId, itemId, qty) {
-    const container = state.containers[containerId];
-    if (!container) return { ok: false, reason: 'container_not_found' };
-    const emptyIndex = container.slots.findIndex(slot => slot === null);
-    if (emptyIndex < 0) return { ok: false, reason: 'container_full' };
-    container.slots[emptyIndex] = normalizeSlot({ itemId, qty });
-    save();
-    return { ok: true, slotIndex: emptyIndex };
+    return moveItem(selected.containerId, targetContainerId, selected.itemId, qty || 1);
   }
 
   function subscribe(listener) {
     if (typeof listener !== 'function') return function () {};
     listeners.add(listener);
-    return function unsubscribe() { listeners.delete(listener); };
+    return function unsubscribe() {
+      listeners.delete(listener);
+    };
   }
 
   function reset() {
@@ -307,18 +720,42 @@
 
   window.SURVIVAL_INVENTORY = Object.freeze({
     storageKey: STORAGE_KEY,
-    basePlayerCapacity: BASE_PLAYER_CAPACITY,
+    stateVersion: STATE_VERSION,
+    basePlayerMaxWeight: BASE_PLAYER_MAX_WEIGHT,
+    equipmentSlots: EQUIPMENT_SLOTS,
+
     getState,
     getContainer,
     getSlot,
+    getStorage,
     ensureContainer,
+    getPlayerItems,
+    getEquipment,
+    getItemQuantity,
+    getItemWeight,
+    getPlayerWeight,
+    getPlayerMaxWeight,
+    getPlayerRemainingWeight,
+    canCarry,
+
+    addItem,
+    removeItem,
+    moveItem,
+
+    equipFromStorage,
+    unequipToStorage,
+
+    setPlayerBaseMaxWeight,
+    setPlayerBonusWeight,
+    setPlayerBonusCapacity,
+
+    selectItem,
     select,
+    move,
     getSelection,
     clearSelection,
-    move,
     moveSelectedTo,
-    setPlayerBonusCapacity,
-    addItem,
+
     subscribe,
     reset
   });
