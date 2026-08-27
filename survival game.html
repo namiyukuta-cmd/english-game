@@ -33,22 +33,15 @@ button{
   -webkit-tap-highlight-color:transparent;
 }
 
-
-/* =========================
-   全体
-========================= */
-
 .game{
   position:relative;
   width:min(100%,540px);
   height:100dvh;
   margin:0 auto;
-
   padding:
     calc(5px + env(safe-area-inset-top))
     6px
     calc(6px + env(safe-area-inset-bottom));
-
   display:flex;
   flex-direction:column;
   gap:4px;
@@ -62,14 +55,8 @@ button{
 
 .topbar{
   flex:0 0 auto;
-
   display:grid;
-  grid-template-columns:
-    36px
-    52px
-    80px
-    minmax(0,1fr);
-
+  grid-template-columns:36px 52px 80px minmax(0,1fr);
   gap:4px;
   align-items:center;
 }
@@ -77,19 +64,14 @@ button{
 .back{
   width:36px;
   height:36px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   border:1px solid #999;
   border-radius:9px;
-
   background:#fff;
   color:#222;
-
   text-decoration:none;
-
   font-size:22px;
   font-weight:900;
   line-height:1;
@@ -98,20 +80,15 @@ button{
 .top-small{
   height:36px;
   padding:0 5px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   border:1px solid #aaa;
   border-radius:9px;
-
   background:#fff;
-
   font-size:13px;
   font-weight:800;
   line-height:1;
-
   white-space:nowrap;
 }
 
@@ -128,10 +105,8 @@ button{
 
 .meters{
   flex:0 0 auto;
-
   display:grid;
   grid-template-columns:repeat(3,1fr);
-
   gap:4px;
 }
 
@@ -139,15 +114,12 @@ button{
   height:32px;
   min-width:0;
   padding:2px 5px;
-
   display:flex;
   align-items:center;
   justify-content:center;
   gap:4px;
-
   border:1px solid #aaa;
   border-radius:9px;
-
   background:#fff;
 }
 
@@ -180,54 +152,40 @@ button{
 
 .scene-wrap{
   position:relative;
-
   width:97%;
   margin:0 auto;
-
   flex:0 0 auto;
-
-  padding-bottom:76px;
+  padding-bottom:122px;
 }
 
 .scene{
   position:relative;
-
   width:100%;
   height:min(61dvh,570px);
   min-height:490px;
-
   overflow:hidden;
-
   border:1px solid #8c9296;
   border-radius:13px;
-
   background:#ddd;
 }
 
 .scene-background{
   position:absolute;
   inset:0;
-
   z-index:1;
-
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-
   pointer-events:none;
-
   transition:
     filter .28s ease,
     transform .28s ease;
 }
 
-
-/* 立ち絵表示時 */
 .scene-background.portrait-focus{
   filter:
     blur(4px)
     brightness(.93);
-
   transform:scale(1.025);
 }
 
@@ -239,37 +197,26 @@ button{
 .scene-objects{
   position:absolute;
   inset:0;
-
   z-index:4;
-
   pointer-events:none;
 }
 
 .scene-object{
   position:absolute;
-
   display:block;
-
   margin:0;
   padding:0;
-
   border:0;
-
   background:transparent;
-
   pointer-events:auto;
 }
 
 .scene-object img{
   display:block;
-
   width:100%;
   height:100%;
-
   object-fit:contain;
-
   pointer-events:none;
-
   filter:
     drop-shadow(1px 0 0 #698594)
     drop-shadow(-1px 0 0 #698594)
@@ -302,55 +249,44 @@ button{
 
 
 /* =========================
-   キャラクター
+   グラント
 ========================= */
 
 .character-layer{
   position:absolute;
   inset:0;
-
   z-index:7;
-
   pointer-events:none;
 }
 
-
-/*
-  グラントのカードDIV
-  背景DIVのど真ん中へ配置
-*/
 .character-sprite{
   position:absolute;
 
   left:50%;
   top:50%;
 
-  transform:
-    translate(-50%,-50%);
+  transform:translate(-50%,-50%);
 
-  width:min(48%,250px);
-  height:min(68%,385px);
+  width:min(66%,340px);
+  height:min(82%,470px);
 
-  padding:8px;
+  padding:0;
 
   display:none;
 
   pointer-events:auto;
 
-  border:2px solid #87652c;
+  border:3px solid #87652c;
   border-radius:3px;
 
-  outline:
-    1px solid rgba(196,157,83,.95);
+  outline:1px solid #c7a253;
+  outline-offset:-8px;
 
-  outline-offset:-6px;
-
-  background:
-    rgba(247,244,235,.94);
+  background:#f5f0e2;
 
   box-shadow:
-    0 5px 14px rgba(0,0,0,.20),
-    inset 0 0 0 1px rgba(255,255,255,.8);
+    0 7px 18px rgba(0,0,0,.22),
+    inset 0 0 0 1px rgba(255,255,255,.85);
 
   overflow:hidden;
 }
@@ -361,38 +297,33 @@ button{
 
 .character-sprite::before{
   content:"";
-
   position:absolute;
-
-  inset:4px;
-
-  border:
-    1px solid rgba(109,79,28,.55);
-
+  inset:5px;
+  z-index:3;
+  border:1px solid rgba(111,77,24,.62);
   pointer-events:none;
 }
 
 .character-sprite img{
-  position:relative;
+  position:absolute;
 
-  z-index:2;
+  left:50%;
+  top:53%;
 
-  display:block;
+  width:142%;
+  height:142%;
 
-  width:100%;
-  height:100%;
+  transform:translate(-50%,-50%);
 
   object-fit:contain;
-  object-position:center bottom;
-
-  margin:0 auto;
+  object-position:center;
 
   pointer-events:none;
 
   filter:
     drop-shadow(
       0 3px 3px
-      rgba(0,0,0,.18)
+      rgba(0,0,0,.16)
     );
 }
 
@@ -404,13 +335,9 @@ button{
 .event-layer{
   position:absolute;
   inset:0;
-
   z-index:20;
-
   display:none;
-
   background:#111;
-
   pointer-events:none;
 }
 
@@ -420,10 +347,8 @@ button{
 
 .event-layer img{
   display:block;
-
   width:100%;
   height:100%;
-
   object-fit:cover;
   object-position:center;
 }
@@ -435,17 +360,10 @@ button{
 
 .door-hotspot{
   position:absolute;
-
   z-index:12;
-
   display:none;
-
   padding:0;
-
-  border:
-    2px solid
-    rgba(104,139,156,.88);
-
+  border:2px solid rgba(104,139,156,.88);
   border-radius:7px;
 
   background:
@@ -471,15 +389,11 @@ button{
 
 .door-hotspot::after{
   content:"";
-
   position:absolute;
-
   top:-30%;
   left:-70%;
-
   width:38%;
   height:160%;
-
   transform:rotate(13deg);
 
   background:
@@ -490,11 +404,7 @@ button{
       transparent
     );
 
-  animation:
-    doorSheen
-    3.2s
-    ease-in-out
-    infinite;
+  animation:doorSheen 3.2s ease-in-out infinite;
 }
 
 @keyframes doorSheen{
@@ -509,74 +419,73 @@ button{
 
 
 /* =========================
-   会話パネル
+   会話DIV
 ========================= */
 
 .message-panel{
   position:absolute;
 
   left:9px;
-  top:calc(100% - 164px);
+
+  /*
+    方向キーより上へ置く
+  */
+  top:calc(100% - 258px);
 
   z-index:30;
 
-  width:calc(100% - 142px);
-  height:124px;
+  /*
+    横長
+  */
+  width:calc(100% - 18px);
+
+  height:120px;
 
   padding:
-    12px
-    12px
+    13px
+    14px
     42px
-    13px;
+    14px;
 
   overflow:hidden;
 
   border:1px solid #979797;
   border-radius:14px;
 
-  background:
-    rgba(255,255,255,.96);
+  background:rgba(255,255,255,.96);
 
   box-shadow:
     0 4px 12px
     rgba(0,0,0,.10);
 
   transition:
-    width .22s ease,
-    height .22s ease,
-    top .22s ease;
+    width .20s ease,
+    height .20s ease,
+    top .20s ease;
 
   cursor:pointer;
 }
 
-
-/*
-  閉じた時も箱は残す
-*/
 .message-panel.closed{
-  width:56px;
-  height:52px;
+  width:60px;
+  height:54px;
 
-  top:calc(100% - 91px);
+  /*
+    閉じたボタンも方向キーに重ならない
+  */
+  top:calc(100% - 180px);
 
   padding:0;
 }
 
-
-.message-panel.closed
-.message-text,
-
-.message-panel.closed
-.message-progress,
-
-.message-panel.closed
-.message-next{
+.message-panel.closed .message-text,
+.message-panel.closed .message-progress,
+.message-panel.closed .message-choice{
   display:none;
 }
 
-
 .message-text{
-  height:66px;
+  height:64px;
 
   overflow:hidden;
 
@@ -594,7 +503,7 @@ button{
 .message-progress{
   position:absolute;
 
-  left:58px;
+  left:62px;
   bottom:13px;
 
   font-size:12px;
@@ -607,43 +516,62 @@ button{
   pointer-events:none;
 }
 
-.message-next{
+
+/*
+  「次へ」ボタンは無し。
+
+  選択がある時だけ
+  このボタンが出る。
+*/
+.message-choice{
   position:absolute;
 
-  right:9px;
-  bottom:7px;
+  right:12px;
+  bottom:9px;
 
-  min-width:74px;
-  height:34px;
+  min-width:132px;
+  height:38px;
 
-  padding:0 11px;
+  padding:0 16px;
 
-  border:1px solid #888;
-  border-radius:8px;
+  border:2px solid #93651f;
+  border-radius:10px;
 
-  background:#f4f4f4;
+  background:
+    linear-gradient(
+      180deg,
+      #fff6df 0%,
+      #e8c16e 100%
+    );
 
-  color:#222;
+  box-shadow:
+    0 2px 8px
+    rgba(106,70,17,.25);
 
-  font-size:14px;
+  color:#3b2506;
+
+  font-size:16px;
   font-weight:900;
 }
 
-.message-next.hidden{
+.message-choice.hidden{
   display:none;
 }
 
 
+/*
+  ◀ / ▶ は会話DIVの中
+*/
 .message-toggle{
   position:absolute;
 
-  left:9px;
-  bottom:7px;
+  left:10px;
+  bottom:8px;
 
   z-index:3;
 
-  width:38px;
-  height:34px;
+  width:40px;
+  height:36px;
 
   padding:0;
 
@@ -672,9 +600,7 @@ button{
 .cold-vision{
   position:fixed;
   inset:0;
-
   z-index:50;
-
   pointer-events:none;
 
   background:
@@ -689,9 +615,7 @@ button{
 .health-vision{
   position:fixed;
   inset:0;
-
   z-index:51;
-
   pointer-events:none;
 
   background:
@@ -710,40 +634,46 @@ button{
 
 
 /* =========================
-   右下操作
+   方向キー
 ========================= */
 
 .control-cluster{
   position:absolute;
 
-  right:8px;
+  /*
+    右端から離して
+    全体を少し左へ
+  */
+  right:42px;
 
   bottom:
     calc(
-      7px
+      8px
       +
       env(safe-area-inset-bottom)
     );
 
   z-index:42;
 
-  width:122px;
-
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-
-  gap:6px;
+  width:128px;
+  height:160px;
 }
 
-.look-button{
-  align-self:flex-end;
 
-  margin-right:39px;
+/*
+  目は↑の右上。
+  右矢印には重ならない。
+*/
+.look-button{
+  position:absolute;
+
+  top:0;
+  right:0;
 
   width:42px;
   height:42px;
 
+  margin:0;
   padding:0;
 
   display:flex;
@@ -753,8 +683,7 @@ button{
   border:1px solid #8d8d8d;
   border-radius:11px;
 
-  background:
-    rgba(255,255,255,.84);
+  background:rgba(255,255,255,.88);
 
   color:#252525;
 }
@@ -777,21 +706,26 @@ button{
 }
 
 .move-pad{
+  position:absolute;
+
+  left:0;
+  top:42px;
+
   display:grid;
 
   grid-template-columns:
-    repeat(3,38px);
+    repeat(3,36px);
 
   grid-template-rows:
-    repeat(3,38px);
+    repeat(3,36px);
 
-  gap:4px;
+  gap:5px;
 }
 
 .direction,
 .menu-key{
-  width:38px;
-  height:38px;
+  width:36px;
+  height:36px;
 
   padding:0;
 
@@ -810,12 +744,9 @@ button{
 }
 
 .direction{
-  background:
-    rgba(108,108,108,.57);
-
+  background:rgba(108,108,108,.57);
   color:#222;
-
-  font-size:19px;
+  font-size:18px;
 }
 
 .direction.active{
@@ -824,17 +755,12 @@ button{
 
 .direction.inactive{
   opacity:.13;
-
-  background:
-    rgba(130,130,130,.28);
+  background:rgba(130,130,130,.28);
 }
 
 .menu-key{
-  background:
-    rgba(82,82,82,.72);
-
+  background:rgba(82,82,82,.72);
   color:#fff;
-
   font-size:9px;
 }
 
@@ -871,11 +797,8 @@ button{
 .game-menu-overlay{
   position:fixed;
   inset:0;
-
   z-index:120;
-
   display:none;
-
   align-items:center;
   justify-content:center;
 
@@ -884,8 +807,7 @@ button{
     12px
     calc(15px + env(safe-area-inset-bottom));
 
-  background:
-    rgba(30,30,30,.54);
+  background:rgba(30,30,30,.54);
 }
 
 .game-menu-overlay.open{
@@ -894,81 +816,48 @@ button{
 
 .game-menu-window{
   position:relative;
-
   width:min(500px,100%);
   height:min(620px,78dvh);
-
   display:flex;
   flex-direction:column;
-
   border:1px solid #7f8386;
   border-radius:15px;
-
   background:#f7f7f7;
-
   overflow:hidden;
 }
 
 .menu-tabs-area{
   position:relative;
-
   flex:0 0 auto;
-
   min-height:54px;
-
-  padding:
-    10px
-    48px
-    0
-    8px;
-
+  padding:10px 48px 0 8px;
   display:flex;
   align-items:flex-end;
-
   overflow-x:auto;
-
   background:#dfe2e4;
-
-  border-bottom:
-    1px solid #969a9d;
+  border-bottom:1px solid #969a9d;
 }
 
 .menu-tab{
   position:relative;
-
   min-width:94px;
   height:38px;
-
   margin-right:-1px;
-
   padding:0 12px;
-
   border:1px solid #969a9d;
   border-bottom:0;
-
-  border-radius:
-    10px
-    10px
-    0
-    0;
-
+  border-radius:10px 10px 0 0;
   background:#cfd3d5;
-
   color:#333;
-
   font-size:14px;
   font-weight:800;
-
   white-space:nowrap;
 }
 
 .menu-tab.active{
   z-index:2;
-
   height:42px;
-
   background:#fff;
-
   color:#111;
 }
 
@@ -978,33 +867,23 @@ button{
 
 .menu-close{
   position:absolute;
-
   top:8px;
   right:8px;
-
   z-index:5;
-
   width:36px;
   height:36px;
-
   border:1px solid #888;
   border-radius:9px;
-
   background:#fff;
-
   font-size:20px;
   font-weight:900;
 }
 
 .menu-content{
   flex:1 1 auto;
-
   min-height:0;
-
   padding:15px;
-
   overflow:auto;
-
   background:#fff;
 }
 
@@ -1018,35 +897,26 @@ button{
 
 .menu-panel-title{
   margin:0 0 12px;
-
   font-size:21px;
 }
 
 .placeholder,
 .empty-message{
   padding:18px 8px;
-
   text-align:center;
-
   font-size:17px;
   line-height:1.6;
-
   color:#555;
 }
 
 .item-row{
   min-height:52px;
-
   padding:10px 4px;
-
   display:flex;
   align-items:center;
   justify-content:space-between;
-
   gap:12px;
-
-  border-bottom:
-    1px solid #ddd;
+  border-bottom:1px solid #ddd;
 }
 
 .item-name,
@@ -1063,18 +933,12 @@ button{
 .dead-modal{
   position:fixed;
   inset:0;
-
   z-index:200;
-
   display:none;
-
   align-items:center;
   justify-content:center;
-
   padding:20px;
-
-  background:
-    rgba(0,0,0,.84);
+  background:rgba(0,0,0,.84);
 }
 
 .dead-modal.open{
@@ -1083,25 +947,19 @@ button{
 
 .dead-card{
   width:min(400px,100%);
-
   padding:24px 18px;
-
   border-radius:17px;
-
   background:#f6f6f6;
-
   text-align:center;
 }
 
 .dead-title{
   margin:0;
-
   font-size:34px;
 }
 
 .dead-reason{
   margin:15px 0 20px;
-
   font-size:17px;
   line-height:1.5;
 }
@@ -1109,12 +967,9 @@ button{
 .restart-button{
   width:100%;
   min-height:52px;
-
   border:1px solid #777;
   border-radius:13px;
-
   background:#fff;
-
   font-size:17px;
   font-weight:900;
 }
@@ -1157,20 +1012,12 @@ button{
   }
 
   .character-sprite{
-    width:min(52%,220px);
-    height:min(66%,350px);
-  }
-
-  .message-panel{
-    width:calc(100% - 135px);
-  }
-
-  .message-panel.closed{
-    width:56px;
+    width:68%;
+    height:80%;
   }
 
   .control-cluster{
-    right:5px;
+    right:34px;
   }
 }
 
@@ -1180,10 +1027,7 @@ button{
 
 <body>
 
-<main
-  id="game"
-  class="game"
->
+<main id="game" class="game">
 
 <header class="topbar">
 
@@ -1195,17 +1039,11 @@ button{
     ←
   </a>
 
-  <div
-    id="day"
-    class="top-small"
-  >
+  <div id="day" class="top-small">
     Day.1
   </div>
 
-  <div
-    id="clock"
-    class="top-small"
-  >
+  <div id="clock" class="top-small">
     08:00:00
   </div>
 
@@ -1249,7 +1087,6 @@ button{
   class="meter-outline"
   d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
 ></path>
-
 </svg>
 
 <div
@@ -1290,7 +1127,6 @@ button{
   class="meter-outline"
   d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"
 ></path>
-
 </svg>
 
 <div
@@ -1331,7 +1167,6 @@ button{
   class="meter-outline"
   d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
 ></path>
-
 </svg>
 
 <div
@@ -1406,7 +1241,6 @@ button{
   type="button"
 ></button>
 
-
 </div>
 
 
@@ -1425,13 +1259,15 @@ button{
   class="message-progress"
 ></div>
 
+
 <button
-  id="messageNext"
-  class="message-next hidden"
+  id="messageChoice"
+  class="message-choice hidden"
   type="button"
 >
-次へ
+選ぶ
 </button>
+
 
 <button
   id="messageToggle"
@@ -1716,9 +1552,6 @@ let metSurvivor =
 
 let currentScene =
   'start';
-
-let messageTimer =
-  null;
 
 let messagePages =
   [];
@@ -2165,24 +1998,6 @@ cabinInside:{
 };
 
 
-const warningFlags = {
-
-  cold35:false,
-  cold33:false,
-  cold31:false,
-
-  hunger40:false,
-  hunger20:false,
-  hunger0:false,
-
-  stamina60:false,
-  stamina35:false,
-  stamina20:false,
-  stamina10:false
-
-};
-
-
 const game =
   document.getElementById(
     'game'
@@ -2223,9 +2038,9 @@ const messageProgress =
     'messageProgress'
   );
 
-const messageNext =
+const messageChoice =
   document.getElementById(
-    'messageNext'
+    'messageChoice'
   );
 
 const messageToggle =
@@ -2489,10 +2304,12 @@ function renderMeters(){
     tempPercent
   );
 
+
   document.getElementById(
     'tempFill'
   ).style.fill =
     temperatureColor();
+
 
   document.getElementById(
     'tempValue'
@@ -2509,12 +2326,14 @@ function renderMeters(){
     hunger
   );
 
+
   document.getElementById(
     'hungerFill'
   ).style.fill =
     normalColor(
       hunger
     );
+
 
   document.getElementById(
     'hungerValue'
@@ -2529,12 +2348,14 @@ function renderMeters(){
     stamina
   );
 
+
   document.getElementById(
     'staminaFill'
   ).style.fill =
     normalColor(
       stamina
     );
+
 
   document.getElementById(
     'staminaValue'
@@ -2545,6 +2366,10 @@ function renderMeters(){
 
 }
 
+
+/* =========================
+   会話
+========================= */
 
 function renderMessage(){
 
@@ -2558,7 +2383,7 @@ function renderMessage(){
     messageProgress.textContent =
       '';
 
-    messageNext.classList.add(
+    messageChoice.classList.add(
       'hidden'
     );
 
@@ -2585,7 +2410,9 @@ function renderMessage(){
 
   messageProgress.textContent =
     (
-      messageIndex + 1
+      messageIndex
+      +
+      1
     )
     +
     ' / '
@@ -2601,46 +2428,36 @@ function renderMessage(){
     1;
 
 
-  if(
-    !last
-  ){
-
-    messageNext.textContent =
-      '次へ';
-
-    messageNext.classList.remove(
-      'hidden'
-    );
-
-  }else if(
+  const hasChoice =
+    last
+    &&
     typeof page
     ===
     'object'
     &&
-    page.actionLabel
-  ){
-
-    messageNext.textContent =
-      page.actionLabel;
-
-    messageNext.classList.remove(
-      'hidden'
+    Boolean(
+      page.action
+    )
+    &&
+    Boolean(
+      page.actionLabel
     );
 
-  }else if(
-    finalMessageAction
+
+  if(
+    hasChoice
   ){
 
-    messageNext.textContent =
-      '次へ';
+    messageChoice.textContent =
+      page.actionLabel;
 
-    messageNext.classList.remove(
+    messageChoice.classList.remove(
       'hidden'
     );
 
   }else{
 
-    messageNext.classList.add(
+    messageChoice.classList.add(
       'hidden'
     );
 
@@ -2656,10 +2473,12 @@ function setMessageOpen(
   messageOpen =
     open;
 
+
   messagePanel.classList.toggle(
     'closed',
     !open
   );
+
 
   messageToggle.textContent =
     open
@@ -2667,6 +2486,7 @@ function setMessageOpen(
       '◀'
       :
       '▶';
+
 
   renderDirections();
 
@@ -2694,6 +2514,7 @@ function showMessages(
 
   messageIndex =
     0;
+
 
   finalMessageAction =
     options.finalAction
@@ -2727,6 +2548,7 @@ function reopenMessage(){
     return;
   }
 
+
   setMessageOpen(
     true
   );
@@ -2734,14 +2556,63 @@ function reopenMessage(){
 }
 
 
-function nextMessage(){
+/*
+  会話DIVをタップした時
+
+  次の文章あり
+  → 次の文章
+
+  最後でfinalActionあり
+  → 実行
+
+  最後で何も無し
+  → 閉じる
+
+  選択肢がある場合
+  → DIVタップでは決定しない
+*/
+function advanceMessage(){
 
   if(
+    !messagePages.length
+  ){
+    hideMessage();
+    return;
+  }
+
+
+  const page =
+    messagePages[
+      messageIndex
+    ];
+
+
+  const last =
     messageIndex
-    <
+    >=
     messagePages.length
     -
-    1
+    1;
+
+
+  const hasChoice =
+    last
+    &&
+    typeof page
+    ===
+    'object'
+    &&
+    Boolean(
+      page.action
+    )
+    &&
+    Boolean(
+      page.actionLabel
+    );
+
+
+  if(
+    !last
   ){
 
     messageIndex++;
@@ -2753,27 +2624,14 @@ function nextMessage(){
   }
 
 
-  const page =
-    messagePages[
-      messageIndex
-    ];
-
-
   if(
-    typeof page
-    ===
-    'object'
-    &&
-    page.action
+    hasChoice
   ){
 
-    const action =
-      page.action;
-
-    hideMessage();
-
-    action();
-
+    /*
+      選択肢がある時は
+      選択ボタンを押すまで待つ
+    */
     return;
 
   }
@@ -2786,10 +2644,13 @@ function nextMessage(){
     const action =
       finalMessageAction;
 
+
     finalMessageAction =
       null;
 
+
     hideMessage();
+
 
     action();
 
@@ -2798,21 +2659,13 @@ function nextMessage(){
   }
 
 
-  /*
-    次の文も処理もなければ閉じる
-  */
   hideMessage();
 
 }
 
 
 /*
-  会話DIV本体をタップ
-
-  次の文があれば次へ進む。
-  最後なら閉じる。
-  action / finalAction がある場合は
-  nextMessage() がその処理を実行する。
+  横長の会話DIV本体をタップ
 */
 messagePanel.addEventListener(
   'click',
@@ -2824,10 +2677,7 @@ messagePanel.addEventListener(
       return;
     }
 
-    /*
-      DIV内のボタンを押した場合は
-      ボタン自身の処理に任せる
-    */
+
     if(
       event.target.closest(
         'button'
@@ -2836,22 +2686,25 @@ messagePanel.addEventListener(
       return;
     }
 
-    nextMessage();
+
+    advanceMessage();
 
   }
 );
 
 
 /*
-  ◀ / ▶ は文章を進めない。
-  開いている時は閉じるだけ。
-  閉じている時は再び開く。
+  ◀ / ▶
+
+  文は進めない。
+  開閉だけ。
 */
 messageToggle.addEventListener(
   'click',
   event=>{
 
     event.stopPropagation();
+
 
     if(
       messageOpen
@@ -2866,19 +2719,55 @@ messageToggle.addEventListener(
 
 
 /*
-  次へボタン
+  選択肢
 */
-messageNext.addEventListener(
+messageChoice.addEventListener(
   'click',
   event=>{
 
     event.stopPropagation();
 
-    nextMessage();
+
+    if(
+      !messageOpen
+    ){
+      return;
+    }
+
+
+    const page =
+      messagePages[
+        messageIndex
+      ];
+
+
+    if(
+      typeof page
+      !==
+      'object'
+      ||
+      !page.action
+    ){
+      return;
+    }
+
+
+    const action =
+      page.action;
+
+
+    hideMessage();
+
+
+    action();
 
   }
 );
 
+
+/* =========================
+   時間・ステータス
+========================= */
 
 function applyDrain(
   seconds
@@ -2889,10 +2778,12 @@ function applyDrain(
     /
     60;
 
+
   bodyTemperature -=
     .008
     *
     minutes;
+
 
   hunger =
     clamp(
@@ -2907,39 +2798,58 @@ function applyDrain(
 
 
   if(
-    bodyTemperature < 35
+    bodyTemperature
+    <
+    35
   ){
+
     stamina -=
       .08
       *
       minutes;
+
   }
 
+
   if(
-    bodyTemperature < 33
+    bodyTemperature
+    <
+    33
   ){
+
     stamina -=
       .30
       *
       minutes;
+
   }
 
+
   if(
-    bodyTemperature < 31
+    bodyTemperature
+    <
+    31
   ){
+
     stamina -=
       .55
       *
       minutes;
+
   }
 
+
   if(
-    bodyTemperature < 29
+    bodyTemperature
+    <
+    29
   ){
+
     stamina -=
       1.20
       *
       minutes;
+
   }
 
 
@@ -2949,6 +2859,7 @@ function applyDrain(
       0,
       100
     );
+
 
   renderMeters();
 
@@ -2965,17 +2876,24 @@ function advanceTime(
     return;
   }
 
+
   gameSeconds +=
     seconds;
+
 
   applyDrain(
     seconds
   );
 
+
   renderClock();
 
 }
 
+
+/* =========================
+   シーン
+========================= */
 
 function setSceneBackground(
   image
@@ -2996,14 +2914,17 @@ function renderScene(){
   const scene =
     getScene();
 
+
   document.getElementById(
     'currentPlace'
   ).textContent =
     scene.place;
 
+
   setSceneBackground(
     scene.image
   );
+
 
   renderSceneItems();
 
@@ -3015,6 +2936,10 @@ function renderScene(){
 
 }
 
+
+/* =========================
+   アイテム
+========================= */
 
 function itemDef(
   id
@@ -3038,6 +2963,7 @@ function renderSceneItems(){
 
   objectLayer.innerHTML =
     '';
+
 
   const scene =
     getScene();
@@ -3080,6 +3006,7 @@ function renderSceneItems(){
     button.type =
       'button';
 
+
     button.className =
       'scene-object '
       +
@@ -3093,10 +3020,12 @@ function renderSceneItems(){
           'stone-object'
       );
 
+
     button.style.left =
       item.left
       +
       '%';
+
 
     button.style.top =
       item.top
@@ -3109,13 +3038,16 @@ function renderSceneItems(){
         'img'
       );
 
+
     image.src =
       definition.image
       ||
       '';
 
+
     image.alt =
       definition.name;
+
 
     button.appendChild(
       image
@@ -3202,6 +3134,10 @@ function pickItem(
 }
 
 
+/* =========================
+   扉
+========================= */
+
 function positionDoorHotspot(){
 
   if(
@@ -3215,6 +3151,7 @@ function positionDoorHotspot(){
 
   const width =
     sceneElement.clientWidth;
+
 
   const height =
     sceneElement.clientHeight;
@@ -3237,6 +3174,7 @@ function positionDoorHotspot(){
     *
     scale;
 
+
   const renderedHeight =
     DOOR_META.sourceHeight
     *
@@ -3251,6 +3189,7 @@ function positionDoorHotspot(){
     )
     /
     2;
+
 
   const offsetY =
     (
@@ -3318,6 +3257,7 @@ function renderDoor(){
       'visible'
     );
 
+
     requestAnimationFrame(
       positionDoorHotspot
     );
@@ -3375,6 +3315,7 @@ function enterCabin(){
   currentScene =
     'cabinInside';
 
+
   renderScene();
 
 
@@ -3385,9 +3326,11 @@ function enterCabin(){
     {
       finalAction:
         ()=>{
+
           runSurvivalEvent(
             'cabin_grant_first_meeting'
           );
+
         }
     }
   );
@@ -3401,12 +3344,17 @@ doorHotspot.addEventListener(
 );
 
 
+/* =========================
+   イベント画像
+========================= */
+
 function showEventImage(
   src
 ){
 
   eventImage.src =
     src;
+
 
   eventLayer.classList.add(
     'visible'
@@ -3421,6 +3369,7 @@ function hideEventImage(){
     'visible'
   );
 
+
   eventImage.removeAttribute(
     'src'
   );
@@ -3429,7 +3378,7 @@ function hideEventImage(){
 
 
 /* =========================
-   グラント表示
+   グラント
 ========================= */
 
 function showGrantCharacter(
@@ -3503,6 +3452,10 @@ function renderCharacter(){
 }
 
 
+/* =========================
+   イベント
+========================= */
+
 function runSurvivalEvent(
   eventId
 ){
@@ -3544,6 +3497,7 @@ function runSurvivalEvent(
 
     }
 
+
     renderCharacter();
 
     renderDirections();
@@ -3556,11 +3510,14 @@ function runSurvivalEvent(
   eventActive =
     true;
 
+
   activeEventId =
     eventId;
 
+
   eventSteps =
     data.steps.slice();
+
 
   eventStepIndex =
     0;
@@ -3654,11 +3611,13 @@ function runNextEventStep(){
 
       hideEventImage();
 
+
       setSceneBackground(
         step.background
         ||
         getScene().image
       );
+
 
       runNextEventStep();
 
@@ -3670,6 +3629,7 @@ function runNextEventStep(){
       showGrantCharacter(
         step.image
       );
+
 
       runNextEventStep();
 
@@ -3691,6 +3651,10 @@ function runNextEventStep(){
 
       }
 
+
+      renderMenuUnlocks();
+
+
       runNextEventStep();
 
       break;
@@ -3707,6 +3671,7 @@ function runNextEventStep(){
         );
 
       }
+
 
       finishEvent();
 
@@ -3726,14 +3691,18 @@ function finishEvent(){
 
   hideEventImage();
 
+
   eventActive =
     false;
+
 
   activeEventId =
     null;
 
+
   eventSteps =
     [];
+
 
   eventStepIndex =
     0;
@@ -3745,6 +3714,8 @@ function finishEvent(){
 
 
   renderCharacter();
+
+  renderMenuUnlocks();
 
   renderDirections();
 
@@ -3830,6 +3801,7 @@ function renderDirections(){
         direction
       ];
 
+
     const target =
       scene.moves[
         direction
@@ -3842,6 +3814,7 @@ function renderDirections(){
         target
       )
     );
+
 
     button.classList.toggle(
       'inactive',
@@ -4199,9 +4172,11 @@ function openGameMenu(){
 
   renderMenuUnlocks();
 
+
   selectMenu(
     'inventory'
   );
+
 
   renderDirections();
 
