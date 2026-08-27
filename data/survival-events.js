@@ -4,7 +4,8 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'survival_game_completed_events_v1';
+  // 初回イベントの画面構成を作り直したため、旧テスト完了状態(v1)は引き継がない。
+  const STORAGE_KEY = 'survival_game_completed_events_v2';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
   const EVENT_RESUME_KEY = 'survival_event_resume_v1';
 
@@ -227,7 +228,13 @@
     if (pageName !== 'survival game.html') return;
 
     if (typeof window.enterCabin === 'function') {
+      const originalEnterCabin = window.enterCabin;
       window.enterCabin = function () {
+        if (isCompleted('cabin_grant_first_meeting')) {
+          originalEnterCabin();
+          return;
+        }
+
         try {
           const state = {
             gameSeconds: typeof gameSeconds !== 'undefined' ? gameSeconds : 8 * 60 * 60,
