@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>雪山サバイバル</title>
+
 <style>
 *{box-sizing:border-box}
+
 html,body{
   margin:0;
   width:100%;
@@ -15,8 +17,15 @@ html,body{
   background:#e5e7e9;
   color:#202427;
 }
-body{min-height:100dvh}
-button,a{font:inherit}
+
+body{
+  min-height:100dvh;
+}
+
+button,a{
+  font:inherit;
+}
+
 button{
   touch-action:manipulation;
   -webkit-user-select:none;
@@ -24,22 +33,43 @@ button{
   -webkit-tap-highlight-color:transparent;
 }
 
+
+/* =========================
+   全体
+========================= */
+
 .game{
   position:relative;
   width:min(100%,540px);
   height:100dvh;
   margin:0 auto;
-  padding:calc(5px + env(safe-area-inset-top)) 6px calc(6px + env(safe-area-inset-bottom));
+
+  padding:
+    calc(5px + env(safe-area-inset-top))
+    6px
+    calc(6px + env(safe-area-inset-bottom));
+
   display:flex;
   flex-direction:column;
   gap:4px;
   overflow:hidden;
 }
 
+
+/* =========================
+   TOP
+========================= */
+
 .topbar{
   flex:0 0 auto;
+
   display:grid;
-  grid-template-columns:36px 52px 80px minmax(0,1fr);
+  grid-template-columns:
+    36px
+    52px
+    80px
+    minmax(0,1fr);
+
   gap:4px;
   align-items:center;
 }
@@ -47,14 +77,19 @@ button{
 .back{
   width:36px;
   height:36px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   border:1px solid #999;
   border-radius:9px;
+
   background:#fff;
   color:#222;
+
   text-decoration:none;
+
   font-size:22px;
   font-weight:900;
   line-height:1;
@@ -63,15 +98,20 @@ button{
 .top-small{
   height:36px;
   padding:0 5px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   border:1px solid #aaa;
   border-radius:9px;
+
   background:#fff;
+
   font-size:13px;
-  line-height:1;
   font-weight:800;
+  line-height:1;
+
   white-space:nowrap;
 }
 
@@ -81,10 +121,17 @@ button{
   text-overflow:ellipsis;
 }
 
+
+/* =========================
+   メーター
+========================= */
+
 .meters{
   flex:0 0 auto;
+
   display:grid;
   grid-template-columns:repeat(3,1fr);
+
   gap:4px;
 }
 
@@ -92,12 +139,15 @@ button{
   height:32px;
   min-width:0;
   padding:2px 5px;
+
   display:flex;
   align-items:center;
   justify-content:center;
   gap:4px;
+
   border:1px solid #aaa;
   border-radius:9px;
+
   background:#fff;
 }
 
@@ -118,83 +168,114 @@ button{
 .meter-value{
   min-width:0;
   font-size:13px;
-  line-height:1;
   font-weight:900;
+  line-height:1;
   white-space:nowrap;
 }
 
+
+/* =========================
+   シーン
+========================= */
+
 .scene-wrap{
   position:relative;
+
   width:97%;
   margin:0 auto;
+
   flex:0 0 auto;
-  padding-bottom:66px;
+
+  padding-bottom:76px;
 }
 
 .scene{
   position:relative;
+
   width:100%;
   height:min(61dvh,570px);
   min-height:490px;
+
   overflow:hidden;
+
   border:1px solid #8c9296;
   border-radius:13px;
+
   background:#ddd;
 }
 
 .scene-background{
   position:absolute;
   inset:0;
+
   z-index:1;
+
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+
   pointer-events:none;
+
   transition:
-    filter .25s ease,
-    transform .25s ease;
+    filter .28s ease,
+    transform .28s ease;
 }
 
-/* グラント立ち絵表示中だけ背景をぼかす */
+
+/* 立ち絵表示時 */
 .scene-background.portrait-focus{
-  filter:blur(4px) brightness(.92);
-  transform:scale(1.03);
+  filter:
+    blur(4px)
+    brightness(.93);
+
+  transform:scale(1.025);
 }
+
+
+/* =========================
+   拾える物
+========================= */
 
 .scene-objects{
   position:absolute;
   inset:0;
+
   z-index:4;
+
   pointer-events:none;
 }
 
 .scene-object{
   position:absolute;
+
   display:block;
+
   margin:0;
   padding:0;
+
   border:0;
+
   background:transparent;
+
   pointer-events:auto;
-  cursor:pointer;
 }
 
 .scene-object img{
   display:block;
+
   width:100%;
   height:100%;
+
   object-fit:contain;
+
   pointer-events:none;
+
   filter:
     drop-shadow(1px 0 0 #698594)
     drop-shadow(-1px 0 0 #698594)
     drop-shadow(0 1px 0 #698594)
     drop-shadow(0 -1px 0 #698594)
     drop-shadow(0 2px 2px rgba(0,0,0,.25));
-}
-
-.scene-object:active{
-  transform:scale(.92);
 }
 
 .branch-object{
@@ -219,49 +300,117 @@ button{
   margin:9px;
 }
 
+
+/* =========================
+   キャラクター
+========================= */
+
 .character-layer{
   position:absolute;
   inset:0;
+
   z-index:7;
+
   pointer-events:none;
 }
 
+
+/*
+  グラントのカードDIV
+  背景DIVのど真ん中へ配置
+*/
 .character-sprite{
   position:absolute;
+
   left:50%;
-  bottom:0;
-  height:84%;
-  max-width:76%;
-  padding:0;
-  border:0;
-  background:transparent;
-  transform:translateX(-50%);
+  top:50%;
+
+  transform:
+    translate(-50%,-50%);
+
+  width:min(48%,250px);
+  height:min(68%,385px);
+
+  padding:8px;
+
   display:none;
+
   pointer-events:auto;
+
+  border:2px solid #87652c;
+  border-radius:3px;
+
+  outline:
+    1px solid rgba(196,157,83,.95);
+
+  outline-offset:-6px;
+
+  background:
+    rgba(247,244,235,.94);
+
+  box-shadow:
+    0 5px 14px rgba(0,0,0,.20),
+    inset 0 0 0 1px rgba(255,255,255,.8);
+
+  overflow:hidden;
 }
 
 .character-sprite.visible{
   display:block;
 }
 
+.character-sprite::before{
+  content:"";
+
+  position:absolute;
+
+  inset:4px;
+
+  border:
+    1px solid rgba(109,79,28,.55);
+
+  pointer-events:none;
+}
+
 .character-sprite img{
+  position:relative;
+
+  z-index:2;
+
   display:block;
+
+  width:100%;
   height:100%;
-  max-width:100%;
-  width:auto;
+
   object-fit:contain;
   object-position:center bottom;
+
   margin:0 auto;
+
   pointer-events:none;
-  filter:drop-shadow(0 3px 3px rgba(0,0,0,.24));
+
+  filter:
+    drop-shadow(
+      0 3px 3px
+      rgba(0,0,0,.18)
+    );
 }
+
+
+/* =========================
+   イベント一枚絵
+========================= */
 
 .event-layer{
   position:absolute;
   inset:0;
+
   z-index:20;
+
   display:none;
+
   background:#111;
+
   pointer-events:none;
 }
 
@@ -270,20 +419,35 @@ button{
 }
 
 .event-layer img{
+  display:block;
+
   width:100%;
   height:100%;
-  display:block;
+
   object-fit:cover;
   object-position:center;
 }
 
+
+/* =========================
+   扉
+========================= */
+
 .door-hotspot{
   position:absolute;
+
   z-index:12;
+
   display:none;
+
   padding:0;
-  border:2px solid rgba(104,139,156,.88);
+
+  border:
+    2px solid
+    rgba(104,139,156,.88);
+
   border-radius:7px;
+
   background:
     linear-gradient(
       120deg,
@@ -293,12 +457,12 @@ button{
       rgba(210,235,246,.18) 58%,
       rgba(255,255,255,.02) 90%
     );
+
   box-shadow:
     0 0 7px rgba(187,226,242,.75),
     inset 0 0 8px rgba(255,255,255,.18);
+
   overflow:hidden;
-  cursor:pointer;
-  animation:doorGlow 2.3s ease-in-out infinite;
 }
 
 .door-hotspot.visible{
@@ -307,12 +471,17 @@ button{
 
 .door-hotspot::after{
   content:"";
+
   position:absolute;
+
   top:-30%;
   left:-70%;
+
   width:38%;
   height:160%;
+
   transform:rotate(13deg);
+
   background:
     linear-gradient(
       to right,
@@ -320,85 +489,142 @@ button{
       rgba(255,255,255,.34),
       transparent
     );
-  animation:doorSheen 3.2s ease-in-out infinite;
-}
 
-.door-hotspot:active{
-  transform:scale(.97);
-}
-
-@keyframes doorGlow{
-  0%,100%{
-    box-shadow:
-      0 0 5px rgba(187,226,242,.50),
-      inset 0 0 6px rgba(255,255,255,.12);
-  }
-
-  50%{
-    box-shadow:
-      0 0 12px rgba(187,226,242,.92),
-      inset 0 0 11px rgba(255,255,255,.24);
-  }
+  animation:
+    doorSheen
+    3.2s
+    ease-in-out
+    infinite;
 }
 
 @keyframes doorSheen{
-  0%,55%{left:-70%}
-  82%,100%{left:135%}
+  0%,55%{
+    left:-70%;
+  }
+
+  82%,100%{
+    left:135%;
+  }
 }
+
+
+/* =========================
+   会話パネル
+========================= */
 
 .message-panel{
   position:absolute;
+
   left:9px;
-  top:calc(100% - 122px);
+  top:calc(100% - 164px);
+
   z-index:30;
-  width:calc(100% - 60px);
-  height:118px;
-  padding:10px 44px 36px 13px;
+
+  width:calc(100% - 142px);
+  height:124px;
+
+  padding:
+    12px
+    12px
+    42px
+    13px;
+
   overflow:hidden;
+
   border:1px solid #979797;
   border-radius:14px;
-  background:rgba(255,255,255,.95);
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-  transform:translateX(0);
-  transition:transform .24s ease;
+
+  background:
+    rgba(255,255,255,.96);
+
+  box-shadow:
+    0 4px 12px
+    rgba(0,0,0,.10);
+
+  transition:
+    width .22s ease,
+    height .22s ease,
+    top .22s ease;
+
   cursor:pointer;
 }
 
+
+/*
+  閉じた時も箱は残す
+*/
 .message-panel.closed{
-  transform:translateX(calc(-100% - 20px));
+  width:56px;
+  height:52px;
+
+  top:calc(100% - 91px);
+
+  padding:0;
 }
 
+
+.message-panel.closed
+.message-text,
+
+.message-panel.closed
+.message-progress,
+
+.message-panel.closed
+.message-next{
+  display:none;
+}
+
+
 .message-text{
-  height:70px;
+  height:66px;
+
   overflow:hidden;
+
   font-size:17px;
   line-height:1.42;
+
   font-weight:650;
+
   white-space:pre-wrap;
   word-break:break-word;
+
+  pointer-events:none;
 }
 
 .message-progress{
   position:absolute;
-  left:13px;
-  bottom:10px;
+
+  left:58px;
+  bottom:13px;
+
   font-size:12px;
   line-height:1;
+
   color:#666;
+
   font-weight:700;
+
+  pointer-events:none;
 }
 
 .message-next{
   position:absolute;
-  right:10px;
-  bottom:8px;
-  min-width:72px;
-  height:32px;
-  padding:0 10px;
+
+  right:9px;
+  bottom:7px;
+
+  min-width:74px;
+  height:34px;
+
+  padding:0 11px;
+
   border:1px solid #888;
   border-radius:8px;
+
   background:#f4f4f4;
+
   color:#222;
+
   font-size:14px;
   font-weight:900;
 }
@@ -407,86 +633,141 @@ button{
   display:none;
 }
 
+
 .message-toggle{
   position:absolute;
-  left:15px;
+
+  left:9px;
   bottom:7px;
-  z-index:35;
-  width:42px;
-  height:42px;
+
+  z-index:3;
+
+  width:38px;
+  height:34px;
+
   padding:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   border:1px solid #888;
-  border-radius:10px;
-  background:#d4d5d6;
+  border-radius:8px;
+
+  background:#d7d8d9;
+
   color:#222;
-  font-size:20px;
+
+  font-size:18px;
   line-height:1;
+
   font-weight:900;
 }
 
-.message-toggle:active{
-  transform:scale(.93);
-}
+
+/* =========================
+   視界効果
+========================= */
 
 .cold-vision{
   position:fixed;
   inset:0;
+
   z-index:50;
+
   pointer-events:none;
-  background:rgba(255,255,255,var(--cold-opacity,0));
-  transition:background .7s ease;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      var(--cold-opacity,0)
+    );
 }
 
 .health-vision{
   position:fixed;
   inset:0;
+
   z-index:51;
+
   pointer-events:none;
+
   background:
     radial-gradient(
       circle at center,
       rgba(150,0,0,0) 31%,
-      rgba(150,0,0,var(--red-opacity,0)) 100%
+      rgba(
+        150,
+        0,
+        0,
+        var(--red-opacity,0)
+      )
+      100%
     );
-  transition:background .7s ease;
 }
+
+
+/* =========================
+   右下操作
+========================= */
 
 .control-cluster{
   position:absolute;
+
   right:8px;
-  bottom:calc(7px + env(safe-area-inset-bottom));
+
+  bottom:
+    calc(
+      7px
+      +
+      env(safe-area-inset-bottom)
+    );
+
   z-index:42;
+
   width:122px;
+
   display:flex;
   flex-direction:column;
   align-items:center;
+
   gap:6px;
 }
 
 .look-button{
   align-self:flex-end;
+
   margin-right:39px;
+
   width:42px;
   height:42px;
+
   padding:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   border:1px solid #8d8d8d;
   border-radius:11px;
-  background:rgba(255,255,255,.84);
+
+  background:
+    rgba(255,255,255,.84);
+
   color:#252525;
 }
 
 .look-button svg{
   width:25px;
   height:25px;
+
   fill:none;
+
   stroke:currentColor;
   stroke-width:1.8;
+
   stroke-linecap:round;
   stroke-linejoin:round;
 }
@@ -497,8 +778,13 @@ button{
 
 .move-pad{
   display:grid;
-  grid-template-columns:repeat(3,38px);
-  grid-template-rows:repeat(3,38px);
+
+  grid-template-columns:
+    repeat(3,38px);
+
+  grid-template-rows:
+    repeat(3,38px);
+
   gap:4px;
 }
 
@@ -506,19 +792,29 @@ button{
 .menu-key{
   width:38px;
   height:38px;
+
   padding:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  border:1px solid rgba(55,55,55,.38);
+
+  border:
+    1px solid
+    rgba(55,55,55,.38);
+
   border-radius:10px;
-  line-height:1;
+
   font-weight:900;
+  line-height:1;
 }
 
 .direction{
-  background:rgba(108,108,108,.57);
+  background:
+    rgba(108,108,108,.57);
+
   color:#222;
+
   font-size:19px;
 }
 
@@ -528,18 +824,18 @@ button{
 
 .direction.inactive{
   opacity:.13;
-  background:rgba(130,130,130,.28);
+
+  background:
+    rgba(130,130,130,.28);
 }
 
 .menu-key{
-  background:rgba(82,82,82,.72);
-  color:#fff;
-  font-size:9px;
-}
+  background:
+    rgba(82,82,82,.72);
 
-.direction:active,
-.menu-key:active{
-  transform:scale(.91);
+  color:#fff;
+
+  font-size:9px;
 }
 
 #moveUp{
@@ -567,18 +863,29 @@ button{
   grid-row:3;
 }
 
+
+/* =========================
+   MENU
+========================= */
+
 .game-menu-overlay{
   position:fixed;
   inset:0;
+
   z-index:120;
+
   display:none;
+
   align-items:center;
   justify-content:center;
+
   padding:
     calc(15px + env(safe-area-inset-top))
     12px
     calc(15px + env(safe-area-inset-bottom));
-  background:rgba(30,30,30,.54);
+
+  background:
+    rgba(30,30,30,.54);
 }
 
 .game-menu-overlay.open{
@@ -587,53 +894,81 @@ button{
 
 .game-menu-window{
   position:relative;
+
   width:min(500px,100%);
   height:min(620px,78dvh);
+
   display:flex;
   flex-direction:column;
+
   border:1px solid #7f8386;
   border-radius:15px;
+
   background:#f7f7f7;
+
   overflow:hidden;
 }
 
 .menu-tabs-area{
   position:relative;
+
   flex:0 0 auto;
+
   min-height:54px;
-  padding:10px 48px 0 8px;
+
+  padding:
+    10px
+    48px
+    0
+    8px;
+
   display:flex;
   align-items:flex-end;
-  overflow-x:auto;
-  background:#dfe2e4;
-  border-bottom:1px solid #969a9d;
-  scrollbar-width:none;
-}
 
-.menu-tabs-area::-webkit-scrollbar{
-  display:none;
+  overflow-x:auto;
+
+  background:#dfe2e4;
+
+  border-bottom:
+    1px solid #969a9d;
 }
 
 .menu-tab{
   position:relative;
+
   min-width:94px;
   height:38px;
+
   margin-right:-1px;
+
   padding:0 12px;
+
   border:1px solid #969a9d;
   border-bottom:0;
-  border-radius:10px 10px 0 0;
+
+  border-radius:
+    10px
+    10px
+    0
+    0;
+
   background:#cfd3d5;
+
   color:#333;
+
   font-size:14px;
   font-weight:800;
+
   white-space:nowrap;
 }
 
 .menu-tab.active{
   z-index:2;
+
   height:42px;
+
   background:#fff;
+
   color:#111;
 }
 
@@ -643,28 +978,33 @@ button{
 
 .menu-close{
   position:absolute;
+
   top:8px;
   right:8px;
+
   z-index:5;
+
   width:36px;
   height:36px;
-  padding:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+
   border:1px solid #888;
   border-radius:9px;
+
   background:#fff;
-  color:#222;
+
   font-size:20px;
   font-weight:900;
 }
 
 .menu-content{
   flex:1 1 auto;
+
   min-height:0;
+
   padding:15px;
+
   overflow:auto;
+
   background:#fff;
 }
 
@@ -678,26 +1018,35 @@ button{
 
 .menu-panel-title{
   margin:0 0 12px;
+
   font-size:21px;
 }
 
 .placeholder,
 .empty-message{
   padding:18px 8px;
+
   text-align:center;
+
   font-size:17px;
   line-height:1.6;
+
   color:#555;
 }
 
 .item-row{
   min-height:52px;
+
   padding:10px 4px;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
+
   gap:12px;
-  border-bottom:1px solid #ddd;
+
+  border-bottom:
+    1px solid #ddd;
 }
 
 .item-name,
@@ -706,44 +1055,26 @@ button{
   font-weight:800;
 }
 
-@keyframes shakeLight{
-  0%,100%{transform:translate(0)}
-  20%{transform:translate(-2px,1px)}
-  40%{transform:translate(2px,-1px)}
-  60%{transform:translate(-1px,-1px)}
-  80%{transform:translate(1px,1px)}
-}
 
-@keyframes shakeHeavy{
-  0%,100%{transform:translate(0)}
-  10%{transform:translate(-4px,2px)}
-  20%{transform:translate(4px,-3px)}
-  30%{transform:translate(-3px,-2px)}
-  40%{transform:translate(4px,3px)}
-  50%{transform:translate(-4px,0)}
-  60%{transform:translate(3px,-3px)}
-  70%{transform:translate(-2px,3px)}
-  80%{transform:translate(3px,1px)}
-  90%{transform:translate(-2px,-1px)}
-}
-
-.game.shake-light{
-  animation:shakeLight .32s linear;
-}
-
-.game.shake-heavy{
-  animation:shakeHeavy .48s linear;
-}
+/* =========================
+   DEAD
+========================= */
 
 .dead-modal{
   position:fixed;
   inset:0;
+
   z-index:200;
+
   display:none;
+
   align-items:center;
   justify-content:center;
+
   padding:20px;
-  background:rgba(0,0,0,.84);
+
+  background:
+    rgba(0,0,0,.84);
 }
 
 .dead-modal.open{
@@ -752,19 +1083,25 @@ button{
 
 .dead-card{
   width:min(400px,100%);
+
   padding:24px 18px;
+
   border-radius:17px;
+
   background:#f6f6f6;
+
   text-align:center;
 }
 
 .dead-title{
   margin:0;
+
   font-size:34px;
 }
 
 .dead-reason{
   margin:15px 0 20px;
+
   font-size:17px;
   line-height:1.5;
 }
@@ -772,16 +1109,29 @@ button{
 .restart-button{
   width:100%;
   min-height:52px;
+
   border:1px solid #777;
   border-radius:13px;
+
   background:#fff;
+
   font-size:17px;
   font-weight:900;
 }
 
+
+/* =========================
+   小さいスマホ
+========================= */
+
 @media(max-width:390px){
+
   .topbar{
-    grid-template-columns:34px 48px 76px minmax(0,1fr);
+    grid-template-columns:
+      34px
+      48px
+      76px
+      minmax(0,1fr);
   }
 
   .back{
@@ -806,39 +1156,56 @@ button{
     min-height:470px;
   }
 
-  .message-panel{
-    height:116px;
-    top:calc(100% - 120px);
+  .character-sprite{
+    width:min(52%,220px);
+    height:min(66%,350px);
   }
 
-  .message-text{
-    height:68px;
-    font-size:16px;
+  .message-panel{
+    width:calc(100% - 135px);
+  }
+
+  .message-panel.closed{
+    width:56px;
   }
 
   .control-cluster{
     right:5px;
   }
 }
+
 </style>
 </head>
 
+
 <body>
 
-<main id="game" class="game">
+<main
+  id="game"
+  class="game"
+>
 
 <header class="topbar">
+
   <a
     class="back"
     href="survival%20game_TOP.html"
     aria-label="戻る"
-  >←</a>
+  >
+    ←
+  </a>
 
-  <div id="day" class="top-small">
+  <div
+    id="day"
+    class="top-small"
+  >
     Day.1
   </div>
 
-  <div id="clock" class="top-small">
+  <div
+    id="clock"
+    class="top-small"
+  >
     08:00:00
   </div>
 
@@ -848,272 +1215,313 @@ button{
   >
     針葉樹林
   </div>
+
 </header>
+
 
 <section class="meters">
 
-  <div class="meter">
-    <svg
-      class="meter-icon"
-      viewBox="0 0 24 24"
-    >
-      <defs>
-        <clipPath id="tempClip">
-          <rect
-            id="tempClipRect"
-            x="0"
-            y="0"
-            width="24"
-            height="24"
-          ></rect>
-        </clipPath>
-      </defs>
+<div class="meter">
 
-      <path
-        id="tempFill"
-        clip-path="url(#tempClip)"
-        d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
-      ></path>
+<svg
+  class="meter-icon"
+  viewBox="0 0 24 24"
+>
+<defs>
+<clipPath id="tempClip">
+<rect
+  id="tempClipRect"
+  x="0"
+  y="0"
+  width="24"
+  height="24"
+></rect>
+</clipPath>
+</defs>
 
-      <path
-        class="meter-outline"
-        d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
-      ></path>
-    </svg>
+<path
+  id="tempFill"
+  clip-path="url(#tempClip)"
+  d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
+></path>
 
-    <div
-      id="tempValue"
-      class="meter-value"
-    >
-      36.7℃
-    </div>
-  </div>
+<path
+  class="meter-outline"
+  d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"
+></path>
 
-  <div class="meter">
-    <svg
-      class="meter-icon"
-      viewBox="0 0 24 24"
-    >
-      <defs>
-        <clipPath id="hungerClip">
-          <rect
-            id="hungerClipRect"
-            x="0"
-            y="0"
-            width="24"
-            height="24"
-          ></rect>
-        </clipPath>
-      </defs>
+</svg>
 
-      <path
-        id="hungerFill"
-        clip-path="url(#hungerClip)"
-        d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Zm.5-1.2c-.1-2.5 1.3-4.3 4.1-4.8.1 2.7-1.3 4.4-4.1 4.8Z"
-      ></path>
+<div
+  id="tempValue"
+  class="meter-value"
+>
+36.7℃
+</div>
 
-      <path
-        class="meter-outline"
-        d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Zm.5-1.2c-.1-2.5 1.3-4.3 4.1-4.8.1 2.7-1.3 4.4-4.1 4.8Z"
-      ></path>
-    </svg>
+</div>
 
-    <div
-      id="hungerValue"
-      class="meter-value"
-    >
-      100
-    </div>
-  </div>
 
-  <div class="meter">
-    <svg
-      class="meter-icon"
-      viewBox="0 0 24 24"
-    >
-      <defs>
-        <clipPath id="staminaClip">
-          <rect
-            id="staminaClipRect"
-            x="0"
-            y="0"
-            width="24"
-            height="24"
-          ></rect>
-        </clipPath>
-      </defs>
+<div class="meter">
 
-      <path
-        id="staminaFill"
-        clip-path="url(#staminaClip)"
-        d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
-      ></path>
+<svg
+  class="meter-icon"
+  viewBox="0 0 24 24"
+>
+<defs>
+<clipPath id="hungerClip">
+<rect
+  id="hungerClipRect"
+  x="0"
+  y="0"
+  width="24"
+  height="24"
+></rect>
+</clipPath>
+</defs>
 
-      <path
-        class="meter-outline"
-        d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
-      ></path>
-    </svg>
+<path
+  id="hungerFill"
+  clip-path="url(#hungerClip)"
+  d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"
+></path>
 
-    <div
-      id="staminaValue"
-      class="meter-value"
-    >
-      100
-    </div>
-  </div>
+<path
+  class="meter-outline"
+  d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"
+></path>
+
+</svg>
+
+<div
+  id="hungerValue"
+  class="meter-value"
+>
+100
+</div>
+
+</div>
+
+
+<div class="meter">
+
+<svg
+  class="meter-icon"
+  viewBox="0 0 24 24"
+>
+<defs>
+<clipPath id="staminaClip">
+<rect
+  id="staminaClipRect"
+  x="0"
+  y="0"
+  width="24"
+  height="24"
+></rect>
+</clipPath>
+</defs>
+
+<path
+  id="staminaFill"
+  clip-path="url(#staminaClip)"
+  d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
+></path>
+
+<path
+  class="meter-outline"
+  d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"
+></path>
+
+</svg>
+
+<div
+  id="staminaValue"
+  class="meter-value"
+>
+100
+</div>
+
+</div>
 
 </section>
 
+
 <section class="scene-wrap">
 
-  <div
-    id="scene"
-    class="scene"
-  >
+<div
+  id="scene"
+  class="scene"
+>
 
-    <div
-      id="sceneBackground"
-      class="scene-background"
-    ></div>
+<div
+  id="sceneBackground"
+  class="scene-background"
+></div>
 
-    <div
-      id="objectLayer"
-      class="scene-objects"
-    ></div>
+<div
+  id="objectLayer"
+  class="scene-objects"
+></div>
 
-    <div
-      id="characterLayer"
-      class="character-layer"
-    >
-      <button
-        id="grantCharacter"
-        class="character-sprite"
-        type="button"
-        aria-label="男に話しかける"
-      >
-        <img
-          id="grantCharacterImage"
-          src="assets/survival/grant_normal.png"
-          alt="負傷した男"
-        >
-      </button>
-    </div>
 
-    <div
-      id="eventLayer"
-      class="event-layer"
-    >
-      <img
-        id="eventImage"
-        alt="イベント"
-      >
-    </div>
+<div
+  id="characterLayer"
+  class="character-layer"
+>
 
-    <button
-      id="doorHotspot"
-      class="door-hotspot"
-      type="button"
-      aria-label="山小屋の扉を調べる"
-    ></button>
+<button
+  id="grantCharacter"
+  class="character-sprite"
+  type="button"
+  aria-label="グラント"
+>
 
-  </div>
+<img
+  id="grantCharacterImage"
+  src="assets/survival/grant_normal.png"
+  alt="グラント"
+>
 
-  <div
-    id="messagePanel"
-    class="message-panel closed"
-  >
-    <div
-      id="messageText"
-      class="message-text"
-    ></div>
+</button>
 
-    <div
-      id="messageProgress"
-      class="message-progress"
-    >
-      1 / 1
-    </div>
+</div>
 
-    <button
-      id="messageNext"
-      class="message-next hidden"
-      type="button"
-    >
-      次へ
-    </button>
-  </div>
 
-  <button
-    id="messageToggle"
-    class="message-toggle"
-    type="button"
-    aria-label="説明を表示"
-  >
-    ▶
-  </button>
+<div
+  id="eventLayer"
+  class="event-layer"
+>
+
+<img
+  id="eventImage"
+  alt="イベント"
+>
+
+</div>
+
+
+<button
+  id="doorHotspot"
+  class="door-hotspot"
+  type="button"
+></button>
+
+
+</div>
+
+
+<div
+  id="messagePanel"
+  class="message-panel closed"
+>
+
+<div
+  id="messageText"
+  class="message-text"
+></div>
+
+<div
+  id="messageProgress"
+  class="message-progress"
+></div>
+
+<button
+  id="messageNext"
+  class="message-next hidden"
+  type="button"
+>
+次へ
+</button>
+
+<button
+  id="messageToggle"
+  class="message-toggle"
+  type="button"
+>
+▶
+</button>
+
+</div>
 
 </section>
 
 </main>
+
 
 <div
   id="controlCluster"
   class="control-cluster"
 >
 
-  <button
-    id="lookButton"
-    class="look-button"
-    type="button"
-    aria-label="周囲を見る"
-  >
-    <svg viewBox="0 0 24 24">
-      <path d="M2.5 12C5.2 7.5 8.4 5.5 12 5.5s6.8 2 9.5 6.5c-2.7 4.5-5.9 6.5-9.5 6.5S5.2 16.5 2.5 12Z"></path>
-      <circle
-        cx="12"
-        cy="12"
-        r="3"
-      ></circle>
-    </svg>
-  </button>
+<button
+  id="lookButton"
+  class="look-button"
+  type="button"
+>
 
-  <div
-    id="movePad"
-    class="move-pad"
-  >
-    <button
-      id="moveUp"
-      class="direction"
-      type="button"
-    >▲</button>
+<svg viewBox="0 0 24 24">
 
-    <button
-      id="moveLeft"
-      class="direction"
-      type="button"
-    >◀</button>
+<path
+  d="M2.5 12C5.2 7.5 8.4 5.5 12 5.5s6.8 2 9.5 6.5c-2.7 4.5-5.9 6.5-9.5 6.5S5.2 16.5 2.5 12Z"
+></path>
 
-    <button
-      id="menuKey"
-      class="menu-key"
-      type="button"
-    >MENU</button>
+<circle
+  cx="12"
+  cy="12"
+  r="3"
+></circle>
 
-    <button
-      id="moveRight"
-      class="direction"
-      type="button"
-    >▶</button>
+</svg>
 
-    <button
-      id="moveDown"
-      class="direction"
-      type="button"
-    >▼</button>
-  </div>
+</button>
+
+
+<div class="move-pad">
+
+<button
+  id="moveUp"
+  class="direction"
+  type="button"
+>
+▲
+</button>
+
+<button
+  id="moveLeft"
+  class="direction"
+  type="button"
+>
+◀
+</button>
+
+<button
+  id="menuKey"
+  class="menu-key"
+  type="button"
+>
+MENU
+</button>
+
+<button
+  id="moveRight"
+  class="direction"
+  type="button"
+>
+▶
+</button>
+
+<button
+  id="moveDown"
+  class="direction"
+  type="button"
+>
+▼
+</button>
 
 </div>
+
+</div>
+
 
 <div
   id="coldVision"
@@ -1125,144 +1533,159 @@ button{
   class="health-vision"
 ></div>
 
+
 <div
   id="gameMenu"
   class="game-menu-overlay"
 >
-  <section class="game-menu-window">
 
-    <div class="menu-tabs-area">
+<section class="game-menu-window">
 
-      <button
-        class="menu-tab active"
-        data-menu-tab="inventory"
-        type="button"
-      >
-        インベントリ
-      </button>
+<div class="menu-tabs-area">
 
-      <button
-        class="menu-tab hidden"
-        data-menu-tab="map"
-        type="button"
-      >
-        地図
-      </button>
+<button
+  class="menu-tab active"
+  data-menu-tab="inventory"
+>
+インベントリ
+</button>
 
-      <button
-        class="menu-tab hidden"
-        data-menu-tab="skills"
-        type="button"
-      >
-        スキル
-      </button>
+<button
+  class="menu-tab hidden"
+  data-menu-tab="map"
+>
+地図
+</button>
 
-      <button
-        class="menu-tab hidden"
-        data-menu-tab="craft"
-        type="button"
-      >
-        クラフト
-      </button>
+<button
+  class="menu-tab hidden"
+  data-menu-tab="skills"
+>
+スキル
+</button>
 
-      <button
-        id="menuClose"
-        class="menu-close"
-        type="button"
-      >
-        ×
-      </button>
+<button
+  class="menu-tab hidden"
+  data-menu-tab="craft"
+>
+クラフト
+</button>
 
-    </div>
+<button
+  id="menuClose"
+  class="menu-close"
+>
+×
+</button>
 
-    <div class="menu-content">
-
-      <section
-        id="menuPanelInventory"
-        class="menu-panel active"
-      >
-        <h2 class="menu-panel-title">
-          インベントリ
-        </h2>
-
-        <div id="inventoryList"></div>
-      </section>
-
-      <section
-        id="menuPanelMap"
-        class="menu-panel"
-      >
-        <h2 class="menu-panel-title">
-          地図
-        </h2>
-
-        <div class="placeholder">
-          まだ地図に記録された情報はありません。
-        </div>
-      </section>
-
-      <section
-        id="menuPanelSkills"
-        class="menu-panel"
-      >
-        <h2 class="menu-panel-title">
-          スキル
-        </h2>
-
-        <div class="placeholder">
-          まだサバイバル知識を習得していません。
-        </div>
-      </section>
-
-      <section
-        id="menuPanelCraft"
-        class="menu-panel"
-      >
-        <h2 class="menu-panel-title">
-          クラフト
-        </h2>
-
-        <div class="placeholder">
-          まだ作り方を知っている物はありません。
-        </div>
-      </section>
-
-    </div>
-
-  </section>
 </div>
+
+
+<div class="menu-content">
+
+<section
+  id="menuPanelInventory"
+  class="menu-panel active"
+>
+
+<h2 class="menu-panel-title">
+インベントリ
+</h2>
+
+<div id="inventoryList"></div>
+
+</section>
+
+
+<section
+  id="menuPanelMap"
+  class="menu-panel"
+>
+
+<h2 class="menu-panel-title">
+地図
+</h2>
+
+<div class="placeholder">
+まだ地図に記録された情報はありません。
+</div>
+
+</section>
+
+
+<section
+  id="menuPanelSkills"
+  class="menu-panel"
+>
+
+<h2 class="menu-panel-title">
+スキル
+</h2>
+
+<div class="placeholder">
+まだサバイバル知識を習得していません。
+</div>
+
+</section>
+
+
+<section
+  id="menuPanelCraft"
+  class="menu-panel"
+>
+
+<h2 class="menu-panel-title">
+クラフト
+</h2>
+
+<div class="placeholder">
+まだ作り方を知っている物はありません。
+</div>
+
+</section>
+
+</div>
+
+</section>
+
+</div>
+
 
 <div
   id="deadModal"
   class="dead-modal"
 >
-  <section class="dead-card">
 
-    <h2 class="dead-title">
-      DEAD
-    </h2>
+<section class="dead-card">
 
-    <p
-      id="deadReason"
-      class="dead-reason"
-    ></p>
+<h2 class="dead-title">
+DEAD
+</h2>
 
-    <button
-      id="restartButton"
-      class="restart-button"
-      type="button"
-    >
-      最初から
-    </button>
+<p
+  id="deadReason"
+  class="dead-reason"
+></p>
 
-  </section>
+<button
+  id="restartButton"
+  class="restart-button"
+>
+最初から
+</button>
+
+</section>
+
 </div>
+
 
 <script src="data/survival-items.js"></script>
 <script src="data/survival-events.js"></script>
 
+
 <script>
 'use strict';
+
 
 let gameSeconds =
   8 * 60 * 60;
@@ -1303,9 +1726,6 @@ let messagePages =
 let messageIndex =
   0;
 
-let messageManual =
-  false;
-
 let finalMessageAction =
   null;
 
@@ -1328,6 +1748,7 @@ const pickedItems =
 const inventory =
   {};
 
+
 const MOVE_SECONDS =
   180;
 
@@ -1337,339 +1758,500 @@ const MOVE_TEMP_DROP =
 const MOVE_STAMINA_COST =
   1;
 
+
 const DOOR_META = {
+
   sourceWidth:1448,
   sourceHeight:1086,
+
   left:600,
   top:437,
+
   width:174,
   height:384
+
 };
 
 
 const SCENES = {
 
-  start:{
-    image:'assets/survival/forest_02.jpeg',
-    place:'針葉樹林',
-    messages:[
-      '雪の積もった針葉樹林です。',
-      '足元に拾えそうな物があります。'
-    ],
-    look:[
-      '雪深い針葉樹林です。',
-      '人の気配も、建物も見当たりません。'
-    ],
-    items:[
-      {
-        id:'branch_start',
-        itemId:'branch_01',
-        left:15,
-        top:56
-      },
-      {
-        id:'stone_start',
-        itemId:'stone_01',
-        left:72,
-        top:57
-      }
-    ],
-    moves:{
-      up:'forest1',
-      down:null,
-      left:null,
-      right:null
-    }
-  },
+start:{
 
-  forest1:{
-    image:'assets/survival/forest_03.jpeg',
-    place:'針葉樹林',
-    messages:[
-      '雪を踏みながら林の奥へ進みます。'
-    ],
-    look:[
-      '木々の間に細い道が続いています。'
-    ],
-    items:[],
-    moves:{
-      up:'forest2',
-      down:'start',
-      left:null,
-      right:null
-    }
-  },
+  image:
+    'assets/survival/forest_02.jpeg',
 
-  forest2:{
-    image:'assets/survival/forest_04.jpeg',
-    place:'針葉樹林',
-    messages:[
-      'さらに雪深い林の中へ進みます。'
-    ],
-    look:[
-      '前にも道が続いています。',
-      '右にも進めそうな場所があります。'
-    ],
-    items:[
-      {
-        id:'branch_forest2',
-        itemId:'branch_01',
-        left:18,
-        top:52
-      }
-    ],
-    moves:{
-      up:'forest3',
-      down:'forest1',
-      left:null,
-      right:'deadend'
-    }
-  },
+  place:
+    '針葉樹林',
 
-  deadend:{
-    image:'assets/survival/forest_deadend_01.png',
-    place:'倒木',
-    messages:[
-      '大きな倒木があります。',
-      'この先へは進めそうにありません。'
-    ],
-    look:[
-      '倒木が完全に行く手を遮っています。',
-      '引き返した方がよさそうです。'
-    ],
-    items:[],
-    moves:{
-      up:null,
-      down:null,
-      left:'forest2',
-      right:null
-    }
-  },
+  messages:[
+    '雪の積もった針葉樹林です。',
+    '足元に拾えそうな物があります。'
+  ],
 
-  forest3:{
-    image:'assets/survival/forest_05.jpeg',
-    place:'針葉樹林',
-    messages:[
-      '林の奥へ進みます。',
-      '指先が冷たくなってきました。'
-    ],
-    look:[
-      'まだ林が続いています。',
-      '前へ進むことはできそうです。'
-    ],
-    items:[
-      {
-        id:'stone_forest3',
-        itemId:'stone_01',
-        left:70,
-        top:54
-      }
-    ],
-    moves:{
-      up:'forest4',
-      down:'forest2',
-      left:null,
-      right:null
-    }
-  },
+  look:[
+    '雪深い針葉樹林です。',
+    '人の気配も、建物も見当たりません。'
+  ],
 
-  forest4:{
-    image:'assets/survival/forest_06.jpeg',
-    place:'林の奥',
-    messages:[
-      '雪の中を進みます。',
-      '身体の芯まで冷えてきます。'
-    ],
-    look:[
-      '少し先まで見渡せます。',
-      'まだ建物は見えません。'
-    ],
-    items:[],
-    moves:{
-      up:'forest5',
-      down:'forest3',
-      left:null,
-      right:null
-    }
-  },
+  items:[
 
-  forest5:{
-    image:'assets/survival/forest_03.jpeg',
-    place:'林の奥',
-    messages:[
-      '足を止めると、一気に身体が冷えそうです。'
-    ],
-    look:[
-      '前方が少し明るく見えます。',
-      '林の出口が近いのかもしれません。'
-    ],
-    items:[],
-    moves:{
-      up:'forest6',
-      down:'forest4',
-      left:null,
-      right:null
-    }
-  },
+    {
+      id:'branch_start',
+      itemId:'branch_01',
+      left:15,
+      top:56
+    },
 
-  forest6:{
-    image:'assets/survival/forest_04.jpeg',
-    place:'林の出口',
-    messages:[
-      '木々の密度が低くなってきました。',
-      '林を抜けられそうです。'
-    ],
-    look:[
-      '前方が開けています。',
-      'さらに先へ進めそうです。'
-    ],
-    items:[],
-    moves:{
-      up:'forest7',
-      down:'forest5',
-      left:null,
-      right:null
+    {
+      id:'stone_start',
+      itemId:'stone_01',
+      left:72,
+      top:57
     }
-  },
 
-  forest7:{
-    image:'assets/survival/forest_05.jpeg',
-    place:'林の外れ',
-    messages:[
-      '林を抜けるように進みます。',
-      '寒さがかなり厳しくなってきました。'
-    ],
-    look:[
-      '木々の向こうに開けた場所があります。'
-    ],
-    items:[],
-    moves:{
-      up:'cabinDistance',
-      down:'forest6',
-      left:null,
-      right:null
-    }
-  },
+  ],
 
-  cabinDistance:{
-    image:'assets/survival/cabin_distance_01.png',
-    place:'山小屋付近',
-    messages:[
-      '遠くに人工物が見えます。',
-      '……山小屋のようです。'
-    ],
-    look:[
-      '雪の向こうに山小屋があります。',
-      '中へ入れれば、寒さをしのげるかもしれません。'
-    ],
-    items:[],
-    moves:{
-      up:'cabinFront',
-      down:'forest7',
-      left:null,
-      right:null
-    }
-  },
-
-  cabinFront:{
-    image:'assets/survival/cabin_front_01.png',
-    place:'山小屋',
-    messages:[
-      'ようやく山小屋の前まで辿り着きました。',
-      '雪の上に赤黒い跡が見えます。'
-    ],
-    look:[
-      '山小屋の入口付近に血の跡があります。',
-      '跡は扉の方へ続いています。'
-    ],
-    items:[],
-    hasDoor:true,
-    moves:{
-      up:null,
-      down:'cabinDistance',
-      left:null,
-      right:null
-    }
-  },
-
-  cabinInside:{
-    image:'assets/survival/cabin_interior_01.png',
-    place:'山小屋・1階',
-    messages:[
-      '山小屋の中へ入りました。'
-    ],
-    look:[
-      '古い山小屋の1階です。',
-      '室内には生活に使えそうな物が残されています。'
-    ],
-    items:[],
-    inside:true,
-    moves:{
-      up:null,
-      down:null,
-      left:null,
-      right:null
-    }
+  moves:{
+    up:'forest1',
+    down:null,
+    left:null,
+    right:null
   }
+
+},
+
+
+forest1:{
+
+  image:
+    'assets/survival/forest_03.jpeg',
+
+  place:
+    '針葉樹林',
+
+  messages:[
+    '雪を踏みながら林の奥へ進みます。'
+  ],
+
+  look:[
+    '木々の間に細い道が続いています。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'forest2',
+    down:'start',
+    left:null,
+    right:null
+  }
+
+},
+
+
+forest2:{
+
+  image:
+    'assets/survival/forest_04.jpeg',
+
+  place:
+    '針葉樹林',
+
+  messages:[
+    'さらに雪深い林の中へ進みます。'
+  ],
+
+  look:[
+    '前にも道が続いています。',
+    '右にも進めそうな場所があります。'
+  ],
+
+  items:[
+    {
+      id:'branch_forest2',
+      itemId:'branch_01',
+      left:18,
+      top:52
+    }
+  ],
+
+  moves:{
+    up:'forest3',
+    down:'forest1',
+    left:null,
+    right:'deadend'
+  }
+
+},
+
+
+deadend:{
+
+  image:
+    'assets/survival/forest_deadend_01.png',
+
+  place:
+    '倒木',
+
+  messages:[
+    '大きな倒木があります。',
+    'この先へは進めそうにありません。'
+  ],
+
+  look:[
+    '倒木が完全に行く手を遮っています。',
+    '引き返した方がよさそうです。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:null,
+    down:null,
+    left:'forest2',
+    right:null
+  }
+
+},
+
+
+forest3:{
+
+  image:
+    'assets/survival/forest_05.jpeg',
+
+  place:
+    '針葉樹林',
+
+  messages:[
+    '林の奥へ進みます。',
+    '指先が冷たくなってきました。'
+  ],
+
+  look:[
+    'まだ林が続いています。',
+    '前へ進むことはできそうです。'
+  ],
+
+  items:[
+    {
+      id:'stone_forest3',
+      itemId:'stone_01',
+      left:70,
+      top:54
+    }
+  ],
+
+  moves:{
+    up:'forest4',
+    down:'forest2',
+    left:null,
+    right:null
+  }
+
+},
+
+
+forest4:{
+
+  image:
+    'assets/survival/forest_06.jpeg',
+
+  place:
+    '林の奥',
+
+  messages:[
+    '雪の中を進みます。',
+    '身体の芯まで冷えてきます。'
+  ],
+
+  look:[
+    '少し先まで見渡せます。',
+    'まだ建物は見えません。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'forest5',
+    down:'forest3',
+    left:null,
+    right:null
+  }
+
+},
+
+
+forest5:{
+
+  image:
+    'assets/survival/forest_03.jpeg',
+
+  place:
+    '林の奥',
+
+  messages:[
+    '足を止めると、一気に身体が冷えそうです。'
+  ],
+
+  look:[
+    '前方が少し明るく見えます。',
+    '林の出口が近いのかもしれません。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'forest6',
+    down:'forest4',
+    left:null,
+    right:null
+  }
+
+},
+
+
+forest6:{
+
+  image:
+    'assets/survival/forest_04.jpeg',
+
+  place:
+    '林の出口',
+
+  messages:[
+    '木々の密度が低くなってきました。',
+    '林を抜けられそうです。'
+  ],
+
+  look:[
+    '前方が開けています。',
+    'さらに先へ進めそうです。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'forest7',
+    down:'forest5',
+    left:null,
+    right:null
+  }
+
+},
+
+
+forest7:{
+
+  image:
+    'assets/survival/forest_05.jpeg',
+
+  place:
+    '林の外れ',
+
+  messages:[
+    '林を抜けるように進みます。',
+    '寒さがかなり厳しくなってきました。'
+  ],
+
+  look:[
+    '木々の向こうに開けた場所があります。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'cabinDistance',
+    down:'forest6',
+    left:null,
+    right:null
+  }
+
+},
+
+
+cabinDistance:{
+
+  image:
+    'assets/survival/cabin_distance_01.png',
+
+  place:
+    '山小屋付近',
+
+  messages:[
+    '遠くに人工物が見えます。',
+    '……山小屋のようです。'
+  ],
+
+  look:[
+    '雪の向こうに山小屋があります。',
+    '中へ入れれば、寒さをしのげるかもしれません。'
+  ],
+
+  items:[],
+
+  moves:{
+    up:'cabinFront',
+    down:'forest7',
+    left:null,
+    right:null
+  }
+
+},
+
+
+cabinFront:{
+
+  image:
+    'assets/survival/cabin_front_01.png',
+
+  place:
+    '山小屋',
+
+  messages:[
+    'ようやく山小屋の前まで辿り着きました。',
+    '雪の上に赤黒い跡が見えます。'
+  ],
+
+  look:[
+    '山小屋の入口付近に血の跡があります。',
+    '跡は扉の方へ続いています。'
+  ],
+
+  items:[],
+
+  hasDoor:true,
+
+  moves:{
+    up:null,
+    down:'cabinDistance',
+    left:null,
+    right:null
+  }
+
+},
+
+
+cabinInside:{
+
+  image:
+    'assets/survival/cabin_interior_01.png',
+
+  place:
+    '山小屋・1階',
+
+  messages:[
+    '山小屋の中へ入りました。'
+  ],
+
+  look:[
+    '古い山小屋の1階です。',
+    '室内には生活に使えそうな物が残されています。'
+  ],
+
+  items:[],
+
+  inside:true,
+
+  moves:{
+    up:null,
+    down:null,
+    left:null,
+    right:null
+  }
+
+}
 
 };
 
 
 const warningFlags = {
+
   cold35:false,
   cold33:false,
   cold31:false,
+
   hunger40:false,
   hunger20:false,
   hunger0:false,
+
   stamina60:false,
   stamina35:false,
   stamina20:false,
   stamina10:false
+
 };
 
 
 const game =
-  document.getElementById('game');
+  document.getElementById(
+    'game'
+  );
 
 const sceneElement =
-  document.getElementById('scene');
+  document.getElementById(
+    'scene'
+  );
 
 const sceneBackground =
-  document.getElementById('sceneBackground');
+  document.getElementById(
+    'sceneBackground'
+  );
 
 const objectLayer =
-  document.getElementById('objectLayer');
+  document.getElementById(
+    'objectLayer'
+  );
 
 const doorHotspot =
-  document.getElementById('doorHotspot');
+  document.getElementById(
+    'doorHotspot'
+  );
 
 const messagePanel =
-  document.getElementById('messagePanel');
+  document.getElementById(
+    'messagePanel'
+  );
 
 const messageText =
-  document.getElementById('messageText');
+  document.getElementById(
+    'messageText'
+  );
 
 const messageProgress =
-  document.getElementById('messageProgress');
+  document.getElementById(
+    'messageProgress'
+  );
 
 const messageNext =
-  document.getElementById('messageNext');
+  document.getElementById(
+    'messageNext'
+  );
 
 const messageToggle =
-  document.getElementById('messageToggle');
+  document.getElementById(
+    'messageToggle'
+  );
 
 const eventLayer =
-  document.getElementById('eventLayer');
+  document.getElementById(
+    'eventLayer'
+  );
 
 const eventImage =
-  document.getElementById('eventImage');
+  document.getElementById(
+    'eventImage'
+  );
 
 const grantCharacter =
-  document.getElementById('grantCharacter');
+  document.getElementById(
+    'grantCharacter'
+  );
 
 const grantCharacterImage =
-  document.getElementById('grantCharacterImage');
+  document.getElementById(
+    'grantCharacterImage'
+  );
 
 
 function clamp(
@@ -1677,6 +2259,7 @@ function clamp(
   min,
   max
 ){
+
   return Math.max(
     min,
     Math.min(
@@ -1684,24 +2267,35 @@ function clamp(
       value
     )
   );
+
 }
 
 
 function getScene(){
+
   return SCENES[
     currentScene
   ];
+
 }
 
 
 function isPaused(){
+
   return (
-    messageOpen ||
-    menuOpen ||
-    eventActive ||
-    gameOver ||
-    document.visibilityState !== 'visible'
+    messageOpen
+    ||
+    menuOpen
+    ||
+    eventActive
+    ||
+    gameOver
+    ||
+    document.visibilityState
+    !==
+    'visible'
   );
+
 }
 
 
@@ -1714,31 +2308,49 @@ function renderClock(){
 
   const day =
     Math.floor(
-      total / 86400
-    ) + 1;
+      total
+      /
+      86400
+    )
+    +
+    1;
 
   const secondsToday =
-    total % 86400;
+    total
+    %
+    86400;
 
   const hour =
     Math.floor(
-      secondsToday / 3600
+      secondsToday
+      /
+      3600
     );
 
   const minute =
     Math.floor(
       (
-        secondsToday % 3600
-      ) / 60
+        secondsToday
+        %
+        3600
+      )
+      /
+      60
     );
 
   const second =
-    secondsToday % 60;
+    secondsToday
+    %
+    60;
+
 
   document.getElementById(
     'day'
   ).textContent =
-    'Day.' + day;
+    'Day.'
+    +
+    day;
+
 
   document.getElementById(
     'clock'
@@ -1784,7 +2396,11 @@ function setFillLevel(
     );
 
   const height =
-    24 * value / 100;
+    24
+    *
+    value
+    /
+    100;
 
   const rect =
     document.getElementById(
@@ -1850,11 +2466,15 @@ function renderMeters(){
     clamp(
       (
         (
-          bodyTemperature - 28
+          bodyTemperature
+          -
+          28
         )
         /
         (
-          36.8 - 28
+          36.8
+          -
+          28
         )
       )
       *
@@ -1862,6 +2482,7 @@ function renderMeters(){
       0,
       100
     );
+
 
   setFillLevel(
     'tempClipRect',
@@ -1922,188 +2543,6 @@ function renderMeters(){
       stamina
     );
 
-  updateVisualEffects();
-
-}
-
-
-function coldOpacity(){
-
-  if(
-    bodyTemperature >= 35
-  ){
-    return 0;
-  }
-
-  if(
-    bodyTemperature >= 33
-  ){
-    return (
-      (
-        35 - bodyTemperature
-      )
-      /
-      2
-    )
-    *
-    .09;
-  }
-
-  if(
-    bodyTemperature >= 31
-  ){
-    return (
-      .09
-      +
-      (
-        (
-          33 - bodyTemperature
-        )
-        /
-        2
-      )
-      *
-      .12
-    );
-  }
-
-  return Math.min(
-    .34,
-    .21
-    +
-    (
-      31 - bodyTemperature
-    )
-    *
-    .055
-  );
-
-}
-
-
-function redOpacity(){
-
-  if(
-    stamina > 60
-  ){
-    return 0;
-  }
-
-  if(
-    stamina > 35
-  ){
-    return (
-      (
-        60 - stamina
-      )
-      /
-      25
-    )
-    *
-    .08;
-  }
-
-  if(
-    stamina > 20
-  ){
-    return (
-      .08
-      +
-      (
-        (
-          35 - stamina
-        )
-        /
-        15
-      )
-      *
-      .12
-    );
-  }
-
-  if(
-    stamina > 10
-  ){
-    return (
-      .20
-      +
-      (
-        (
-          20 - stamina
-        )
-        /
-        10
-      )
-      *
-      .13
-    );
-  }
-
-  return (
-    .33
-    +
-    (
-      (
-        10 - stamina
-      )
-      /
-      10
-    )
-    *
-    .16
-  );
-
-}
-
-
-function updateVisualEffects(){
-
-  document.getElementById(
-    'coldVision'
-  ).style.setProperty(
-    '--cold-opacity',
-    coldOpacity()
-  );
-
-  document.getElementById(
-    'healthVision'
-  ).style.setProperty(
-    '--red-opacity',
-    redOpacity()
-  );
-
-}
-
-
-function shake(
-  heavy = false
-){
-
-  game.classList.remove(
-    'shake-light',
-    'shake-heavy'
-  );
-
-  void game.offsetWidth;
-
-  game.classList.add(
-    heavy
-      ?
-      'shake-heavy'
-      :
-      'shake-light'
-  );
-
-  setTimeout(
-    ()=>{
-      game.classList.remove(
-        'shake-light',
-        'shake-heavy'
-      );
-    },
-    600
-  );
-
 }
 
 
@@ -2124,6 +2563,7 @@ function renderMessage(){
     );
 
     return;
+
   }
 
 
@@ -2132,15 +2572,16 @@ function renderMessage(){
       messageIndex
     ];
 
-  const text =
-    typeof page === 'string'
+
+  messageText.textContent =
+    typeof page
+    ===
+    'string'
       ?
       page
       :
       page.text;
 
-  messageText.textContent =
-    text;
 
   messageProgress.textContent =
     (
@@ -2155,7 +2596,9 @@ function renderMessage(){
   const last =
     messageIndex
     ===
-    messagePages.length - 1;
+    messagePages.length
+    -
+    1;
 
 
   if(
@@ -2170,7 +2613,9 @@ function renderMessage(){
     );
 
   }else if(
-    typeof page === 'object'
+    typeof page
+    ===
+    'object'
     &&
     page.actionLabel
   ){
@@ -2233,20 +2678,6 @@ function showMessages(
   options = {}
 ){
 
-  if(
-    messageTimer
-  ){
-
-    clearTimeout(
-      messageTimer
-    );
-
-    messageTimer =
-      null;
-
-  }
-
-
   messagePages =
     Array.isArray(
       pages
@@ -2260,13 +2691,9 @@ function showMessages(
         )
       ];
 
+
   messageIndex =
     0;
-
-  messageManual =
-    Boolean(
-      options.manual
-    );
 
   finalMessageAction =
     options.finalAction
@@ -2280,42 +2707,10 @@ function showMessages(
     true
   );
 
-
-  if(
-    messagePages.length === 1
-    &&
-    !finalMessageAction
-    &&
-    !messageManual
-  ){
-
-    messageTimer =
-      setTimeout(
-        hideMessage,
-        options.duration
-        ||
-        4300
-      );
-
-  }
-
 }
 
 
 function hideMessage(){
-
-  if(
-    messageTimer
-  ){
-
-    clearTimeout(
-      messageTimer
-    );
-
-    messageTimer =
-      null;
-
-  }
 
   setMessageOpen(
     false
@@ -2332,9 +2727,6 @@ function reopenMessage(){
     return;
   }
 
-  messageManual =
-    true;
-
   setMessageOpen(
     true
   );
@@ -2347,7 +2739,9 @@ function nextMessage(){
   if(
     messageIndex
     <
-    messagePages.length - 1
+    messagePages.length
+    -
+    1
   ){
 
     messageIndex++;
@@ -2355,6 +2749,7 @@ function nextMessage(){
     renderMessage();
 
     return;
+
   }
 
 
@@ -2365,7 +2760,9 @@ function nextMessage(){
 
 
   if(
-    typeof page === 'object'
+    typeof page
+    ===
+    'object'
     &&
     page.action
   ){
@@ -2378,6 +2775,7 @@ function nextMessage(){
     action();
 
     return;
+
   }
 
 
@@ -2396,14 +2794,59 @@ function nextMessage(){
     action();
 
     return;
+
   }
 
 
+  /*
+    次の文も処理もなければ閉じる
+  */
   hideMessage();
 
 }
 
 
+/*
+  会話DIV本体をタップ
+
+  次の文があれば次へ進む。
+  最後なら閉じる。
+  action / finalAction がある場合は
+  nextMessage() がその処理を実行する。
+*/
+messagePanel.addEventListener(
+  'click',
+  event=>{
+
+    if(
+      !messageOpen
+    ){
+      return;
+    }
+
+    /*
+      DIV内のボタンを押した場合は
+      ボタン自身の処理に任せる
+    */
+    if(
+      event.target.closest(
+        'button'
+      )
+    ){
+      return;
+    }
+
+    nextMessage();
+
+  }
+);
+
+
+/*
+  ◀ / ▶ は文章を進めない。
+  開いている時は閉じるだけ。
+  閉じている時は再び開く。
+*/
 messageToggle.addEventListener(
   'click',
   event=>{
@@ -2422,20 +2865,9 @@ messageToggle.addEventListener(
 );
 
 
-messagePanel.addEventListener(
-  'click',
-  ()=>{
-
-    if(
-      messageOpen
-    ){
-      hideMessage();
-    }
-
-  }
-);
-
-
+/*
+  次へボタン
+*/
 messageNext.addEventListener(
   'click',
   event=>{
@@ -2448,212 +2880,27 @@ messageNext.addEventListener(
 );
 
 
-function collectWarnings(){
-
-  const warnings =
-    [];
-
-  if(
-    bodyTemperature < 35
-    &&
-    !warningFlags.cold35
-  ){
-
-    warningFlags.cold35 =
-      true;
-
-    warnings.push(
-      '身体が冷えてきました。'
-    );
-
-    shake();
-
-  }
-
-
-  if(
-    bodyTemperature < 33
-    &&
-    !warningFlags.cold33
-  ){
-
-    warningFlags.cold33 =
-      true;
-
-    warnings.push(
-      '震えが止まりません。',
-      'かなり身体が冷えています。'
-    );
-
-    shake(
-      true
-    );
-
-  }
-
-
-  if(
-    bodyTemperature < 31
-    &&
-    !warningFlags.cold31
-  ){
-
-    warningFlags.cold31 =
-      true;
-
-    warnings.push(
-      '意識がぼんやりします。',
-      '早く寒さをしのげる場所を探さなければ。'
-    );
-
-    shake(
-      true
-    );
-
-  }
-
-
-  if(
-    hunger <= 40
-    &&
-    !warningFlags.hunger40
-  ){
-
-    warningFlags.hunger40 =
-      true;
-
-    warnings.push(
-      '空腹を強く感じます。'
-    );
-
-  }
-
-
-  if(
-    hunger <= 20
-    &&
-    !warningFlags.hunger20
-  ){
-
-    warningFlags.hunger20 =
-      true;
-
-    warnings.push(
-      '腹が痛みます。力が出ません。'
-    );
-
-  }
-
-
-  if(
-    hunger <= 0
-    &&
-    !warningFlags.hunger0
-  ){
-
-    warningFlags.hunger0 =
-      true;
-
-    warnings.push(
-      '何か食べなければ、身体がもちません。'
-    );
-
-  }
-
-
-  if(
-    stamina <= 60
-    &&
-    !warningFlags.stamina60
-  ){
-
-    warningFlags.stamina60 =
-      true;
-
-    warnings.push(
-      '身体が重く感じます。'
-    );
-
-    shake();
-
-  }
-
-
-  if(
-    stamina <= 35
-    &&
-    !warningFlags.stamina35
-  ){
-
-    warningFlags.stamina35 =
-      true;
-
-    warnings.push(
-      'かなり消耗しています。'
-    );
-
-  }
-
-
-  if(
-    stamina <= 20
-    &&
-    !warningFlags.stamina20
-  ){
-
-    warningFlags.stamina20 =
-      true;
-
-    warnings.push(
-      '立っているのもつらくなってきました。'
-    );
-
-    shake(
-      true
-    );
-
-  }
-
-
-  if(
-    stamina <= 10
-    &&
-    !warningFlags.stamina10
-  ){
-
-    warningFlags.stamina10 =
-      true;
-
-    warnings.push(
-      'もうほとんど身体が動きません。'
-    );
-
-    shake(
-      true
-    );
-
-  }
-
-  return warnings;
-
-}
-
-
 function applyDrain(
   seconds
 ){
 
   const minutes =
-    seconds / 60;
+    seconds
+    /
+    60;
 
   bodyTemperature -=
-    .008 * minutes;
+    .008
+    *
+    minutes;
 
   hunger =
     clamp(
       hunger
       -
-      .10 * minutes,
+      .10
+      *
+      minutes,
       0,
       100
     );
@@ -2663,35 +2910,36 @@ function applyDrain(
     bodyTemperature < 35
   ){
     stamina -=
-      .08 * minutes;
+      .08
+      *
+      minutes;
   }
 
   if(
     bodyTemperature < 33
   ){
     stamina -=
-      .30 * minutes;
+      .30
+      *
+      minutes;
   }
 
   if(
     bodyTemperature < 31
   ){
     stamina -=
-      .55 * minutes;
+      .55
+      *
+      minutes;
   }
 
   if(
     bodyTemperature < 29
   ){
     stamina -=
-      1.20 * minutes;
-  }
-
-  if(
-    hunger <= 0
-  ){
-    stamina -=
-      .25 * minutes;
+      1.20
+      *
+      minutes;
   }
 
 
@@ -2704,8 +2952,6 @@ function applyDrain(
 
   renderMeters();
 
-  checkDeath();
-
 }
 
 
@@ -2716,7 +2962,7 @@ function advanceTime(
   if(
     gameOver
   ){
-    return [];
+    return;
   }
 
   gameSeconds +=
@@ -2727,46 +2973,6 @@ function advanceTime(
   );
 
   renderClock();
-
-  return gameOver
-    ?
-    []
-    :
-    collectWarnings();
-
-}
-
-
-function checkDeath(){
-
-  if(
-    gameOver
-    ||
-    stamina > 0
-  ){
-    return;
-  }
-
-  gameOver =
-    true;
-
-  eventActive =
-    false;
-
-  hideMessage();
-
-  closeGameMenu();
-
-  document.getElementById(
-    'deadReason'
-  ).textContent =
-    '体力が尽きました。';
-
-  document.getElementById(
-    'deadModal'
-  ).classList.add(
-    'open'
-  );
 
 }
 
@@ -2814,13 +3020,16 @@ function itemDef(
   id
 ){
 
-  return typeof window.getSurvivalItem === 'function'
-    ?
-    window.getSurvivalItem(
-      id
-    )
-    :
-    null;
+  return typeof
+    window.getSurvivalItem
+    ===
+    'function'
+      ?
+      window.getSurvivalItem(
+        id
+      )
+      :
+      null;
 
 }
 
@@ -2835,7 +3044,9 @@ function renderSceneItems(){
 
 
   for(
-    const item of scene.items
+    const item
+    of
+    scene.items
   ){
 
     if(
@@ -2852,6 +3063,7 @@ function renderSceneItems(){
         item.itemId
       );
 
+
     if(
       !definition
     ){
@@ -2864,6 +3076,7 @@ function renderSceneItems(){
         'button'
       );
 
+
     button.type =
       'button';
 
@@ -2871,7 +3084,9 @@ function renderSceneItems(){
       'scene-object '
       +
       (
-        item.itemId === 'branch_01'
+        item.itemId
+        ===
+        'branch_01'
           ?
           'branch-object'
           :
@@ -2879,10 +3094,14 @@ function renderSceneItems(){
       );
 
     button.style.left =
-      item.left + '%';
+      item.left
+      +
+      '%';
 
     button.style.top =
-      item.top + '%';
+      item.top
+      +
+      '%';
 
 
     const image =
@@ -2902,14 +3121,18 @@ function renderSceneItems(){
       image
     );
 
+
     button.addEventListener(
       'click',
       ()=>{
+
         pickItem(
           item
         );
+
       }
     );
+
 
     objectLayer.appendChild(
       button
@@ -2930,10 +3153,12 @@ function pickItem(
     return;
   }
 
+
   const definition =
     itemDef(
       item.itemId
     );
+
 
   if(
     !definition
@@ -2941,9 +3166,11 @@ function pickItem(
     return;
   }
 
+
   pickedItems.add(
     item.id
   );
+
 
   inventory[
     item.itemId
@@ -2958,19 +3185,18 @@ function pickItem(
     +
     1;
 
+
   renderSceneItems();
 
   renderInventory();
+
 
   showMessages(
     [
       definition.name
       +
       'を拾いました。'
-    ],
-    {
-      manual:true
-    }
+    ]
   );
 
 }
@@ -2979,10 +3205,13 @@ function pickItem(
 function positionDoorHotspot(){
 
   if(
-    currentScene !== 'cabinFront'
+    currentScene
+    !==
+    'cabinFront'
   ){
     return;
   }
+
 
   const width =
     sceneElement.clientWidth;
@@ -2990,15 +3219,18 @@ function positionDoorHotspot(){
   const height =
     sceneElement.clientHeight;
 
+
   const scale =
     Math.max(
       width
       /
       DOOR_META.sourceWidth,
+
       height
       /
       DOOR_META.sourceHeight
     );
+
 
   const renderedWidth =
     DOOR_META.sourceWidth
@@ -3010,16 +3242,21 @@ function positionDoorHotspot(){
     *
     scale;
 
+
   const offsetX =
     (
-      width - renderedWidth
+      width
+      -
+      renderedWidth
     )
     /
     2;
 
   const offsetY =
     (
-      height - renderedHeight
+      height
+      -
+      renderedHeight
     )
     /
     2;
@@ -3036,6 +3273,7 @@ function positionDoorHotspot(){
     +
     'px';
 
+
   doorHotspot.style.top =
     (
       offsetY
@@ -3047,6 +3285,7 @@ function positionDoorHotspot(){
     +
     'px';
 
+
   doorHotspot.style.width =
     (
       DOOR_META.width
@@ -3055,6 +3294,7 @@ function positionDoorHotspot(){
     )
     +
     'px';
+
 
   doorHotspot.style.height =
     (
@@ -3101,21 +3341,30 @@ function inspectDoor(){
     return;
   }
 
+
   showMessages(
     [
+
       '扉の近くの雪に、血の跡があります。',
+
       '血の跡は扉の中へ続いているようです。',
+
       '扉に手をかけます。',
+
       '……開いています。',
+
       {
-        text:'中へ入りますか？',
-        actionLabel:'中に入る',
-        action:enterCabin
+        text:
+          '中へ入りますか？',
+
+        actionLabel:
+          '中に入る',
+
+        action:
+          enterCabin
       }
-    ],
-    {
-      manual:true
-    }
+
+    ]
   );
 
 }
@@ -3128,17 +3377,18 @@ function enterCabin(){
 
   renderScene();
 
+
   showMessages(
     [
       '山小屋の中へ入ります。'
     ],
     {
-      manual:true,
-      finalAction:()=>{
-        runSurvivalEvent(
-          'cabin_grant_first_meeting'
-        );
-      }
+      finalAction:
+        ()=>{
+          runSurvivalEvent(
+            'cabin_grant_first_meeting'
+          );
+        }
     }
   );
 
@@ -3148,20 +3398,6 @@ function enterCabin(){
 doorHotspot.addEventListener(
   'click',
   inspectDoor
-);
-
-
-window.addEventListener(
-  'resize',
-  ()=>{
-
-    if(
-      currentScene === 'cabinFront'
-    ){
-      positionDoorHotspot();
-    }
-
-  }
 );
 
 
@@ -3192,7 +3428,10 @@ function hideEventImage(){
 }
 
 
-/* グラント表示 → 背景ぼかしON */
+/* =========================
+   グラント表示
+========================= */
+
 function showGrantCharacter(
   src
 ){
@@ -3200,13 +3439,17 @@ function showGrantCharacter(
   if(
     src
   ){
+
     grantCharacterImage.src =
       src;
+
   }
+
 
   grantCharacter.classList.add(
     'visible'
   );
+
 
   sceneBackground.classList.add(
     'portrait-focus'
@@ -3215,12 +3458,12 @@ function showGrantCharacter(
 }
 
 
-/* グラント非表示 → 背景ぼかしOFF */
 function hideGrantCharacter(){
 
   grantCharacter.classList.remove(
     'visible'
   );
+
 
   sceneBackground.classList.remove(
     'portrait-focus'
@@ -3232,7 +3475,9 @@ function hideGrantCharacter(){
 function renderCharacter(){
 
   if(
-    currentScene === 'cabinInside'
+    currentScene
+    ===
+    'cabinInside'
     &&
     metSurvivor
     &&
@@ -3265,9 +3510,6 @@ function runSurvivalEvent(
   if(
     !window.SURVIVAL_EVENTS
   ){
-
-    renderCharacter();
-
     return;
   }
 
@@ -3281,9 +3523,6 @@ function runSurvivalEvent(
   if(
     !data
   ){
-
-    renderCharacter();
-
     return;
   }
 
@@ -3299,17 +3538,18 @@ function runSurvivalEvent(
       ===
       'cabin_grant_first_meeting'
     ){
+
       metSurvivor =
         true;
-    }
 
-    renderMenuUnlocks();
+    }
 
     renderCharacter();
 
     renderDirections();
 
     return;
+
   }
 
 
@@ -3324,6 +3564,7 @@ function runSurvivalEvent(
 
   eventStepIndex =
     0;
+
 
   hideGrantCharacter();
 
@@ -3344,6 +3585,7 @@ function runNextEventStep(){
     return;
   }
 
+
   if(
     eventStepIndex
     >=
@@ -3353,6 +3595,7 @@ function runNextEventStep(){
     finishEvent();
 
     return;
+
   }
 
 
@@ -3383,9 +3626,9 @@ function runNextEventStep(){
         step.image
       );
 
-      {
 
-        const text =
+      showMessages(
+        [
           step.speaker
             ?
             step.speaker
@@ -3396,19 +3639,13 @@ function runNextEventStep(){
             +
             '」'
             :
-            step.text;
-
-        showMessages(
-          [
-            text
-          ],
-          {
-            manual:true,
-            finalAction:runNextEventStep
-          }
-        );
-
-      }
+            step.text
+        ],
+        {
+          finalAction:
+            runNextEventStep
+        }
+      );
 
       break;
 
@@ -3453,8 +3690,6 @@ function runNextEventStep(){
           );
 
       }
-
-      renderMenuUnlocks();
 
       runNextEventStep();
 
@@ -3503,13 +3738,13 @@ function finishEvent(){
   eventStepIndex =
     0;
 
+
   setSceneBackground(
     getScene().image
   );
 
-  renderCharacter();
 
-  renderMenuUnlocks();
+  renderCharacter();
 
   renderDirections();
 
@@ -3526,18 +3761,20 @@ grantCharacter.addEventListener(
       return;
     }
 
+
     showMessages(
       [
-        '負傷した男が、壁にもたれたままこちらを見ています。'
-      ],
-      {
-        manual:true
-      }
+        '負傷した男がこちらを見ています。'
+      ]
     );
 
   }
 );
 
+
+/* =========================
+   移動
+========================= */
 
 const directionButtons = {
 
@@ -3569,6 +3806,7 @@ function renderDirections(){
   const scene =
     getScene();
 
+
   const locked =
     messageOpen
     ||
@@ -3597,6 +3835,7 @@ function renderDirections(){
         direction
       ];
 
+
     button.classList.toggle(
       'active',
       Boolean(
@@ -3608,6 +3847,7 @@ function renderDirections(){
       'inactive',
       !target
     );
+
 
     button.disabled =
       locked
@@ -3626,38 +3866,7 @@ function renderDirections(){
   document.getElementById(
     'menuKey'
   ).disabled =
-    messageOpen
-    ||
-    eventActive
-    ||
-    gameOver;
-
-}
-
-
-function movementStaminaCost(){
-
-  if(
-    hunger <= 0
-  ){
-    return (
-      MOVE_STAMINA_COST
-      *
-      1.8
-    );
-  }
-
-  if(
-    hunger <= 20
-  ){
-    return (
-      MOVE_STAMINA_COST
-      *
-      1.5
-    );
-  }
-
-  return MOVE_STAMINA_COST;
+    locked;
 
 }
 
@@ -3672,10 +3881,12 @@ function move(
     return;
   }
 
+
   const target =
     getScene().moves[
       direction
     ];
+
 
   if(
     !target
@@ -3688,37 +3899,32 @@ function move(
     clamp(
       stamina
       -
-      movementStaminaCost(),
+      MOVE_STAMINA_COST,
       0,
       100
     );
 
+
   bodyTemperature -=
     MOVE_TEMP_DROP;
 
-  const warnings =
-    advanceTime(
-      MOVE_SECONDS
-    );
 
-  if(
-    gameOver
-  ){
-    return;
-  }
+  advanceTime(
+    MOVE_SECONDS
+  );
+
 
   currentScene =
     target;
 
+
   renderScene();
+
 
   showMessages(
     getScene().messages
-      .slice()
-      .concat(
-        warnings
-      )
   );
+
 
   renderMeters();
 
@@ -3738,9 +3944,11 @@ Object.entries(
     button.addEventListener(
       'click',
       ()=>{
+
         move(
           direction
         );
+
       }
     );
 
@@ -3760,16 +3968,18 @@ document.getElementById(
       return;
     }
 
+
     showMessages(
-      getScene().look.slice(),
-      {
-        manual:true
-      }
+      getScene().look
     );
 
   }
 );
 
+
+/* =========================
+   インベントリ
+========================= */
 
 function renderInventory(){
 
@@ -3777,6 +3987,7 @@ function renderInventory(){
     document.getElementById(
       'inventoryList'
     );
+
 
   const rows =
     [];
@@ -3799,28 +4010,32 @@ function renderInventory(){
       continue;
     }
 
+
     const definition =
       itemDef(
         id
       );
 
+
     rows.push(
       `
-        <div class="item-row">
-          <span class="item-name">
-            ${
-              definition
-                ?
-                definition.name
-                :
-                id
-            }
-          </span>
+      <div class="item-row">
 
-          <span class="item-count">
-            × ${count}
-          </span>
-        </div>
+        <span class="item-name">
+          ${
+            definition
+              ?
+              definition.name
+              :
+              id
+          }
+        </span>
+
+        <span class="item-count">
+          × ${count}
+        </span>
+
+      </div>
       `
     );
 
@@ -3839,15 +4054,21 @@ function renderInventory(){
 }
 
 
+/* =========================
+   MENU
+========================= */
+
 const gameMenu =
   document.getElementById(
     'gameMenu'
   );
 
+
 const menuTabs =
   document.querySelectorAll(
     '.menu-tab'
   );
+
 
 const menuPanels = {
 
@@ -3874,24 +4095,6 @@ const menuPanels = {
 };
 
 
-function availableMenus(){
-
-  return metSurvivor
-    ?
-    [
-      'inventory',
-      'map',
-      'skills',
-      'craft'
-    ]
-    :
-    [
-      'inventory'
-    ];
-
-}
-
-
 function renderMenuUnlocks(){
 
   for(
@@ -3903,9 +4106,12 @@ function renderMenuUnlocks(){
     const name =
       tab.dataset.menuTab;
 
+
     tab.classList.toggle(
       'hidden',
-      name !== 'inventory'
+      name
+      !==
+      'inventory'
       &&
       !metSurvivor
     );
@@ -3918,14 +4124,6 @@ function renderMenuUnlocks(){
 function selectMenu(
   name
 ){
-
-  if(
-    !availableMenus().includes(
-      name
-    )
-  ){
-    return;
-  }
 
   currentMenu =
     name;
@@ -3969,39 +4167,40 @@ function selectMenu(
 
 
   if(
-    name === 'inventory'
+    name
+    ===
+    'inventory'
   ){
+
     renderInventory();
+
   }
 
 }
 
 
-function openGameMenu(
-  name = 'inventory'
-){
+function openGameMenu(){
 
   if(
-    gameOver
-    ||
-    messageOpen
-    ||
-    eventActive
+    isPaused()
   ){
     return;
   }
 
+
   menuOpen =
     true;
+
 
   gameMenu.classList.add(
     'open'
   );
 
+
   renderMenuUnlocks();
 
   selectMenu(
-    name
+    'inventory'
   );
 
   renderDirections();
@@ -4014,12 +4213,11 @@ function closeGameMenu(){
   menuOpen =
     false;
 
-  currentMenu =
-    null;
 
   gameMenu.classList.remove(
     'open'
   );
+
 
   renderDirections();
 
@@ -4030,57 +4228,15 @@ document.getElementById(
   'menuKey'
 ).addEventListener(
   'click',
-  ()=>{
+  openGameMenu
+);
 
-    if(
-      gameOver
-      ||
-      messageOpen
-      ||
-      eventActive
-    ){
-      return;
-    }
 
-    const menus =
-      availableMenus();
-
-    if(
-      !menuOpen
-    ){
-
-      openGameMenu(
-        menus[
-          0
-        ]
-      );
-
-      return;
-    }
-
-    const index =
-      menus.indexOf(
-        currentMenu
-      );
-
-    if(
-      index
-      ===
-      menus.length - 1
-    ){
-
-      closeGameMenu();
-
-      return;
-    }
-
-    selectMenu(
-      menus[
-        index + 1
-      ]
-    );
-
-  }
+document.getElementById(
+  'menuClose'
+).addEventListener(
+  'click',
+  closeGameMenu
 );
 
 
@@ -4104,13 +4260,9 @@ for(
 }
 
 
-document.getElementById(
-  'menuClose'
-).addEventListener(
-  'click',
-  closeGameMenu
-);
-
+/* =========================
+   通常時間
+========================= */
 
 setInterval(
   ()=>{
@@ -4121,30 +4273,37 @@ setInterval(
       return;
     }
 
-    const warnings =
-      advanceTime(
-        5
-      );
 
     if(
-      warnings.length
+      currentScene
+      ===
+      'cabinInside'
     ){
-      showMessages(
-        warnings
-      );
+      return;
     }
+
+
+    advanceTime(
+      5
+    );
 
   },
   1000
 );
 
 
+/* =========================
+   RESET
+========================= */
+
 document.getElementById(
   'restartButton'
 ).addEventListener(
   'click',
   ()=>{
+
     window.location.reload();
+
   }
 );
 
@@ -4156,10 +4315,16 @@ if(
     'cabin_grant_first_meeting'
   )
 ){
+
   metSurvivor =
     true;
+
 }
 
+
+/* =========================
+   START
+========================= */
 
 renderClock();
 
@@ -4176,5 +4341,6 @@ showMessages(
 );
 
 </script>
+
 </body>
 </html>
