@@ -8,8 +8,8 @@
 
   const ASSETS = Object.freeze({
     cabinInterior: 'assets/survival/cabin_interior_01.png',
-    grantCabinEyesClosed: 'assets/survival/grant_mercer_cabin_eyes_closed.jpg',
-    grantCabinEyesOpen: 'assets/survival/grant_mercer_cabin_eyes_open.jpg',
+    grantCabinEyesClosed: 'assets/survival/grant_mercer_cabin_eyes_closed.webp',
+    grantCabinEyesOpen: 'assets/survival/grant_mercer_cabin_eyes_open.webp',
     grantNormal: 'assets/survival/grant_normal.png'
   });
 
