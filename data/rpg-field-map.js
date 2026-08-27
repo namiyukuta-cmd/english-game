@@ -27,6 +27,19 @@ window.RPG_MAP = {
   ],
   exits: [
     {
+      id: 'to_north_forest',
+      x: 270,
+      y: 12,
+      width: 90,
+      height: 24,
+      name: '北の森',
+      label: '北の森 ↑',
+      labelPosition: { x: 270, y: 36 },
+      destination: 'rpg_forest.html',
+      destinationReturnKey: 'rpgForestReturnPositionV1',
+      destinationPosition: { x: 270, y: 875 }
+    },
+    {
       id: 'to_village',
       x: 270,
       y: 948,
