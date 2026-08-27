@@ -7,7 +7,8 @@
   const EVENT_ID = 'cabin_grant_first_meeting';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
   const ROOM_FLAGS_KEY = 'survival_room_flags_v1';
-  const FLOORPLAN_IMAGE = 'assets/survival/survival_room01.png';
+  const FIRST_FLOORPLAN_IMAGE = 'assets/survival/survival_room01.png';
+  const BASEMENT_FLOORPLAN_IMAGE = 'assets/survival/survival_room02.png';
 
   const $ = id => document.getElementById(id);
 
@@ -15,6 +16,7 @@
   let messagePages = [];
   let messageIndex = 0;
   let finalMessageAction = null;
+  let currentFloor = 'first';
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -201,14 +203,18 @@
   }
 
   function showEventMode() {
+    currentFloor = 'first';
+
     const floorplanLayer = $('floorplanLayer');
     const messagePanel = $('messagePanel');
     const roomBackground = $('roomBackground');
     const grantCharacter = $('grantCharacter');
     const grantCharacterImage = $('grantCharacterImage');
+    const roomHotspots = $('roomHotspots');
 
     if (floorplanLayer) floorplanLayer.classList.remove('visible');
     if (messagePanel) messagePanel.classList.remove('hidden');
+    if (roomHotspots) roomHotspots.style.display = '';
 
     if (roomBackground && window.SURVIVAL_EVENTS) {
       roomBackground.style.backgroundImage = `url("${SURVIVAL_EVENTS.assets.cabinInterior}")`;
@@ -222,19 +228,49 @@
   }
 
   function showFloorplan() {
+    currentFloor = 'first';
+
     const floorplanLayer = $('floorplanLayer');
     const floorplanImage = $('floorplanImage');
     const messagePanel = $('messagePanel');
     const grantCharacter = $('grantCharacter');
     const roomBackground = $('roomBackground');
+    const roomHotspots = $('roomHotspots');
 
     hideMessage();
     if (messagePanel) messagePanel.classList.add('hidden');
     if (grantCharacter) grantCharacter.classList.remove('visible');
     if (roomBackground) roomBackground.style.opacity = '0';
+    if ($('placeName')) $('placeName').textContent = '山小屋・1階';
+    if (roomHotspots) roomHotspots.style.display = '';
 
     if (floorplanImage) {
-      floorplanImage.src = FLOORPLAN_IMAGE;
+      floorplanImage.src = FIRST_FLOORPLAN_IMAGE;
+    }
+    if (floorplanLayer) floorplanLayer.classList.add('visible');
+  }
+
+  function showBasement() {
+    currentFloor = 'basement';
+
+    const floorplanLayer = $('floorplanLayer');
+    const floorplanImage = $('floorplanImage');
+    const messagePanel = $('messagePanel');
+    const grantCharacter = $('grantCharacter');
+    const roomBackground = $('roomBackground');
+    const roomHotspots = $('roomHotspots');
+
+    hideMessage();
+    if (messagePanel) messagePanel.classList.add('hidden');
+    if (grantCharacter) grantCharacter.classList.remove('visible');
+    if (roomBackground) roomBackground.style.opacity = '0';
+    if ($('placeName')) $('placeName').textContent = '山小屋・地下';
+
+    // 1階用のタップ領域を地下図の上に残さない。
+    if (roomHotspots) roomHotspots.style.display = 'none';
+
+    if (floorplanImage) {
+      floorplanImage.src = BASEMENT_FLOORPLAN_IMAGE;
     }
     if (floorplanLayer) floorplanLayer.classList.add('visible');
   }
@@ -340,7 +376,7 @@
             break;
 
           case 'basement':
-            showRoomMessage('地下へ続く階段があります。');
+            showBasement();
             break;
 
           case 'entry':
@@ -374,7 +410,12 @@
   function bindBackButton() {
     const button = $('backButton');
     if (!button) return;
+
     button.addEventListener('click', () => {
+      if (currentFloor === 'basement') {
+        showFloorplan();
+        return;
+      }
       location.href = 'survival%20game_TOP.html';
     });
   }
