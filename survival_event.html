@@ -14,8 +14,11 @@ body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-w
 .top-small{height:36px;padding:0 5px;display:flex;align-items:center;justify-content:center;border:1px solid #aaa;border-radius:9px;background:#fff;font-size:13px;font-weight:800;line-height:1;white-space:nowrap}.place{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .environment-bar{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4px}.environment-card{height:32px;padding:0 9px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #aaa;border-radius:9px;background:#f8f8f8;white-space:nowrap}.environment-label{font-size:13px;color:#555;font-weight:800}.environment-value{font-size:15px;color:#222;font-weight:900}
 .meters{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.meter{height:32px;min-width:0;padding:2px 5px;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #aaa;border-radius:9px;background:#fff}.meter-icon{width:18px;height:18px;flex:0 0 18px}.meter-outline{fill:none;stroke:#262626;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}.meter-value{min-width:0;font-size:13px;font-weight:900;line-height:1;white-space:nowrap}
-.event-stage{position:relative;flex:1 1 auto;min-height:0;width:97%;margin:0 auto;overflow:hidden;border:1px solid #8c9296;border-radius:13px;background:#111}
-.event-background{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image .15s ease}
+.event-stage{position:relative;flex:1 1 auto;min-height:0;width:97%;margin:0 auto;overflow:hidden;border:1px solid #8c9296;border-radius:13px;background:#050505}
+.event-backdrop{position:absolute;inset:-12px;background-position:center;background-size:cover;background-repeat:no-repeat;filter:blur(14px) brightness(.55);transform:scale(1.06);opacity:0;transition:opacity .35s ease}
+.event-image{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:0;transition:opacity .35s ease;display:block}
+.event-stage.image-visible .event-backdrop,.event-stage.image-visible .event-image{opacity:1}
+.event-blackout{position:absolute;inset:0;z-index:20;background:#000;opacity:1;pointer-events:none;transition:opacity .65s ease}.event-blackout.fade-out{opacity:0}
 .message-panel{position:absolute;left:9px;top:calc(100% - 258px);z-index:30;width:calc(100% - 18px);height:120px;padding:13px 14px 42px 14px;overflow:hidden;border:1px solid #979797;border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 4px 12px rgba(0,0,0,.10);transition:width .20s ease,height .20s ease,top .20s ease;cursor:pointer}.message-panel.closed{width:60px;height:54px;top:calc(100% - 180px);padding:0}.message-panel.closed .message-text,.message-panel.closed .message-progress{display:none}.message-text{height:64px;overflow:hidden;font-size:17px;line-height:1.42;font-weight:650;white-space:pre-wrap;word-break:break-word;pointer-events:none}.message-progress{position:absolute;left:62px;bottom:13px;font-size:12px;line-height:1;color:#666;font-weight:700;pointer-events:none}.message-toggle{position:absolute;left:10px;bottom:8px;z-index:3;width:40px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid #888;border-radius:8px;background:#d7d8d9;color:#222;font-size:18px;line-height:1;font-weight:900}
 @media(max-width:390px){.topbar{grid-template-columns:34px 48px 76px minmax(0,1fr)}.back{width:34px;height:34px}.top-small{height:34px;font-size:12px}.environment-card{height:30px}.environment-label{font-size:12px}.environment-value{font-size:14px}.meter{height:30px}.meter-value{font-size:12px}}
 </style>
@@ -29,7 +32,7 @@ body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-w
 <div class="meter"><svg class="meter-icon" viewBox="0 0 24 24"><defs><clipPath id="hungerClip"><rect id="hungerClipRect" x="0" y="0" width="24" height="24"></rect></clipPath></defs><path id="hungerFill" clip-path="url(#hungerClip)" d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"></path><path class="meter-outline" d="M12 7C9.5 4.5 5.2 5.4 3.8 8.6 1.7 13.4 5.2 20.5 9.3 22c1.2.4 2-.3 2.7-.7.7.4 1.5 1.1 2.7.7 4.1-1.5 7.6-8.6 5.5-13.4C18.8 5.4 14.5 4.5 12 7Z"></path></svg><div id="hungerValue" class="meter-value">100</div></div>
 <div class="meter"><svg class="meter-icon" viewBox="0 0 24 24"><defs><clipPath id="staminaClip"><rect id="staminaClipRect" x="0" y="0" width="24" height="24"></rect></clipPath></defs><path id="staminaFill" clip-path="url(#staminaClip)" d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"></path><path class="meter-outline" d="M12 21C10.7 19.8 4.3 15.5 2.6 11.6.6 7.2 3.5 3.5 7.4 3.5c2.1 0 3.6 1.2 4.6 2.6 1-1.4 2.5-2.6 4.6-2.6 3.9 0 6.8 3.7 4.8 8.1C19.7 15.5 13.3 19.8 12 21Z"></path></svg><div id="staminaValue" class="meter-value">100</div></div>
 </section>
-<section id="eventStage" class="event-stage"><div id="eventBackground" class="event-background"></div><div id="messagePanel" class="message-panel closed"><div id="messageText" class="message-text"></div><div id="messageProgress" class="message-progress"></div><button id="messageToggle" class="message-toggle" type="button">▶</button></div></section>
+<section id="eventStage" class="event-stage"><div id="eventBackdrop" class="event-backdrop"></div><img id="eventImage" class="event-image" alt="イベント"><div id="eventBlackout" class="event-blackout"></div><div id="messagePanel" class="message-panel closed"><div id="messageText" class="message-text"></div><div id="messageProgress" class="message-progress"></div><button id="messageToggle" class="message-toggle" type="button">▶</button></div></section>
 </main>
 <script src="data/survival-events.js"></script>
 <script>
@@ -37,9 +40,11 @@ body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-w
 const EVENT_ID='cabin_grant_first_meeting';
 const EVENT_STATE_KEY='survival_event_state_v1';
 const EVENT_RESUME_KEY='survival_event_resume_v1';
+const FIRST_IMAGE_HOLD_MS=2200;
+const BLACKOUT_HOLD_MS=650;
 const $=id=>document.getElementById(id);
-const eventBackground=$('eventBackground'),messagePanel=$('messagePanel'),messageText=$('messageText'),messageProgress=$('messageProgress'),messageToggle=$('messageToggle');
-let messageOpen=false,messagePages=[],messageIndex=0,finalMessageAction=null,stepIndex=0;
+const eventStage=$('eventStage'),eventBackdrop=$('eventBackdrop'),eventImage=$('eventImage'),eventBlackout=$('eventBlackout'),messagePanel=$('messagePanel'),messageText=$('messageText'),messageProgress=$('messageProgress'),messageToggle=$('messageToggle');
+let messageOpen=false,messagePages=[],messageIndex=0,finalMessageAction=null,stepIndex=0,firstImageShown=false;
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function setFillLevel(id,percent){const v=clamp(percent,0,100),h=24*v/100,r=$(id);r.setAttribute('y',24-h);r.setAttribute('height',h)}
 function normalColor(v){if(v<=20)return'#c62828';if(v<=40)return'#d6a000';return'#151515'}
@@ -54,9 +59,22 @@ function reopenMessage(){if(messagePages.length)setMessageOpen(true)}
 function advanceMessage(){if(!messagePages.length){hideMessage();return}const last=messageIndex>=messagePages.length-1;if(!last){messageIndex++;renderMessage();return}if(finalMessageAction){const action=finalMessageAction;finalMessageAction=null;hideMessage();action();return}hideMessage()}
 messagePanel.addEventListener('click',e=>{if(!messageOpen||e.target.closest('button'))return;advanceMessage()});
 messageToggle.addEventListener('click',e=>{e.stopPropagation();messageOpen?hideMessage():reopenMessage()});
+function setEventImage(src){eventBackdrop.style.backgroundImage=`url("${src}")`;eventImage.src=src;eventStage.classList.add('image-visible')}
 function finishEventPage(){sessionStorage.setItem(EVENT_RESUME_KEY,EVENT_ID);window.location.href='survival%20game.html'}
-function runStep(){const steps=window.SURVIVAL_EVENTS&&typeof SURVIVAL_EVENTS.getEventPageSteps==='function'?SURVIVAL_EVENTS.getEventPageSteps(EVENT_ID):[];if(stepIndex>=steps.length){finishEventPage();return}const step=steps[stepIndex++];if(step.type==='eventImage'){eventBackground.style.backgroundImage=`url("${step.image}")`;showMessages([step.text||''],{finalAction:runStep});return}if(step.type==='returnToGame'){finishEventPage();return}runStep()}
+function runStep(){const steps=window.SURVIVAL_EVENTS&&typeof SURVIVAL_EVENTS.getEventPageSteps==='function'?SURVIVAL_EVENTS.getEventPageSteps(EVENT_ID):[];if(stepIndex>=steps.length){finishEventPage();return}const step=steps[stepIndex++];if(step.type==='eventImage'){
+  setEventImage(step.image);
+  if(!firstImageShown){
+    firstImageShown=true;
+    setTimeout(()=>eventBlackout.classList.add('fade-out'),BLACKOUT_HOLD_MS);
+    setTimeout(()=>showMessages([step.text||''],{finalAction:runStep}),BLACKOUT_HOLD_MS+FIRST_IMAGE_HOLD_MS);
+    return;
+  }
+  showMessages([step.text||''],{finalAction:runStep});
+  return;
+}
+if(step.type==='returnToGame'){finishEventPage();return}runStep()}
 renderStatus();
+hideMessage();
 runStep();
 </script>
 </body>
