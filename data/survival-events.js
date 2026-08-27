@@ -4,10 +4,8 @@
 (function () {
   'use strict';
 
-  // 初回イベントの画面構成を作り直したため、旧テスト完了状態(v1)は引き継がない。
   const STORAGE_KEY = 'survival_game_completed_events_v2';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
-  const EVENT_RESUME_KEY = 'survival_event_resume_v1';
 
   const ASSETS = Object.freeze({
     cabinInterior: 'assets/survival/cabin_interior_01.png',
@@ -29,7 +27,6 @@
       pauseGameTime: true,
 
       // survival_event.html で再生する導入カット。
-      // 「中に入る」直後は通常画面の立ち絵を出さず、まずここを再生する。
       eventPageSteps: [
         {
           type: 'eventImage',
@@ -42,17 +39,11 @@
           text: '…。'
         },
         {
-          type: 'returnToGame'
+          type: 'returnToRoom'
         }
       ],
 
-      // 導入カット終了後、survival game.html に戻ってから会話へ入る。
-      steps: [
-        {
-          type: 'startDialogue'
-        }
-      ],
-
+      // survival_room.html で、ぼかした室内背景＋グラント立ち絵の上に再生する会話。
       dialogue: {
         startNode: 'choice_identity',
 
@@ -201,9 +192,7 @@
     if (eventId) {
       delete data[eventId];
     } else {
-      for (const key of Object.keys(data)) {
-        delete data[key];
-      }
+      for (const key of Object.keys(data)) delete data[key];
     }
 
     writeCompletedEvents(data);
@@ -221,90 +210,35 @@
     resetCompleted
   });
 
-  // survival game.html と survival_event.html の受け渡し。
-  // survival game.html 本体を大きく書き換えず、初回入室だけ専用イベント画面へ分離する。
+  // survival game.html の「中に入る」だけを専用画面へ振り分ける。
+  // 初回：survival_event.html → survival_room.html
+  // 初回イベント完了後：survival_room.html へ直接入る。
   window.addEventListener('DOMContentLoaded', function () {
     const pageName = decodeURIComponent(location.pathname.split('/').pop() || '');
     if (pageName !== 'survival game.html') return;
+    if (typeof window.enterCabin !== 'function') return;
 
-    if (typeof window.enterCabin === 'function') {
-      const originalEnterCabin = window.enterCabin;
-      window.enterCabin = function () {
-        if (isCompleted('cabin_grant_first_meeting')) {
-          originalEnterCabin();
-          return;
-        }
-
-        try {
-          const state = {
-            gameSeconds: typeof gameSeconds !== 'undefined' ? gameSeconds : 8 * 60 * 60,
-            bodyTemperature: typeof bodyTemperature !== 'undefined' ? bodyTemperature : 36.7,
-            hunger: typeof hunger !== 'undefined' ? hunger : 100,
-            stamina: typeof stamina !== 'undefined' ? stamina : 100,
-            currentScene: 'cabinInside',
-            inventory: typeof inventory !== 'undefined' ? Object.assign({}, inventory) : {},
-            pickedItems: typeof pickedItems !== 'undefined' ? Array.from(pickedItems) : []
-          };
-          sessionStorage.setItem(EVENT_STATE_KEY, JSON.stringify(state));
-        } catch (error) {
-          console.warn('[survival-events] event state could not be saved.', error);
-        }
-        location.href = 'survival_event.html?event=cabin_grant_first_meeting';
-      };
-    }
-
-    const resumeEventId = sessionStorage.getItem(EVENT_RESUME_KEY);
-    if (resumeEventId !== 'cabin_grant_first_meeting') return;
-    sessionStorage.removeItem(EVENT_RESUME_KEY);
-
-    let saved = null;
-    try {
-      saved = JSON.parse(sessionStorage.getItem(EVENT_STATE_KEY) || 'null');
-    } catch (error) {
-      saved = null;
-    }
-
-    try {
-      if (saved) {
-        if (Number.isFinite(Number(saved.gameSeconds))) gameSeconds = Number(saved.gameSeconds);
-        if (Number.isFinite(Number(saved.bodyTemperature))) bodyTemperature = Number(saved.bodyTemperature);
-        if (Number.isFinite(Number(saved.hunger))) hunger = Number(saved.hunger);
-        if (Number.isFinite(Number(saved.stamina))) stamina = Number(saved.stamina);
-        if (typeof inventory !== 'undefined' && saved.inventory && typeof saved.inventory === 'object') {
-          for (const key of Object.keys(inventory)) delete inventory[key];
-          Object.assign(inventory, saved.inventory);
-        }
-        if (typeof pickedItems !== 'undefined' && Array.isArray(saved.pickedItems)) {
-          pickedItems.clear();
-          for (const id of saved.pickedItems) pickedItems.add(id);
-        }
+    window.enterCabin = function () {
+      try {
+        const state = {
+          gameSeconds: typeof gameSeconds !== 'undefined' ? gameSeconds : 8 * 60 * 60,
+          bodyTemperature: typeof bodyTemperature !== 'undefined' ? bodyTemperature : 36.7,
+          hunger: typeof hunger !== 'undefined' ? hunger : 100,
+          stamina: typeof stamina !== 'undefined' ? stamina : 100,
+          currentScene: 'cabinInside',
+          inventory: typeof inventory !== 'undefined' ? Object.assign({}, inventory) : {},
+          pickedItems: typeof pickedItems !== 'undefined' ? Array.from(pickedItems) : []
+        };
+        sessionStorage.setItem(EVENT_STATE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn('[survival-events] event state could not be saved.', error);
       }
 
-      currentScene = 'cabinInside';
-      metSurvivor = true;
-      cabinExplorationUnlocked = false;
-      eventActive = true;
-      activeEventId = 'cabin_grant_first_meeting';
-      eventSteps = [];
-      eventStepIndex = 0;
-
-      if (typeof hideMessage === 'function') hideMessage();
-      if (typeof renderClock === 'function') renderClock();
-      if (typeof renderMeters === 'function') renderMeters();
-      if (typeof renderInventory === 'function') renderInventory();
-      if (typeof renderMenuUnlocks === 'function') renderMenuUnlocks();
-      if (typeof renderScene === 'function') renderScene();
-      if (typeof showGrantCharacter === 'function') showGrantCharacter(ASSETS.grantNormal);
-      if (typeof renderDirections === 'function') renderDirections();
-
-      // 戻った直後は、ぼかした室内背景＋中央のグラント立ち絵。
-      // その状態のまま既存の二択会話へ続ける。
-      setTimeout(function () {
-        if (typeof startEventDialogue === 'function') startEventDialogue();
-      }, 0);
-    } catch (error) {
-      console.error('[survival-events] event resume failed.', error);
-      sessionStorage.removeItem(EVENT_STATE_KEY);
-    }
+      if (isCompleted('cabin_grant_first_meeting')) {
+        location.href = 'survival_room.html';
+      } else {
+        location.href = 'survival_event.html?event=cabin_grant_first_meeting';
+      }
+    };
   });
 })();
