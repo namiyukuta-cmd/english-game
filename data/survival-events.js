@@ -24,6 +24,9 @@
       },
       lockMovement: true,
       pauseGameTime: true,
+
+      // 現在のイベントランナーで使用している導入部分。
+      // 会話分岐は下の dialogue に保持し、HTML側から接続する。
       steps: [
         {
           type: 'background',
@@ -59,7 +62,94 @@
         {
           type: 'completeEvent'
         }
-      ]
+      ],
+
+      dialogue: {
+        startNode: 'choice_identity',
+
+        nodes: {
+          choice_identity: {
+            type: 'choice',
+            choices: [
+              {
+                id: 'choice_name',
+                label: '私は◯◯◯◯',
+                next: 'crash_explain'
+              },
+              {
+                id: 'choice_who',
+                label: '貴方は？',
+                next: 'answer_first'
+              }
+            ]
+          },
+
+          answer_first: {
+            type: 'dialogue',
+            speaker: 'グラント',
+            text: '先に答えろ。',
+            next: 'choice_identity'
+          },
+
+          crash_explain: {
+            type: 'dialogue',
+            speaker: '主人公',
+            text: '飛行機が墜落して……。',
+            next: 'grant_you_too'
+          },
+
+          grant_you_too: {
+            type: 'dialogue',
+            speaker: 'グラント',
+            text: '……君も？',
+            next: 'grant_relax'
+          },
+
+          grant_relax: {
+            type: 'narration',
+            text: 'グラントが、ようやく少し警戒を解く。',
+            next: 'player_you_too'
+          },
+
+          player_you_too: {
+            type: 'dialogue',
+            speaker: '主人公',
+            text: '君も？',
+            next: 'grant_plane'
+          },
+
+          grant_plane: {
+            type: 'dialogue',
+            speaker: 'グラント',
+            text: '俺も搭乗していた。',
+            next: 'injury'
+          },
+
+          injury: {
+            type: 'narration',
+            text: '怪我が痛そうだ。',
+            next: 'request'
+          },
+
+          request: {
+            type: 'dialogue',
+            speaker: 'グラント',
+            text: '悪いが、この小屋の中を探してきてくれないか。',
+            next: 'unlock_exploration'
+          },
+
+          unlock_exploration: {
+            type: 'setFlag',
+            flag: 'cabinExplorationUnlocked',
+            value: true,
+            next: 'complete'
+          },
+
+          complete: {
+            type: 'completeEvent'
+          }
+        }
+      }
     }
   });
 
@@ -85,6 +175,12 @@
 
   function getEvent(eventId) {
     return EVENTS[eventId] || null;
+  }
+
+  function getDialogueNode(eventId, nodeId) {
+    const event = getEvent(eventId);
+    if (!event || !event.dialogue || !event.dialogue.nodes) return null;
+    return event.dialogue.nodes[nodeId] || null;
   }
 
   function isCompleted(eventId) {
@@ -122,6 +218,7 @@
     assets: ASSETS,
     events: EVENTS,
     getEvent,
+    getDialogueNode,
     shouldRun,
     isCompleted,
     markCompleted,
