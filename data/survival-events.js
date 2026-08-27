@@ -5,6 +5,8 @@
   'use strict';
 
   const STORAGE_KEY = 'survival_game_completed_events_v1';
+  const EVENT_STATE_KEY = 'survival_event_state_v1';
+  const EVENT_RESUME_KEY = 'survival_event_resume_v1';
 
   const ASSETS = Object.freeze({
     cabinInterior: 'assets/survival/cabin_interior_01.png',
@@ -216,5 +218,86 @@
     isCompleted,
     markCompleted,
     resetCompleted
+  });
+
+  // survival game.html と survival_event.html の受け渡し。
+  // survival game.html 本体を大きく書き換えず、初回入室だけ専用イベント画面へ分離する。
+  window.addEventListener('DOMContentLoaded', function () {
+    const pageName = decodeURIComponent(location.pathname.split('/').pop() || '');
+    if (pageName !== 'survival game.html') return;
+
+    if (typeof window.enterCabin === 'function') {
+      window.enterCabin = function () {
+        try {
+          const state = {
+            gameSeconds: typeof gameSeconds !== 'undefined' ? gameSeconds : 8 * 60 * 60,
+            bodyTemperature: typeof bodyTemperature !== 'undefined' ? bodyTemperature : 36.7,
+            hunger: typeof hunger !== 'undefined' ? hunger : 100,
+            stamina: typeof stamina !== 'undefined' ? stamina : 100,
+            currentScene: 'cabinInside',
+            inventory: typeof inventory !== 'undefined' ? Object.assign({}, inventory) : {},
+            pickedItems: typeof pickedItems !== 'undefined' ? Array.from(pickedItems) : []
+          };
+          sessionStorage.setItem(EVENT_STATE_KEY, JSON.stringify(state));
+        } catch (error) {
+          console.warn('[survival-events] event state could not be saved.', error);
+        }
+        location.href = 'survival_event.html?event=cabin_grant_first_meeting';
+      };
+    }
+
+    const resumeEventId = sessionStorage.getItem(EVENT_RESUME_KEY);
+    if (resumeEventId !== 'cabin_grant_first_meeting') return;
+    sessionStorage.removeItem(EVENT_RESUME_KEY);
+
+    let saved = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(EVENT_STATE_KEY) || 'null');
+    } catch (error) {
+      saved = null;
+    }
+
+    try {
+      if (saved) {
+        if (Number.isFinite(Number(saved.gameSeconds))) gameSeconds = Number(saved.gameSeconds);
+        if (Number.isFinite(Number(saved.bodyTemperature))) bodyTemperature = Number(saved.bodyTemperature);
+        if (Number.isFinite(Number(saved.hunger))) hunger = Number(saved.hunger);
+        if (Number.isFinite(Number(saved.stamina))) stamina = Number(saved.stamina);
+        if (typeof inventory !== 'undefined' && saved.inventory && typeof saved.inventory === 'object') {
+          for (const key of Object.keys(inventory)) delete inventory[key];
+          Object.assign(inventory, saved.inventory);
+        }
+        if (typeof pickedItems !== 'undefined' && Array.isArray(saved.pickedItems)) {
+          pickedItems.clear();
+          for (const id of saved.pickedItems) pickedItems.add(id);
+        }
+      }
+
+      currentScene = 'cabinInside';
+      metSurvivor = true;
+      cabinExplorationUnlocked = false;
+      eventActive = true;
+      activeEventId = 'cabin_grant_first_meeting';
+      eventSteps = [];
+      eventStepIndex = 0;
+
+      if (typeof hideMessage === 'function') hideMessage();
+      if (typeof renderClock === 'function') renderClock();
+      if (typeof renderMeters === 'function') renderMeters();
+      if (typeof renderInventory === 'function') renderInventory();
+      if (typeof renderMenuUnlocks === 'function') renderMenuUnlocks();
+      if (typeof renderScene === 'function') renderScene();
+      if (typeof showGrantCharacter === 'function') showGrantCharacter(ASSETS.grantNormal);
+      if (typeof renderDirections === 'function') renderDirections();
+
+      // 戻った直後は、ぼかした室内背景＋中央のグラント立ち絵。
+      // その状態のまま既存の二択会話へ続ける。
+      setTimeout(function () {
+        if (typeof startEventDialogue === 'function') startEventDialogue();
+      }, 0);
+    } catch (error) {
+      console.error('[survival-events] event resume failed.', error);
+      sessionStorage.removeItem(EVENT_STATE_KEY);
+    }
   });
 })();
