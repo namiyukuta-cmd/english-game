@@ -7,8 +7,43 @@
   const EVENT_ID = 'cabin_grant_first_meeting';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
   const ROOM_FLAGS_KEY = 'survival_room_flags_v1';
-  const FIRST_FLOORPLAN_IMAGE = 'assets/survival/survival_room01.png';
-  const BASEMENT_FLOORPLAN_IMAGE = 'assets/survival/survival_room02.png';
+
+  const FLOOR_CONFIGS = Object.freeze({
+    first: {
+      placeName: '山小屋・1階',
+      image: 'assets/survival/survival_room01.png',
+      imageStyle: {
+        objectPosition: 'center top',
+        transform: 'scaleY(1.05)',
+        transformOrigin: 'top center'
+      },
+      hotspots: [
+        { action: 'bed', label: 'ベッド', left: 11, top: 11, width: 34, height: 19 },
+        { action: 'wardrobe', label: '洋服箪笥', left: 54, top: 12, width: 29, height: 13 },
+        { action: 'kitchen', label: '台所', left: 66, top: 29, width: 20, height: 20 },
+        { action: 'fridge', label: '冷蔵庫', left: 67, top: 49, width: 19, height: 14 },
+        { action: 'stove', label: '薪ストーブ', left: 62, top: 64, width: 27, height: 17 },
+        { action: 'attic', label: '屋根裏へ上がる', left: 16, top: 39, width: 22, height: 18 },
+        { action: 'basement', label: '地下へ降りる', left: 10, top: 61, width: 22, height: 20 },
+        { action: 'entry', label: '玄関土間', left: 27, top: 81, width: 42, height: 18 }
+      ]
+    },
+
+    basement: {
+      placeName: '山小屋・地下',
+      image: 'assets/survival/survival_room02.png',
+      imageStyle: {
+        objectPosition: 'center center',
+        transform: 'none',
+        transformOrigin: 'center center'
+      },
+      hotspots: [
+        { action: 'basementUp', label: '1階へ上がる', left: 10.5, top: 45.5, width: 14, height: 12.5 },
+        { action: 'firewoodStorage', label: '薪置き場', left: 73.2, top: 37.2, width: 17.8, height: 11.7 },
+        { action: 'foodShelf', label: '食料棚', left: 73.2, top: 49.2, width: 17.8, height: 15.2 }
+      ]
+    }
+  });
 
   const $ = id => document.getElementById(id);
 
@@ -73,7 +108,7 @@
         String(minute).padStart(2, '0') + ':' +
         String(second).padStart(2, '0');
     }
-    if ($('placeName')) $('placeName').textContent = '山小屋・1階';
+    if ($('placeName')) $('placeName').textContent = FLOOR_CONFIGS[currentFloor].placeName;
     if ($('roomTemperature')) $('roomTemperature').textContent = '18℃';
     if ($('weather')) $('weather').textContent = '雪';
 
@@ -226,37 +261,45 @@
       }
 
       @keyframes survivalHotspotPulse {
-        from {
-          opacity: .72;
-          filter: brightness(1);
-        }
-        to {
-          opacity: 1;
-          filter: brightness(1.16);
-        }
+        from { opacity: .72; filter: brightness(1); }
+        to { opacity: 1; filter: brightness(1.16); }
       }
     `;
     document.head.appendChild(style);
   }
 
-  function setHotspotsForFloor(floor) {
+  function applyFloorplanView(floor) {
+    const config = FLOOR_CONFIGS[floor];
+    const image = $('floorplanImage');
+    if (!config || !image) return;
+
+    image.src = config.image;
+    image.style.objectPosition = config.imageStyle.objectPosition;
+    image.style.transform = config.imageStyle.transform;
+    image.style.transformOrigin = config.imageStyle.transformOrigin;
+  }
+
+  function renderHotspots(floor) {
+    const config = FLOOR_CONFIGS[floor];
     const roomHotspots = $('roomHotspots');
-    if (!roomHotspots) return;
+    if (!config || !roomHotspots) return;
 
     roomHotspots.style.display = '';
+    roomHotspots.replaceChildren();
 
-    roomHotspots.querySelectorAll('.room-hotspot').forEach(button => {
-      const action = button.dataset.roomAction;
-      const visible = floor === 'first' || action === 'basement';
-      button.style.display = visible ? '' : 'none';
-      button.classList.toggle('tap-glow', visible);
+    config.hotspots.forEach(def => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'room-hotspot tap-glow';
+      button.dataset.roomAction = def.action;
+      button.setAttribute('aria-label', def.label);
 
-      if (action === 'basement') {
-        button.setAttribute(
-          'aria-label',
-          floor === 'basement' ? '1階へ上がる' : '地下へ降りる'
-        );
-      }
+      button.style.left = def.left + '%';
+      button.style.top = def.top + '%';
+      button.style.width = def.width + '%';
+      button.style.height = def.height + '%';
+
+      roomHotspots.appendChild(button);
     });
   }
 
@@ -271,7 +314,9 @@
 
     if (floorplanLayer) floorplanLayer.classList.remove('visible');
     if (messagePanel) messagePanel.classList.remove('hidden');
-    setHotspotsForFloor('first');
+
+    applyFloorplanView('first');
+    renderHotspots('first');
 
     if (roomBackground && window.SURVIVAL_EVENTS) {
       roomBackground.style.backgroundImage = `url("${SURVIVAL_EVENTS.assets.cabinInterior}")`;
@@ -284,11 +329,13 @@
     if (grantCharacter) grantCharacter.classList.add('visible');
   }
 
-  function showFloorplan() {
-    currentFloor = 'first';
+  function showFloor(floor) {
+    const config = FLOOR_CONFIGS[floor];
+    if (!config) return;
+
+    currentFloor = floor;
 
     const floorplanLayer = $('floorplanLayer');
-    const floorplanImage = $('floorplanImage');
     const messagePanel = $('messagePanel');
     const grantCharacter = $('grantCharacter');
     const roomBackground = $('roomBackground');
@@ -297,37 +344,20 @@
     if (messagePanel) messagePanel.classList.add('hidden');
     if (grantCharacter) grantCharacter.classList.remove('visible');
     if (roomBackground) roomBackground.style.opacity = '0';
-    if ($('placeName')) $('placeName').textContent = '山小屋・1階';
-    setHotspotsForFloor('first');
+    if ($('placeName')) $('placeName').textContent = config.placeName;
 
-    if (floorplanImage) {
-      floorplanImage.src = FIRST_FLOORPLAN_IMAGE;
-    }
+    applyFloorplanView(floor);
+    renderHotspots(floor);
+
     if (floorplanLayer) floorplanLayer.classList.add('visible');
   }
 
+  function showFloorplan() {
+    showFloor('first');
+  }
+
   function showBasement() {
-    currentFloor = 'basement';
-
-    const floorplanLayer = $('floorplanLayer');
-    const floorplanImage = $('floorplanImage');
-    const messagePanel = $('messagePanel');
-    const grantCharacter = $('grantCharacter');
-    const roomBackground = $('roomBackground');
-
-    hideMessage();
-    if (messagePanel) messagePanel.classList.add('hidden');
-    if (grantCharacter) grantCharacter.classList.remove('visible');
-    if (roomBackground) roomBackground.style.opacity = '0';
-    if ($('placeName')) $('placeName').textContent = '山小屋・地下';
-
-    // 地下では階段のタップ領域だけ残し、同じ階段を押すと1階へ戻る。
-    setHotspotsForFloor('basement');
-
-    if (floorplanImage) {
-      floorplanImage.src = BASEMENT_FLOORPLAN_IMAGE;
-    }
-    if (floorplanLayer) floorplanLayer.classList.add('visible');
+    showFloor('basement');
   }
 
   function runDialogueNode(nodeId) {
@@ -396,50 +426,77 @@
     });
   }
 
-  function openInventory(storageId) {
+  function openInventory(storageId, storageName) {
+    const inventory = window.SURVIVAL_INVENTORY;
+
+    if (inventory && typeof inventory.getStorage === 'function' && typeof inventory.ensureContainer === 'function') {
+      if (!inventory.getStorage(storageId)) {
+        inventory.ensureContainer(storageId, {
+          name: storageName || storageId,
+          items: {}
+        });
+      }
+    }
+
     location.href = 'survival-inventory.html?storage=' + encodeURIComponent(storageId);
   }
 
+  function handleRoomAction(action) {
+    switch (action) {
+      case 'wardrobe':
+        openInventory('wardrobe', '洋服箪笥');
+        break;
+
+      case 'fridge':
+        openInventory('fridge', '冷蔵庫');
+        break;
+
+      case 'bed':
+        showRoomMessage('ベッドがあります。');
+        break;
+
+      case 'kitchen':
+        showRoomMessage('台所があります。');
+        break;
+
+      case 'stove':
+        showRoomMessage('薪ストーブです。火が燃えています。');
+        break;
+
+      case 'attic':
+        showRoomMessage('天井収納へ上がるための、はしごがあります。');
+        break;
+
+      case 'basement':
+        showBasement();
+        break;
+
+      case 'basementUp':
+        showFloorplan();
+        break;
+
+      case 'firewoodStorage':
+        openInventory('firewoodStorage', '薪置き場');
+        break;
+
+      case 'foodShelf':
+        openInventory('foodShelf', '食料棚');
+        break;
+
+      case 'entry':
+        showRoomMessage('玄関土間です。');
+        break;
+    }
+  }
+
   function bindRoomHotspots() {
-    document.querySelectorAll('.room-hotspot').forEach(button => {
-      button.addEventListener('click', () => {
-        const action = button.dataset.roomAction;
+    const roomHotspots = $('roomHotspots');
+    if (!roomHotspots) return;
 
-        switch (action) {
-          case 'wardrobe':
-            openInventory('wardrobe');
-            break;
-
-          case 'fridge':
-            openInventory('fridge');
-            break;
-
-          case 'bed':
-            showRoomMessage('ベッドがあります。');
-            break;
-
-          case 'kitchen':
-            showRoomMessage('台所があります。');
-            break;
-
-          case 'stove':
-            showRoomMessage('薪ストーブです。火が燃えています。');
-            break;
-
-          case 'attic':
-            showRoomMessage('天井収納へ上がるための、はしごがあります。');
-            break;
-
-          case 'basement':
-            if (currentFloor === 'basement') showFloorplan();
-            else showBasement();
-            break;
-
-          case 'entry':
-            showRoomMessage('玄関土間です。');
-            break;
-        }
-      });
+    roomHotspots.addEventListener('click', event => {
+      const button = event.target.closest('.room-hotspot');
+      if (!button || !roomHotspots.contains(button)) return;
+      handleRoomAction(button.dataset.roomAction);
     });
   }
 
