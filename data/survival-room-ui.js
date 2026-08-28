@@ -520,13 +520,121 @@
     }
   }
 
+  function ensureBackConfirmStyle() {
+    if (document.getElementById('survivalBackConfirmStyle')) return;
+
+    const style = document.createElement('style');
+    style.id = 'survivalBackConfirmStyle';
+    style.textContent = `
+      .survival-back-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0,0,0,.42);
+      }
+
+      .survival-back-confirm-box {
+        width: min(100%, 360px);
+        padding: 20px 18px 16px;
+        border: 1px solid #8f8f8f;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 10px 28px rgba(0,0,0,.28);
+        text-align: center;
+      }
+
+      .survival-back-confirm-text {
+        margin: 0 0 18px;
+        font-size: 18px;
+        line-height: 1.5;
+        font-weight: 800;
+      }
+
+      .survival-back-confirm-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .survival-back-confirm-button {
+        min-height: 48px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        background: #f6f6f6;
+        font-size: 17px;
+        font-weight: 900;
+      }
+
+      .survival-back-confirm-button.yes {
+        background: #efe5d2;
+        border-color: #8c6b3e;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function closeBackConfirm() {
+    const overlay = document.getElementById('survivalBackConfirmOverlay');
+    if (overlay) overlay.remove();
+  }
+
+  function showBackConfirm() {
+    if (document.getElementById('survivalBackConfirmOverlay')) return;
+
+    ensureBackConfirmStyle();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'survivalBackConfirmOverlay';
+    overlay.className = 'survival-back-confirm-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'ゲームの最初の画面に戻る確認');
+
+    const box = document.createElement('div');
+    box.className = 'survival-back-confirm-box';
+
+    const text = document.createElement('p');
+    text.className = 'survival-back-confirm-text';
+    text.textContent = 'ゲームの最初の画面に戻りますか？';
+
+    const actions = document.createElement('div');
+    actions.className = 'survival-back-confirm-actions';
+
+    const yesButton = document.createElement('button');
+    yesButton.type = 'button';
+    yesButton.className = 'survival-back-confirm-button yes';
+    yesButton.textContent = 'はい';
+    yesButton.addEventListener('click', () => {
+      location.href = 'survival%20game_TOP.html';
+    });
+
+    const noButton = document.createElement('button');
+    noButton.type = 'button';
+    noButton.className = 'survival-back-confirm-button';
+    noButton.textContent = 'いいえ';
+    noButton.addEventListener('click', closeBackConfirm);
+
+    actions.append(yesButton, noButton);
+    box.append(text, actions);
+    overlay.appendChild(box);
+
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) closeBackConfirm();
+    });
+
+    document.body.appendChild(overlay);
+    noButton.focus();
+  }
+
   function bindBackButton() {
     const button = $('backButton');
     if (!button) return;
 
-    button.addEventListener('click', () => {
-      location.href = 'survival%20game_TOP.html';
-    });
+    button.addEventListener('click', showBackConfirm);
   }
 
   function startRoom() {
