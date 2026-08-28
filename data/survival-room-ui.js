@@ -202,6 +202,43 @@
     sessionStorage.setItem(ROOM_FLAGS_KEY, JSON.stringify(data));
   }
 
+  function ensureHotspotGlowStyle() {
+    if (document.getElementById('survivalHotspotGlowStyle')) return;
+
+    const style = document.createElement('style');
+    style.id = 'survivalHotspotGlowStyle';
+    style.textContent = `
+      .room-hotspot.tap-glow {
+        background: rgba(255, 226, 92, .12) !important;
+        box-shadow:
+          inset 0 0 0 2px rgba(255, 214, 64, .78),
+          0 0 10px rgba(255, 210, 56, .72),
+          0 0 20px rgba(255, 210, 56, .35);
+        animation: survivalHotspotPulse 1.15s ease-in-out infinite alternate;
+      }
+
+      .room-hotspot.tap-glow:active {
+        background: rgba(255, 224, 92, .28) !important;
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 196, 20, .95),
+          0 0 14px rgba(255, 196, 20, .95),
+          0 0 26px rgba(255, 196, 20, .55);
+      }
+
+      @keyframes survivalHotspotPulse {
+        from {
+          opacity: .72;
+          filter: brightness(1);
+        }
+        to {
+          opacity: 1;
+          filter: brightness(1.16);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function setHotspotsForFloor(floor) {
     const roomHotspots = $('roomHotspots');
     if (!roomHotspots) return;
@@ -212,6 +249,7 @@
       const action = button.dataset.roomAction;
       const visible = floor === 'first' || action === 'basement';
       button.style.display = visible ? '' : 'none';
+      button.classList.toggle('tap-glow', visible);
 
       if (action === 'basement') {
         button.setAttribute(
@@ -435,6 +473,7 @@
   }
 
   function startRoom() {
+    ensureHotspotGlowStyle();
     renderStatus();
     bindBackButton();
     bindMessageEvents();
