@@ -10,7 +10,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-sys
 body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .game{position:relative;width:min(100%,540px);height:100dvh;margin:0 auto;padding:calc(5px + env(safe-area-inset-top)) 6px calc(6px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;overflow:hidden}
 .topbar{flex:0 0 auto;display:grid;grid-template-columns:36px 52px 80px minmax(0,1fr);gap:4px;align-items:center}
-.back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid #999;border-radius:9px;background:#fff;color:#222;text-decoration:none;font-size:22px;font-weight:900;line-height:1}
+.back{width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid #999;border-radius:9px;background:#fff;color:#222;text-decoration:none;font-size:22px;font-weight:900;line-height:1}
 .top-small{height:36px;padding:0 5px;display:flex;align-items:center;justify-content:center;border:1px solid #aaa;border-radius:9px;background:#fff;font-size:13px;font-weight:800;line-height:1;white-space:nowrap}.place{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .environment-bar{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4px}.environment-card{height:32px;padding:0 9px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #aaa;border-radius:9px;background:#f8f8f8;white-space:nowrap}.environment-label{font-size:13px;color:#555;font-weight:800}.environment-value{font-size:15px;color:#222;font-weight:900}
 .meters{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.meter{height:32px;min-width:0;padding:2px 5px;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #aaa;border-radius:9px;background:#fff}.meter-icon{width:18px;height:18px;flex:0 0 18px}.meter-outline{fill:none;stroke:#262626;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}.meter-value{min-width:0;font-size:13px;font-weight:900;line-height:1;white-space:nowrap}
@@ -29,7 +29,7 @@ body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-w
 </head>
 <body>
 <main id="game" class="game">
-<header class="topbar"><a class="back" href="survival%20game_TOP.html" aria-label="戻る">←</a><div id="day" class="top-small">Day.1</div><div id="clock" class="top-small">08:00:00</div><div id="currentPlace" class="top-small place">針葉樹林</div></header>
+<header class="topbar"><button id="backButton" class="back" type="button" data-survival-top-back aria-label="戻る">←</button><div id="day" class="top-small">Day.1</div><div id="clock" class="top-small">08:00:00</div><div id="currentPlace" class="top-small place">針葉樹林</div></header>
 <section class="environment-bar"><div class="environment-card"><span id="temperatureLabel" class="environment-label">気温</span><span id="ambientTemperature" class="environment-value">-8℃</span></div><div class="environment-card"><span class="environment-label">天気</span><span id="weatherValue" class="environment-value">雪</span></div></section>
 <section class="meters">
 <div class="meter"><svg class="meter-icon" viewBox="0 0 24 24"><defs><clipPath id="tempClip"><rect id="tempClipRect" x="0" y="0" width="24" height="24"></rect></clipPath></defs><path id="tempFill" clip-path="url(#tempClip)" d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"></path><path class="meter-outline" d="M12 2C9.8 2 8 3.8 8 6v8.1C6.7 15.3 6 17 6 18.7 6 22 8.7 24 12 24s6-2 6-5.3c0-1.7-.7-3.4-2-4.6V6c0-2.2-1.8-4-4-4Z"></path></svg><div id="tempValue" class="meter-value">体温 36.7℃</div></div>
@@ -44,6 +44,7 @@ body{min-height:100dvh}button,a{font:inherit}button{touch-action:manipulation;-w
 <div id="deadModal" class="dead-modal"><section class="dead-card"><h2 class="dead-title">DEAD</h2><p id="deadReason" class="dead-reason"></p><button id="restartButton" class="restart-button">最初から</button></section></div>
 <script src="data/survival-items.js"></script>
 <script src="data/survival-events.js"></script>
+<script src="data/survival-common-ui.js"></script>
 <script>
 'use strict';
 let gameSeconds=8*60*60,bodyTemperature=36.7,hunger=100,stamina=100,gameOver=false,menuOpen=false,messageOpen=false,currentMenu=null,metSurvivor=false,cabinExplorationUnlocked=false,currentScene='start',messagePages=[],messageIndex=0,finalMessageAction=null,eventActive=false,eventStepIndex=0,eventSteps=[],activeEventId=null;
