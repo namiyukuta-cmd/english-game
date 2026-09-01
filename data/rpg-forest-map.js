@@ -24,8 +24,23 @@ window.RPG_MAP = {
     { x: 60, y: 840 }, { x: 150, y: 885 }, { x: 390, y: 870 },
     { x: 480, y: 820 }
   ],
-  npcs: [],
+  npcs: [
+    { id: 'forest_ranger_01', x: 360, y: 455, name: '森の旅人' }
+  ],
   exits: [
+    {
+      id: 'to_deep_forest',
+      x: 270,
+      y: 12,
+      width: 90,
+      height: 24,
+      name: '深い森',
+      label: '深い森 ↑',
+      labelPosition: { x: 270, y: 36 },
+      destination: 'rpg_deep_forest.html',
+      destinationReturnKey: 'rpgDeepForestReturnPositionV1',
+      destinationPosition: { x: 270, y: 875 }
+    },
     {
       id: 'to_north_field',
       x: 270,
@@ -40,5 +55,10 @@ window.RPG_MAP = {
       destinationPosition: { x: 270, y: 70 }
     }
   ],
-  enemies: []
+  enemies: [
+    { id: 'forest_green_slime_01', x: 125, y: 350, name: '森の緑スライム', kind: 'green' },
+    { id: 'forest_blue_slime_01', x: 405, y: 330, name: '森の青スライム', kind: 'blue' },
+    { id: 'forest_horn_slime_01', x: 155, y: 620, name: '森のツノスライム', kind: 'horn-purple' },
+    { id: 'forest_red_slime_01', x: 390, y: 710, name: '森の赤スライム', kind: 'red' }
+  ]
 };
