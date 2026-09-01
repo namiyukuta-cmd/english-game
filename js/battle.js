@@ -3,17 +3,33 @@
   const shuffle = list => [...list].sort(() => Math.random() - 0.5);
   const normalize = value => String(value).trim().toLowerCase();
   const params = new URLSearchParams(location.search);
+
   const enemyName = params.get('enemy') || 'スライム';
   const enemyId = params.get('id') || '';
-  const allowedReturnPages = new Set(['rpg.html', 'rpg_field.html']);
   const requestedReturnPage = params.get('return') || 'rpg.html';
+  const allowedReturnPages = new Set([
+    'rpg.html',
+    'rpg_field.html',
+    'rpg_forest.html',
+    'rpg_deep_forest.html',
+    'rpg_lake.html'
+  ]);
   const returnPage = allowedReturnPages.has(requestedReturnPage)
     ? requestedReturnPage
     : 'rpg.html';
+
   const isBlackBoss =
     enemyId === 'boss_black_slime_01' ||
     enemyName.includes('黒スライム');
-  const reward = isBlackBoss ? 50 : 12;
+
+  const mapSentenceLevel = {
+    'rpg_forest.html': 3,
+    'rpg_deep_forest.html': 4,
+    'rpg_lake.html': 5
+  };
+  const sentenceLevel = isBlackBoss ? 2 : (mapSentenceLevel[returnPage] || 0);
+  const sentenceMode = isBlackBoss || sentenceLevel >= 3;
+  const reward = isBlackBoss ? 50 : sentenceMode ? 18 + sentenceLevel * 6 : 12;
 
   document.querySelectorAll('.back, .victory-card a').forEach(link => {
     link.addEventListener('click', event => {
@@ -32,19 +48,31 @@
 
   function getEnemyImage() {
     if (isBlackBoss) return enemyImages.black;
-    if (enemyId.startsWith('blue_') || enemyName.includes('青')) return enemyImages.blue;
-    if (enemyId.startsWith('green_') || enemyName.includes('緑')) return enemyImages.green;
-    if (enemyId.startsWith('horn_') || enemyName.includes('ツノ') || enemyName.includes('紫')) return enemyImages.purple;
+    if (enemyName.includes('青')) return enemyImages.blue;
+    if (enemyName.includes('緑')) return enemyImages.green;
+    if (enemyName.includes('ツノ') || enemyName.includes('紫')) return enemyImages.purple;
     return enemyImages.red;
   }
 
   const studyPool = WordData.getCurrentStudyWords(GameStore.state.studyProgress);
   const unlocked = studyPool.filter(word => GameStore.state.unlockedWordIds.includes(word.id));
-  const sentencePool = Array.isArray(window.SENTENCES)
-    ? window.SENTENCES.filter(sentence => sentence.level <= 2)
+  const allSentences = Array.isArray(window.SENTENCES) ? window.SENTENCES : [];
+
+  function getSentencePool() {
+    if (!sentenceMode) return [];
+    if (isBlackBoss) return allSentences.filter(sentence => sentence.level <= 2);
+
+    const exactLevel = allSentences.filter(sentence => sentence.level === sentenceLevel);
+    if (exactLevel.length >= 4) return exactLevel;
+    return allSentences.filter(sentence => sentence.level <= sentenceLevel && sentence.level >= Math.max(2, sentenceLevel - 1));
+  }
+
+  const sentencePool = getSentencePool();
+  const sentenceRoundCount = isBlackBoss ? 5 : sentenceLevel >= 4 ? 4 : 3;
+  const sentenceRounds = sentenceMode
+    ? shuffle(sentencePool).slice(0, sentenceRoundCount)
     : [];
-  const bossSentenceRounds = isBlackBoss ? shuffle(sentencePool).slice(0, 5) : [];
-  const maxHp = isBlackBoss ? bossSentenceRounds.length : 6;
+  const maxHp = sentenceMode ? Math.max(1, sentenceRounds.length) : 6;
 
   let firstPick = null;
   let sentenceRound = 0;
@@ -73,17 +101,18 @@
 
   const board = $('wordBoard');
 
-  if (isBlackBoss) {
+  if (sentenceMode) {
     document.querySelector('.battle-shell').classList.add('boss-sentence-mode');
     $('bossSentenceBattle').classList.remove('hidden');
     board.classList.add('sentence-board');
-    renderBossSentenceRound();
+    renderSentenceRound();
   } else {
     renderWordPairBattle();
   }
 
   function renderWordPairBattle() {
-    const words = shuffle(unlocked).slice(0, 6);
+    const source = unlocked.length >= 6 ? unlocked : WordData.all;
+    const words = shuffle(source).slice(0, 6);
     const tiles = shuffle(words.flatMap(word => [
       { key: word.id, type: 'en', text: word.en },
       { key: word.id, type: 'ja', text: word.ja }
@@ -144,27 +173,29 @@
 
   function makeSentenceDistractors(sentence, count) {
     const answerWords = new Set(sentence.answer.map(normalize));
-    const source = Array.isArray(window.WORDS) ? window.WORDS : unlocked;
-    const candidates = source
-      .map(word => word.en)
-      .filter(word => !answerWords.has(normalize(word)));
+    const candidates = [
+      ...(Array.isArray(window.WORDS) ? window.WORDS.map(word => word.en) : []),
+      ...allSentences.flatMap(item => item.answer)
+    ].filter(word => !answerWords.has(normalize(word)));
     return [...new Set(shuffle(candidates))].slice(0, count);
   }
 
-  function renderBossSentenceRound() {
+  function renderSentenceRound() {
     if (victory) return;
-    const sentence = bossSentenceRounds[sentenceRound];
+    const sentence = sentenceRounds[sentenceRound];
     if (!sentence) return;
 
     locked = false;
     sentencePicked = [];
     board.innerHTML = '';
+
+    const levelLabel = isBlackBoss ? 'BOSS' : `LEVEL ${sentenceLevel}`;
     $('bossSentencePrompt').textContent =
-      `第${sentenceRound + 1}問 / ${bossSentenceRounds.length}　「${sentence.jp}」`;
+      `${levelLabel}　第${sentenceRound + 1}問 / ${sentenceRounds.length}　「${sentence.jp}」`;
     renderSentenceAnswer();
     $('battleMessage').textContent = '正しい英文になるように単語を選ぼう';
 
-    const distractorCount = sentenceRound < 2 ? 1 : 3;
+    const distractorCount = sentenceLevel >= 5 ? 4 : sentenceLevel >= 4 ? 3 : 2;
     const tokens = shuffle([
       ...sentence.answer,
       ...makeSentenceDistractors(sentence, distractorCount)
@@ -183,7 +214,7 @@
   function pickSentenceWord(button, word, index) {
     if (locked || victory || button.classList.contains('matched')) return;
 
-    const sentence = bossSentenceRounds[sentenceRound];
+    const sentence = sentenceRounds[sentenceRound];
     const expectedWord = sentence.answer[sentencePicked.length];
     if (normalize(word) !== normalize(expectedWord)) {
       const answerWords = sentence.answer.map(normalize);
@@ -208,7 +239,7 @@
 
     if (sentencePicked.length === sentence.answer.length) {
       locked = true;
-      setTimeout(checkBossSentence, 180);
+      setTimeout(checkSentence, 180);
     }
   }
 
@@ -218,13 +249,34 @@
       : 'ここに英文ができます';
   }
 
-  function resetBossSentenceSelection() {
+  function resetSentenceSelection() {
     if (victory) return;
     sentencePicked.forEach(item => item.button.classList.remove('matched', 'wrong'));
     sentencePicked = [];
     locked = false;
     renderSentenceAnswer();
   }
+
+  function checkSentence() {
+    const sentence = sentenceRounds[sentenceRound];
+    const answer = sentencePicked.map(item => normalize(item.word));
+    const correct = answer.every((word, index) => word === normalize(sentence.answer[index]));
+
+    if (!correct) {
+      signalWrongAnswer();
+      $('battleMessage').textContent = '語順が違います。選びなおそう';
+      sentencePicked.forEach(item => item.button.classList.add('wrong'));
+      setTimeout(resetSentenceSelection, 650);
+      return;
+    }
+
+    if (typeof GameStore.seeSentence === 'function') GameStore.seeSentence(sentence.id);
+    const completedSentence = sentence.answer.join(' ');
+    sentenceRound += 1;
+    attackEnemy(completedSentence);
+  }
+
+  $('bossSentenceReset').addEventListener('click', resetSentenceSelection);
 
   function signalWrongAnswer() {
     const layer = $('wrongEffect');
@@ -235,8 +287,7 @@
       [-128,-72,18,-32,0],[-96,-20,11,24,10],[-76,58,16,-18,20],
       [-42,-92,10,42,0],[-24,34,20,-35,25],[-8,-48,13,16,15],
       [18,72,12,38,10],[36,-78,19,-22,20],[58,22,10,30,0],
-      [78,-36,15,-40,25],[98,66,18,18,15],[126,-8,12,-28,5],
-      [-142,18,9,20,25],[144,42,10,-16,20],[4,12,24,28,0]
+      [78,-36,15,-40,25],[98,66,18,18,15],[126,-8,12,-28,5]
     ];
     const particles = particleData.map(([x,y,size,rotate,delay]) => {
       const particle = document.createElement('span');
@@ -258,31 +309,6 @@
     }, 520);
   }
 
-  function checkBossSentence() {
-    const sentence = bossSentenceRounds[sentenceRound];
-    const answer = sentencePicked.map(item => normalize(item.word));
-    const correct = answer.every((word, index) =>
-      word === normalize(sentence.answer[index])
-    );
-
-    if (!correct) {
-      signalWrongAnswer();
-      $('battleMessage').textContent = '語順が違います。選びなおそう';
-      sentencePicked.forEach(item => item.button.classList.add('wrong'));
-      setTimeout(resetBossSentenceSelection, 650);
-      return;
-    }
-
-    if (typeof GameStore.seeSentence === 'function') {
-      GameStore.seeSentence(sentence.id);
-    }
-    const completedSentence = sentence.answer.join(' ');
-    sentenceRound += 1;
-    attackEnemy(completedSentence);
-  }
-
-  $('bossSentenceReset').addEventListener('click', resetBossSentenceSelection);
-
   function attackEnemy(completedSentence = '') {
     hp -= 1;
     const segments = [...hpBox.children];
@@ -294,11 +320,10 @@
     sprite.classList.add('hit');
 
     if (hp > 0) {
-      if (isBlackBoss) {
-        $('battleMessage').textContent =
-          `正解！ ${completedSentence}.　${enemyName}に攻撃！`;
+      if (sentenceMode) {
+        $('battleMessage').textContent = `正解！ ${completedSentence}.　${enemyName}に攻撃！`;
         setTimeout(() => {
-          if (!victory) renderBossSentenceRound();
+          if (!victory) renderSentenceRound();
         }, 850);
       } else {
         $('battleMessage').textContent = `${enemyName}に攻撃！ あと${hp}回`;
