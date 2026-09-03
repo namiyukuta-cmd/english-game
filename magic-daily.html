@@ -73,17 +73,6 @@
   </main>
 
   <script src="js/magic-state.js?v=20260903-2"></script>
-  <script src="js/magic-daily.js?v=20260903-5"></script>
-  <script>
-    document.addEventListener('click',event=>{
-      const button=event.target.closest('button');
-      if(!button)return;
-      if(button.textContent.replace(/\s+/g,' ').trim().startsWith('Go to work')){
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        location.href='magic-school.html?v=20260903-6';
-      }
-    },true);
-  </script>
+  <script src="js/magic-daily.js?v=20260903-6"></script>
 </body>
 </html>
