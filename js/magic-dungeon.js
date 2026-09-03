@@ -21,6 +21,13 @@
     [[0,0],[0,-1],[-1,-1],[1,-1],[-1,-2],[1,-2],[1,-3],[2,-2]]
   ];
 
+  const ENEMIES=[
+    {enemyName:'Goblin',ja:'ゴブリン',visual:'👺',hp:4,attack:1,description:'A goblin blocks the way.'},
+    {enemyName:'Red Slime',ja:'赤いスライム',visual:'🔴',hp:3,attack:1,description:'A red slime appears.'},
+    {enemyName:'Blue Slime',ja:'青いスライム',visual:'🔵',hp:3,attack:1,description:'A blue slime appears.'},
+    {enemyName:'Skeleton',ja:'骸骨兵',visual:'💀',hp:4,attack:1,description:'A skeleton raises its weapon.'}
+  ];
+
   const months=['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
   const weekdays=['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];
   const weekShort=['1st wk.','2nd wk.','3rd wk.','4th wk.','5th wk.'];
@@ -124,26 +131,15 @@
   function generateFloor(number){
     const base=templates[Math.floor(Math.random()*templates.length)];
     const coords=transformedCoords(base);
-    const tiles=coords.map(([x,y],id)=>({id,x,y,links:{}}));
+    const tiles=coords.map(([x,y],id)=>({id,x,y,links:{},encounterChecked:id===0,encounterResolved:id===0,enemyPending:null}));
     buildLinks(tiles);
     const stairsDown=farthestLeaf(tiles);
-    return {
-      number,
-      tiles,
-      discovered:[0],
-      current:0,
-      stairsUp:number>1?0:null,
-      stairsDown
-    };
+    return {number,tiles,discovered:[0],current:0,stairsUp:number>1?0:null,stairsDown};
   }
 
   function ensureDungeon(){
     if(!state.magicDungeon||state.magicDungeon.version!==DUNGEON_VERSION){
-      state.magicDungeon={
-        version:DUNGEON_VERSION,
-        activeFloor:1,
-        floors:{1:generateFloor(1)}
-      };
+      state.magicDungeon={version:DUNGEON_VERSION,activeFloor:1,floors:{1:generateFloor(1)}};
       save();
     }
     const dungeon=state.magicDungeon;
@@ -199,7 +195,8 @@
 
       const mark=document.createElement('span');
       mark.className='cell-mark';
-      if(floor.number===1&&tile.id===0)mark.textContent='S';
+      if(tile.enemyPending&&!tile.encounterResolved)mark.textContent='!';
+      else if(floor.number===1&&tile.id===0)mark.textContent='S';
       else if(tile.id===floor.stairsDown){mark.textContent='↓';mark.classList.add('stairs')}
       else if(floor.number>1&&tile.id===floor.stairsUp){mark.textContent='↑';mark.classList.add('stairs')}
       cell.appendChild(mark);
@@ -232,12 +229,57 @@
     renderControls(floor);
   }
 
+  function beginEncounter(enemy,floor,tile,returnTileId){
+    const battle={
+      floorNumber:floor.number,
+      tileId:tile.id,
+      returnTileId,
+      enemyName:enemy.enemyName,
+      enemyJa:enemy.ja,
+      visual:enemy.visual,
+      description:enemy.description,
+      enemyHp:enemy.hp,
+      enemyMaxHp:enemy.hp,
+      enemyAttack:enemy.attack
+    };
+    tile.enemyPending={...battle};
+    state.magicBattle=battle;
+    save();
+    showEncounter(battle);
+  }
+
+  function showEncounter(battle){
+    document.querySelector('.encounter-overlay')?.remove();
+    const overlay=document.createElement('div');
+    overlay.className='encounter-overlay';
+    overlay.innerHTML=`<section class="encounter-card"><small>ENCOUNTER!</small><div class="encounter-visual">${battle.visual||'👺'}</div><h2>${battle.enemyJa||battle.enemyName}が現れた！</h2><p>${battle.enemyName} blocks the way.</p><button id="encounterFight" type="button">Fight<br><small>戦う</small></button></section>`;
+    document.body.appendChild(overlay);
+    $('encounterFight').onclick=()=>{location.href='magic-battle.html?v=20260903-1'};
+  }
+
+  function maybeEncounter(floor,tile,returnTileId,isNew){
+    if(tile.encounterResolved)return false;
+    if(tile.enemyPending){
+      state.magicBattle={...tile.enemyPending,returnTileId};
+      save();
+      showEncounter(state.magicBattle);
+      return true;
+    }
+    if(!isNew||tile.id===floor.stairsDown||(floor.number>1&&tile.id===floor.stairsUp))return false;
+    tile.encounterChecked=true;
+    if(Math.random()>=0.45){save();return false}
+    const enemy=ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+    beginEncounter(enemy,floor,tile,returnTileId);
+    return true;
+  }
+
   function move(dir){
     const floor=currentFloor();
     const tile=floor.tiles[floor.current];
     const target=tile.links[dir];
     if(target===undefined)return;
 
+    const previousId=floor.current;
     const isNew=!floor.discovered.includes(target);
     floor.current=target;
     if(isNew)floor.discovered.push(target);
@@ -246,6 +288,9 @@
       : '探索済みの場所へ戻りました。枝道はそのまま残っています。';
     save();
     render();
+
+    const targetTile=floor.tiles[target];
+    maybeEncounter(floor,targetTile,previousId,isNew);
   }
 
   function goDown(){
@@ -276,13 +321,12 @@
 
   function returnMagic(){
     state.lastPlace='MAGIC SCHOOL';
+    state.magicBattle=null;
     save();
-    location.href='magic-school.html?v=20260903-8';
+    location.href='magic-school.html?v=20260903-9';
   }
 
-  document.querySelectorAll('.dir-btn').forEach(button=>{
-    button.onclick=()=>move(button.dataset.dir);
-  });
+  document.querySelectorAll('.dir-btn').forEach(button=>{button.onclick=()=>move(button.dataset.dir)});
   $('goDownBtn').onclick=goDown;
   $('goUpBtn').onclick=goUp;
   $('returnMagicBtn').onclick=returnMagic;
@@ -295,4 +339,11 @@
 
   ensureDungeon();
   render();
+
+  if(state.magicBattle){
+    const floor=currentFloor();
+    if(state.magicBattle.floorNumber===floor.number&&state.magicBattle.tileId===floor.current){
+      showEncounter(state.magicBattle);
+    }
+  }
 })();
