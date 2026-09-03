@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>Magic Battle</title>
-  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-2">
+  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-3">
 </head>
 <body>
   <main id="battleShell" class="magic-battle-shell">
@@ -40,14 +40,16 @@
 
     <button id="captureBtn" class="capture-button hidden" type="button">CAPTURE<small>捕まえる</small></button>
 
-    <section id="capturePanel" class="capture-panel hidden" aria-live="polite">
-      <h2>CAPTURE</h2>
-      <p class="capture-sub">英単語ゲームをクリアして捕まえる</p>
-      <div id="wordProgress" class="word-progress">1 / 3</div>
-      <div id="wordQuestion" class="word-question"></div>
-      <div id="wordOptions" class="word-options"></div>
-      <div id="wordResult" class="word-result"></div>
-      <button id="captureDone" class="capture-done hidden" type="button">探索に戻る</button>
+    <section id="capturePanel" class="capture-panel hidden" aria-live="polite" aria-modal="true" role="dialog">
+      <div class="capture-dialog">
+        <h2>CAPTURE</h2>
+        <p class="capture-sub">英単語ゲームをクリアして捕まえる</p>
+        <div id="wordProgress" class="word-progress">1 / 3</div>
+        <div id="wordQuestion" class="word-question"></div>
+        <div id="wordOptions" class="word-options"></div>
+        <div id="wordResult" class="word-result"></div>
+        <button id="captureDone" class="capture-done hidden" type="button">探索に戻る</button>
+      </div>
     </section>
   </main>
 
