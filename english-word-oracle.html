@@ -20,6 +20,8 @@
   .result.empty{color:#777}
   .result .en{font-size:27px;font-weight:800;line-height:1.25}
   .result .ja{font-size:20px;margin-top:2px}
+  .multi-result{font-size:19px;font-weight:750;line-height:1.65;word-break:break-word}
+  .multi-order{font-size:15px;color:#666;margin-bottom:5px;font-weight:600}
   details{margin-top:12px;border-top:1px solid #e5e5df;padding-top:8px}
   summary{cursor:pointer;font-weight:700;padding:8px 2px}
   .table-wrap{width:100%;overflow-x:auto;margin-top:6px}
@@ -28,6 +30,7 @@
   .word-table th{background:#f1f1ec;font-weight:800}
   .word-table .num{width:52px;text-align:center;color:#666}
   .word-table .en-col{width:42%;font-weight:700}
+  .group-row th{background:#e8e8e1;text-align:left;font-size:17px}
   @media(max-width:520px){
     main{padding:18px 12px 50px}
     .oracle-card{padding:14px 12px}
@@ -35,6 +38,7 @@
     .word-table th,.word-table td{padding:8px 7px}
     .word-table .num{width:44px}
     .word-table .en-col{width:43%}
+    .multi-result{font-size:18px}
   }
 </style>
 </head>
@@ -56,6 +60,14 @@ const oracleData={
 "形容詞・副詞":[["good","良い"],["bad","悪い"],["big","大きい"],["small","小さい"],["new","新しい"],["old","古い"],["young","若い"],["long","長い"],["short","短い"],["tall","背が高い"],["high","高い"],["low","低い"],["hot","暑い"],["cold","寒い"],["warm","暖かい"],["cool","涼しい"],["fast","速い"],["slow","遅い"],["happy","幸せな"],["sad","悲しい"],["busy","忙しい"],["fine","元気な"],["quiet","静かな"],["dirty","汚い"],["beautiful","美しい"],["nice","素敵"],["easy","簡単な"],["hard","難しい"],["kind","親切な"],["always","いつも"],["usually","たいてい"],["often","よく"],["sometimes","時々"],["never","決して〜ない"],["now","今"],["then","その時"],["soon","すぐに"],["again","再び"],["later","後で"],["also","〜もまた"],["here","ここ"],["there","そこ"],["very","とても"],["too","〜すぎる"],["well","上手に"],["early","早く"],["late","遅く"]],
 "疑問詞・前置詞・接続詞・指示詞":[["what","何"],["who","誰"],["whose","誰の"],["which","どちら"],["where","どこ"],["when","いつ"],["why","なぜ"],["how","どのように"],["this","これ"],["that","あれ"],["these","これら"],["those","あれら"],["in","〜の中に"],["on","〜の上に"],["at","〜で"],["under","〜の下に"],["by","〜のそばに"],["with","〜と一緒に"],["to","〜へ"],["for","〜のために"],["from","〜から"],["of","〜の"],["about","〜について"],["before","〜の前"],["after","〜の後"],["and","〜と"],["but","しかし"],["or","または"],["because","〜だから"],["so","だから"]],
 "数詞・序数":[["one","1"],["two","2"],["three","3"],["four","4"],["five","5"],["six","6"],["seven","7"],["eight","8"],["nine","9"],["ten","10"],["eleven","11"],["twelve","12"],["thirteen","13"],["fourteen","14"],["fifteen","15"],["sixteen","16"],["seventeen","17"],["eighteen","18"],["nineteen","19"],["twenty","20"],["thirty","30"],["forty","40"],["fifty","50"],["sixty","60"],["seventy","70"],["eighty","80"],["ninety","90"],["hundred","100"],["first","1st"],["second","2nd"],["third","3rd"],["fourth","4th"],["fifth","5th"]]
+};
+
+const natureGroups={
+  "動物":[0,13],
+  "植物":[13,17],
+  "自然":[17,21],
+  "天気":[21,25],
+  "色":[25,35]
 };
 
 const root=document.getElementById('oracleList');
@@ -83,9 +95,18 @@ Object.entries(oracleData).forEach(([category,words])=>{
   result.textContent='—';
 
   button.addEventListener('click',()=>{
+    result.classList.remove('empty');
+    if(category==='動物・植物・自然・天気・色'){
+      const picked=Object.entries(natureGroups).map(([name,[start,end]])=>{
+        const group=words.slice(start,end);
+        const [en,ja]=group[Math.floor(Math.random()*group.length)];
+        return `${en}（${ja}）`;
+      });
+      result.innerHTML=`<div class="multi-order">動物 / 植物 / 自然 / 天気 / 色</div><div class="multi-result">${picked.join(' / ')}</div>`;
+      return;
+    }
     const index=Math.floor(Math.random()*words.length);
     const [en,ja]=words[index];
-    result.classList.remove('empty');
     result.innerHTML=`<div class="en">${en}</div><div class="ja">${ja}</div>`;
   });
 
@@ -99,19 +120,43 @@ Object.entries(oracleData).forEach(([category,words])=>{
   table.className='word-table';
   table.innerHTML='<thead><tr><th class="num">No.</th><th class="en-col">英語</th><th>日本語</th></tr></thead>';
   const tbody=document.createElement('tbody');
-  words.forEach(([en,ja],index)=>{
-    const tr=document.createElement('tr');
-    const no=document.createElement('td');
-    no.className='num';
-    no.textContent=index+1;
-    const enTd=document.createElement('td');
-    enTd.className='en-col';
-    enTd.textContent=en;
-    const jaTd=document.createElement('td');
-    jaTd.textContent=ja;
-    tr.append(no,enTd,jaTd);
-    tbody.appendChild(tr);
-  });
+
+  if(category==='動物・植物・自然・天気・色'){
+    Object.entries(natureGroups).forEach(([groupName,[start,end]])=>{
+      const groupHead=document.createElement('tr');
+      groupHead.className='group-row';
+      groupHead.innerHTML=`<th colspan="3">${groupName}</th>`;
+      tbody.appendChild(groupHead);
+      words.slice(start,end).forEach(([en,ja],index)=>{
+        const tr=document.createElement('tr');
+        const no=document.createElement('td');
+        no.className='num';
+        no.textContent=index+1;
+        const enTd=document.createElement('td');
+        enTd.className='en-col';
+        enTd.textContent=en;
+        const jaTd=document.createElement('td');
+        jaTd.textContent=ja;
+        tr.append(no,enTd,jaTd);
+        tbody.appendChild(tr);
+      });
+    });
+  }else{
+    words.forEach(([en,ja],index)=>{
+      const tr=document.createElement('tr');
+      const no=document.createElement('td');
+      no.className='num';
+      no.textContent=index+1;
+      const enTd=document.createElement('td');
+      enTd.className='en-col';
+      enTd.textContent=en;
+      const jaTd=document.createElement('td');
+      jaTd.textContent=ja;
+      tr.append(no,enTd,jaTd);
+      tbody.appendChild(tr);
+    });
+  }
+
   table.appendChild(tbody);
   wrap.appendChild(table);
   details.append(summary,wrap);
