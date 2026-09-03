@@ -7,7 +7,7 @@
   <title>Magic School</title>
   <link rel="stylesheet" href="css/magic-daily.css?v=20260903-4">
   <link rel="stylesheet" href="css/magic-daily-compact.css?v=20260903-1">
-  <link rel="stylesheet" href="css/magic-school.css?v=20260903-1">
+  <link rel="stylesheet" href="css/magic-school.css?v=20260903-2">
 </head>
 <body>
   <main class="daily-shell">
@@ -59,7 +59,14 @@
         <span id="placeLabel">WORK</span>
       </div>
 
-      <div id="dailyContent" class="daily-content" aria-live="polite"></div>
+      <div id="dailyContent" class="daily-content" aria-live="polite">
+        <div class="school-place-list">
+          <button id="classroomBtn" class="place-button" type="button">
+            Magic Classroom
+            <small>魔法教室</small>
+          </button>
+        </div>
+      </div>
       <div id="dailyActions" class="daily-actions"></div>
     </section>
 
@@ -74,6 +81,6 @@
   </main>
 
   <script src="js/magic-state.js?v=20260903-2"></script>
-  <script src="js/magic-school.js?v=20260903-2"></script>
+  <script src="js/magic-school.js?v=20260903-3"></script>
 </body>
 </html>
