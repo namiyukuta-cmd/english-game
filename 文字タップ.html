@@ -15,7 +15,7 @@
     .app{width:min(620px,100%);height:100svh;margin:auto;padding:10px 12px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto 150px auto 1fr;gap:8px;overflow:hidden}
     .top{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px}
     .back{width:42px;height:42px;border:1px solid #3a4d67;border-radius:12px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
-    .title{text-align:center;font-weight:900;font-size:16px}.count{font-size:14px;color:#c9d5e5;white-space:nowrap}
+    .title{text-align:center;font-weight:900;font-size:16px}.title small{display:block;margin-top:2px;color:#8fa5c0;font-size:10px}.count{font-size:14px;color:#c9d5e5;white-space:nowrap}
 
     .field{position:relative;min-height:0;overflow:hidden;border:1px solid #2c405a;border-radius:20px;background:linear-gradient(#13243a,#09121f)}
     .field:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px;pointer-events:none}
@@ -25,7 +25,8 @@
 
     .quiz{padding:9px 11px;border:1px solid #334964;border-radius:18px;background:#111e30}
     .label{font-size:12px;color:#9db0c7;font-weight:800;margin-bottom:3px}
-    .jp{font-size:24px;font-weight:950;margin:0 0 6px;color:#ffd75a;line-height:1.2}
+    .jp{font-size:24px;font-weight:950;margin:0 0 5px;color:#ffd75a;line-height:1.2}
+    .hint{display:none;margin:0 0 6px;padding:5px 8px;border-radius:9px;background:#25344a;color:#bfeaff;font-size:13px;font-weight:900;line-height:1.35}.hint.show{display:block}
     .answer-row{display:grid;grid-template-columns:1fr auto;gap:7px}
     .answer-box{min-width:0;height:48px;border:2px solid #77dcff;border-radius:13px;background:#08111e;color:#fff;padding:0 13px;font-size:21px;font-weight:800;outline:none;caret-color:transparent;user-select:none;pointer-events:none}
     .submit{height:48px;border:0;border-radius:13px;background:#ffd54f;color:#172033;font-weight:900;padding:0 18px;font-size:18px}
@@ -65,7 +66,7 @@
   <main class="app">
     <header class="top">
       <a class="back" href="シューティングtop.html" aria-label="戻る">←</a>
-      <div class="title">英単語シューティング</div>
+      <div class="title">英単語シューティング<small id="difficultyLabel">普通</small></div>
       <div class="count"><span id="now">1</span> / 10</div>
     </header>
 
@@ -78,6 +79,7 @@
     <section class="quiz" id="quiz">
       <div class="label">さっき飛んできた英単語を入力してください</div>
       <p class="jp" id="jp"></p>
+      <div class="hint" id="hint"></div>
       <div class="answer-row">
         <input class="answer-box" id="answer" type="text" readonly inputmode="none" tabindex="-1" autocomplete="off" aria-label="英単語の入力内容">
         <button class="submit" id="submitBtn" type="button">決定</button>
@@ -101,6 +103,13 @@
 
   <script>
     const SAVE_KEY='eiken5TypingSave';
+    const PROGRESS_KEY='eiken5TypingProgress';
+    const DIFFICULTY={
+      easy:{label:'簡単',hintLetters:2},
+      normal:{label:'普通',hintLetters:1},
+      hard:{label:'難しい',hintLetters:0}
+    };
+
     const now=document.getElementById('now');
     const jpHit=document.getElementById('jpHit');
     const jp=document.getElementById('jp');
@@ -109,11 +118,15 @@
     const error=document.getElementById('error');
     const answer=document.getElementById('answer');
     const msg=document.getElementById('msg');
+    const hint=document.getElementById('hint');
     const submitBtn=document.getElementById('submitBtn');
+    const difficultyLabel=document.getElementById('difficultyLabel');
 
     let save=null;
     let current=null;
     let locked=false;
+    let mistakes=0;
+    let difficulty='normal';
 
     function pressEffect(el){
       el.classList.add('pressed');
@@ -181,6 +194,42 @@
       msg.className='msg';
     }
 
+    function makeHint(word){
+      const clean=word.toLowerCase();
+      const cfg=DIFFICULTY[difficulty]||DIFFICULTY.normal;
+      if(cfg.hintLetters===0){
+        const letters=[...clean].filter(ch=>ch!==' ').length;
+        return 'ヒント：'+letters+'文字';
+      }
+      let revealed=0;
+      const parts=[...clean].map(ch=>{
+        if(ch===' ')return '　';
+        if(revealed<cfg.hintLetters){revealed++;return ch;}
+        revealed++;
+        return '_';
+      });
+      return 'ヒント：'+parts.join(' ');
+    }
+
+    function showHint(){
+      if(!current)return;
+      hint.textContent=makeHint(current[0]);
+      hint.classList.add('show');
+    }
+
+    function markMastered(word){
+      let progress={};
+      try{progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')||{}}catch(e){progress={}}
+      const key=word.toLowerCase();
+      const old=progress[key]||{};
+      progress[key]={
+        mastered:true,
+        correct:(old.correct||0)+1,
+        lastCorrect:Date.now()
+      };
+      localStorage.setItem(PROGRESS_KEY,JSON.stringify(progress));
+    }
+
     function loadQuestion(){
       try{save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){save=null}
       if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
@@ -190,11 +239,16 @@
         error.classList.add('show');
         return;
       }
+      difficulty=(save.difficulty&&DIFFICULTY[save.difficulty])?save.difficulty:'normal';
+      difficultyLabel.textContent=DIFFICULTY[difficulty].label;
       current=save.questions[save.index];
       now.textContent=save.index+1;
       jpHit.textContent=current[1];
       jp.textContent=current[1];
       answer.value='';
+      mistakes=0;
+      hint.textContent='';
+      hint.classList.remove('show');
     }
 
     function submitAnswer(){
@@ -204,19 +258,22 @@
       if(!typed)return;
       if(typed===correct){
         locked=true;
-        msg.textContent='正解：'+current[0]+' ＝ '+current[1];
+        markMastered(current[0]);
+        msg.textContent='正解！ ★ 覚えた：'+current[0]+' ＝ '+current[1];
         msg.className='msg good';
         save.index++;
         if(save.index>=save.questions.length){
           localStorage.removeItem(SAVE_KEY);
-          setTimeout(()=>{location.href='シューティングtop.html'},650);
+          setTimeout(()=>{location.href='シューティングtop.html'},750);
         }else{
           localStorage.setItem(SAVE_KEY,JSON.stringify(save));
-          setTimeout(()=>{location.href='シューティング.html?continue=1'},450);
+          setTimeout(()=>{location.href='シューティング.html?continue=1'},520);
         }
       }else{
+        mistakes++;
         msg.textContent='ちがいます。もう一度入力してください。';
         msg.className='msg bad';
+        if(mistakes>=1)showHint();
       }
     }
 
