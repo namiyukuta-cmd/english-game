@@ -19,8 +19,14 @@
 
     stats:{PE:2,science:2,history:2,math:2,art:2},
     dailyBuff:{},
-    inventory:[],
+    inventory:[
+      {id:'orange',qty:2},
+      {id:'milk',qty:1},
+      {id:'meat',qty:1},
+      {id:'summer-paper',qty:1}
+    ],
     money:0,
+    learnedMagic:['spring','summer','autumn','winter'],
 
     // Ruins / quest progression shared by Daily, Magic School, Dungeon and Battle.
     mainQuest:{reachedFloor:1},
@@ -29,6 +35,7 @@
     questItems:{},
     flags:{},
     completedSideQuests:[],
+    bossCaptures:{},
 
     dailyStage:'month',
     egg:false,
@@ -49,13 +56,15 @@
     const state={...clone(fresh),...source};
     state.stats={...fresh.stats,...(source.stats||{})};
     state.dailyBuff={...(source.dailyBuff||{})};
-    state.inventory=Array.isArray(source.inventory)?source.inventory:[];
+    state.inventory=Array.isArray(source.inventory)?source.inventory:clone(fresh.inventory);
+    state.learnedMagic=Array.isArray(source.learnedMagic)?source.learnedMagic:[...fresh.learnedMagic];
     state.mainQuest={...fresh.mainQuest,...(source.mainQuest||{})};
     state.sideQuest=source.sideQuest&&typeof source.sideQuest==='object'?source.sideQuest:null;
     state.capturedMonsters=Array.isArray(source.capturedMonsters)?source.capturedMonsters:[];
     state.questItems=source.questItems&&typeof source.questItems==='object'?{...source.questItems}:{};
     state.flags=source.flags&&typeof source.flags==='object'?{...source.flags}:{};
     state.completedSideQuests=Array.isArray(source.completedSideQuests)?source.completedSideQuests:[];
+    state.bossCaptures=source.bossCaptures&&typeof source.bossCaptures==='object'?{...source.bossCaptures}:{};
     return state;
   }
 
