@@ -25,6 +25,7 @@
       {id:'meat',qty:1},
       {id:'summer-paper',qty:1}
     ],
+    itemSystemV1:true,
     money:0,
     learnedMagic:['spring','summer','autumn','winter'],
 
@@ -56,7 +57,12 @@
     const state={...clone(fresh),...source};
     state.stats={...fresh.stats,...(source.stats||{})};
     state.dailyBuff={...(source.dailyBuff||{})};
-    state.inventory=Array.isArray(source.inventory)?source.inventory:clone(fresh.inventory);
+    if(!source.itemSystemV1){
+      state.inventory=clone(fresh.inventory);
+      state.itemSystemV1=true;
+    }else{
+      state.inventory=Array.isArray(source.inventory)?source.inventory:clone(fresh.inventory);
+    }
     state.learnedMagic=Array.isArray(source.learnedMagic)?source.learnedMagic:[...fresh.learnedMagic];
     state.mainQuest={...fresh.mainQuest,...(source.mainQuest||{})};
     state.sideQuest=source.sideQuest&&typeof source.sideQuest==='object'?source.sideQuest:null;
