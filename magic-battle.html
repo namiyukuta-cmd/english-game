@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>Magic Battle</title>
-  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-4">
+  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-6">
 </head>
 <body>
   <main id="battleShell" class="magic-battle-shell">
@@ -22,9 +22,9 @@
     </section>
 
     <section id="enemyCard" class="enemy-card">
-      <div id="enemyVisual" class="enemy-visual">👺</div>
-      <h2 id="enemyName">Goblin</h2>
-      <p id="enemyText">A monster blocks the way.</p>
+      <div id="enemyVisual" class="enemy-visual">🐺</div>
+      <h2 id="enemyName">Wolf</h2>
+      <p id="enemyText">A wild animal blocks the way.</p>
       <div class="enemy-hp-row"><span>ENEMY HP</span><span id="enemyHpText">3 / 3</span></div>
       <div class="hp-track"><div id="enemyHpFill" class="hp-fill"></div></div>
     </section>
@@ -32,10 +32,18 @@
     <div id="battleMessage" class="battle-message" aria-live="polite">Choose an action.</div>
 
     <section id="commandGrid" class="command-grid">
-      <button id="attackBtn" type="button">Attack<small>攻撃</small></button>
+      <button id="attackBtn" type="button">Pencil Knife<small>攻撃</small></button>
       <button id="magicBtn" type="button">Magic<small>魔法</small></button>
       <button id="itemBtn" type="button">Item<small>道具</small></button>
       <button id="runBtn" type="button">Run<small>逃げる</small></button>
+    </section>
+
+    <section id="actionPanel" class="action-panel hidden">
+      <div class="action-panel-head">
+        <strong id="actionPanelTitle">MAGIC</strong>
+        <button id="closeActionPanel" type="button">×</button>
+      </div>
+      <div id="actionOptions" class="action-options"></div>
     </section>
 
     <button id="captureBtn" class="capture-button hidden" type="button">CAPTURE<small>捕まえる</small></button>
@@ -53,7 +61,8 @@
     </section>
   </main>
 
-  <script src="js/magic-state.js?v=20260903-3"></script>
-  <script src="js/magic-battle.js?v=20260903-6"></script>
+  <script src="js/magic-state.js?v=20260903-6"></script>
+  <script src="data/magic-items.js?v=20260903-1"></script>
+  <script src="js/magic-battle.js?v=20260903-7"></script>
 </body>
 </html>
