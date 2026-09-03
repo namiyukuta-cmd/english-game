@@ -22,6 +22,14 @@
     inventory:[],
     money:0,
 
+    // Ruins / quest progression shared by Daily, Magic School, Dungeon and Battle.
+    mainQuest:{reachedFloor:1},
+    sideQuest:null,
+    capturedMonsters:[],
+    questItems:{},
+    flags:{},
+    completedSideQuests:[],
+
     dailyStage:'month',
     egg:false,
     eggTaken:false,
@@ -42,6 +50,12 @@
     state.stats={...fresh.stats,...(source.stats||{})};
     state.dailyBuff={...(source.dailyBuff||{})};
     state.inventory=Array.isArray(source.inventory)?source.inventory:[];
+    state.mainQuest={...fresh.mainQuest,...(source.mainQuest||{})};
+    state.sideQuest=source.sideQuest&&typeof source.sideQuest==='object'?source.sideQuest:null;
+    state.capturedMonsters=Array.isArray(source.capturedMonsters)?source.capturedMonsters:[];
+    state.questItems=source.questItems&&typeof source.questItems==='object'?{...source.questItems}:{};
+    state.flags=source.flags&&typeof source.flags==='object'?{...source.flags}:{};
+    state.completedSideQuests=Array.isArray(source.completedSideQuests)?source.completedSideQuests:[];
     return state;
   }
 
