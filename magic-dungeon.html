@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+  <title>Magic Dungeon</title>
+  <link rel="stylesheet" href="css/magic-daily.css?v=20260903-4">
+  <link rel="stylesheet" href="css/magic-daily-compact.css?v=20260903-1">
+</head>
+<body>
+  <main class="daily-shell">
+    <header class="daily-hud">
+      <div class="hud-top">
+        <a class="hud-back" href="magic-school.html?v=20260903-7" aria-label="Magic Schoolへ戻る">←</a>
+        <div class="hud-title">
+          <strong>DUNGEON</strong>
+          <span>RUINS / 遺跡</span>
+        </div>
+        <button id="saveBtn" class="hud-save" type="button">SAVE</button>
+      </div>
+
+      <section class="calendar-row compact-calendar" aria-label="日付・曜日・季節・時刻">
+        <strong id="dateMain">Sep. 1st</strong>
+        <span id="dateSub">Mon. · Fall · 1st wk.</span>
+        <strong id="clockMain">8:15 a.m.</strong>
+        <div class="time-parts-hidden" aria-hidden="true">
+          <span id="timeValue">8:15 a.m.</span>
+          <span id="hourValue">8</span>
+          <span id="minuteValue">15</span>
+        </div>
+      </section>
+
+      <section class="resource-row" aria-label="リソース">
+        <div class="resource"><small>HP</small><strong id="hpValue">5</strong><span>/5</span></div>
+        <div class="resource"><small>MP</small><strong id="mpValue">5</strong><span>/5</span></div>
+        <div class="resource"><small>SUPPLY</small><strong id="supplyValue">5</strong><span>/5</span></div>
+      </section>
+
+      <section class="stat-wrap" aria-label="ステータス">
+        <div class="stat-head">STATUS / ステータス</div>
+        <div class="stat-row">
+          <div class="stat"><small>PE</small><strong id="peValue">2</strong></div>
+          <div class="stat"><small>SCIENCE</small><strong id="scienceValue">2</strong></div>
+          <div class="stat"><small>HISTORY</small><strong id="historyValue">2</strong></div>
+          <div class="stat"><small>MATH</small><strong id="mathValue">2</strong></div>
+          <div class="stat"><small>ART</small><strong id="artValue">2</strong></div>
+        </div>
+      </section>
+    </header>
+
+    <section class="daily-stage">
+      <div class="stage-head">
+        <div>
+          <small>DUNGEON</small>
+          <h1>Ruins</h1>
+        </div>
+        <span>ENTRANCE</span>
+      </div>
+
+      <div id="dailyContent" class="daily-content" aria-live="polite"></div>
+      <div id="dailyActions" class="daily-actions"></div>
+    </section>
+
+    <nav class="daily-nav" aria-label="共通メニュー">
+      <button type="button" disabled>TODAY</button>
+      <button type="button" disabled>MAP</button>
+      <button type="button" disabled>BAG</button>
+      <button type="button" disabled>STATUS</button>
+    </nav>
+
+    <div id="saveMessage" class="save-message" aria-live="polite"></div>
+  </main>
+
+  <script src="js/magic-state.js?v=20260903-2"></script>
+  <script src="js/magic-dungeon.js?v=20260903-1"></script>
+</body>
+</html>
