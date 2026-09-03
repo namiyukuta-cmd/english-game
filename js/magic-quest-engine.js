@@ -11,11 +11,7 @@
     if(!req)return {current:0,required:0,met:true};
     if(req.type==='discover'){const current=discoveredCount(state,Number(req.floor||1));const required=Number(req.count||0);return {current,required,met:current>=required}}
     if(req.type==='capture'){const current=countCaptured(state,req.target);const required=Number(req.count||0);return {current,required,met:current>=required}}
-    if(req.type==='boss_capture'){
-      const floor=Number(req.floor||1);
-      const met=Boolean(state.bossCaptures?.[floor]);
-      return {current:met?1:0,required:1,met};
-    }
+    if(req.type==='boss_capture'){const floor=Number(req.floor||1);const met=Boolean(state.bossCaptures?.[floor]);return {current:met?1:0,required:1,met}}
     if(req.type==='item'){const current=itemCount(state,req.id);const required=Number(req.count||0);return {current,required,met:current>=required}}
     if(req.type==='stat'){const current=statValue(state,req.key);const required=Number(req.value||req.count||0);return {current,required,met:current>=required}}
     if(req.type==='flag'){const met=Boolean(state.flags?.[req.id]);return {current:met?1:0,required:1,met}}
@@ -30,9 +26,10 @@
 
   function removeCaptured(state,target,count){let left=Math.max(0,Number(count||0));state.capturedMonsters=capturedList(state).filter(monster=>{if(left>0&&monster?.name===target){left-=1;return false}return true})}
   function consumeRequirements(state,requirements=[]){requirements.forEach(req=>{if(req.type==='capture'&&req.consume!==false)removeCaptured(state,req.target,req.count);if(req.type==='item'&&req.consume){if(!state.questItems)state.questItems={};state.questItems[req.id]=Math.max(0,itemCount(state,req.id)-Number(req.count||0))}})}
-  function applyReward(state,reward={}){if(reward.money)state.money=Number(state.money||0)+Number(reward.money||0);if(reward.supply){const max=Number(state.maxSupply||5);state.supply=Math.min(max,Number(state.supply||0)+Number(reward.supply||0))}if(reward.items&&typeof reward.items==='object'){if(!state.questItems)state.questItems={};Object.entries(reward.items).forEach(([id,count])=>{state.questItems[id]=itemCount(state,id)+Number(count||0)})}}
+  function addInventoryItem(state,id,count){if(!Array.isArray(state.inventory))state.inventory=[];const row=state.inventory.find(item=>item?.id===id);if(row)row.qty=Number(row.qty||0)+Number(count||0);else state.inventory.push({id,qty:Number(count||0)})}
+  function applyReward(state,reward={}){if(reward.money)state.money=Number(state.money||0)+Number(reward.money||0);if(reward.items&&typeof reward.items==='object'){Object.entries(reward.items).forEach(([id,count])=>addInventoryItem(state,id,count))}}
   function turnInSideQuest(state,questOrId){const status=sideQuestStatus(state,questOrId);if(!status.quest||!status.met)return {ok:false,quest:status.quest,status};consumeRequirements(state,status.quest.requirements);applyReward(state,status.quest.reward||{});if(!Array.isArray(state.completedSideQuests))state.completedSideQuests=[];state.completedSideQuests.push(status.quest.id);return {ok:true,quest:status.quest,status}}
-  function rewardText(reward={}){const parts=[];if(reward.money)parts.push(`${reward.money} money`);if(reward.supply)parts.push(`SUPPLY +${reward.supply}`);if(reward.items&&typeof reward.items==='object')Object.entries(reward.items).forEach(([id,count])=>parts.push(`${id} ×${count}`));return parts.join(' / ')||'—'}
+  function rewardText(reward={}){const parts=[];if(reward.money)parts.push(`${reward.money} money`);if(reward.items&&typeof reward.items==='object')Object.entries(reward.items).forEach(([id,count])=>parts.push(`${id} ×${count}`));return parts.join(' / ')||'—'}
 
   window.MagicQuestEngine={countCaptured,requirementProgress,requirementsStatus,mainQuestForFloor,mainQuestStatus,sideQuestById,sideQuestStatus,turnInSideQuest,rewardText};
 })();
