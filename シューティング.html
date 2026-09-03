@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#07111f">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>EIKEN Grade 5 Shooting</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{--bg:#07111f;--panel:#111f34;--panel2:#172a45;--line:#35506e;--text:#f7fbff;--sub:#b9c9dc;--yellow:#ffd54f;--cyan:#7ee7ff;--green:#7df0a7;--red:#ff7878}
+    html,body{margin:0;min-height:100%;overscroll-behavior:none}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 50% 0,#183151 0,#07111f 58%,#040913 100%);color:var(--text);touch-action:manipulation}
+    button,a{font:inherit}
+    .app{width:min(760px,100%);height:100svh;min-height:620px;margin:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto auto 1fr auto;gap:9px;overflow:hidden}
+    .topbar{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px}
+    .back{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+    .title{text-align:center;min-width:0}.title b{display:block;font-size:14px;letter-spacing:.08em}.title small{display:block;color:var(--cyan);font-size:11px;margin-top:1px}
+    .score{min-width:76px;padding:6px 9px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center}.score small{display:block;color:var(--sub);font-size:9px}.score strong{font-size:16px;color:var(--yellow)}
+    .status{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center}
+    .progress{height:12px;border-radius:999px;background:#0d1b2c;border:1px solid var(--line);overflow:hidden}.progress>span{display:block;height:100%;width:10%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .25s ease}
+    .round{font-size:12px;font-weight:900;color:var(--sub);white-space:nowrap}.life{font-size:18px;letter-spacing:1px;white-space:nowrap;color:var(--red)}
+    .arena{position:relative;min-height:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0d1c30 0,#101e31 50%,#0a1422 100%);box-shadow:inset 0 0 45px #0006}
+    .arena:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#fff1 1px,transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(transparent,#000 20%,#000 85%,transparent);pointer-events:none}
+    .prompt{position:absolute;z-index:5;left:12px;right:12px;top:12px;padding:11px 12px;border:1px solid #4b6889;border-radius:16px;background:#091522e8;backdrop-filter:blur(4px);text-align:center;box-shadow:0 8px 25px #0005}
+    .prompt small{display:block;color:var(--sub);font-size:11px;font-weight:800}.prompt strong{display:block;margin-top:2px;font-size:clamp(23px,6vw,34px);line-height:1.25;color:#fff}.prompt .hint{margin-top:2px;color:var(--yellow);font-size:12px;font-weight:900}
+    .targets{position:absolute;inset:104px 8px 46px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:5px}
+    .target{position:relative;border:0;background:transparent;color:#fff;display:flex;align-items:center;justify-content:center;min-width:0;cursor:crosshair;animation:float 2.6s ease-in-out infinite alternate;transform:translateZ(0)}
+    .target:nth-child(2){animation-delay:-.7s;animation-duration:3.1s}.target:nth-child(3){animation-delay:-1.3s;animation-duration:2.8s}.target:nth-child(4){animation-delay:-1.8s;animation-duration:3.4s}
+    .target-core{width:min(132px,88%);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;background:radial-gradient(circle,#1b3555 0 27%,#e9f5ff 28% 31%,#1b3555 32% 53%,#e9f5ff 54% 58%,#1b3555 59% 100%);border:2px solid #9adfff;box-shadow:0 0 0 4px #0c1d30,0 0 24px #55cfff44;transition:.12s ease}
+    .target span{display:block;max-width:100%;font-size:clamp(15px,4vw,21px);font-weight:950;line-height:1.12;text-shadow:0 2px 5px #000,0 0 5px #000;overflow-wrap:anywhere}
+    .target:active .target-core{transform:scale(.9)}
+    .target.correct .target-core{background:radial-gradient(circle,#0b7f3f 0 30%,#caffda 31% 36%,#0b7f3f 37% 100%);border-color:var(--green);box-shadow:0 0 32px #7df0a788;transform:scale(1.08)}
+    .target.wrong .target-core{background:radial-gradient(circle,#8a2020 0 30%,#ffd1d1 31% 36%,#8a2020 37% 100%);border-color:var(--red);animation:shake .2s linear 2}
+    .crosshair{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:30px;opacity:.35;pointer-events:none}
+    .feedback{min-height:84px;padding:10px 12px;border:1px solid var(--line);border-radius:17px;background:var(--panel);display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+    .feedback-main{min-width:0}.feedback-main strong{display:block;font-size:17px}.feedback-main span{display:block;margin-top:3px;color:var(--sub);font-size:13px;line-height:1.4}.feedback.good .feedback-main strong{color:var(--green)}.feedback.bad .feedback-main strong{color:var(--red)}
+    .combo{text-align:right;min-width:60px}.combo small{display:block;color:var(--sub);font-size:9px}.combo b{font-size:19px;color:var(--yellow)}
+    .overlay{position:absolute;z-index:20;inset:0;background:#06101beF;display:none;align-items:center;justify-content:center;padding:20px}.overlay.show{display:flex}
+    .result-card{width:min(430px,100%);padding:24px 18px;border:1px solid var(--line);border-radius:24px;background:#14253c;text-align:center;box-shadow:0 20px 60px #0009}.result-card .mark{font-size:55px}.result-card h2{margin:8px 0 0;font-size:27px}.result-card .final-score{font-size:38px;color:var(--yellow);font-weight:950;margin:10px 0 2px}.result-card p{color:var(--sub);font-size:14px;line-height:1.6}.result-actions{display:grid;gap:9px;margin-top:16px}.result-actions a,.result-actions button{min-height:50px;border-radius:14px;font-weight:900;text-decoration:none;display:flex;align-items:center;justify-content:center}.again{border:0;background:var(--yellow);color:#172033}.to-top{border:1px solid var(--line);background:#101d30;color:#fff}
+    @keyframes float{from{transform:translate(-4px,-3px) rotate(-1deg)}to{transform:translate(5px,6px) rotate(1deg)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+    @media(max-height:700px){.app{min-height:560px}.targets{inset:95px 8px 38px}.prompt{padding:8px 10px}.prompt strong{font-size:22px}.target-core{width:min(104px,78%)}.feedback{min-height:66px;padding:7px 10px}.feedback-main strong{font-size:15px}.feedback-main span{font-size:12px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <a class="back" href="シューティングtop.html" aria-label="シューティングトップへ戻る">←</a>
+      <div class="title"><b>WORD SHOOTING</b><small id="modeLabel">日本語 → 英語</small></div>
+      <div class="score"><small>SCORE / 得点</small><strong id="score">0</strong></div>
+    </header>
+
+    <div class="status">
+      <div class="progress"><span id="progressBar"></span></div>
+      <div class="round"><span id="roundNow">1</span> / 10</div>
+      <div class="life" id="life" aria-label="ライフ3">♥♥♥</div>
+    </div>
+
+    <section class="arena" id="arena">
+      <div class="prompt">
+        <small id="instruction">この意味の英単語を撃て</small>
+        <strong id="question">犬</strong>
+        <div class="hint" id="category">ANIMAL / 動物</div>
+      </div>
+      <div class="targets" id="targets"></div>
+      <div class="crosshair" aria-hidden="true">⌖</div>
+      <div class="overlay" id="overlay">
+        <div class="result-card">
+          <div class="mark" id="resultMark">🎯</div>
+          <h2 id="resultTitle">MISSION COMPLETE</h2>
+          <div class="final-score" id="finalScore">0</div>
+          <p id="resultText"></p>
+          <div class="result-actions">
+            <button class="again" id="againBtn">もう一度</button>
+            <a class="to-top" href="シューティングtop.html">シューティングTOPへ</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="feedback" id="feedback">
+      <div class="feedback-main"><strong>READY / 準備完了</strong><span>正しい標的をタップしてください。</span></div>
+      <div class="combo"><small>COMBO / 連続</small><b id="combo">0</b></div>
+    </section>
+  </main>
+
+  <script>
+    const WORDS = [
+      {en:'father',ja:'父',cat:'FAMILY / 家族'},{en:'mother',ja:'母',cat:'FAMILY / 家族'},{en:'brother',ja:'兄・弟',cat:'FAMILY / 家族'},{en:'sister',ja:'姉・妹',cat:'FAMILY / 家族'},{en:'friend',ja:'友達',cat:'PEOPLE / 人物'},{en:'teacher',ja:'先生',cat:'PEOPLE / 人物'},{en:'student',ja:'生徒',cat:'PEOPLE / 人物'},{en:'doctor',ja:'医師',cat:'PEOPLE / 人物'},
+      {en:'school',ja:'学校',cat:'SCHOOL / 学校'},{en:'classroom',ja:'教室',cat:'SCHOOL / 学校'},{en:'desk',ja:'机',cat:'SCHOOL / 学校'},{en:'chair',ja:'椅子',cat:'SCHOOL / 学校'},{en:'pen',ja:'ペン',cat:'SCHOOL / 学校'},{en:'pencil',ja:'鉛筆',cat:'SCHOOL / 学校'},{en:'notebook',ja:'ノート',cat:'SCHOOL / 学校'},{en:'book',ja:'本',cat:'SCHOOL / 学校'},{en:'dictionary',ja:'辞書',cat:'SCHOOL / 学校'},{en:'homework',ja:'宿題',cat:'SCHOOL / 学校'},{en:'English',ja:'英語',cat:'SUBJECT / 教科'},{en:'science',ja:'理科',cat:'SUBJECT / 教科'},
+      {en:'house',ja:'家',cat:'HOME / 家'},{en:'room',ja:'部屋',cat:'HOME / 家'},{en:'kitchen',ja:'台所',cat:'HOME / 家'},{en:'door',ja:'ドア',cat:'HOME / 家'},{en:'window',ja:'窓',cat:'HOME / 家'},{en:'bed',ja:'ベッド',cat:'HOME / 家'},{en:'table',ja:'テーブル',cat:'HOME / 家'},{en:'phone',ja:'電話',cat:'HOME / 家'},{en:'clock',ja:'時計',cat:'HOME / 家'},{en:'umbrella',ja:'傘',cat:'CLOTHES / 衣類'},
+      {en:'breakfast',ja:'朝食',cat:'FOOD / 食べ物'},{en:'lunch',ja:'昼食',cat:'FOOD / 食べ物'},{en:'dinner',ja:'夕食',cat:'FOOD / 食べ物'},{en:'bread',ja:'パン',cat:'FOOD / 食べ物'},{en:'rice',ja:'ご飯',cat:'FOOD / 食べ物'},{en:'meat',ja:'肉',cat:'FOOD / 食べ物'},{en:'fish',ja:'魚',cat:'FOOD / 食べ物'},{en:'egg',ja:'卵',cat:'FOOD / 食べ物'},{en:'apple',ja:'リンゴ',cat:'FOOD / 食べ物'},{en:'banana',ja:'バナナ',cat:'FOOD / 食べ物'},{en:'water',ja:'水',cat:'DRINK / 飲み物'},{en:'milk',ja:'牛乳',cat:'DRINK / 飲み物'},{en:'tea',ja:'お茶',cat:'DRINK / 飲み物'},{en:'coffee',ja:'コーヒー',cat:'DRINK / 飲み物'},{en:'juice',ja:'ジュース',cat:'DRINK / 飲み物'},
+      {en:'park',ja:'公園',cat:'PLACE / 場所'},{en:'city',ja:'市',cat:'PLACE / 場所'},{en:'town',ja:'町',cat:'PLACE / 場所'},{en:'station',ja:'駅',cat:'PLACE / 場所'},{en:'library',ja:'図書館',cat:'PLACE / 場所'},{en:'hospital',ja:'病院',cat:'PLACE / 場所'},{en:'restaurant',ja:'レストラン',cat:'PLACE / 場所'},{en:'zoo',ja:'動物園',cat:'PLACE / 場所'},{en:'car',ja:'車',cat:'VEHICLE / 乗り物'},{en:'bus',ja:'バス',cat:'VEHICLE / 乗り物'},{en:'train',ja:'電車',cat:'VEHICLE / 乗り物'},{en:'plane',ja:'飛行機',cat:'VEHICLE / 乗り物'},
+      {en:'dog',ja:'犬',cat:'ANIMAL / 動物'},{en:'cat',ja:'猫',cat:'ANIMAL / 動物'},{en:'bird',ja:'鳥',cat:'ANIMAL / 動物'},{en:'bear',ja:'クマ',cat:'ANIMAL / 動物'},{en:'horse',ja:'馬',cat:'ANIMAL / 動物'},{en:'rabbit',ja:'ウサギ',cat:'ANIMAL / 動物'},{en:'lion',ja:'ライオン',cat:'ANIMAL / 動物'},{en:'tree',ja:'木',cat:'NATURE / 自然'},{en:'flower',ja:'花',cat:'NATURE / 自然'},{en:'sun',ja:'太陽',cat:'NATURE / 自然'},{en:'moon',ja:'月',cat:'NATURE / 自然'},{en:'sky',ja:'空',cat:'NATURE / 自然'},{en:'rain',ja:'雨',cat:'WEATHER / 天気'},{en:'snow',ja:'雪',cat:'WEATHER / 天気'},
+      {en:'red',ja:'赤',cat:'COLOR / 色'},{en:'blue',ja:'青',cat:'COLOR / 色'},{en:'yellow',ja:'黄',cat:'COLOR / 色'},{en:'green',ja:'緑',cat:'COLOR / 色'},{en:'white',ja:'白',cat:'COLOR / 色'},{en:'black',ja:'黒',cat:'COLOR / 色'},
+      {en:'today',ja:'今日',cat:'TIME / 時'},{en:'tomorrow',ja:'明日',cat:'TIME / 時'},{en:'yesterday',ja:'昨日',cat:'TIME / 時'},{en:'morning',ja:'朝',cat:'TIME / 時'},{en:'afternoon',ja:'昼・午後',cat:'TIME / 時'},{en:'night',ja:'夜',cat:'TIME / 時'},{en:'Monday',ja:'月曜日',cat:'DAY / 曜日'},{en:'Tuesday',ja:'火曜日',cat:'DAY / 曜日'},{en:'Wednesday',ja:'水曜日',cat:'DAY / 曜日'},{en:'Thursday',ja:'木曜日',cat:'DAY / 曜日'},{en:'Friday',ja:'金曜日',cat:'DAY / 曜日'},{en:'Saturday',ja:'土曜日',cat:'DAY / 曜日'},{en:'Sunday',ja:'日曜日',cat:'DAY / 曜日'},
+      {en:'go',ja:'行く',cat:'VERB / 動詞'},{en:'come',ja:'来る',cat:'VERB / 動詞'},{en:'run',ja:'走る',cat:'VERB / 動詞'},{en:'walk',ja:'歩く',cat:'VERB / 動詞'},{en:'swim',ja:'泳ぐ',cat:'VERB / 動詞'},{en:'open',ja:'開ける',cat:'VERB / 動詞'},{en:'close',ja:'閉める',cat:'VERB / 動詞'},{en:'eat',ja:'食べる',cat:'VERB / 動詞'},{en:'drink',ja:'飲む',cat:'VERB / 動詞'},{en:'sleep',ja:'眠る',cat:'VERB / 動詞'},{en:'buy',ja:'買う',cat:'VERB / 動詞'},{en:'speak',ja:'話す',cat:'VERB / 動詞'},{en:'listen',ja:'聴く',cat:'VERB / 動詞'},{en:'read',ja:'読む',cat:'VERB / 動詞'},{en:'write',ja:'書く',cat:'VERB / 動詞'},{en:'study',ja:'勉強する',cat:'VERB / 動詞'},{en:'play',ja:'遊ぶ・演奏する',cat:'VERB / 動詞'},{en:'help',ja:'手伝う',cat:'VERB / 動詞'},{en:'like',ja:'好む・好き',cat:'VERB / 動詞'},{en:'make',ja:'作る',cat:'VERB / 動詞'},
+      {en:'good',ja:'良い',cat:'ADJECTIVE / 形容詞'},{en:'bad',ja:'悪い',cat:'ADJECTIVE / 形容詞'},{en:'big',ja:'大きい',cat:'ADJECTIVE / 形容詞'},{en:'small',ja:'小さい',cat:'ADJECTIVE / 形容詞'},{en:'new',ja:'新しい',cat:'ADJECTIVE / 形容詞'},{en:'old',ja:'古い・年をとった',cat:'ADJECTIVE / 形容詞'},{en:'young',ja:'若い',cat:'ADJECTIVE / 形容詞'},{en:'hot',ja:'暑い・熱い',cat:'ADJECTIVE / 形容詞'},{en:'cold',ja:'寒い・冷たい',cat:'ADJECTIVE / 形容詞'},{en:'happy',ja:'幸せな',cat:'ADJECTIVE / 形容詞'},{en:'busy',ja:'忙しい',cat:'ADJECTIVE / 形容詞'},{en:'beautiful',ja:'美しい',cat:'ADJECTIVE / 形容詞'},{en:'easy',ja:'簡単な',cat:'ADJECTIVE / 形容詞'},{en:'hard',ja:'難しい',cat:'ADJECTIVE / 形容詞'},{en:'kind',ja:'親切な',cat:'ADJECTIVE / 形容詞'}
+    ];
+
+    const TOTAL = 10;
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode') === 'en-ja' ? 'en-ja' : 'ja-en';
+    const $ = id => document.getElementById(id);
+    const els = {modeLabel:$('modeLabel'),score:$('score'),round:$('roundNow'),life:$('life'),bar:$('progressBar'),question:$('question'),instruction:$('instruction'),category:$('category'),targets:$('targets'),feedback:$('feedback'),combo:$('combo'),overlay:$('overlay'),resultMark:$('resultMark'),resultTitle:$('resultTitle'),finalScore:$('finalScore'),resultText:$('resultText'),again:$('againBtn')};
+
+    let questions=[], index=0, score=0, life=3, combo=0, locked=false;
+
+    function shuffle(arr){
+      const a=[...arr];
+      for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+      return a;
+    }
+
+    function startGame(){
+      questions=shuffle(WORDS).slice(0,TOTAL);
+      index=0; score=0; life=3; combo=0; locked=false;
+      els.overlay.classList.remove('show');
+      els.modeLabel.textContent = mode==='ja-en' ? '日本語 → 英語' : '英語 → 日本語';
+      renderStatus();
+      setFeedback('READY / 準備完了','正しい標的をタップしてください。','');
+      showQuestion();
+    }
+
+    function renderStatus(){
+      els.score.textContent=score;
+      els.round.textContent=Math.min(index+1,TOTAL);
+      els.life.textContent='♥'.repeat(life)+'♡'.repeat(3-life);
+      els.life.setAttribute('aria-label','ライフ'+life);
+      els.bar.style.width=((Math.min(index+1,TOTAL)/TOTAL)*100)+'%';
+      els.combo.textContent=combo;
+    }
+
+    function showQuestion(){
+      locked=false;
+      const q=questions[index];
+      els.question.textContent = mode==='ja-en' ? q.ja : q.en;
+      els.instruction.textContent = mode==='ja-en' ? 'この意味の英単語を撃て' : 'この英単語の日本語訳を撃て';
+      els.category.textContent=q.cat;
+
+      const distractors=shuffle(WORDS.filter(w=>w.en!==q.en)).slice(0,3);
+      const options=shuffle([q,...distractors]);
+      els.targets.innerHTML='';
+      options.forEach(word=>{
+        const btn=document.createElement('button');
+        btn.className='target';
+        btn.type='button';
+        btn.dataset.en=word.en;
+        btn.setAttribute('aria-label',mode==='ja-en'?word.en:word.ja);
+        const core=document.createElement('div');
+        core.className='target-core';
+        const span=document.createElement('span');
+        span.textContent=mode==='ja-en'?word.en:word.ja;
+        core.appendChild(span); btn.appendChild(core);
+        btn.addEventListener('click',()=>shoot(btn,word));
+        els.targets.appendChild(btn);
+      });
+      renderStatus();
+    }
+
+    function shoot(btn,word){
+      if(locked)return;
+      const q=questions[index];
+      if(word.en===q.en){
+        locked=true;
+        btn.classList.add('correct');
+        combo++;
+        const gain=100+Math.min(combo-1,5)*20;
+        score+=gain;
+        setFeedback('HIT! / 正解',q.en+' ＝ '+q.ja,'good');
+        renderStatus();
+        setTimeout(()=>{
+          index++;
+          if(index>=TOTAL){finish(true);return;}
+          showQuestion();
+        },650);
+      }else{
+        btn.classList.add('wrong');
+        combo=0;
+        life--;
+        setFeedback('MISS / 不正解',word.en+' ＝ '+word.ja,'bad');
+        renderStatus();
+        setTimeout(()=>btn.classList.remove('wrong'),450);
+        if(life<=0){
+          locked=true;
+          setTimeout(()=>finish(false),550);
+        }
+      }
+    }
+
+    function setFeedback(title,text,state){
+      els.feedback.className='feedback'+(state?' '+state:'');
+      els.feedback.querySelector('.feedback-main').innerHTML='<strong>'+escapeHtml(title)+'</strong><span>'+escapeHtml(text)+'</span>';
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+    function finish(cleared){
+      const key='eiken5_shooting_high_'+mode;
+      const old=Number(localStorage.getItem(key)||0);
+      if(score>old)localStorage.setItem(key,String(score));
+      const high=Math.max(old,score);
+      els.resultMark.textContent=cleared?'🎯':'💥';
+      els.resultTitle.textContent=cleared?'MISSION COMPLETE':'GAME OVER';
+      els.finalScore.textContent=score;
+      let grade='もう一度挑戦';
+      if(cleared&&score>=1300)grade='すばやく正確です';
+      else if(cleared&&score>=1100)grade='よくできました';
+      else if(cleared)grade='クリアしました';
+      els.resultText.textContent=grade+'。ハイスコア：'+high+'点。間違えた単語は、英語と日本語をセットで確認してから再挑戦してください。';
+      els.overlay.classList.add('show');
+    }
+
+    els.again.addEventListener('click',startGame);
+    startGame();
+  </script>
+</body>
+</html>
