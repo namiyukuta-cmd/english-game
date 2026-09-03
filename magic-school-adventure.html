@@ -4,109 +4,139 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-<title>Magic School Adventure</title>
+<title>Magic School - Ruins Adventure</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3efe5;color:#25231f}body{overflow:hidden}.app{height:100dvh;max-width:760px;margin:auto;display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:10px}.top{display:flex;align-items:center;gap:8px}.back{width:42px;height:42px;border:1px solid #b8ad98;border-radius:12px;background:#fff;color:#222;text-decoration:none;display:grid;place-items:center;font-size:22px;font-weight:900}.title{flex:1}.title strong{display:block;font-size:17px}.title small{display:block;color:#726b61;font-size:12px}.status{display:grid;grid-template-columns:1fr 1fr;gap:6px}.status-card{background:#fff;border:1px solid #d0c7b8;border-radius:12px;padding:7px 9px;min-width:0}.status-card b{font-size:12px;display:block;color:#665f55}.status-card span{font-size:13px;font-weight:800;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:4px}.time-grid div{background:#f5f1e9;border-radius:7px;text-align:center;padding:2px}.time-grid small{display:block;font-size:9px;color:#777}.time-grid strong{font-size:12px}.scene{min-height:0;background:#fff;border:1px solid #d0c7b8;border-radius:18px;padding:14px;display:flex;flex-direction:column;justify-content:center;overflow:auto}.phase{font-size:13px;font-weight:900;letter-spacing:.08em;color:#7a5c2e;text-transform:uppercase;margin-bottom:7px}.english{font-size:27px;line-height:1.25;font-weight:900;margin:0 0 5px}.jp{font-size:15px;color:#5f5950;margin:0 0 12px}.info{background:#f6f2e8;border-radius:13px;padding:10px 11px;font-size:14px;line-height:1.55;margin-top:5px}.info strong{font-size:17px}.word{display:inline-block;background:#fff;border:1px solid #ded5c6;border-radius:8px;padding:2px 7px;margin:2px}.word b{font-size:15px}.word small{font-size:11px;color:#766f66;margin-left:5px}.roll{font-size:13px;margin-top:7px;color:#675f55}.stats{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.stat{background:#eee8dc;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:800}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.actions.one{grid-template-columns:1fr}.btn{min-height:48px;border:1px solid #3e392f;border-radius:12px;background:#fff;font-size:16px;font-weight:850;padding:7px 10px;color:#222}.btn.primary{background:#2f2b25;color:#fff}.btn:active{transform:translateY(1px)}.tiny{font-size:11px;font-weight:600;display:block;opacity:.75;margin-top:2px}.oracle-badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:999px;background:#e4dccb;color:#5c503d;font-weight:900;margin-bottom:6px}.calendar-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}.calendar-list div{background:#f6f2e8;border-radius:10px;padding:7px}.calendar-list small{font-size:10px;color:#777;display:block}.calendar-list b{font-size:14px}.notice{font-size:12px;color:#756e64;margin-top:8px}.inventory{font-size:12px;margin-top:5px;color:#665f55}@media(max-height:680px){.app{padding:6px;gap:5px}.scene{padding:10px}.english{font-size:22px}.jp{margin-bottom:7px}.btn{min-height:42px}.status-card{padding:5px 7px}}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#eee9df;color:#24211d}body{overflow:hidden}.app{height:100dvh;max-width:760px;margin:auto;padding:8px;display:grid;grid-template-rows:auto auto 1fr auto;gap:7px}.top{display:flex;align-items:center;gap:8px}.back{width:40px;height:40px;border:1px solid #b9ae9c;border-radius:11px;background:#fff;color:#222;text-decoration:none;display:grid;place-items:center;font-size:21px;font-weight:900}.title{min-width:0;flex:1}.title strong{font-size:16px;display:block}.title small{font-size:11px;color:#736b60;display:block}.hud{display:grid;grid-template-columns:1.25fr 1fr;gap:6px}.card{background:#fff;border:1px solid #d0c5b4;border-radius:12px;padding:7px 9px;min-width:0}.card-label{font-size:10px;font-weight:900;color:#716657}.date-main,.clock-main{font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.date-sub{font-size:10px;color:#756e64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.clock-parts{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:3px}.clock-parts div{background:#f5f1e9;border-radius:6px;text-align:center;padding:2px}.clock-parts small{font-size:8px;color:#766f65;display:block}.clock-parts b{font-size:11px}.scene{min-height:0;overflow:auto;background:#fff;border:1px solid #d0c5b4;border-radius:17px;padding:13px;display:flex;flex-direction:column}.phase{font-size:11px;letter-spacing:.1em;font-weight:900;color:#725831;margin-bottom:5px}.scene h1{font-size:25px;line-height:1.25;margin:0 0 4px}.jp{font-size:14px;color:#615a51;margin:0 0 9px}.box{background:#f5f0e6;border-radius:12px;padding:10px;margin-top:6px;font-size:13px;line-height:1.55}.box strong{font-size:15px}.word{display:inline-block;background:#fff;border:1px solid #d9cfbf;border-radius:8px;margin:2px;padding:2px 6px}.word b{font-size:14px}.word small{font-size:10px;color:#756d62;margin-left:4px}.badge{display:inline-block;border-radius:999px;background:#ded4c2;padding:2px 7px;font-size:10px;font-weight:900;margin:0 4px 4px 0}.stats{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.stat{font-size:11px;font-weight:900;border-radius:999px;background:#e9e2d6;padding:4px 8px}.stat.danger{background:#eee0de}.stat.magic{background:#e3e2ee}.stat.money{background:#eee6cb}.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.actions.one{grid-template-columns:1fr}.btn{min-height:46px;border:1px solid #3c372f;border-radius:11px;background:#fff;color:#201e1a;font-size:15px;font-weight:900;padding:7px}.btn.primary{background:#302c26;color:white}.btn.warn{background:#5c342c;color:white}.btn:disabled{opacity:.4}.tiny{font-size:10px;font-weight:600;display:block;margin-top:2px;opacity:.74}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5px}.mini{background:#fff;border:1px solid #ddd3c4;border-radius:9px;padding:7px}.mini small{font-size:9px;color:#777;display:block}.mini b{font-size:13px}.quest{border-left:4px solid #735b37;padding-left:9px}.enemy{display:flex;justify-content:space-between;align-items:center;gap:8px}.enemy-name{font-size:19px;font-weight:950}.hpbar{height:9px;background:#ded8ce;border-radius:99px;overflow:hidden;margin-top:4px}.hpfill{height:100%;background:#433b34}.choices{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.choice{min-height:43px;border:1px solid #847b70;border-radius:9px;background:#fff;font-size:14px;font-weight:800;padding:6px}.tokens{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.token{border:1px solid #837a6e;border-radius:8px;background:#fff;padding:7px 9px;font-size:14px;font-weight:850}.answerline{min-height:40px;border:1px dashed #a89c8b;border-radius:9px;padding:7px;margin-top:7px}.feedback{font-size:13px;font-weight:850;margin-top:7px}.good{color:#285a34}.bad{color:#8a352a}.loot{font-size:12px;color:#625a50;margin-top:6px}.map{display:grid;grid-template-columns:repeat(5,24px);gap:3px;justify-content:center;margin:8px auto}.tile{width:24px;height:24px;border-radius:5px;background:#e8e0d4;display:grid;place-items:center;font-size:11px}.tile.now{background:#3d3831;color:#fff}.tile.done{background:#cfc3b0}.dept{display:grid;grid-template-columns:1fr 1fr;gap:5px}.dept div{background:#fff;border:1px solid #ddd3c4;border-radius:9px;padding:6px;font-size:11px}.dept b{display:block;font-size:13px}.note{font-size:11px;color:#746c61;margin-top:6px}@media(max-height:690px){.app{padding:5px;gap:4px}.scene{padding:10px}.scene h1{font-size:21px}.btn{min-height:41px}.box{padding:8px}.hud{gap:4px}.card{padding:5px 7px}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <a class="back" href="story-menu.html?v=20260903-2" aria-label="戻る">←</a>
-    <div class="title"><strong>Magic School Adventure</strong><small>魔法学校と冒険の英語ゲーム</small></div>
+    <a class="back" href="story-menu.html?v=20260903-3" aria-label="戻る">←</a>
+    <div class="title"><strong>Magic School</strong><small>遺跡都市・公営遺跡調査隊</small></div>
   </div>
-  <div class="status">
-    <div class="status-card"><b>DATE / 日付</b><span id="dateShort"></span><span id="weekShort"></span></div>
-    <div class="status-card"><b>TIME / 時間</b><span id="clockText"></span><div class="time-grid"><div><small>time<br>時間</small><strong id="timeVal"></strong></div><div><small>hour<br>時</small><strong id="hourVal"></strong></div><div><small>minute<br>分</small><strong id="minuteVal"></strong></div></div></div>
+  <div class="hud">
+    <div class="card"><div class="card-label">DATE / 日付</div><div class="date-main" id="dateMain"></div><div class="date-sub" id="dateSub"></div></div>
+    <div class="card"><div class="card-label">TIME / 時間</div><div class="clock-main" id="clockMain"></div><div class="clock-parts"><div><small>time / 時間</small><b id="timeVal"></b></div><div><small>hour / 時</small><b id="hourVal"></b></div><div><small>minute / 分</small><b id="minuteVal"></b></div></div></div>
   </div>
   <main class="scene" id="scene"></main>
   <div class="actions" id="actions"></div>
 </div>
 <script>
+const SAVE_KEY='magicSchoolRuinsSave_v2';
 const months=[['January','1月'],['February','2月'],['March','3月'],['April','4月'],['May','5月'],['June','6月'],['July','7月'],['August','8月'],['September','9月'],['October','10月'],['November','11月'],['December','12月']];
 const weekdays=[['Sunday','日曜日'],['Monday','月曜日'],['Tuesday','火曜日'],['Wednesday','水曜日'],['Thursday','木曜日'],['Friday','金曜日'],['Saturday','土曜日']];
-const weekNames=[['First week','第1週'],['Second week','第2週'],['Third week','第3週'],['Fourth week','第4週'],['Fifth week','第5週']];
+const weeks=[['First week','第1週'],['Second week','第2週'],['Third week','第3週'],['Fourth week','第4週'],['Fifth week','第5週']];
 const fruits=[['apple','リンゴ'],['banana','バナナ'],['orange','オレンジ'],['strawberry','イチゴ'],['lemon','レモン']];
-const weather=[['sun','太陽'],['rain','雨'],['snow','雪'],['wind','風'],['blue sky','青空'],['hot','暑い'],['cold','寒い'],['warm','暖かい'],['cool','涼しい']];
-const schoolItems=[['pen','ペン'],['pencil','鉛筆'],['notebook','ノート'],['book','本'],['textbook','教科書'],['dictionary','辞書'],['eraser','消しゴム'],['ruler','定規'],['pencil case','筆箱'],['bag','かばん'],['paper','紙']];
-const lessons=[['history','歴史','Mind'],['science','理科','Mind'],['math','数学','Mind'],['music','音楽','Magic'],['art','美術','Magic'],['PE','体育','Body']];
-const lunchFoods=[['salad','サラダ'],['soup','スープ'],['cake','ケーキ'],['bread','パン'],['rice','ご飯'],['egg','卵'],['fish','魚']];
-const drinks=[['water','水'],['milk','牛乳'],['tea','お茶'],['coffee','コーヒー'],['juice','ジュース']];
-const places=[['park','公園'],['sea','海'],['beach','浜辺'],['station','駅'],['library','図書館'],['shop','店'],['supermarket','スーパー'],['restaurant','レストラン'],['museum','博物館'],['zoo','動物園']];
-const animals=[['dog','犬'],['cat','猫'],['bird','鳥'],['bear','クマ'],['horse','馬'],['cow','牛'],['pig','豚'],['sheep','羊'],['monkey','サル'],['rabbit','ウサギ']];
-const plants=[['tree','木'],['flower','花'],['plant','植物'],['grass','草']];
-const monsters=[['goblin','ゴブリン'],['orc','オーク'],['slime','スライム'],['dragon','ドラゴン']];
-const colors=[['red','赤'],['blue','青'],['yellow','黄'],['green','緑'],['white','白'],['black','黒'],['brown','茶'],['orange','橙'],['pink','桃'],['purple','紫']];
+const weatherList=[['sun','晴れ'],['rain','雨'],['snow','雪'],['wind','風'],['blue sky','青空'],['hot','暑い'],['cold','寒い'],['warm','暖かい'],['cool','涼しい']];
+const lunchFoods=[['salad','サラダ'],['soup','スープ'],['bread','パン'],['rice','ご飯'],['fish','魚'],['cake','ケーキ']];
 const dinnerFoods=[['meat','肉'],['beef','牛肉'],['pork','豚肉'],['chicken','鶏肉'],['fish','魚'],['salad','サラダ'],['soup','スープ'],['bread','パン'],['rice','ご飯']];
-const state={year:1,month:8,day:1,weekday:1,hour:7,minute:0,stage:'date',egg:0,body:0,mind:0,magic:0,fruit:null,weather:null,desk:null,item:null,lesson:null,lunch:null,drink:null,place:null,encounter:null,color:null,dinner:null,dinnerDrink:null};
+const drinks=[['water','水'],['milk','牛乳'],['tea','お茶'],['coffee','コーヒー'],['juice','ジュース']];
+const monsters=[['slime','スライム',2],['goblin','ゴブリン',3],['orc','オーク',4],['dragon','ドラゴン',6]];
+const colors=[['red','赤'],['blue','青'],['green','緑'],['yellow','黄'],['white','白'],['black','黒'],['brown','茶'],['purple','紫']];
+const questTypes=[
+ {en:'Defeat monsters',ja:'モンスター退治',dept:'PE',target:'monster'},
+ {en:'Investigate the ruins',ja:'遺跡調査',dept:'history',target:'ruin'},
+ {en:'Open a sealed door',ja:'封印扉の解錠',dept:'science',target:'door'},
+ {en:'Recover an old item',ja:'古代アイテム回収',dept:'history',target:'item'},
+ {en:'Read an old inscription',ja:'碑文の解読',dept:'English',target:'text'}
+];
+const departments=[
+ ['PE','戦闘','weapon / 武器・戦闘訓練'],
+ ['science','理科','key / 鍵・罠・仕掛け'],
+ ['history','歴史','old book / 遺跡・古代資料'],
+ ['math','数学','ruler / 距離・地図'],
+ ['art','美術','paper & pen / 魔法陣・術札'],
+ ['music','音楽','sound / 音を使う魔法'],
+ ['English','英語','dictionary / 文書・碑文の解読']
+];
+const tools={PE:['pen','ペン型の魔法ナイフ'],science:['ruler','罠や扉を測る定規'],history:['book','遺跡資料の本'],math:['pencil','地図を書く鉛筆'],art:['paper','術札用の紙'],music:['notebook','音術を記録するノート'],English:['dictionary','碑文を読む辞書']};
+const treasures=[['money','お金'],['old book','古い本'],['magic stone','魔石'],['monster material','モンスター素材'],['old coin','古代貨幣'],['jewel','宝石']];
+const wordQuestions=[
+ ['walk','歩く'],['road','道'],['egg','卵'],['coffee','コーヒー'],['music','音楽'],['door','ドア'],['money','お金'],['good','良い'],['well','上手に'],['happy','幸せな'],['slow','遅い'],['flower','花'],['young','若い'],['safe','安全な'],['busy','忙しい'],['hot','暑い'],['why','なぜ'],['this','これ'],['under','〜の下に'],['but','しかし'],['weather','天気'],['wind','風'],['sky','空'],['history','歴史'],['science','理科'],['water','水'],['milk','牛乳'],['tea','お茶'],['fish','魚'],['meat','肉']
+];
+const sentences=[
+ {jp:'私は道を歩きます。',tokens:['I','walk','on','the','road.']},
+ {jp:'私は卵を買います。',tokens:['I','buy','eggs.']},
+ {jp:'私はコーヒーを飲みます。',tokens:['I','drink','coffee.']},
+ {jp:'私は音楽が聞こえます。',tokens:['I','hear','music.']},
+ {jp:'私はドアを引きます。',tokens:['I','pull','the','door.']},
+ {jp:'私はお金が欲しいです。',tokens:['I','want','money.']},
+ {jp:'私はたいてい幸せです。',tokens:['I','am','usually','happy.']},
+ {jp:'私は時々幸せです。',tokens:['I','am','sometimes','happy.']},
+ {jp:'私はいつも悲しいです。',tokens:['I','am','always','sad.']},
+ {jp:'私はよく忙しいです。',tokens:['I','am','often','busy.']},
+ {jp:'なぜこのバッグはテーブルの下にあるのですか？',tokens:['Why','is','this','bag','under','the','table?']},
+ {jp:'あなたはサッカーが上手です。',tokens:['You','play','soccer','well.']}
+];
+const defaultState={year:1,month:8,day:1,weekday:1,hour:7,minute:0,stage:'date',hp:6,maxHp:6,mp:3,maxMp:3,coins:0,egg:false,eggBuff:0,fruit:null,weather:null,lunch:null,lunchDrink:null,dinner:null,dinnerDrink:null,quest:null,tool:null,questProgress:0,questGoal:3,dungeonStep:0,enemy:null,battleType:null,question:null,sentencePick:[],sentencePool:[],loot:[],message:'',reported:false};
+let state=loadState();
 const scene=document.getElementById('scene'),actions=document.getElementById('actions');
+function loadState(){try{return {...defaultState,...JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')}}catch(e){return {...defaultState}}}
+function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
 function rnd(a){return a[Math.floor(Math.random()*a.length)]}
-function ordinal(n){const v=n%100;if(v>=11&&v<=13)return n+'th';switch(n%10){case 1:return n+'st';case 2:return n+'nd';case 3:return n+'rd';default:return n+'th'}}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function ordinal(n){const v=n%100;if(v>=11&&v<=13)return n+'th';return n+(n%10===1?'st':n%10===2?'nd':n%10===3?'rd':'th')}
 function season(m){if([2,3,4].includes(m))return ['spring','春'];if([5,6,7].includes(m))return ['summer','夏'];if([8,9,10].includes(m))return ['fall / autumn','秋'];return ['winter','冬']}
 function daysInMonth(m){return [31,28,31,30,31,30,31,31,30,31,30,31][m]}
 function weekIndex(){return Math.min(4,Math.floor((state.day-1)/7))}
-function ampm(){const h=state.hour;const hr=h===0?12:h>12?h-12:h;return `${hr}:${String(state.minute).padStart(2,'0')} ${h>=12?'p.m.':'a.m.'}`}
-function updateTop(){document.getElementById('dateShort').textContent=`${months[state.month][0]} ${ordinal(state.day)}, ${weekdays[state.weekday][0]}`;document.getElementById('weekShort').textContent=`Year ${state.year} · ${weekNames[weekIndex()][0]} · ${season(state.month)[0]}`;document.getElementById('clockText').textContent=ampm();document.getElementById('timeVal').textContent=ampm();document.getElementById('hourVal').textContent=state.hour;document.getElementById('minuteVal').textContent=String(state.minute).padStart(2,'0')}
-function setTime(h,m=0){state.hour=h;state.minute=m;updateTop()}
+function clock(){const h=state.hour,hr=h===0?12:h>12?h-12:h;return `${hr}:${String(state.minute).padStart(2,'0')} ${h>=12?'p.m.':'a.m.'}`}
+function setTime(h,m=0){state.hour=h;state.minute=m;updateHud()}
+function updateHud(){const s=season(state.month);document.getElementById('dateMain').textContent=`${months[state.month][0]} ${ordinal(state.day)}, ${weekdays[state.weekday][0]}`;document.getElementById('dateSub').textContent=`Year ${state.year} · ${weeks[weekIndex()][0]} · ${s[0]}`;document.getElementById('clockMain').textContent=clock();document.getElementById('timeVal').textContent=clock();document.getElementById('hourVal').textContent=state.hour;document.getElementById('minuteVal').textContent=String(state.minute).padStart(2,'0')}
 function word(en,ja){return `<span class="word"><b>${en}</b><small>${ja}</small></span>`}
-function btn(label,jp,fn,primary=false){const b=document.createElement('button');b.className='btn'+(primary?' primary':'');b.innerHTML=`${label}<span class="tiny">${jp}</span>`;b.onclick=fn;actions.appendChild(b)}
-function base(phase,en,jp,body=''){scene.innerHTML=`<div class="phase">${phase}</div><h1 class="english">${en}</h1><p class="jp">${jp}</p>${body}`;actions.innerHTML='';updateTop()}
-function stats(){return `<div class="stats"><span class="stat">Body ${state.body}</span><span class="stat">Mind ${state.mind}</span><span class="stat">Magic ${state.magic}</span><span class="stat">Egg ${state.egg}</span></div>`}
+function stats(){return `<div class="stats"><span class="stat danger">HP ${state.hp}/${state.maxHp}</span><span class="stat magic">MP ${state.mp}/${state.maxMp}</span><span class="stat money">Money ${state.coins}</span>${state.eggBuff?'<span class="stat">Egg Buff +1</span>':''}</div><div class="loot">Bag / かばん：${state.loot.length?state.loot.join(' / '):'empty / 空'}</div>`}
+function base(phase,en,jp,body=''){scene.innerHTML=`<div class="phase">${phase}</div><h1>${en}</h1><p class="jp">${jp}</p>${body}`;actions.innerHTML='';actions.className='actions';updateHud();save()}
+function btn(en,ja,fn,primary=false,extra=''){const b=document.createElement('button');b.className='btn'+(primary?' primary':'')+(extra?' '+extra:'');b.innerHTML=`${en}<span class="tiny">${ja}</span>`;b.onclick=fn;actions.appendChild(b);return b}
+function one(){actions.className='actions one'}
+function nextStage(s){state.stage=s;render()}
 function render(){
- if(state.stage==='date'){
-  setTime(7,0);const s=season(state.month),w=weekNames[weekIndex()];
-  base('DATE / 日付','Today','今日',`<div class="calendar-list"><div><small>year / 年</small><b>Year ${state.year}</b></div><div><small>month / 月</small><b>${months[state.month][0]}（${months[state.month][1]}）</b></div><div><small>week / 週</small><b>${w[0]}（${w[1]}）</b></div><div><small>day / 日</small><b>${ordinal(state.day)}（${state.day}日）</b></div><div><small>today / 今日</small><b>${weekdays[state.weekday][0]}（${weekdays[state.weekday][1]}）</b></div><div><small>season / 季節</small><b>${s[0]}（${s[1]}）</b></div></div><div class="notice">tomorrow＝明日 / yesterday＝昨日</div>`);
-  btn('Morning','朝を始める',()=>{state.stage='egg';render()},true);return;
- }
- if(state.stage==='egg'){
-  setTime(7,0);base('MORNING / 朝','I take an egg.','私は卵を取ります。',`${word('egg','卵')}<div id="result" class="info">鶏から egg を取ります。判定してください。</div>${stats()}`);
-  btn('Roll','判定',()=>{const d=1+Math.floor(Math.random()*6);const ok=d>=3;if(ok)state.egg++;document.getElementById('result').innerHTML=`🎲 ${d} — <strong>${ok?'Success':'Fail'}</strong><br>${ok?'I get an egg.（卵を手に入れます。）':'I do not get an egg.（卵を取れません。）'}`;actions.innerHTML='';btn('Breakfast','朝食へ',()=>{state.stage='breakfast';render()},true)});return;
- }
- if(state.stage==='breakfast'){
-  setTime(7,30);if(!state.fruit)state.fruit=rnd(fruits);const f=state.fruit;
-  base('BREAKFAST / 朝食','I make fruit juice.','私はフルーツジュースを作ります。',`<span class="oracle-badge">FRUIT ORACLE / 果物オラクル</span><div class="info">${word(f[0],f[1])}<br><strong>${f[0]} juice</strong> — ${f[1]}ジュース<br>${state.egg?`I eat an egg.（私は卵を食べます。）`:'No egg.（卵はありません。）'}</div>`);
-  btn('Fruit oracle','果物を引き直す',()=>{state.fruit=rnd(fruits);render()});btn('Weather','天気を見る',()=>{state.stage='weather';render()},true);return;
- }
- if(state.stage==='weather'){
-  setTime(8,0);if(!state.weather)state.weather=rnd(weather);const w=state.weather;
-  base('WEATHER / 天気','How is the weather?','天気はどうですか？',`<span class="oracle-badge">WEATHER ORACLE / 天気オラクル</span><div class="info">${word('weather','天気')} ${word(w[0],w[1])}<br><strong>Weather: ${w[0]}</strong> — 天気：${w[1]}</div>`);
-  btn('Weather oracle','天気を引き直す',()=>{state.weather=rnd(weather);render()});btn('Go to magic school','魔法学校へ行く',()=>{state.stage='school';render()},true);return;
- }
- if(state.stage==='school'){
-  setTime(9,0);if(!state.desk)state.desk=1+Math.floor(Math.random()*100);if(!state.item)state.item=rnd(schoolItems);const i=state.item;
-  base('MAGIC SCHOOL / 魔法学校','Magic classroom','魔法教室',`<div class="info">${word('school','学校')} ${word('classroom','教室')} ${word('desk','机')} ${word('chair','椅子')}<br><strong>This is the ${ordinal(state.desk)} desk.</strong><br>これは${state.desk}番目の机です。<br><br><strong>“Open the textbook.”</strong><br>「教科書を開いてください」<br><br>Today’s item / 今日の学用品：${word(i[0],i[1])}</div>`);
-  btn('School item oracle','学用品を引き直す',()=>{state.item=rnd(schoolItems);render()});btn('Special lesson','特別授業へ',()=>{state.stage='lesson';render()},true);return;
- }
- if(state.stage==='lesson'){
-  setTime(10,0);if(!state.lesson)state.lesson=rnd(lessons);const l=state.lesson;
-  base('SPECIAL LESSON / 特別授業',l[0],l[1],`<span class="oracle-badge">LESSON ORACLE / 授業オラクル</span><div class="info">Today’s special lesson is ${word(l[0],l[1])}.<br>今日の特別授業は${l[1]}です。<br><br>Finish the lesson → <strong>${l[2]} +1</strong></div>${stats()}`);
-  btn('Lesson oracle','授業を引き直す',()=>{state.lesson=rnd(lessons);render()});btn('Finish class','授業を終える',()=>{if(l[2]==='Body')state.body++;if(l[2]==='Mind')state.mind++;if(l[2]==='Magic')state.magic++;state.stage='lunch';render()},true);return;
- }
- if(state.stage==='lunch'){
-  setTime(12,0);if(!state.lunch)state.lunch=rnd(lunchFoods);if(!state.drink)state.drink=rnd(drinks);
-  base('AFTERNOON / 昼','Lunch','昼食',`<div class="info"><strong>Food / 食べ物</strong><br>${word(state.lunch[0],state.lunch[1])}<br><br><strong>Drink / 飲み物</strong><br>${word(state.drink[0],state.drink[1])}</div>`);
-  btn('Lunch oracle','昼食を引き直す',()=>{state.lunch=rnd(lunchFoods);state.drink=rnd(drinks);render()});btn('Adventure','冒険へ',()=>{state.stage='adventure';render()},true);return;
- }
- if(state.stage==='adventure'){
-  setTime(15,0);if(!state.place)state.place=rnd(places);if(!state.color)state.color=rnd(colors);if(!state.encounter){const cat=rnd(['animal','plant','monster']);const pool=cat==='animal'?animals:cat==='plant'?plants:monsters;state.encounter={cat,val:rnd(pool)}}const e=state.encounter.val,c=state.color,p=state.place;
-  base('ADVENTURE / 冒険','I walk to the '+p[0]+'.',`私は${p[1]}へ歩いて行きます。`,`<span class="oracle-badge">PLACE + ENCOUNTER ORACLE</span><div class="info">${word(p[0],p[1])}<br><br><strong>I see a ${c[0]} ${e[0]}.</strong><br>私は${c[1]}い${e[1]}を見ます。<br>${word(c[0],c[1])} ${word(e[0],e[1])}<br><br>Magic tools / 魔法道具：<br>${word('pen','ペン → 魔法の小型ナイフ')} ${word('pencil','鉛筆 → 魔法を書く')} ${word('notebook','ノート → 術札を記録')}</div>`);
-  btn('Adventure oracle','場所と遭遇を引き直す',()=>{state.place=rnd(places);state.color=rnd(colors);state.encounter=null;render()});btn('Evening','夕方へ',()=>{state.stage='evening';render()},true);return;
- }
- if(state.stage==='evening'){
-  setTime(18,0);base('EVENING / 夕方','I go back to town.','私は町へ戻ります。',`<div class="info">${word('evening','夕方')} ${word('town','町')} ${word('restaurant','レストラン')}<br><br>I walk to a restaurant.<br>私はレストランへ歩いて行きます。</div>`);
-  btn('Dinner','夕食へ',()=>{state.stage='dinner';render()},true);return;
- }
- if(state.stage==='dinner'){
-  setTime(19,0);if(!state.dinner)state.dinner=rnd(dinnerFoods);if(!state.dinnerDrink)state.dinnerDrink=rnd(drinks);
-  base('DINNER / 夕食','Dinner at a restaurant','レストランで夕食',`<div class="info"><strong>Food / 食べ物</strong><br>${word(state.dinner[0],state.dinner[1])}<br><br><strong>Drink / 飲み物</strong><br>${word(state.dinnerDrink[0],state.dinnerDrink[1])}<br><br>I eat ${state.dinner[0]}. / I drink ${state.dinnerDrink[0]}.</div>`);
-  btn('Dinner oracle','夕食を引き直す',()=>{state.dinner=rnd(dinnerFoods);state.dinnerDrink=rnd(drinks);render()});btn('Night','夜へ',()=>{state.stage='night';render()},true);return;
- }
- if(state.stage==='night'){
-  setTime(21,0);base('NIGHT / 夜','I sleep.','私は眠ります。',`${word('night','夜')} ${word('sleep','眠る')}<div class="info">Today is finished. — 今日が終わりました。<br>Tomorrow starts after sleep. — 眠ると明日が始まります。</div>${stats()}`);
-  btn('Sleep','眠る',nextDay,true);return;
- }
+ if(state.stage==='date')return renderDate();
+ if(state.stage==='egg')return renderEgg();
+ if(state.stage==='breakfast')return renderBreakfast();
+ if(state.stage==='weather')return renderWeather();
+ if(state.stage==='guild')return renderGuild();
+ if(state.stage==='classroom')return renderClassroom();
+ if(state.stage==='prepare')return renderPrepare();
+ if(state.stage==='lunch')return renderLunch();
+ if(state.stage==='ruins')return renderRuins();
+ if(state.stage==='battle')return renderBattle();
+ if(state.stage==='questDone')return renderQuestDone();
+ if(state.stage==='report')return renderReport();
+ if(state.stage==='evening')return renderEvening();
+ if(state.stage==='dinner')return renderDinner();
+ if(state.stage==='night')return renderNight();
 }
-function nextDay(){state.day++;state.weekday=(state.weekday+1)%7;if(state.day>daysInMonth(state.month)){state.day=1;state.month++;if(state.month>11){state.month=0;state.year++}}state.stage='date';state.fruit=state.weather=state.desk=state.item=state.lesson=state.lunch=state.drink=state.place=state.encounter=state.color=state.dinner=state.dinnerDrink=null;render()}
+function renderDate(){setTime(7,0);const s=season(state.month);base('DATE / 日付','Today','今日',`<div class="grid2"><div class="mini"><small>year / 年</small><b>Year ${state.year}</b></div><div class="mini"><small>month / 月</small><b>${months[state.month][0]}</b></div><div class="mini"><small>week / 週</small><b>${weeks[weekIndex()][0]}</b></div><div class="mini"><small>day / 日</small><b>${ordinal(state.day)}</b></div><div class="mini"><small>today / 今日</small><b>${weekdays[state.weekday][0]}</b></div><div class="mini"><small>season / 季節</small><b>${s[0]}</b></div></div><div class="note">tomorrow＝明日 / yesterday＝昨日</div>${stats()}`);one();btn('Morning','朝を始める',()=>nextStage('egg'),true)}
+function renderEgg(){setTime(7,0);base('MORNING / 朝','I take an egg.','私は卵を取ります。',`${word('egg','卵')}<div id="eggResult" class="box">鶏から egg を取ります。<br>Roll / 判定をします。</div>${stats()}`);one();btn('Roll','判定',()=>{const d=1+Math.floor(Math.random()*6);state.egg=d>=3;document.getElementById('eggResult').innerHTML=`🎲 ${d} — <strong>${state.egg?'Success':'Fail'}</strong><br>${state.egg?'I get an egg. — 卵を手に入れました。':'I do not get an egg. — 卵を取れませんでした。'}`;actions.innerHTML='';btn('Breakfast','朝食へ',()=>nextStage('breakfast'),true);save()},true)}
+function renderBreakfast(){setTime(7,30);if(!state.fruit)state.fruit=rnd(fruits);const f=state.fruit;state.mp=state.maxMp;if(state.egg){state.eggBuff=1;state.egg=false}base('BREAKFAST / 朝食','I make fruit juice.','私はフルーツジュースを作ります。',`<span class="badge">FRUIT ORACLE</span><div class="box">${word(f[0],f[1])}<br><strong>${f[0]} juice</strong> — ${f[1]}ジュース<br><br>Juice → <strong>MP full / MP全回復</strong><br>${state.eggBuff?'Egg → <strong>Egg Buff +1</strong>（次の戦闘で最初の正解攻撃+1）':'No egg buff today. — 今日はegg buffなし。'}</div>${stats()}`);btn('Fruit oracle','果物を引き直す',()=>{state.fruit=rnd(fruits);renderBreakfast()});btn('Weather','天気を見る',()=>nextStage('weather'),true)}
+function renderWeather(){setTime(8,0);if(!state.weather)state.weather=rnd(weatherList);const w=state.weather;base('WEATHER / 天気','How is the weather?','天気はどうですか？',`<span class="badge">WEATHER ORACLE</span><div class="box">${word('weather','天気')} ${word(w[0],w[1])}<br><strong>Weather: ${w[0]}</strong> — ${w[1]}</div>${stats()}`);btn('Weather oracle','天気を引き直す',()=>{state.weather=rnd(weatherList);renderWeather()});btn('Go to Magic School','Magic Schoolへ行く',()=>nextStage('guild'),true)}
+function renderGuild(){setTime(9,0);base('MAGIC SCHOOL','Public Ruins Survey Corps','公営遺跡調査隊',`<div class="box"><strong>Magic School</strong> は学校ではありません。<br>街の地下に広がる遺跡を調査し、地上へ上がる monsters を防ぐ公的組織です。<br><br>遺跡の treasure・古代品・monster materials が街を発展させています。</div><div class="dept">${departments.map(d=>`<div><b>${d[0]} — ${d[1]}</b>${d[2]}</div>`).join('')}</div>${stats()}`);one();btn('Magic Classroom','依頼斡旋所へ',()=>nextStage('classroom'),true)}
+function newQuest(){state.quest=rnd(questTypes);state.questProgress=0;state.questGoal=3;state.tool=null;state.dungeonStep=0;state.enemy=null;state.reported=false}
+function renderClassroom(){setTime(9,15);if(!state.quest)newQuest();const q=state.quest;base('MAGIC CLASSROOM','Mission Counter','依頼斡旋所',`<span class="badge">MISSION ORACLE</span><div class="box quest"><strong>${q.en}</strong><br>${q.ja}<br><br>Department / 担当：${word(q.dept,departments.find(d=>d[0]===q.dept)?.[1]||'')}</div><div class="note">Magic Classroom は classroom という名前ですが、実際は退治・調査・回収依頼の受付所です。</div>${stats()}`);btn('New mission','別の依頼を引く',()=>{newQuest();renderClassroom()});btn('Take mission','依頼を受ける',()=>nextStage('prepare'),true)}
+function renderPrepare(){setTime(10,0);const q=state.quest,t=tools[q.dept]||['bag','かばん'];state.tool=t;base('PREPARE / 準備','Prepare for the ruins.','遺跡へ行く準備をします。',`<div class="box"><strong>${q.dept} equipment</strong><br>${word(t[0],t[1])}<br><br>${word('bag','かばん')} ${word('paper','紙')} ${word('notebook','ノート')} ${word('pencil','鉛筆')} ${word('eraser','消しゴム')}<br><br>Mission: <strong>${q.en}</strong></div>${stats()}`);one();btn('Lunch','昼食へ',()=>nextStage('lunch'),true)}
+function renderLunch(){setTime(12,0);if(!state.lunch)state.lunch=rnd(lunchFoods);if(!state.lunchDrink)state.lunchDrink=rnd(drinks);state.hp=Math.min(state.maxHp,state.hp+1);base('AFTERNOON / 昼','Lunch','昼食',`<div class="box"><strong>Food</strong> ${word(state.lunch[0],state.lunch[1])}<br><strong>Drink</strong> ${word(state.lunchDrink[0],state.lunchDrink[1])}<br><br>Lunch → HP +1</div>${stats()}`);btn('Lunch oracle','昼食を引き直す',()=>{state.lunch=rnd(lunchFoods);state.lunchDrink=rnd(drinks);renderLunch()});btn('Go to the ruins','遺跡へ',()=>nextStage('ruins'),true)}
+function dungeonMap(){let html='<div class="map">';for(let i=0;i<15;i++){let c='tile';if(i<state.dungeonStep)c+=' done';if(i===Math.min(state.dungeonStep,14))c+=' now';html+=`<div class="${c}">${i===Math.min(state.dungeonStep,14)?'●':''}</div>`}return html+'</div>'}
+function renderRuins(){setTime(Math.min(17,13+Math.floor(state.dungeonStep/2)),state.dungeonStep%2?30:0);if(state.questProgress>=state.questGoal)return nextStage('questDone');base('RUINS / 遺跡','Explore the ruins.','遺跡を探索します。',`<div class="box"><strong>Mission:</strong> ${state.quest.en}<br>Progress / 進行：${state.questProgress} / ${state.questGoal}<br>Depth / 探索歩数：${state.dungeonStep}</div>${dungeonMap()}${stats()}<div id="ruinMessage" class="note">前・左・右のどこかへ進みます。</div>`);btn('Forward','前へ進む',()=>explore('forward'),true);btn('Left','左へ進む',()=>explore('left'));btn('Right','右へ進む',()=>explore('right'));btn('Return','街へ戻る',()=>nextStage('evening'))}
+function explore(dir){state.dungeonStep++;const roll=Math.random();let msg='';if(roll<.38){const m=rnd(monsters),c=rnd(colors);state.enemy={en:m[0],ja:m[1],color:c[0],colorJa:c[1],hp:m[2],maxHp:m[2]};state.battleType=Math.random()<.5?'word':'sentence';state.stage='battle';render();return}else if(roll<.58){const t=rnd(treasures);state.loot.push(t[1]);state.coins+=t[0]==='money'||t[0]==='old coin'?2:0;state.questProgress++;msg=`Treasure! ${t[0]} — ${t[1]} を見つけました。`}else if(roll<.72){const d=1+Math.floor(Math.random()*6);if(d>=3){state.questProgress++;msg=`Trap / 罠。science check 🎲${d} Success — 仕掛けを解除しました。`}else{state.hp=Math.max(0,state.hp-1);msg=`Trap / 罠。science check 🎲${d} Fail — HP -1`}}else if(roll<.88){state.questProgress++;msg=`Old room / 古い部屋を調査しました。history + investigation.`}else{state.questProgress++;msg=`A sealed passage opens. — 封印された通路が開きました。`}
+ save();if(state.hp<=0){state.hp=state.maxHp;state.coins=Math.max(0,state.coins-2);state.questProgress=0;state.dungeonStep=0;state.stage='evening';state.message='倒れて街へ運ばれました。Money -2';render();return}renderRuins();const e=document.getElementById('ruinMessage');if(e)e.textContent=msg}
+function makeWordQuestion(){const q=rnd(wordQuestions),wrong=shuffle(wordQuestions.filter(x=>x[0]!==q[0])).slice(0,3);return {kind:'word',en:q[0],ja:q[1],choices:shuffle([q,...wrong])}}
+function makeSentenceQuestion(){const q=rnd(sentences);return {kind:'sentence',jp:q.jp,correct:[...q.tokens],pool:shuffle(q.tokens.map((t,i)=>({t,id:i}))),pick:[]}}
+function ensureQuestion(){if(!state.question)state.question=state.battleType==='word'?makeWordQuestion():makeSentenceQuestion()}
+function enemyBox(){const e=state.enemy,p=Math.max(0,Math.round(e.hp/e.maxHp*100));return `<div class="box"><div class="enemy"><div><span class="badge">MONSTER</span><div class="enemy-name">${e.color} ${e.en}</div><div>${e.colorJa}い${e.ja}</div></div><b>HP ${e.hp}/${e.maxHp}</b></div><div class="hpbar"><div class="hpfill" style="width:${p}%"></div></div></div>`}
+function renderBattle(){ensureQuestion();const q=state.question;setTime(state.hour,state.minute);let body=enemyBox()+stats();if(q.kind==='word'){body+=`<div class="box"><span class="badge">WORD BATTLE / 英単語</span><br><strong>${q.en}</strong> の意味は？<div class="choices" id="choices"></div><div id="battleFeedback" class="feedback"></div></div>`}else{body+=`<div class="box"><span class="badge">SENTENCE BATTLE / 英文</span><br><strong>${q.jp}</strong><div class="answerline" id="answerLine"></div><div class="tokens" id="tokenPool"></div><div id="battleFeedback" class="feedback"></div></div>`}base('BATTLE / 戦闘','Fight!','英語で戦います。',body);if(q.kind==='word'){const area=document.getElementById('choices');q.choices.forEach(ch=>{const b=document.createElement('button');b.className='choice';b.textContent=`${ch[1]}`;b.onclick=()=>answerWord(ch[1]===q.ja);area.appendChild(b)})}else drawSentence();one();btn('Use Magic -1 MP','ヒントを使う',useMagic)}
+function attackDamage(){let dmg=1;if(state.eggBuff){dmg++;state.eggBuff=0}return dmg}
+function correctBattle(){const dmg=attackDamage();state.enemy.hp-=dmg;state.question=null;state.message=`Correct! — 正解。Damage ${dmg}`;if(state.enemy.hp<=0){state.loot.push(`${state.enemy.ja}素材`);state.coins+=1;state.questProgress++;state.enemy=null;state.stage=state.questProgress>=state.questGoal?'questDone':'ruins';save();render();return}state.battleType=Math.random()<.5?'word':'sentence';save();renderBattle()}
+function wrongBattle(){state.hp=Math.max(0,state.hp-1);state.question=null;state.message='Wrong. — 不正解。HP -1';if(state.hp<=0){state.hp=state.maxHp;state.coins=Math.max(0,state.coins-2);state.questProgress=0;state.dungeonStep=0;state.enemy=null;state.stage='evening';state.message='戦闘で倒れ、街へ運ばれました。Money -2';save();render();return}state.battleType=Math.random()<.5?'word':'sentence';save();renderBattle()}
+function answerWord(ok){const f=document.getElementById('battleFeedback');if(f)f.innerHTML=ok?'<span class="good">Correct! — 正解</span>':'<span class="bad">Wrong. — 不正解</span>';setTimeout(()=>ok?correctBattle():wrongBattle(),250)}
+function drawSentence(){const q=state.question,a=document.getElementById('answerLine'),p=document.getElementById('tokenPool');if(!a||!p)return;a.innerHTML='';p.innerHTML='';q.pick.forEach((x,idx)=>{const b=document.createElement('button');b.className='token';b.textContent=x.t;b.onclick=()=>{q.pool.push(q.pick.splice(idx,1)[0]);drawSentence()};a.appendChild(b)});q.pool.forEach((x,idx)=>{const b=document.createElement('button');b.className='token';b.textContent=x.t;b.onclick=()=>{q.pick.push(q.pool.splice(idx,1)[0]);drawSentence()};p.appendChild(b)});actions.innerHTML='';btn('Check','答え合わせ',checkSentence,true);btn('Reset','並べ直す',()=>{q.pool=shuffle([...q.pool,...q.pick]);q.pick=[];drawSentence()});btn('Use Magic -1 MP','ヒントを使う',useMagic)}
+function checkSentence(){const q=state.question,ans=q.pick.map(x=>x.t);if(ans.length!==q.correct.length){document.getElementById('battleFeedback').innerHTML='<span class="bad">文を最後まで作ってください。</span>';return}const ok=ans.every((x,i)=>x===q.correct[i]);document.getElementById('battleFeedback').innerHTML=ok?'<span class="good">Correct! — 正解</span>':'<span class="bad">Wrong. — 不正解</span>';setTimeout(()=>ok?correctBattle():wrongBattle(),250)}
+function useMagic(){if(state.mp<=0){const f=document.getElementById('battleFeedback');if(f)f.innerHTML='<span class="bad">MPがありません。</span>';return}state.mp--;const q=state.question;if(q.kind==='word'){const f=document.getElementById('battleFeedback');if(f)f.innerHTML=`Hint / ヒント：<strong>${q.ja}</strong>`}else{const next=q.correct[q.pick.length];const f=document.getElementById('battleFeedback');if(f)f.innerHTML=`Hint / 次の語：<strong>${next||'完成'}</strong>`}save();updateHud()}
+function renderQuestDone(){setTime(17,0);base('MISSION COMPLETE','Mission complete!','依頼達成です。',`<div class="box"><strong>${state.quest.en}</strong><br>${state.quest.ja}<br><br>Ruins progress: ${state.questProgress}/${state.questGoal}<br>街へ戻って Magic Classroom に報告します。</div>${stats()}`);one();btn('Return to town','街へ戻る',()=>nextStage('report'),true)}
+function renderReport(){setTime(17,30);if(!state.reported){state.coins+=5;state.reported=true}base('MAGIC CLASSROOM','Report the mission.','依頼を報告します。',`<div class="box"><strong>Mission complete.</strong><br>報酬：Money +5<br><br>Loot / 戦利品：${state.loot.length?state.loot.join(' / '):'なし'}</div>${stats()}`);one();btn('Evening','夕方へ',()=>nextStage('evening'),true)}
+function renderEvening(){setTime(18,0);base('EVENING / 夕方','I go back to town.','私は街へ戻ります。',`<div class="box">${word('evening','夕方')} ${word('town','町')} ${word('restaurant','レストラン')}<br><br>${state.message||'I walk to a restaurant. — レストランへ歩いて行きます。'}</div>${stats()}`);one();btn('Dinner','夕食へ',()=>nextStage('dinner'),true)}
+function renderDinner(){setTime(19,0);if(!state.dinner)state.dinner=rnd(dinnerFoods);if(!state.dinnerDrink)state.dinnerDrink=rnd(drinks);state.hp=state.maxHp;base('DINNER / 夕食','Dinner at a restaurant','レストランで夕食',`<div class="box"><strong>Food</strong> ${word(state.dinner[0],state.dinner[1])}<br><strong>Drink</strong> ${word(state.dinnerDrink[0],state.dinnerDrink[1])}<br><br>I eat ${state.dinner[0]}.<br>I drink ${state.dinnerDrink[0]}.<br>Dinner → HP full / HP全回復</div>${stats()}`);btn('Dinner oracle','夕食を引き直す',()=>{state.dinner=rnd(dinnerFoods);state.dinnerDrink=rnd(drinks);renderDinner()});btn('Night','夜へ',()=>nextStage('night'),true)}
+function renderNight(){setTime(21,0);base('NIGHT / 夜','I sleep.','私は眠ります。',`${word('night','夜')} ${word('sleep','眠る')}<div class="box">Today is finished. — 今日が終わりました。<br>Tomorrow starts after sleep. — 眠ると明日が始まります。</div>${stats()}`);one();btn('Sleep','眠る',nextDay,true)}
+function nextDay(){state.day++;state.weekday=(state.weekday+1)%7;if(state.day>daysInMonth(state.month)){state.day=1;state.month++;if(state.month>11){state.month=0;state.year++}}state.stage='date';state.hour=7;state.minute=0;state.egg=false;state.eggBuff=0;state.fruit=null;state.weather=null;state.lunch=null;state.lunchDrink=null;state.dinner=null;state.dinnerDrink=null;state.quest=null;state.tool=null;state.questProgress=0;state.dungeonStep=0;state.enemy=null;state.question=null;state.loot=[];state.message='';state.reported=false;save();render()}
 render();
 </script>
 </body>
