@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>Magic School - Daily</title>
-  <link rel="stylesheet" href="css/magic-daily.css?v=20260903-2">
+  <link rel="stylesheet" href="css/magic-daily.css?v=20260903-3">
 </head>
 <body>
   <main class="daily-shell">
@@ -22,16 +22,16 @@
       <section class="calendar-row" aria-label="日付と時刻">
         <div class="calendar-card">
           <small>DATE / 日付</small>
-          <strong id="dateMain">—</strong>
-          <span id="dateSub">—</span>
+          <strong id="dateMain">Sep. 1st</strong>
+          <span id="dateSub">Mon. · Fall · 1st wk.</span>
         </div>
         <div class="time-card">
           <small>TIME / 時間</small>
-          <strong id="clockMain">—</strong>
+          <strong id="clockMain">7:00 a.m.</strong>
           <div class="time-parts">
-            <span><b>time</b><i id="timeValue">—</i></span>
-            <span><b>hour</b><i id="hourValue">—</i></span>
-            <span><b>minute</b><i id="minuteValue">—</i></span>
+            <span><b>time</b><i id="timeValue">7:00 a.m.</i></span>
+            <span><b>hour</b><i id="hourValue">7</i></span>
+            <span><b>minute</b><i id="minuteValue">00</i></span>
           </div>
         </div>
       </section>
@@ -58,7 +58,7 @@
       <div class="stage-head">
         <div>
           <small id="stageKicker">DAILY</small>
-          <h1 id="stageTitle">Morning</h1>
+          <h1 id="stageTitle">Today</h1>
         </div>
         <span id="placeLabel">HOME</span>
       </div>
@@ -68,8 +68,8 @@
     </section>
 
     <nav class="daily-nav" aria-label="日常メニュー">
+      <button type="button" data-jump="today">TODAY</button>
       <button type="button" data-jump="home">HOME</button>
-      <button type="button" data-jump="school">MAGIC SCHOOL</button>
       <button type="button" data-jump="bag">BAG</button>
       <button type="button" data-jump="status">STATUS</button>
     </nav>
@@ -77,7 +77,7 @@
     <div id="saveMessage" class="save-message" aria-live="polite"></div>
   </main>
 
-  <script src="js/magic-state.js?v=20260903-1"></script>
-  <script src="js/magic-daily.js?v=20260903-1"></script>
+  <script src="js/magic-state.js?v=20260903-2"></script>
+  <script src="js/magic-daily.js?v=20260903-2"></script>
 </body>
 </html>
