@@ -16,6 +16,12 @@
           count:8,
           labelEn:'Explore all 8 areas on B1F',
           labelJa:'B1Fの8マスをすべて発見する'
+        },
+        {
+          type:'boss_capture',
+          floor:1,
+          labelEn:'Capture the B1F boss',
+          labelJa:'B1Fのボスを捕まえる'
         }
       ]
     }
