@@ -1,0 +1,49 @@
+.compact-calendar{
+  display:flex!important;
+  grid-template-columns:none!important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  border:2px solid #d4bbae;
+  border-radius:13px;
+  background:#fff;
+  padding:7px 10px;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.compact-calendar>strong,
+.compact-calendar>span{
+  display:inline;
+  min-width:0;
+  margin:0;
+  line-height:1.2;
+}
+.compact-calendar>strong{
+  font-size:17px;
+  font-weight:900;
+  flex:0 0 auto;
+}
+.compact-calendar>span{
+  font-size:14px;
+  font-weight:800;
+  color:#765e55;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.compact-calendar #clockMain{
+  margin-left:auto;
+}
+.time-parts-hidden{display:none!important}
+
+@media(max-width:480px){
+  .compact-calendar{gap:6px;padding:6px 8px}
+  .compact-calendar>strong{font-size:15px}
+  .compact-calendar>span{font-size:12px}
+}
+
+@media(max-height:760px){
+  .compact-calendar{padding:4px 7px}
+  .compact-calendar>strong{font-size:14px}
+  .compact-calendar>span{font-size:11px}
+}
