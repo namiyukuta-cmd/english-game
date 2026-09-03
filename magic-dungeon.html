@@ -14,15 +14,15 @@
     <header class="daily-hud">
       <div class="hud-top"><button id="returnMagicTop" class="hud-back" type="button" aria-label="帰還魔法">←</button><div class="hud-title"><strong>DUNGEON</strong><span>RUINS / 遺跡</span></div><button id="saveBtn" class="hud-save" type="button">SAVE</button></div>
       <section class="calendar-row compact-calendar" aria-label="日付・曜日・季節・時刻"><strong id="dateMain">Sep. 1st</strong><span id="dateSub">Mon. · Fall · 1st wk.</span><strong id="clockMain">8:15 a.m.</strong><div class="time-parts-hidden" aria-hidden="true"><span id="timeValue">8:15 a.m.</span><span id="hourValue">8</span><span id="minuteValue">15</span></div></section>
-      <section class="resource-row" aria-label="リソース"><div class="resource"><small>HP</small><strong id="hpValue">5</strong><span>/5</span></div><div class="resource"><small>MP</small><strong id="mpValue">5</strong><span>/5</span></div><div class="resource"><small>SUPPLY</small><strong id="supplyValue">5</strong><span>/5</span></div></section>
+      <section class="resource-row" aria-label="リソース"><div class="resource"><small>HP</small><strong id="hpValue">5</strong><span>/5</span></div><div class="resource"><small>MP</small><strong id="mpValue">5</strong><span>/5</span></div><div class="resource"><small>MONEY</small><strong id="moneyValue">0</strong></div></section>
       <section class="stat-wrap" aria-label="ステータス"><div class="stat-head">STATUS / ステータス</div><div class="stat-row"><div class="stat"><small>PE</small><strong id="peValue">2</strong></div><div class="stat"><small>SCIENCE</small><strong id="scienceValue">2</strong></div><div class="stat"><small>HISTORY</small><strong id="historyValue">2</strong></div><div class="stat"><small>MATH</small><strong id="mathValue">2</strong></div><div class="stat"><small>ART</small><strong id="artValue">2</strong></div></div></section>
     </header>
     <section class="daily-stage dungeon-stage"><div class="stage-head"><div><small>DUNGEON</small><h1 id="floorTitle">B1F</h1></div><span id="foundText">MAP 1 / 8</span></div><div class="dungeon-content"><section class="dungeon-map-card"><div class="dungeon-map-head"><strong>MAP</strong><span>黄色の枠＝現在地</span></div><div class="dungeon-map-wrap"><div id="dungeonMap" class="dungeon-map" aria-label="ダンジョンマップ"></div></div></section><section class="dungeon-control-card"><div class="dungeon-room-row"><strong id="roomName">Entrance</strong><span id="floorCount">B1F · 1/8</span></div><p id="dungeonMessage">道がある方向へ進めます。</p><div class="dungeon-play-row"><button id="returnMagicBtn" class="return-magic" type="button">Return Magic<br><small>帰還魔法</small></button><div class="direction-pad" aria-label="移動方向"><button class="dir-btn up" data-dir="up" type="button" aria-label="上へ">↑</button><button class="dir-btn left" data-dir="left" type="button" aria-label="左へ">←</button><button class="dir-btn right" data-dir="right" type="button" aria-label="右へ">→</button><button class="dir-btn down" data-dir="down" type="button" aria-label="下へ">↓</button></div></div><div class="stairs-actions"><button id="goUpBtn" type="button" hidden>Go up / 上の階へ</button><button id="goDownBtn" type="button" hidden>Go down / 下の階へ</button></div></section></div></section>
     <div id="saveMessage" class="save-message" aria-live="polite"></div>
   </main>
-  <script src="js/magic-state.js?v=20260903-3"></script>
+  <script src="js/magic-state.js?v=20260903-7"></script>
   <script src="data/magic-main-quests.js?v=20260903-2"></script>
-  <script src="js/magic-quest-engine.js?v=20260903-2"></script>
-  <script src="js/magic-dungeon.js?v=20260903-5"></script>
+  <script src="js/magic-quest-engine.js?v=20260903-3"></script>
+  <script src="js/magic-dungeon.js?v=20260903-6"></script>
 </body>
 </html>
