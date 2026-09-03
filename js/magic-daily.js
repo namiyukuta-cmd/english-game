@@ -52,7 +52,7 @@
   const $=id=>document.getElementById(id);
   const pick=list=>list[Math.floor(Math.random()*list.length)];
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'
   }[char]));
   const reEsc=value=>String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 
@@ -71,10 +71,10 @@
   }
 
   function seasonInfo(monthIndex){
-    if([2,3,4].includes(monthIndex))return {word:'spring',label:'Spring',ja:'春',magic:'Spring Magic',magicJa:'春魔法'};
-    if([5,6,7].includes(monthIndex))return {word:'summer',label:'Summer',ja:'夏',magic:'Summer Magic',magicJa:'夏魔法'};
-    if([8,9,10].includes(monthIndex))return {word:'fall',label:'Fall',ja:'秋',magic:'Fall Magic',magicJa:'秋魔法'};
-    return {word:'winter',label:'Winter',ja:'冬',magic:'Winter Magic',magicJa:'冬魔法'};
+    if([2,3,4].includes(monthIndex))return {word:'spring',label:'Spring',ja:'春'};
+    if([5,6,7].includes(monthIndex))return {word:'summer',label:'Summer',ja:'夏'};
+    if([8,9,10].includes(monthIndex))return {word:'fall',label:'Fall',ja:'秋'};
+    return {word:'winter',label:'Winter',ja:'冬'};
   }
 
   function weekIndex(){return Math.min(4,Math.floor((state.day-1)/7))}
@@ -189,7 +189,7 @@
     if(overlay==='bag')return renderBag();
     if(overlay==='status')return renderStatus();
     if(!Object.prototype.hasOwnProperty.call(stages,state.dailyStage)){
-      state.dailyStage='month';
+      state.dailyStage='date';
       save();
     }
     stages[state.dailyStage]();
@@ -214,9 +214,7 @@
 
   function renderBag(){
     setHeader('BAG / かばん','Bag');
-    const items=[];
-    if(state.egg)items.push('egg / 卵');
-    items.push(...state.inventory);
+    const items=[...(Array.isArray(state.inventory)?state.inventory:[])];
     $('dailyContent').innerHTML=`${studyStrip([{en:'bag',ja:'かばん'}])}<div class="dialogue-card"><span class="speaker">BAG</span>${items.length?items.map(item=>`<p>${esc(item)}</p>`).join(''):'<p class="jp">empty / 空</p>'}</div>`;
     backButton();
   }
@@ -228,16 +226,10 @@
   }
 
   const stages={
-    month(){
+    date(){
       setTime(7,0);
       const m=months[state.month];
       setHeader('DATE / 日付','Today');
-      dialogue('NARRATION',`It is ${m.full}.`,`${m.ja}です。`,[{en:m.full,ja:m.ja}]);
-      nextButton('date');
-    },
-
-    date(){
-      const m=months[state.month];
       dialogue('NARRATION',`It is ${m.full} ${ordinalWord(state.day)}.`,`${m.ja}${state.day}日です。`,[
         {en:m.full,ja:m.ja},{en:ordinalWord(state.day),ja:`${state.day}日 / ${ordinal(state.day)}`}
       ]);
@@ -252,92 +244,41 @@
 
     week(){
       const wi=weekIndex();
-      dialogue('NARRATION',`It is the ${weekWords[wi]} week.`,`第${wi+1}週です。`,[{en:'week',ja:'週'},{en:weekWords[wi],ja:`第${wi+1}`}]);
+      dialogue('NARRATION',`It is the ${weekWords[wi]} week.`,`第${wi+1}週です。`,[{en:weekWords[wi],ja:`第${wi+1}`},{en:'week',ja:'週'}]);
       nextButton('season');
     },
 
     season(){
       const s=seasonInfo(state.month);
       dialogue('NARRATION',`It is ${s.word}.`,`${s.ja}です。`,[{en:s.word,ja:s.ja}]);
-      nextButton('seasonMagic');
-    },
-
-    seasonMagic(){
-      const s=seasonInfo(state.month);
-      dialogue('NARRATION',`I can use ${s.magic}.`,`${s.magicJa}を使えます。`,[{en:s.magic,ja:s.magicJa}]);
-      nextButton('timeQuestion');
-    },
-
-    timeQuestion(){
-      dialogue('NARRATION','What time is it?','今何時ですか？',[{en:'time',ja:'時間'}]);
       nextButton('timeAnswer');
     },
 
     timeAnswer(){
-      dialogue('NARRATION',"It is seven o'clock a.m.",'午前7時です。',[{en:"o'clock",ja:'〜時'}]);
-      nextButton('morning');
-    },
-
-    morning(){
-      dialogue('NARRATION','It is morning.','朝です。',[{en:'morning',ja:'朝'}]);
+      dialogue('NARRATION',"It is seven o'clock in the morning.",'朝7時です。',[
+        {en:'seven',ja:'7'},{en:"o'clock",ja:'〜時'},{en:'morning',ja:'朝'}
+      ]);
       nextButton('goodMorning');
     },
 
     goodMorning(){
       dialogue('YOU','Good morning.','おはよう。',[{en:'morning',ja:'朝'}]);
-      nextButton('wake');
-    },
-
-    wake(){
-      dialogue('YOU','I get up.','起きます。',[{en:'get up',ja:'起きる'}]);
-      nextButton('egg');
-    },
-
-    egg(){
-      setTime(7,10);
-      dialogue('YOU','I take an egg.','卵を取ります。',[{en:'take',ja:'取る'},{en:'egg',ja:'卵'}],'<div id="eggResult"></div>');
-      clearActions();
-      if(state.eggTaken){one();action('Next','次へ',()=>next('breakfast'),{primary:true});return}
-      action('Roll','判定する',()=>{
-        const d=1+Math.floor(Math.random()*6);
-        const ok=d>=3;
-        state.eggTaken=true;
-        state.egg=ok;
-        save();
-        const result=$('eggResult');
-        if(result)result.innerHTML=`<div class="roll-result"><b>1d6 → ${d}</b><br>${ok?'Success! I get an egg. / 卵を手に入れました。':'Fail. No egg today. / 今日は卵を取れませんでした。'}</div>`;
-        clearActions();one();action('Next','次へ',()=>next('breakfast'),{primary:true});
-      },{primary:true});
-      action('Skip','取らない',()=>{state.eggTaken=true;state.egg=false;save();next('breakfast')});
+      nextButton('breakfast');
     },
 
     breakfast(){
       setTime(7,30);
-      dialogue('NARRATION','It is breakfast time.','朝食の時間です。',[{en:'breakfast',ja:'朝食'}]);
-      nextButton('fruit');
-    },
-
-    fruit(){
       if(!state.fruit){state.fruit=pick(fruits);save()}
-      dialogue('YOU',`I use ${state.fruit[0]}.`,`${state.fruit[1]}を使います。`,[{en:state.fruit[0],ja:state.fruit[1]}]);
-      clearActions();
-      action('Fruit Oracle','果物を変える',()=>{state.fruit=pick(fruits);save();render()});
-      action('Next','次へ',()=>next('juice'),{primary:true});
-    },
-
-    juice(){
-      dialogue('YOU',`I make ${state.fruit[0]} juice.`,`${state.fruit[1]}ジュースを作ります。`,[{en:state.fruit[0],ja:state.fruit[1]},{en:'juice',ja:'ジュース'}],'<div class="effect">MP + FULL</div>');
-      nextButton('drinkJuice');
-    },
-
-    drinkJuice(){
-      dialogue('YOU','I drink juice.','ジュースを飲みます。',[{en:'drink',ja:'飲む'},{en:'juice',ja:'ジュース'}]);
-      clearActions();one();action('Drink','飲む',()=>{state.mp=state.maxMp;save();next(state.egg?'eatEgg':'weatherQuestion')},{primary:true});
-    },
-
-    eatEgg(){
-      dialogue('YOU','I eat an egg.','卵を食べます。',[{en:'eat',ja:'食べる'},{en:'egg',ja:'卵'}],'<div class="effect">PE +1 TODAY</div>');
-      clearActions();one();action('Eat','食べる',()=>{state.dailyBuff.PE=1;state.egg=false;save();next('weatherQuestion')},{primary:true});
+      const fruit=state.fruit;
+      dialogue('YOU',`For breakfast, I drink ${fruit[0]} juice.`,`朝食に${fruit[1]}ジュースを飲みます。`,[
+        {en:'breakfast',ja:'朝食'},{en:'drink',ja:'飲む'},{en:fruit[0],ja:fruit[1]},{en:'juice',ja:'ジュース'}
+      ],'<div class="effect">MP + FULL</div>');
+      clearActions();one();
+      action('Next','次へ',()=>{
+        state.mp=state.maxMp;
+        save();
+        next('weatherQuestion');
+      },{primary:true});
     },
 
     weatherQuestion(){
@@ -358,12 +299,11 @@
     ready(){
       setTime(8,15);
       dialogue('YOU','I am ready.','準備できました。',[{en:'ready',ja:'準備ができた'}]);
-      clearActions();
-      one();
+      clearActions();one();
       action('Go to work','出勤',()=>{
         state.lastPlace='MAGIC SCHOOL';
         save();
-        location.href='magic-school.html';
+        location.href='magic-school.html?v=20260903-10';
       },{primary:true});
     }
   };
@@ -378,8 +318,18 @@
     setTimeout(()=>$('saveMessage').textContent='',900);
   };
 
+  const legacyStages={
+    month:'date',seasonMagic:'timeAnswer',timeQuestion:'timeAnswer',morning:'goodMorning',wake:'breakfast',egg:'breakfast',fruit:'breakfast',juice:'breakfast',drinkJuice:'breakfast',eatEgg:'weatherQuestion'
+  };
+  if(legacyStages[state.dailyStage]){
+    state.dailyStage=legacyStages[state.dailyStage];
+    state.egg=false;
+    state.eggTaken=false;
+    if(state.dailyBuff&&state.dailyBuff.PE)delete state.dailyBuff.PE;
+    save();
+  }
   if(!Object.prototype.hasOwnProperty.call(stages,state.dailyStage)){
-    state.dailyStage='month';
+    state.dailyStage='date';
     save();
   }
 
