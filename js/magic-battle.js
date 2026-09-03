@@ -13,9 +13,10 @@
   ];
 
   let battle=state.magicBattle||null;
-  let quizIndex=0;
-  let currentWord=null;
   let captureComplete=false;
+  let firstPick=null;
+  let matchedPairs=0;
+  let captureLocked=false;
 
   function save(){Store.save(state)}
   function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
@@ -161,44 +162,89 @@
     $('enemyText').textContent=battle.description||'A monster blocks the way.';
   }
 
-  function nextQuestion(){
-    currentWord=WORDS[Math.floor(Math.random()*WORDS.length)];
-    $('wordProgress').textContent=`${quizIndex+1} / 3`;
-    $('wordQuestion').innerHTML=`<small>この意味の英単語は？</small>${currentWord[1]}`;
+  function renderCaptureBoard(){
+    firstPick=null;
+    matchedPairs=0;
+    captureLocked=false;
+    captureComplete=false;
+
+    const chosen=shuffle(WORDS).slice(0,6);
+    const cards=shuffle(chosen.flatMap(([en,ja],index)=>[
+      {key:index,type:'en',text:en},
+      {key:index,type:'ja',text:ja}
+    ]));
+
+    $('wordProgress').textContent='0 / 6';
+    $('wordQuestion').innerHTML='<small>英語と日本語を選ぶ</small>同じ意味のペアを6組そろえる';
     $('wordResult').textContent='';
     $('wordResult').className='word-result';
-
-    const wrong=shuffle(WORDS.filter(word=>word[0]!==currentWord[0])).slice(0,3).map(word=>word[0]);
-    const options=shuffle([currentWord[0],...wrong]);
     $('wordOptions').innerHTML='';
-    options.forEach(word=>{
+
+    cards.forEach(card=>{
       const button=document.createElement('button');
       button.type='button';
-      button.className='word-option';
-      button.textContent=word;
-      button.onclick=()=>answerWord(word);
+      button.className='word-option pair-card';
+      button.textContent=card.text;
+      button.onclick=()=>pickCaptureCard(button,card);
       $('wordOptions').appendChild(button);
     });
   }
 
-  function answerWord(answer){
-    if(captureComplete)return;
-    if(answer!==currentWord[0]){
-      $('wordResult').textContent='× もう一度';
-      $('wordResult').className='word-result wrong';
+  function pickCaptureCard(button,card){
+    if(captureComplete||captureLocked||button.classList.contains('matched'))return;
+
+    if(!firstPick){
+      firstPick={button,card};
+      button.classList.add('selected');
+      $('wordResult').textContent='もう1枚選ぶ';
+      $('wordResult').className='word-result';
       return;
     }
-    quizIndex+=1;
-    $('wordResult').textContent='○ Correct!';
-    $('wordResult').className='word-result correct';
-    if(quizIndex>=3){
-      completeCapture();
+
+    if(firstPick.button===button){
+      button.classList.remove('selected');
+      firstPick=null;
+      $('wordResult').textContent='';
       return;
     }
-    setTimeout(nextQuestion,320);
+
+    const first=firstPick;
+    const correct=first.card.key===card.key&&first.card.type!==card.type;
+
+    if(correct){
+      first.button.classList.remove('selected');
+      first.button.classList.add('matched');
+      button.classList.add('matched');
+      firstPick=null;
+      matchedPairs+=1;
+      $('wordProgress').textContent=`${matchedPairs} / 6`;
+      $('wordResult').textContent='○ Correct!';
+      $('wordResult').className='word-result correct';
+
+      if(matchedPairs>=6){
+        setTimeout(completeCapture,280);
+      }
+      return;
+    }
+
+    captureLocked=true;
+    first.button.classList.add('wrong');
+    button.classList.add('wrong');
+    $('wordResult').textContent='× 違う組み合わせ';
+    $('wordResult').className='word-result wrong';
+
+    setTimeout(()=>{
+      first.button.classList.remove('selected','wrong');
+      button.classList.remove('wrong');
+      firstPick=null;
+      captureLocked=false;
+      $('wordResult').textContent='';
+      $('wordResult').className='word-result';
+    },420);
   }
 
   function completeCapture(){
+    if(captureComplete)return;
     captureComplete=true;
     const floor=dungeonFloor();
     if(floor){
@@ -211,7 +257,7 @@
     state.lastPlace='DUNGEON';
     save();
 
-    $('wordProgress').textContent='3 / 3';
+    $('wordProgress').textContent='6 / 6';
     $('wordQuestion').innerHTML='<small>CAPTURE SUCCESS</small>Captured!';
     $('wordOptions').innerHTML='';
     $('wordResult').textContent=`${battle.enemyName} を捕まえた！`;
@@ -224,8 +270,7 @@
     $('captureBtn').classList.add('hidden');
     $('capturePanel').classList.remove('hidden');
     $('backBtn').disabled=true;
-    quizIndex=0;
-    nextQuestion();
+    renderCaptureBoard();
   }
 
   if(!battle){
