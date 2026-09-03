@@ -2,6 +2,7 @@
   'use strict';
 
   const Store=window.MagicGameState;
+  const Quest=window.MagicQuestEngine;
   const state=Store.load();
   const $=id=>document.getElementById(id);
 
@@ -204,6 +205,16 @@
     });
   }
 
+  function mainGateText(status,floor){
+    if(!status.configured)return `B${floor.number+1}Fへの条件はまだ未設定です。`;
+    const progress=status.details.map(item=>{
+      const req=item.req;
+      const label=req.labelJa||req.labelEn||req.type;
+      return `${label} ${item.current}/${item.required}`;
+    }).join(' / ');
+    return status.met?`B${floor.number+1}Fへの道が開いています。`:`封印されています。${progress}`;
+  }
+
   function renderControls(floor){
     const tile=floor.tiles[floor.current];
     $('floorTitle').textContent=`B${floor.number}F`;
@@ -220,6 +231,13 @@
     const down=$('goDownBtn');
     up.hidden=!(floor.number>1&&floor.current===floor.stairsUp);
     down.hidden=!(floor.current===floor.stairsDown);
+
+    if(!down.hidden){
+      const gate=Quest.mainQuestStatus(state,floor.number);
+      down.innerHTML=gate.met
+        ? `Go down / B${floor.number+1}Fへ`
+        : 'Sealed / 条件未達';
+    }
   }
 
   function render(){
@@ -254,7 +272,7 @@
     overlay.className='encounter-overlay';
     overlay.innerHTML=`<section class="encounter-card"><small>ENCOUNTER!</small><div class="encounter-visual">${battle.visual||'👺'}</div><h2>${battle.enemyJa||battle.enemyName}が現れた！</h2><p>${battle.enemyName} blocks the way.</p><button id="encounterFight" type="button">Fight<br><small>戦う</small></button></section>`;
     document.body.appendChild(overlay);
-    $('encounterFight').onclick=()=>{location.href='magic-battle.html?v=20260903-1'};
+    $('encounterFight').onclick=()=>{location.href='magic-battle.html?v=20260903-4'};
   }
 
   function maybeEncounter(floor,tile,returnTileId,isNew){
@@ -297,11 +315,21 @@
     const dungeon=ensureDungeon();
     const floor=currentFloor();
     if(floor.current!==floor.stairsDown)return;
+
+    const gate=Quest.mainQuestStatus(state,floor.number);
+    if(!gate.configured||!gate.met){
+      message=mainGateText(gate,floor);
+      render();
+      return;
+    }
+
     const nextNumber=floor.number+1;
     if(!dungeon.floors[nextNumber])dungeon.floors[nextNumber]=generateFloor(nextNumber);
     dungeon.activeFloor=nextNumber;
     dungeon.floors[nextNumber].current=0;
-    message=`B${nextNumber}Fへ下りました。上の階の地図と未探索の枝道は保存されています。`;
+    if(!state.mainQuest)state.mainQuest={reachedFloor:1};
+    state.mainQuest.reachedFloor=Math.max(Number(state.mainQuest.reachedFloor||1),nextNumber);
+    message=`B${nextNumber}Fへ到達しました。上の階の地図と未探索の枝道は保存されています。`;
     save();
     render();
   }
@@ -323,7 +351,7 @@
     state.lastPlace='MAGIC SCHOOL';
     state.magicBattle=null;
     save();
-    location.href='magic-school.html?v=20260903-9';
+    location.href='magic-school.html?v=20260903-10';
   }
 
   document.querySelectorAll('.dir-btn').forEach(button=>{button.onclick=()=>move(button.dataset.dir)});
