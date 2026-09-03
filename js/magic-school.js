@@ -23,7 +23,7 @@
   const $=id=>document.getElementById(id);
   const pick=list=>list[Math.floor(Math.random()*list.length)];
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 
   function ordinal(n){
@@ -136,17 +136,16 @@
     render();
   }
 
-  function acceptQuest(){
-    state.currentQuest={en:offeredQuest.en,ja:offeredQuest.ja,status:'accepted'};
-    save();
-    stage='accepted';
-    render();
-  }
-
   function goDungeon(){
     state.lastPlace='DUNGEON';
     save();
     location.href='magic-dungeon.html?v=20260903-1';
+  }
+
+  function acceptQuest(){
+    state.currentQuest={en:offeredQuest.en,ja:offeredQuest.ja,status:'accepted'};
+    save();
+    goDungeon();
   }
 
   function renderToday(){
@@ -214,13 +213,6 @@
       clearActions(false);
       action('Another job','別の依頼',()=>{offeredQuest=pick(quests);render()});
       action('Accept','受ける',acceptQuest,true);
-      return;
-    }
-
-    if(stage==='accepted'){
-      dialogue('YOU','I take this job.','この依頼を受けます。',[['take','受ける・取る'],['job','仕事・依頼']]);
-      clearActions(true);
-      action('Go to dungeon','ダンジョンへ',goDungeon,true);
     }
   }
 
