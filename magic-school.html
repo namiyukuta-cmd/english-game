@@ -7,19 +7,62 @@
   <title>Magic School</title>
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fffaf8;color:#4e3e37}
-    body{display:grid;place-items:center;padding:16px}
-    main{width:min(100%,720px);border:2px solid #8b685b;border-radius:20px;background:#fff;padding:24px}
-    h1{margin:0 0 8px;font-size:32px}
-    p{font-size:18px;line-height:1.7;margin:0 0 20px}
-    a{display:block;text-align:center;text-decoration:none;border:2px solid #7d5e53;border-radius:13px;background:#efc4d0;color:#4d3b34;font-size:18px;font-weight:900;padding:14px}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fffaf8;color:#4e3e37}
+    body{padding:10px}
+    .school-shell{height:100%;max-width:760px;margin:0 auto;display:grid;grid-template-rows:auto 1fr;gap:10px}
+    .school-head{display:flex;align-items:center;justify-content:space-between;border:2px solid #8b685b;border-radius:16px;background:#fff;padding:12px 14px}
+    .school-head h1{margin:0;font-size:27px}
+    .school-head span{font-size:14px;font-weight:900;color:#876d63}
+    .school-main{min-height:0;border:2px solid #8b685b;border-radius:20px;background:#fff;padding:16px;display:flex;flex-direction:column}
+    .place-label{font-size:13px;font-weight:900;color:#94766b;margin-bottom:10px}
+    .places{display:grid;gap:10px}
+    .place-button{width:100%;min-height:64px;border:2px solid #7d5e53;border-radius:15px;background:#efc4d0;color:#4d3b34;font-size:21px;font-weight:900;text-align:left;padding:12px 16px}
+    .place-button small{display:block;font-size:14px;margin-top:4px}
+    .classroom-view{display:none;height:100%;flex-direction:column}
+    .classroom-view.active{display:flex}
+    .school-menu.hidden{display:none}
+    .classroom-title{margin:0 0 8px;font-size:28px}
+    .classroom-note{font-size:16px;color:#806960}
+    .back-button{margin-top:auto;min-height:52px;border:2px solid #7d5e53;border-radius:13px;background:#fff4f4;color:#4d3b34;font-size:17px;font-weight:900}
   </style>
 </head>
 <body>
-  <main>
-    <h1>Magic School</h1>
-    <p>ここから先はまだ作りません。</p>
-    <a href="magic-daily.html">日常へ戻る</a>
+  <main class="school-shell">
+    <header class="school-head">
+      <h1>Magic School</h1>
+      <span>WORK</span>
+    </header>
+
+    <section class="school-main">
+      <div id="schoolMenu" class="school-menu">
+        <div class="place-label">PLACE / 行き先</div>
+        <div class="places">
+          <button id="classroomBtn" class="place-button" type="button">
+            Magic Classroom
+            <small>魔法教室</small>
+          </button>
+        </div>
+      </div>
+
+      <div id="classroomView" class="classroom-view">
+        <h2 class="classroom-title">Magic Classroom</h2>
+        <p class="classroom-note">ここから先の内容はまだ未設定です。</p>
+        <button id="backBtn" class="back-button" type="button">Magic Schoolへ戻る</button>
+      </div>
+    </section>
   </main>
+
+  <script>
+    const schoolMenu=document.getElementById('schoolMenu');
+    const classroomView=document.getElementById('classroomView');
+    document.getElementById('classroomBtn').addEventListener('click',()=>{
+      schoolMenu.classList.add('hidden');
+      classroomView.classList.add('active');
+    });
+    document.getElementById('backBtn').addEventListener('click',()=>{
+      classroomView.classList.remove('active');
+      schoolMenu.classList.remove('hidden');
+    });
+  </script>
 </body>
 </html>
