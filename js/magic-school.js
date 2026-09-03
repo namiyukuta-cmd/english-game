@@ -123,12 +123,13 @@
   function goDungeon(){
     state.lastPlace='DUNGEON';
     save();
-    location.href='magic-dungeon.html?v=20260903-2';
+    location.href='magic-dungeon.html?v=20260903-3';
   }
 
   function acceptQuest(){
     state.currentQuest={en:offeredQuest.en,ja:offeredQuest.ja,status:'accepted'};
     state.magicDungeon=null;
+    state.magicBattle=null;
     save();
     goDungeon();
   }
