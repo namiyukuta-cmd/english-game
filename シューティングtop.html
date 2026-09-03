@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>EIKEN Grade 5 Shooting</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{--bg:#101827;--panel:#172338;--panel2:#1d2c45;--line:#36506f;--text:#f7fbff;--sub:#b9c9dc;--accent:#ffd54f;--accent2:#7ee7ff;--danger:#ff7b7b}
+    body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 50% 0,#203657 0,#101827 55%,#0a101c 100%);color:var(--text)}
+    main{width:min(720px,100%);min-height:100vh;margin:auto;padding:18px 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+    .top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center}
+    .back{width:42px;height:42px;border:1px solid var(--line);border-radius:14px;background:#172338;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+    .top h1{margin:0;text-align:center;font-size:18px;letter-spacing:.04em}
+    .hero{padding:24px 18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,#1d2d47,#152238);text-align:center;box-shadow:0 18px 50px #0005}
+    .hero-icon{font-size:58px;line-height:1;margin-bottom:12px}
+    .eyebrow{margin:0 0 5px;color:var(--accent2);font-size:12px;font-weight:900;letter-spacing:.14em}
+    .hero h2{margin:0;font-size:30px;line-height:1.15}
+    .jp-title{margin:8px 0 0;font-size:17px;font-weight:800;color:var(--accent)}
+    .lead{margin:16px auto 0;max-width:520px;color:var(--sub);font-size:15px;line-height:1.75}
+    .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .rule{padding:12px 8px;border:1px solid var(--line);border-radius:16px;background:#172338;text-align:center}
+    .rule strong{display:block;font-size:18px;color:var(--accent);margin-bottom:3px}.rule span{font-size:12px;color:var(--sub)}
+    .mode-list{display:grid;gap:10px}
+    .mode{display:grid;grid-template-columns:52px 1fr 26px;align-items:center;gap:12px;padding:15px;border:1px solid var(--line);border-radius:20px;background:var(--panel);text-decoration:none;color:inherit;box-shadow:0 9px 25px #0003}
+    .mode:active{transform:translateY(1px)}
+    .mode-icon{width:52px;height:52px;border-radius:16px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:25px}
+    .mode-copy{min-width:0}.mode-copy strong{display:block;font-size:17px}.mode-copy small{display:block;margin-top:4px;color:var(--sub);font-size:13px;line-height:1.45}.arrow{font-size:30px;color:var(--accent2)}
+    .note{padding:13px 15px;border:1px dashed var(--line);border-radius:16px;color:var(--sub);font-size:13px;line-height:1.65;background:#111c2d}
+    @media(max-width:430px){main{padding-left:12px;padding-right:12px}.hero{padding:20px 14px}.hero h2{font-size:26px}.rules{gap:6px}.rule{padding:10px 5px}.mode{padding:13px 12px;grid-template-columns:46px 1fr 22px}.mode-icon{width:46px;height:46px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header class="top">
+      <a class="back" href="story-menu.html" aria-label="物語メニューへ戻る">←</a>
+      <h1>SHOOTING</h1>
+      <span></span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true">🎯</div>
+      <p class="eyebrow">EIKEN GRADE 5</p>
+      <h2>WORD SHOOTING</h2>
+      <p class="jp-title">英検5級 単語シューティング</p>
+      <p class="lead">表示された意味に合う標的を撃って、英検5級の基本単語を反復します。英語には日本語訳を付け、正解後にも英語と意味を確認できます。</p>
+    </section>
+
+    <section class="rules" aria-label="ゲームルール">
+      <div class="rule"><strong>10</strong><span>1ゲーム10問</span></div>
+      <div class="rule"><strong>♥♥♥</strong><span>ライフ3</span></div>
+      <div class="rule"><strong>4</strong><span>標的4択</span></div>
+    </section>
+
+    <section class="mode-list">
+      <a class="mode" href="シューティング.html?mode=ja-en">
+        <span class="mode-icon">あ→A</span>
+        <span class="mode-copy"><strong>日本語 → 英語</strong><small>日本語の意味を見て、正しい英単語を撃つ</small></span>
+        <span class="arrow">›</span>
+      </a>
+      <a class="mode" href="シューティング.html?mode=en-ja">
+        <span class="mode-icon">A→あ</span>
+        <span class="mode-copy"><strong>英語 → 日本語</strong><small>英単語を見て、正しい日本語訳を撃つ</small></span>
+        <span class="arrow">›</span>
+      </a>
+    </section>
+
+    <div class="note">収録語は、リポジトリ内の英単語オラクルで使っている英検5級向け語彙を中心にしています。まずは単語を素早く判断できることを狙ったゲームです。</div>
+  </main>
+</body>
+</html>
