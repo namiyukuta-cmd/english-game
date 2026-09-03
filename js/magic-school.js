@@ -42,9 +42,7 @@
     return 'Winter';
   }
 
-  function weekIndex(){
-    return Math.min(4,Math.floor((state.day-1)/7));
-  }
+  function weekIndex(){return Math.min(4,Math.floor((state.day-1)/7))}
 
   function clock(){
     const h=Number(state.hour||0);
@@ -118,32 +116,19 @@
     $('dailyContent').innerHTML=`${study(words)}<div class="dialogue-card"><span class="speaker">${esc(speaker)}</span><div class="en dialogue-en">${highlighted(en,words)}</div><p class="jp">${esc(ja)}</p></div>`;
   }
 
-  function showMenu(){
-    overlay=null;
-    stage='menu';
-    render();
-  }
-
-  function openClassroom(){
-    overlay=null;
-    stage='greeting';
-    render();
-  }
-
-  function newQuest(){
-    offeredQuest=pick(quests);
-    stage='quest';
-    render();
-  }
+  function showMenu(){overlay=null;stage='menu';render()}
+  function openClassroom(){overlay=null;stage='greeting';render()}
+  function newQuest(){offeredQuest=pick(quests);stage='quest';render()}
 
   function goDungeon(){
     state.lastPlace='DUNGEON';
     save();
-    location.href='magic-dungeon.html?v=20260903-1';
+    location.href='magic-dungeon.html?v=20260903-2';
   }
 
   function acceptQuest(){
     state.currentQuest={en:offeredQuest.en,ja:offeredQuest.ja,status:'accepted'};
+    state.magicDungeon=null;
     save();
     goDungeon();
   }
@@ -174,7 +159,6 @@
 
   function render(){
     updateHud();
-
     document.querySelectorAll('[data-jump]').forEach(button=>{
       button.classList.toggle('on',button.dataset.jump===overlay || (button.dataset.jump==='school'&&!overlay));
     });
