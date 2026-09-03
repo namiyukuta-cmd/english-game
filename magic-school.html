@@ -14,75 +14,27 @@
     <header class="daily-hud">
       <div class="hud-top">
         <a class="hud-back" href="magic-daily.html" aria-label="日常へ戻る">←</a>
-        <div class="hud-title">
-          <strong>MAGIC SCHOOL</strong>
-          <span>WORK / 出勤</span>
-        </div>
+        <div class="hud-title"><strong>MAGIC SCHOOL</strong><span>WORK / 出勤</span></div>
         <button id="saveBtn" class="hud-save" type="button">SAVE</button>
       </div>
-
       <section class="calendar-row compact-calendar" aria-label="日付・曜日・季節・時刻">
-        <strong id="dateMain">Sep. 1st</strong>
-        <span id="dateSub">Mon. · Fall · 1st wk.</span>
-        <strong id="clockMain">8:15 a.m.</strong>
-        <div class="time-parts-hidden" aria-hidden="true">
-          <span id="timeValue">8:15 a.m.</span>
-          <span id="hourValue">8</span>
-          <span id="minuteValue">15</span>
-        </div>
+        <strong id="dateMain">Sep. 1st</strong><span id="dateSub">Mon. · Fall · 1st wk.</span><strong id="clockMain">8:15 a.m.</strong>
+        <div class="time-parts-hidden" aria-hidden="true"><span id="timeValue">8:15 a.m.</span><span id="hourValue">8</span><span id="minuteValue">15</span></div>
       </section>
-
       <section class="resource-row" aria-label="リソース">
         <div class="resource"><small>HP</small><strong id="hpValue">5</strong><span>/5</span></div>
         <div class="resource"><small>MP</small><strong id="mpValue">5</strong><span>/5</span></div>
         <div class="resource"><small>SUPPLY</small><strong id="supplyValue">5</strong><span>/5</span></div>
       </section>
-
-      <section class="stat-wrap" aria-label="ステータス">
-        <div class="stat-head">STATUS / ステータス</div>
-        <div class="stat-row">
-          <div class="stat"><small>PE</small><strong id="peValue">2</strong></div>
-          <div class="stat"><small>SCIENCE</small><strong id="scienceValue">2</strong></div>
-          <div class="stat"><small>HISTORY</small><strong id="historyValue">2</strong></div>
-          <div class="stat"><small>MATH</small><strong id="mathValue">2</strong></div>
-          <div class="stat"><small>ART</small><strong id="artValue">2</strong></div>
-        </div>
-      </section>
+      <section class="stat-wrap" aria-label="ステータス"><div class="stat-head">STATUS / ステータス</div><div class="stat-row"><div class="stat"><small>PE</small><strong id="peValue">2</strong></div><div class="stat"><small>SCIENCE</small><strong id="scienceValue">2</strong></div><div class="stat"><small>HISTORY</small><strong id="historyValue">2</strong></div><div class="stat"><small>MATH</small><strong id="mathValue">2</strong></div><div class="stat"><small>ART</small><strong id="artValue">2</strong></div></div></section>
     </header>
-
-    <section class="daily-stage">
-      <div class="stage-head">
-        <div>
-          <small id="stageKicker">MAGIC SCHOOL</small>
-          <h1 id="stageTitle">Magic School</h1>
-        </div>
-        <span id="placeLabel">WORK</span>
-      </div>
-
-      <div id="dailyContent" class="daily-content" aria-live="polite">
-        <div class="school-place-list">
-          <button id="classroomBtn" class="place-button" type="button">
-            Magic Classroom
-            <small>魔法教室</small>
-          </button>
-        </div>
-      </div>
-      <div id="dailyActions" class="daily-actions"></div>
-    </section>
-
-    <nav class="daily-nav" aria-label="共通メニュー">
-      <button type="button" data-jump="today">TODAY</button>
-      <button type="button" data-jump="school">MAGIC SCHOOL</button>
-      <button type="button" data-jump="bag">BAG</button>
-      <button type="button" data-jump="status">STATUS</button>
-    </nav>
-
+    <section class="daily-stage"><div class="stage-head"><div><small id="stageKicker">MAGIC SCHOOL</small><h1 id="stageTitle">Magic School</h1></div><span id="placeLabel">WORK</span></div><div id="dailyContent" class="daily-content" aria-live="polite"><div class="school-place-list"><button id="classroomBtn" class="place-button" type="button">Magic Classroom<small>魔法教室</small></button></div></div><div id="dailyActions" class="daily-actions"></div></section>
+    <nav class="daily-nav" aria-label="共通メニュー"><button type="button" data-jump="today">TODAY</button><button type="button" data-jump="school">MAGIC SCHOOL</button><button type="button" data-jump="bag">BAG</button><button type="button" data-jump="status">STATUS</button></nav>
     <div id="saveMessage" class="save-message" aria-live="polite"></div>
   </main>
-
-  <script src="js/magic-state.js?v=20260903-3"></script>
-  <script src="data/magic-side-quests.js?v=20260903-1"></script>
-  <script src="js/magic-quest-engine.js?v=20260903-1"></script>
+  <script src="js/magic-state.js?v=20260903-7"></script>
+  <script src="data/magic-side-quests.js?v=20260903-2"></script>
+  <script src="js/magic-quest-engine.js?v=20260903-3"></script>
   <script src="js/magic-school.js?v=20260903-8"></script>
 </body>
 </html>
