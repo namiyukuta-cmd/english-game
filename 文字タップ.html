@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>英単語シューティング - 回答</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07111f;color:#fff;touch-action:manipulation}
     button,input{font:inherit}
     button{touch-action:manipulation}
@@ -31,12 +31,11 @@
     .submit{height:48px;border:0;border-radius:13px;background:#ffd54f;color:#172033;font-weight:900;padding:0 18px;font-size:18px}
     .msg{min-height:18px;margin-top:4px;font-size:13px;font-weight:800}.msg.good{color:#78eca5}.msg.bad{color:#ff8c8c}
 
-    /* キーボード本体は余白を引き伸ばさず、スマホ標準に近い高さで画面下へ固定 */
-    .keyboard-wrap{min-height:0;display:flex;align-items:flex-end;justify-content:center}
-    .keyboard{width:100%;border:1px solid #334964;border-radius:18px;background:#101c2d;padding:7px 5px 8px;display:grid;gap:4px;align-self:end}
+    .keyboard-wrap{min-height:0;display:flex;align-items:flex-end;justify-content:center;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .keyboard{width:100%;border:1px solid #334964;border-radius:18px;background:#101c2d;padding:7px 5px 8px;display:grid;gap:4px;align-self:end;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .keyboard *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     .key-row{display:flex;justify-content:center;align-items:center;height:52px}
 
-    /* hit は隙間を含む実際のタップ領域、keycap は見た目だけ */
     .key-hit{height:100%;min-width:0;display:flex;align-items:stretch;justify-content:stretch;padding:2px;cursor:pointer;user-select:none}
     .key-hit.letter{flex:1}
     .keycap{width:100%;height:100%;border:0;border-radius:7px;background:#e8edf3;color:#101722;font-size:23px;font-weight:650;box-shadow:0 1px 0 #65748a,0 2px 3px #0006;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -246,6 +245,16 @@
       pressEffect(deleteHit);
       deleteCharacter();
     });
+
+    ['gesturestart','gesturechange','gestureend'].forEach(type=>{
+      document.addEventListener(type,e=>{
+        if(e.target && e.target.closest && e.target.closest('#keyboard')) e.preventDefault();
+      },{passive:false});
+    });
+
+    document.addEventListener('dblclick',e=>{
+      if(e.target && e.target.closest && e.target.closest('#keyboard')) e.preventDefault();
+    },{passive:false});
 
     makeKeyboard();
     loadQuestion();
