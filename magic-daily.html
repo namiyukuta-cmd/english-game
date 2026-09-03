@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>Magic School - Daily</title>
-  <link rel="stylesheet" href="css/magic-daily.css?v=20260903-4">
+  <link rel="stylesheet" href="css/magic-daily.css?v=20260903-5">
 </head>
 <body>
   <main class="daily-shell">
@@ -19,20 +19,14 @@
         <button id="saveBtn" class="hud-save" type="button">SAVE</button>
       </div>
 
-      <section class="calendar-row" aria-label="日付と時刻">
-        <div class="calendar-card">
-          <small>DATE / 日付</small>
-          <strong id="dateMain">Sep. 1st</strong>
-          <span id="dateSub">Mon. · Fall · 1st wk.</span>
-        </div>
-        <div class="time-card">
-          <small>TIME / 時間</small>
-          <strong id="clockMain">7:00 a.m.</strong>
-          <div class="time-parts">
-            <span><b>time</b><i id="timeValue">7:00 a.m.</i></span>
-            <span><b>hour</b><i id="hourValue">7</i></span>
-            <span><b>minute</b><i id="minuteValue">00</i></span>
-          </div>
+      <section class="calendar-row compact-calendar" aria-label="日付・曜日・季節・時刻">
+        <strong id="dateMain">Sep. 1st</strong>
+        <span id="dateSub">Mon. · Fall · 1st wk.</span>
+        <strong id="clockMain">7:00 a.m.</strong>
+        <div class="time-parts-hidden" aria-hidden="true">
+          <span id="timeValue">7:00 a.m.</span>
+          <span id="hourValue">7</span>
+          <span id="minuteValue">00</span>
         </div>
       </section>
 
