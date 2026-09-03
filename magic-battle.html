@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>Magic Battle</title>
-  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-1">
+  <link rel="stylesheet" href="css/magic-battle.css?v=20260903-2">
 </head>
 <body>
-  <main class="magic-battle-shell">
+  <main id="battleShell" class="magic-battle-shell">
     <header class="battle-top">
       <button id="backBtn" class="battle-back" type="button" aria-label="逃げる">←</button>
       <h1>BATTLE</h1>
@@ -16,11 +16,12 @@
     </header>
 
     <section class="battle-status">
-      <div class="status-box"><small>YOUR HP</small><strong id="playerHp">5 / 5</strong></div>
+      <div id="playerHpBox" class="status-box"><small>YOUR HP</small><strong id="playerHp">5 / 5</strong></div>
+      <div id="playerMpBox" class="status-box mp-box"><small>YOUR MP</small><strong id="playerMp">5 / 5</strong></div>
       <div class="status-box"><small>ENEMY HP</small><strong id="enemyHpTop">3 / 3</strong></div>
     </section>
 
-    <section class="enemy-card">
+    <section id="enemyCard" class="enemy-card">
       <div id="enemyVisual" class="enemy-visual">👺</div>
       <h2 id="enemyName">Goblin</h2>
       <p id="enemyText">A monster blocks the way.</p>
@@ -51,6 +52,6 @@
   </main>
 
   <script src="js/magic-state.js?v=20260903-2"></script>
-  <script src="js/magic-battle.js?v=20260903-1"></script>
+  <script src="js/magic-battle.js?v=20260903-2"></script>
 </body>
 </html>
