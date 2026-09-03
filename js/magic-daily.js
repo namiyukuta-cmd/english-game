@@ -34,11 +34,7 @@
   const weekShort=['1st wk.','2nd wk.','3rd wk.','4th wk.','5th wk.'];
 
   const fruits=[
-    ['apple','リンゴ'],
-    ['banana','バナナ'],
-    ['orange','オレンジ'],
-    ['strawberry','イチゴ'],
-    ['lemon','レモン']
+    ['apple','リンゴ'],['banana','バナナ'],['orange','オレンジ'],['strawberry','イチゴ'],['lemon','レモン']
   ];
 
   const weather=[
@@ -112,9 +108,9 @@
     $('dateMain').textContent=`${month.short} ${ordinal(state.day)}`;
     $('dateSub').textContent=`${weekday.short} · ${season.label} · ${weekShort[wi]}`;
     $('clockMain').textContent=clock();
-    $('timeValue').textContent=clock();
-    $('hourValue').textContent=state.hour;
-    $('minuteValue').textContent=String(state.minute).padStart(2,'0');
+    if($('timeValue'))$('timeValue').textContent=clock();
+    if($('hourValue'))$('hourValue').textContent=state.hour;
+    if($('minuteValue'))$('minuteValue').textContent=String(state.minute).padStart(2,'0');
     $('hpValue').textContent=state.hp;
     $('mpValue').textContent=state.mp;
     $('supplyValue').textContent=state.supply;
@@ -192,22 +188,28 @@
     if(overlay==='home')return renderHome();
     if(overlay==='bag')return renderBag();
     if(overlay==='status')return renderStatus();
-    const valid=Object.prototype.hasOwnProperty.call(stages,state.dailyStage);
-    if(!valid){state.dailyStage='month';save()}
+    if(!Object.prototype.hasOwnProperty.call(stages,state.dailyStage)){
+      state.dailyStage='month';
+      save();
+    }
     stages[state.dailyStage]();
+  }
+
+  function backButton(){
+    clearActions();one();action('Back','今の場面へ戻る',()=>{overlay=null;render()},{primary:true});
   }
 
   function renderToday(){
     const m=months[state.month],w=weekdays[state.weekday],s=seasonInfo(state.month);
     setHeader('TODAY','Today');
     $('dailyContent').innerHTML=`<div class="dialogue-card"><span class="speaker">TODAY</span><div class="en">${esc(m.full)} ${ordinal(state.day)}</div><p class="jp">${esc(w.full)} / ${esc(s.label)} / ${esc(weekShort[weekIndex()])}</p></div>`;
-    clearActions();one();action('Back','今の場面へ戻る',()=>{overlay=null;render()},{primary:true});
+    backButton();
   }
 
   function renderHome(){
     setHeader('HOME / 家','Home');
     dialogue('HOME','Home','家',[{en:'Home',ja:'家'}]);
-    clearActions();one();action('Back','今の場面へ戻る',()=>{overlay=null;render()},{primary:true});
+    backButton();
   }
 
   function renderBag(){
@@ -216,13 +218,13 @@
     if(state.egg)items.push('egg / 卵');
     items.push(...state.inventory);
     $('dailyContent').innerHTML=`${studyStrip([{en:'bag',ja:'かばん'}])}<div class="dialogue-card"><span class="speaker">BAG</span>${items.length?items.map(item=>`<p>${esc(item)}</p>`).join(''):'<p class="jp">empty / 空</p>'}</div>`;
-    clearActions();one();action('Back','今の場面へ戻る',()=>{overlay=null;render()},{primary:true});
+    backButton();
   }
 
   function renderStatus(){
     setHeader('STATUS / ステータス','Status');
     $('dailyContent').innerHTML=`<div class="dialogue-card"><span class="speaker">STATUS</span><p><b>PE</b> ${esc(statText('PE'))}</p><p><b>SCIENCE</b> ${esc(statText('science'))}</p><p><b>HISTORY</b> ${esc(statText('history'))}</p><p><b>MATH</b> ${esc(statText('math'))}</p><p><b>ART</b> ${esc(statText('art'))}</p></div>`;
-    clearActions();one();action('Back','今の場面へ戻る',()=>{overlay=null;render()},{primary:true});
+    backButton();
   }
 
   const stages={
@@ -356,23 +358,15 @@
     ready(){
       setTime(8,15);
       dialogue('YOU','I am ready.','準備できました。',[{en:'ready',ja:'準備ができた'}]);
-      clearActions();one();action('Morning again','朝を最初から見る',resetMorning,{primary:true});
+      clearActions();
+      one();
+      action('Go to work','出勤',()=>{
+        state.lastPlace='MAGIC SCHOOL';
+        save();
+        location.href='magic-school.html';
+      },{primary:true});
     }
   };
-
-  function resetMorning(){
-    state.hour=7;
-    state.minute=0;
-    state.dailyStage='month';
-    state.weather=null;
-    state.fruit=null;
-    state.egg=false;
-    state.eggTaken=false;
-    state.dailyBuff={};
-    save();
-    overlay=null;
-    render();
-  }
 
   document.querySelectorAll('[data-jump]').forEach(button=>{
     button.onclick=()=>{overlay=button.dataset.jump;render()};
@@ -388,6 +382,7 @@
     state.dailyStage='month';
     save();
   }
+
   updateHud();
   render();
 })();
