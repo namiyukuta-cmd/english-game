@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+  <title>Magic School</title>
+  <link rel="stylesheet" href="css/magic-start.css?v=20260903-1">
+</head>
+<body>
+  <main class="magic-start-shell">
+    <header class="magic-start-head">
+      <a href="story-menu.html?v=20260903-6" aria-label="物語選択へ戻る">←</a>
+      <div>
+        <strong>MAGIC SCHOOL</strong>
+        <span>START</span>
+      </div>
+    </header>
+
+    <section class="magic-start-card">
+      <div class="magic-start-title">Magic School</div>
+      <p>遺跡調査隊の日常と冒険</p>
+
+      <button id="newGameBtn" class="primary" type="button">
+        New Game
+        <small>はじめから</small>
+      </button>
+
+      <button id="continueBtn" type="button">
+        Continue
+        <small>続きから</small>
+      </button>
+
+      <p id="saveStatus" class="save-status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="js/magic-state.js?v=20260903-2"></script>
+  <script src="js/magic-start.js?v=20260903-1"></script>
+</body>
+</html>
