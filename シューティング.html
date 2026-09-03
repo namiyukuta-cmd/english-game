@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-  <title>英検5級 英単語シューティング</title>
+  <title>英検5級 英単語タイピング</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
@@ -22,8 +22,7 @@
     .impact{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:68%;height:8px;border-radius:999px;background:#1b2c42;box-shadow:0 0 28px #7ee7ff44}
     .impact:before{content:"YOU";position:absolute;left:50%;top:-34px;transform:translateX(-50%);font-size:12px;color:#8094ac;font-weight:900}
     .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.flash.on{animation:flash .18s ease}
-    .quiz{display:none;padding:12px;border:1px solid #334964;border-radius:18px;background:#111e30}
-    .quiz.show{display:block}
+    .quiz{display:none;padding:12px;border:1px solid #334964;border-radius:18px;background:#111e30}.quiz.show{display:block}
     .label{font-size:12px;color:#9db0c7;font-weight:800;margin-bottom:4px}.jp{font-size:28px;font-weight:950;margin:0 0 10px;color:#ffd75a}
     form{display:grid;grid-template-columns:1fr auto;gap:8px}
     input{min-width:0;height:52px;border:2px solid #47627f;border-radius:13px;background:#08111e;color:#fff;padding:0 13px;font-size:21px;font-weight:800;outline:none}
@@ -42,7 +41,7 @@
   <main class="app">
     <header class="top">
       <a class="back" href="シューティングtop.html" aria-label="戻る">←</a>
-      <div class="title">英単語シューティング</div>
+      <div class="title">英単語タイピング</div>
       <div class="count"><span id="now">1</span> / 10</div>
     </header>
 
@@ -55,7 +54,7 @@
       <div class="result" id="result">
         <div class="card">
           <h2>終了</h2>
-          <p>10問終わりました。<br>正解 <strong id="finalScore">0</strong> / 10</p>
+          <p>10問終わりました。</p>
           <button class="again" id="again">もう一度</button>
           <a class="to-top" href="シューティングtop.html">TOPへ戻る</a>
         </div>
@@ -74,7 +73,8 @@
   </main>
 
   <script>
-    const WORDS = [
+    const SAVE_KEY='eiken5TypingSave';
+    const WORDS=[
       ["dog","犬"],["cat","猫"],["bird","鳥"],["fish","魚"],["book","本"],["pen","ペン"],["pencil","鉛筆"],["school","学校"],["teacher","先生"],["student","生徒"],
       ["father","父"],["mother","母"],["brother","兄・弟"],["sister","姉・妹"],["friend","友達"],["house","家"],["room","部屋"],["door","ドア"],["window","窓"],["table","テーブル"],
       ["apple","リンゴ"],["banana","バナナ"],["water","水"],["milk","牛乳"],["rice","ご飯"],["bread","パン"],["egg","卵"],["park","公園"],["station","駅"],["train","電車"],
@@ -83,95 +83,117 @@
       ["good","良い"],["big","大きい"],["small","小さい"],["new","新しい"],["old","古い"],["happy","幸せな"],["today","今日"],["tomorrow","明日"],["morning","朝"],["night","夜"]
     ];
 
-    const wordEl = document.getElementById('word');
-    const startMsg = document.getElementById('startMsg');
-    const quiz = document.getElementById('quiz');
-    const jp = document.getElementById('jp');
-    const form = document.getElementById('form');
-    const answer = document.getElementById('answer');
-    const msg = document.getElementById('msg');
-    const now = document.getElementById('now');
-    const flash = document.getElementById('flash');
-    const result = document.getElementById('result');
-    const finalScore = document.getElementById('finalScore');
-    const again = document.getElementById('again');
+    const wordEl=document.getElementById('word');
+    const startMsg=document.getElementById('startMsg');
+    const quiz=document.getElementById('quiz');
+    const jp=document.getElementById('jp');
+    const form=document.getElementById('form');
+    const answer=document.getElementById('answer');
+    const msg=document.getElementById('msg');
+    const now=document.getElementById('now');
+    const flash=document.getElementById('flash');
+    const result=document.getElementById('result');
+    const again=document.getElementById('again');
 
-    let questions = [];
-    let index = 0;
-    let score = 0;
-    let current = null;
-    let locked = false;
+    let questions=[];
+    let index=0;
+    let current=null;
+    let locked=false;
 
-    function shuffle(arr){
-      return [...arr].sort(()=>Math.random()-.5);
+    function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+
+    function saveGame(){
+      localStorage.setItem(SAVE_KEY,JSON.stringify({questions,index}));
     }
 
     function startGame(){
-      questions = shuffle(WORDS).slice(0,10);
-      index = 0;
-      score = 0;
+      questions=shuffle(WORDS).slice(0,10);
+      index=0;
       result.classList.remove('show');
+      saveGame();
       nextWord();
     }
 
+    function continueGame(){
+      try{
+        const save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+        if(save && Array.isArray(save.questions) && save.questions.length===10 && save.index>=0 && save.index<save.questions.length){
+          questions=save.questions;
+          index=save.index;
+          result.classList.remove('show');
+          nextWord();
+          return;
+        }
+      }catch(e){}
+      startGame();
+    }
+
     function nextWord(){
-      if(index >= questions.length){
-        finalScore.textContent = score;
+      if(index>=questions.length){
+        localStorage.removeItem(SAVE_KEY);
         result.classList.add('show');
         return;
       }
-
-      locked = true;
-      current = questions[index];
-      now.textContent = index + 1;
+      locked=true;
+      current=questions[index];
+      now.textContent=index+1;
       quiz.classList.remove('show');
-      answer.value = '';
-      msg.textContent = '';
-      msg.className = 'msg';
-      startMsg.style.display = 'none';
-
-      wordEl.hidden = false;
-      wordEl.textContent = current[0];
-      wordEl.className = 'word';
+      answer.value='';
+      msg.textContent='';
+      msg.className='msg';
+      startMsg.style.display='none';
+      wordEl.hidden=false;
+      wordEl.textContent=current[0];
+      wordEl.className='word';
       void wordEl.offsetWidth;
       wordEl.classList.add('fly');
+      saveGame();
     }
 
-    wordEl.addEventListener('animationend', (e)=>{
-      if(e.animationName !== 'flyIn') return;
-      wordEl.className = 'word hit';
-      wordEl.textContent = current[1];
+    wordEl.addEventListener('animationend',e=>{
+      if(e.animationName!=='flyIn')return;
+      wordEl.className='word hit';
+      wordEl.textContent=current[1];
       flash.classList.remove('on');
       void flash.offsetWidth;
       flash.classList.add('on');
-      jp.textContent = current[1];
+      jp.textContent=current[1];
       quiz.classList.add('show');
-      locked = false;
+      locked=false;
       setTimeout(()=>answer.focus(),120);
     });
 
-    form.addEventListener('submit',(e)=>{
+    form.addEventListener('submit',e=>{
       e.preventDefault();
-      if(locked) return;
-      const typed = answer.value.trim().toLowerCase();
-      const correct = current[0].toLowerCase();
-      if(typed === correct){
-        locked = true;
-        score++;
-        msg.textContent = '正解：' + current[0] + ' ＝ ' + current[1];
-        msg.className = 'msg good';
+      if(locked)return;
+      const typed=answer.value.trim().toLowerCase();
+      const correct=current[0].toLowerCase();
+      if(typed===correct){
+        locked=true;
+        msg.textContent='正解：'+current[0]+' ＝ '+current[1];
+        msg.className='msg good';
         index++;
+        if(index<questions.length)saveGame();else localStorage.removeItem(SAVE_KEY);
         setTimeout(nextWord,650);
       }else{
-        msg.textContent = 'ちがいます。もう一度入力してください。';
-        msg.className = 'msg bad';
+        msg.textContent='ちがいます。もう一度入力してください。';
+        msg.className='msg bad';
         answer.select();
       }
     });
 
-    again.addEventListener('click',startGame);
+    again.addEventListener('click',()=>{
+      localStorage.removeItem(SAVE_KEY);
+      startGame();
+    });
 
-    setTimeout(startGame,700);
+    const params=new URLSearchParams(location.search);
+    if(params.has('continue')){
+      setTimeout(continueGame,500);
+    }else{
+      localStorage.removeItem(SAVE_KEY);
+      setTimeout(startGame,500);
+    }
   </script>
 </body>
 </html>
