@@ -4,34 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-  <title>英検5級 シューティング</title>
+  <title>英検5級 英単語タイピング</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101722;color:#fff;display:flex;justify-content:center}
     main{width:min(520px,100%);min-height:100vh;padding:20px 16px 32px;display:flex;flex-direction:column}
     .back{width:44px;height:44px;border:1px solid #3a485c;border-radius:12px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px}
-    .center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:18px}
-    h1{margin:0;font-size:31px}
-    .sub{margin:0;color:#b9c5d6;font-size:16px;line-height:1.8}
-    .how{width:100%;padding:18px;border:1px solid #34445b;border-radius:18px;background:#172131;text-align:left;font-size:16px;line-height:1.9}
-    .start{width:100%;min-height:58px;border:0;border-radius:16px;background:#ffd54f;color:#1a2130;font-weight:900;font-size:20px;text-decoration:none;display:flex;align-items:center;justify-content:center}
+    .center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px}
+    h1{margin:0 0 20px;font-size:31px}
+    .menu{width:100%;display:grid;gap:12px}
+    .btn{width:100%;min-height:62px;border-radius:16px;font-weight:900;font-size:21px;text-decoration:none;display:flex;align-items:center;justify-content:center}
+    .new{background:#ffd54f;color:#1a2130}
+    .continue{background:#1b2b42;color:#fff;border:1px solid #49627f}
+    .continue.disabled{opacity:.42;pointer-events:none}
   </style>
 </head>
 <body>
   <main>
     <a class="back" href="story-menu.html" aria-label="戻る">←</a>
     <div class="center">
-      <div>
-        <h1>英単語シューティング</h1>
-        <p class="sub">英検5級の単語を、見て・思い出して・入力するゲーム</p>
+      <h1>英単語タイピング</h1>
+      <div class="menu">
+        <a class="btn new" href="シューティング.html?new=1">初めから</a>
+        <a class="btn continue" id="continueBtn" href="シューティング.html?continue=1">続きから</a>
       </div>
-      <div class="how">
-        ① 英単語が飛んできます。<br>
-        ② 当たると日本語に変わります。<br>
-        ③ さっき飛んできた英単語を入力します。
-      </div>
-      <a class="start" href="シューティング.html">スタート</a>
     </div>
   </main>
+  <script>
+    const SAVE_KEY='eiken5TypingSave';
+    const continueBtn=document.getElementById('continueBtn');
+    try{
+      const save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+      if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
+        continueBtn.classList.add('disabled');
+      }
+    }catch(e){
+      continueBtn.classList.add('disabled');
+    }
+  </script>
 </body>
 </html>
