@@ -4,154 +4,108 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-  <title>文字タップ</title>
+  <title>英単語シューティング - 回答</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f0e8;color:#222}
-    button{font:inherit}
-    .app{width:min(640px,100%);height:100svh;margin:auto;padding:12px 12px calc(12px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto auto auto 1fr auto;gap:10px}
-    .top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center}
-    .back{width:42px;height:42px;border:1px solid #b9b2a7;border-radius:12px;background:#fff;color:#222;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
-    h1{margin:0;text-align:center;font-size:20px}
-    .question{background:#fff;border:1px solid #ccc3b7;border-radius:18px;padding:18px 14px;text-align:center}
-    .question small{display:block;color:#777;font-size:13px;margin-bottom:4px}
-    .question strong{display:block;font-size:34px;line-height:1.3}
-    .answer{min-height:64px;background:#fff;border:2px solid #aaa196;border-radius:16px;padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
-    .answer .letter{min-width:32px;height:42px;padding:0 5px;border-bottom:3px solid #444;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;text-transform:lowercase}
-    .placeholder{color:#aaa;font-size:17px}
-    .message{min-height:24px;text-align:center;font-size:15px;font-weight:800}
-    .message.good{color:#147a3d}.message.bad{color:#c43d3d}
-    .keys{min-height:0;display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-content:center}
-    .key{aspect-ratio:1.05;border:1px solid #999084;border-radius:12px;background:#fff;color:#222;font-size:clamp(18px,5vw,25px);font-weight:900;box-shadow:0 2px 0 #bbb2a5;touch-action:manipulation}
-    .key:active{transform:translateY(2px);box-shadow:none;background:#eee8dd}
-    .controls{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
-    .control{min-height:52px;border-radius:13px;border:1px solid #aaa196;background:#fff;font-weight:900;font-size:16px}
-    .submit{background:#222;color:#fff;border-color:#222}
-    @media(max-width:430px){.app{padding-left:8px;padding-right:8px;gap:8px}.keys{gap:5px}.key{border-radius:10px}.question{padding:14px 10px}.question strong{font-size:30px}}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07111f;color:#fff}
+    button,input{font:inherit}
+    .app{width:min(620px,100%);height:100svh;margin:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto 1fr auto;gap:10px}
+    .top{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px}
+    .back{width:42px;height:42px;border:1px solid #3a4d67;border-radius:12px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
+    .title{text-align:center;font-weight:900;font-size:16px}.count{font-size:14px;color:#c9d5e5;white-space:nowrap}
+    .field{position:relative;min-height:0;overflow:hidden;border:1px solid #2c405a;border-radius:20px;background:linear-gradient(#13243a,#09121f)}
+    .field:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px;pointer-events:none}
+    .jp-hit{position:absolute;left:50%;top:76%;transform:translate(-50%,-50%);min-width:150px;max-width:78%;padding:12px 22px;border:2px solid #ff9aac;border-radius:18px;background:#4c2430;color:#fff;text-align:center;font-size:clamp(28px,9vw,48px);font-weight:950;line-height:1.2;text-shadow:0 3px 10px #000;white-space:nowrap}
+    .impact{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:68%;height:8px;border-radius:999px;background:#1b2c42;box-shadow:0 0 28px #7ee7ff44}
+    .impact:before{content:"YOU";position:absolute;left:50%;top:-34px;transform:translateX(-50%);font-size:12px;color:#8094ac;font-weight:900}
+    .quiz{padding:12px;border:1px solid #334964;border-radius:18px;background:#111e30}
+    .label{font-size:12px;color:#9db0c7;font-weight:800;margin-bottom:4px}.jp{font-size:28px;font-weight:950;margin:0 0 10px;color:#ffd75a}
+    form{display:grid;grid-template-columns:1fr auto;gap:8px}
+    input{min-width:0;height:52px;border:2px solid #77dcff;border-radius:13px;background:#08111e;color:#fff;padding:0 13px;font-size:21px;font-weight:800;outline:none}
+    button{height:52px;border:0;border-radius:13px;background:#ffd54f;color:#172033;font-weight:900;padding:0 18px}
+    .msg{min-height:25px;margin-top:8px;font-size:14px;font-weight:800}.msg.good{color:#78eca5}.msg.bad{color:#ff8c8c}
+    .error{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:30px;color:#c9d5e5;line-height:1.7}.error.show{display:flex}
   </style>
 </head>
 <body>
   <main class="app">
     <header class="top">
       <a class="back" href="シューティングtop.html" aria-label="戻る">←</a>
-      <h1>英単語を作る</h1>
-      <span></span>
+      <div class="title">英単語シューティング</div>
+      <div class="count"><span id="now">1</span> / 10</div>
     </header>
 
-    <section class="question">
-      <small>日本語に合う英単語をタップしてください</small>
-      <strong id="jp">りんご</strong>
+    <section class="field">
+      <div class="jp-hit" id="jpHit"></div>
+      <div class="impact"></div>
+      <div class="error" id="error">問題データがありません。<br>「初めから」で開始してください。</div>
     </section>
 
-    <section class="answer" id="answer" aria-live="polite">
-      <span class="placeholder">下の文字をタップ</span>
-    </section>
-
-    <section class="keys" id="keys" aria-label="アルファベット"></section>
-
-    <section>
-      <div class="message" id="message"></div>
-      <div class="controls">
-        <button class="control" id="deleteBtn" type="button">1文字消す</button>
-        <button class="control" id="clearBtn" type="button">全部消す</button>
-        <button class="control submit" id="submitBtn" type="button">決定</button>
-      </div>
+    <section class="quiz" id="quiz">
+      <div class="label">さっき飛んできた英単語を入力してください</div>
+      <p class="jp" id="jp"></p>
+      <form id="form" autocomplete="off">
+        <input id="answer" type="text" inputmode="text" autocapitalize="none" autocomplete="off" spellcheck="false" aria-label="英単語を入力">
+        <button type="submit">決定</button>
+      </form>
+      <div class="msg" id="msg"></div>
     </section>
   </main>
 
   <script>
-    const WORDS = [
-      ["apple","りんご"],["dog","犬"],["cat","猫"],["book","本"],["school","学校"],
-      ["teacher","先生"],["friend","友達"],["water","水"],["train","電車"],["green","緑"]
-    ];
+    const SAVE_KEY='eiken5TypingSave';
+    const now=document.getElementById('now');
+    const jpHit=document.getElementById('jpHit');
+    const jp=document.getElementById('jp');
+    const quiz=document.getElementById('quiz');
+    const error=document.getElementById('error');
+    const form=document.getElementById('form');
+    const answer=document.getElementById('answer');
+    const msg=document.getElementById('msg');
 
-    const jp = document.getElementById('jp');
-    const answerEl = document.getElementById('answer');
-    const keysEl = document.getElementById('keys');
-    const message = document.getElementById('message');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const submitBtn = document.getElementById('submitBtn');
+    let save=null;
+    let current=null;
 
-    let index = 0;
-    let typed = '';
-
-    const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-
-    function makeKeys(){
-      keysEl.innerHTML = '';
-      letters.forEach(letter => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'key';
-        btn.textContent = letter;
-        btn.setAttribute('aria-label', letter);
-        btn.addEventListener('click', () => addLetter(letter));
-        keysEl.appendChild(btn);
-      });
-    }
-
-    function addLetter(letter){
-      if(typed.length >= 18) return;
-      typed += letter;
-      message.textContent = '';
-      message.className = 'message';
-      renderAnswer();
-    }
-
-    function renderAnswer(){
-      answerEl.innerHTML = '';
-      if(!typed){
-        const p = document.createElement('span');
-        p.className = 'placeholder';
-        p.textContent = '下の文字をタップ';
-        answerEl.appendChild(p);
+    function loadQuestion(){
+      try{save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){save=null}
+      if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
+        quiz.style.display='none';
+        jpHit.style.display='none';
+        error.classList.add('show');
         return;
       }
-      [...typed].forEach(letter => {
-        const span = document.createElement('span');
-        span.className = 'letter';
-        span.textContent = letter;
-        answerEl.appendChild(span);
-      });
+      current=save.questions[save.index];
+      now.textContent=save.index+1;
+      jpHit.textContent=current[1];
+      jp.textContent=current[1];
+      setTimeout(()=>answer.focus(),120);
     }
 
-    function nextQuestion(){
-      index = (index + 1) % WORDS.length;
-      typed = '';
-      jp.textContent = WORDS[index][1];
-      message.textContent = '';
-      message.className = 'message';
-      renderAnswer();
-    }
-
-    deleteBtn.addEventListener('click', () => {
-      typed = typed.slice(0,-1);
-      renderAnswer();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      typed = '';
-      renderAnswer();
-    });
-
-    submitBtn.addEventListener('click', () => {
-      if(!typed) return;
-      const correct = WORDS[index][0];
-      if(typed === correct){
-        message.textContent = '正解！ ' + correct + ' ＝ ' + WORDS[index][1];
-        message.className = 'message good';
-        setTimeout(nextQuestion,700);
+    form.addEventListener('submit',e=>{
+      e.preventDefault();
+      if(!current)return;
+      const typed=answer.value.trim().toLowerCase();
+      const correct=current[0].toLowerCase();
+      if(typed===correct){
+        msg.textContent='正解：'+current[0]+' ＝ '+current[1];
+        msg.className='msg good';
+        save.index++;
+        if(save.index>=save.questions.length){
+          localStorage.removeItem(SAVE_KEY);
+          setTimeout(()=>{location.href='シューティングtop.html'},700);
+        }else{
+          localStorage.setItem(SAVE_KEY,JSON.stringify(save));
+          setTimeout(()=>{location.href='シューティング.html?continue=1'},500);
+        }
       }else{
-        message.textContent = 'ちがいます。もう一度。';
-        message.className = 'message bad';
+        msg.textContent='ちがいます。もう一度入力してください。';
+        msg.className='msg bad';
+        answer.select();
       }
     });
 
-    makeKeys();
-    jp.textContent = WORDS[index][1];
-    renderAnswer();
+    loadQuestion();
   </script>
 </body>
 </html>
