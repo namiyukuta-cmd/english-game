@@ -10,36 +10,56 @@
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07111f;color:#fff;touch-action:manipulation}
     button,input{font:inherit}
-    .app{width:min(620px,100%);height:100svh;margin:auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto minmax(145px,23vh) auto 1fr;gap:8px;overflow:hidden}
+    button{touch-action:manipulation}
+
+    .app{width:min(620px,100%);height:100svh;margin:auto;padding:10px 12px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto 150px auto 1fr;gap:8px;overflow:hidden}
     .top{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px}
     .back{width:42px;height:42px;border:1px solid #3a4d67;border-radius:12px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
     .title{text-align:center;font-weight:900;font-size:16px}.count{font-size:14px;color:#c9d5e5;white-space:nowrap}
 
     .field{position:relative;min-height:0;overflow:hidden;border:1px solid #2c405a;border-radius:20px;background:linear-gradient(#13243a,#09121f)}
     .field:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px;pointer-events:none}
-    .jp-hit{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);min-width:150px;max-width:82%;padding:11px 22px;border:2px solid #ff9aac;border-radius:18px;background:#4c2430;color:#fff;text-align:center;font-size:clamp(28px,9vw,46px);font-weight:950;line-height:1.15;text-shadow:0 3px 10px #000;white-space:nowrap}
-    .impact{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:66%;height:7px;border-radius:999px;background:#1b2c42;box-shadow:0 0 28px #7ee7ff44}
-    .impact:before{content:"YOU";position:absolute;left:50%;top:-30px;transform:translateX(-50%);font-size:11px;color:#8094ac;font-weight:900}
+    .jp-hit{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:150px;max-width:82%;padding:9px 22px;border:2px solid #ff9aac;border-radius:18px;background:#4c2430;color:#fff;text-align:center;font-size:clamp(28px,9vw,44px);font-weight:950;line-height:1.15;text-shadow:0 3px 10px #000;white-space:nowrap}
+    .impact{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:66%;height:7px;border-radius:999px;background:#1b2c42;box-shadow:0 0 28px #7ee7ff44}
+    .impact:before{content:"YOU";position:absolute;left:50%;top:-28px;transform:translateX(-50%);font-size:11px;color:#8094ac;font-weight:900}
 
-    .quiz{padding:10px 12px;border:1px solid #334964;border-radius:18px;background:#111e30}
+    .quiz{padding:9px 11px;border:1px solid #334964;border-radius:18px;background:#111e30}
     .label{font-size:12px;color:#9db0c7;font-weight:800;margin-bottom:3px}
-    .jp{font-size:25px;font-weight:950;margin:0 0 7px;color:#ffd75a;line-height:1.2}
-    .answer-row{display:grid;grid-template-columns:1fr auto;gap:8px}
-    .answer-box{min-width:0;height:50px;border:2px solid #77dcff;border-radius:13px;background:#08111e;color:#fff;padding:0 13px;font-size:21px;font-weight:800;outline:none;caret-color:transparent;user-select:none}
-    .submit{height:50px;border:0;border-radius:13px;background:#ffd54f;color:#172033;font-weight:900;padding:0 18px;font-size:18px}
-    .msg{min-height:20px;margin-top:5px;font-size:13px;font-weight:800}.msg.good{color:#78eca5}.msg.bad{color:#ff8c8c}
+    .jp{font-size:24px;font-weight:950;margin:0 0 6px;color:#ffd75a;line-height:1.2}
+    .answer-row{display:grid;grid-template-columns:1fr auto;gap:7px}
+    .answer-box{min-width:0;height:48px;border:2px solid #77dcff;border-radius:13px;background:#08111e;color:#fff;padding:0 13px;font-size:21px;font-weight:800;outline:none;caret-color:transparent;user-select:none;pointer-events:none}
+    .submit{height:48px;border:0;border-radius:13px;background:#ffd54f;color:#172033;font-weight:900;padding:0 18px;font-size:18px}
+    .msg{min-height:18px;margin-top:4px;font-size:13px;font-weight:800}.msg.good{color:#78eca5}.msg.bad{color:#ff8c8c}
 
-    .keyboard{min-height:0;border:1px solid #334964;border-radius:20px;background:#101c2d;padding:10px 7px;display:grid;grid-template-rows:repeat(4,1fr);gap:7px;align-content:stretch}
-    .key-row{display:flex;justify-content:center;gap:5px;min-height:0}
-    .key{flex:1;min-width:0;max-width:54px;border:1px solid #526987;border-radius:10px;background:#1b2c43;color:#fff;font-size:clamp(18px,5.1vw,24px);font-weight:900;box-shadow:0 2px 0 #08111e;touch-action:manipulation}
-    .key:active{transform:translateY(2px);box-shadow:none;background:#29415f}
-    .utility-row{display:grid;grid-template-columns:1fr 1.7fr 1fr;gap:6px;min-height:0}
-    .utility{border:1px solid #526987;border-radius:10px;background:#1b2c43;color:#dfeaff;font-size:15px;font-weight:900}
-    .utility:active{background:#29415f}
-    .space{font-size:14px;letter-spacing:.08em}
+    /* キーボード本体は余白を引き伸ばさず、スマホ標準に近い高さで画面下へ固定 */
+    .keyboard-wrap{min-height:0;display:flex;align-items:flex-end;justify-content:center}
+    .keyboard{width:100%;border:1px solid #334964;border-radius:18px;background:#101c2d;padding:7px 5px 8px;display:grid;gap:4px;align-self:end}
+    .key-row{display:flex;justify-content:center;align-items:center;height:52px}
+
+    /* hit は隙間を含む実際のタップ領域、keycap は見た目だけ */
+    .key-hit{height:100%;min-width:0;display:flex;align-items:stretch;justify-content:stretch;padding:2px;cursor:pointer;user-select:none}
+    .key-hit.letter{flex:1}
+    .keycap{width:100%;height:100%;border:0;border-radius:7px;background:#e8edf3;color:#101722;font-size:23px;font-weight:650;box-shadow:0 1px 0 #65748a,0 2px 3px #0006;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    .key-hit.pressed .keycap{transform:translateY(1px);background:#cbd5e1;box-shadow:0 1px 1px #0004}
+
+    .row2{padding-left:4.5%;padding-right:4.5%}
+    .row3{gap:0}
+    .side-hit{height:100%;display:flex;align-items:stretch;padding:2px;flex:1.28}
+    .side-hit .keycap{background:#aeb9c8;font-size:18px;font-weight:900}
+    .row3 .key-hit.letter{flex:1}
+
+    .utility-row{display:grid;grid-template-columns:1.15fr 3.6fr 1.15fr;height:52px}
+    .utility-hit{height:100%;display:flex;padding:2px;user-select:none;cursor:pointer}
+    .utility-hit .keycap{background:#aeb9c8;font-size:14px;font-weight:900;color:#101722}
+    .utility-hit.space .keycap{background:#eef2f6;font-size:13px;letter-spacing:.08em}
 
     .error{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:30px;color:#c9d5e5;line-height:1.7}.error.show{display:flex}
-    @media(max-height:700px){.app{grid-template-rows:auto minmax(120px,20vh) auto 1fr;gap:6px}.quiz{padding:8px 10px}.jp{font-size:22px;margin-bottom:5px}.answer-box,.submit{height:46px}.keyboard{padding:7px 5px;gap:5px}.key-row{gap:4px}.key{border-radius:8px}}
+
+    @media(max-height:700px){
+      .app{grid-template-rows:auto 120px auto 1fr;gap:6px}
+      .quiz{padding:7px 9px}.jp{font-size:21px;margin-bottom:4px}.answer-box,.submit{height:44px}
+      .key-row,.utility-row{height:46px}.keyboard{padding:5px 4px 6px;gap:3px}.key-hit,.side-hit,.utility-hit{padding:1.5px}.keycap{font-size:20px}
+    }
   </style>
 </head>
 <body>
@@ -66,16 +86,18 @@
       <div class="msg" id="msg"></div>
     </section>
 
-    <section class="keyboard" id="keyboard" aria-label="英語キーボード">
-      <div class="key-row" data-row="qwertyuiop"></div>
-      <div class="key-row" data-row="asdfghjkl"></div>
-      <div class="key-row" data-row="zxcvbnm"></div>
-      <div class="utility-row">
-        <button class="utility" id="clearBtn" type="button">全消し</button>
-        <button class="utility space" id="spaceBtn" type="button">SPACE</button>
-        <button class="utility" id="deleteBtn" type="button">⌫</button>
-      </div>
-    </section>
+    <div class="keyboard-wrap">
+      <section class="keyboard" id="keyboard" aria-label="英語キーボード">
+        <div class="key-row row1" id="row1"></div>
+        <div class="key-row row2" id="row2"></div>
+        <div class="key-row row3" id="row3"></div>
+        <div class="utility-row">
+          <div class="utility-hit" id="clearHit" role="button" aria-label="全部消す"><div class="keycap">全消し</div></div>
+          <div class="utility-hit space" id="spaceHit" role="button" aria-label="スペース"><div class="keycap">SPACE</div></div>
+          <div class="utility-hit" id="deleteHit" role="button" aria-label="1文字消す"><div class="keycap">⌫</div></div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -89,33 +111,69 @@
     const answer=document.getElementById('answer');
     const msg=document.getElementById('msg');
     const submitBtn=document.getElementById('submitBtn');
-    const clearBtn=document.getElementById('clearBtn');
-    const spaceBtn=document.getElementById('spaceBtn');
-    const deleteBtn=document.getElementById('deleteBtn');
 
     let save=null;
     let current=null;
     let locked=false;
 
-    function makeKeyboard(){
-      document.querySelectorAll('.key-row[data-row]').forEach(row=>{
-        const letters=row.dataset.row.split('');
-        letters.forEach(letter=>{
-          const button=document.createElement('button');
-          button.type='button';
-          button.className='key';
-          button.textContent=letter;
-          button.setAttribute('aria-label',letter);
-          button.addEventListener('click',()=>addCharacter(letter));
-          row.appendChild(button);
-        });
+    function pressEffect(el){
+      el.classList.add('pressed');
+      setTimeout(()=>el.classList.remove('pressed'),85);
+    }
+
+    function makeLetter(row,letter){
+      const hit=document.createElement('div');
+      hit.className='key-hit letter';
+      hit.setAttribute('role','button');
+      hit.setAttribute('aria-label',letter);
+      const cap=document.createElement('div');
+      cap.className='keycap';
+      cap.textContent=letter;
+      hit.appendChild(cap);
+      hit.addEventListener('pointerdown',e=>{
+        e.preventDefault();
+        pressEffect(hit);
+        addCharacter(letter);
       });
+      row.appendChild(hit);
+    }
+
+    function makeKeyboard(){
+      const row1=document.getElementById('row1');
+      const row2=document.getElementById('row2');
+      const row3=document.getElementById('row3');
+      'qwertyuiop'.split('').forEach(l=>makeLetter(row1,l));
+      'asdfghjkl'.split('').forEach(l=>makeLetter(row2,l));
+
+      const left=document.createElement('div');
+      left.className='side-hit';
+      left.setAttribute('aria-hidden','true');
+      left.innerHTML='<div class="keycap">⇧</div>';
+      row3.appendChild(left);
+      'zxcvbnm'.split('').forEach(l=>makeLetter(row3,l));
+      const right=document.createElement('div');
+      right.className='side-hit';
+      right.setAttribute('role','button');
+      right.setAttribute('aria-label','1文字消す');
+      right.innerHTML='<div class="keycap">⌫</div>';
+      right.addEventListener('pointerdown',e=>{
+        e.preventDefault();
+        pressEffect(right);
+        deleteCharacter();
+      });
+      row3.appendChild(right);
     }
 
     function addCharacter(char){
       if(locked || !current)return;
       if(answer.value.length>=24)return;
       answer.value+=char;
+      clearMessage();
+    }
+
+    function deleteCharacter(){
+      if(locked)return;
+      answer.value=answer.value.slice(0,-1);
       clearMessage();
     }
 
@@ -164,19 +222,29 @@
     }
 
     submitBtn.addEventListener('click',submitAnswer);
-    deleteBtn.addEventListener('click',()=>{
-      if(locked)return;
-      answer.value=answer.value.slice(0,-1);
-      clearMessage();
-    });
-    clearBtn.addEventListener('click',()=>{
+
+    const clearHit=document.getElementById('clearHit');
+    clearHit.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      pressEffect(clearHit);
       if(locked)return;
       answer.value='';
       clearMessage();
     });
-    spaceBtn.addEventListener('click',()=>{
+
+    const spaceHit=document.getElementById('spaceHit');
+    spaceHit.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      pressEffect(spaceHit);
       if(locked || !answer.value || answer.value.endsWith(' '))return;
       addCharacter(' ');
+    });
+
+    const deleteHit=document.getElementById('deleteHit');
+    deleteHit.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      pressEffect(deleteHit);
+      deleteCharacter();
     });
 
     makeKeyboard();
