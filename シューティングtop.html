@@ -6,12 +6,22 @@
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
   <title>英検5級 英単語タイピング</title>
   <style>
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101722;color:#fff;display:flex;justify-content:center}
     main{width:min(520px,100%);min-height:100vh;padding:20px 16px 32px;display:flex;flex-direction:column}
     .back{width:44px;height:44px;border:1px solid #3a485c;border-radius:12px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:22px}
     .center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px}
-    h1{margin:0 0 20px;font-size:31px}
+    h1{margin:0;font-size:31px}
+    .learned{width:100%;padding:14px 16px;border:1px solid #3a485c;border-radius:16px;background:#151f2f;text-align:left}
+    .learned-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-weight:900}
+    .learned-head strong{font-size:19px;color:#ffd75a}.learned-head span{font-size:13px;color:#aebed1}
+    .bar{height:10px;margin-top:9px;border-radius:999px;background:#0b1320;overflow:hidden;border:1px solid #30435c}.bar span{display:block;height:100%;width:0;background:#7ee7ff;transition:width .25s ease}
+    .difficulty{width:100%;padding:14px;border:1px solid #3a485c;border-radius:16px;background:#151f2f;text-align:left}
+    .difficulty-title{font-size:13px;font-weight:900;color:#aebed1;margin-bottom:9px}
+    .difficulty-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+    .difficulty-btn{min-height:52px;border:1px solid #4a607d;border-radius:13px;background:#1b2b42;color:#fff;font-size:16px;font-weight:900}
+    .difficulty-btn.active{background:#ffd54f;color:#172033;border-color:#ffd54f}
+    .difficulty-note{margin:9px 2px 0;color:#9fb0c6;font-size:12px;line-height:1.5;min-height:18px}
     .menu{width:100%;display:grid;gap:12px}
     .btn{width:100%;min-height:62px;border-radius:16px;font-weight:900;font-size:21px;text-decoration:none;display:flex;align-items:center;justify-content:center}
     .new{background:#ffd54f;color:#1a2130}
@@ -24,23 +34,85 @@
     <a class="back" href="story-menu.html" aria-label="戻る">←</a>
     <div class="center">
       <h1>英単語タイピング</h1>
+
+      <section class="learned" aria-label="覚えた単語数">
+        <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / 60語</strong><span>正解した単語</span></div>
+        <div class="bar"><span id="learnedBar"></span></div>
+      </section>
+
+      <section class="difficulty" aria-label="難易度">
+        <div class="difficulty-title">難易度</div>
+        <div class="difficulty-grid">
+          <button class="difficulty-btn" type="button" data-difficulty="easy">簡単</button>
+          <button class="difficulty-btn" type="button" data-difficulty="normal">普通</button>
+          <button class="difficulty-btn" type="button" data-difficulty="hard">難しい</button>
+        </div>
+        <div class="difficulty-note" id="difficultyNote"></div>
+      </section>
+
       <div class="menu">
-        <a class="btn new" href="シューティング.html?new=1">初めから</a>
+        <a class="btn new" id="newBtn" href="シューティング.html?new=1&difficulty=normal">初めから</a>
         <a class="btn continue" id="continueBtn" href="シューティング.html?continue=1">続きから</a>
       </div>
     </div>
   </main>
   <script>
     const SAVE_KEY='eiken5TypingSave';
+    const PROGRESS_KEY='eiken5TypingProgress';
+    const DIFFICULTY_KEY='eiken5TypingDifficulty';
+    const TOTAL_WORDS=60;
+    const NOTES={
+      easy:'ゆっくり表示・1回間違えると最初の2文字を表示',
+      normal:'標準速度・1回間違えると最初の1文字を表示',
+      hard:'速めに表示・1回間違えると文字数だけ表示'
+    };
+
     const continueBtn=document.getElementById('continueBtn');
+    const newBtn=document.getElementById('newBtn');
+    const learnedCount=document.getElementById('learnedCount');
+    const learnedBar=document.getElementById('learnedBar');
+    const difficultyNote=document.getElementById('difficultyNote');
+    const difficultyButtons=[...document.querySelectorAll('.difficulty-btn')];
+
+    let selectedDifficulty=localStorage.getItem(DIFFICULTY_KEY)||'normal';
+    if(!NOTES[selectedDifficulty])selectedDifficulty='normal';
+
+    function renderDifficulty(){
+      difficultyButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.difficulty===selectedDifficulty));
+      difficultyNote.textContent=NOTES[selectedDifficulty];
+      newBtn.href='シューティング.html?new=1&difficulty='+encodeURIComponent(selectedDifficulty);
+      localStorage.setItem(DIFFICULTY_KEY,selectedDifficulty);
+    }
+
+    difficultyButtons.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        selectedDifficulty=btn.dataset.difficulty;
+        renderDifficulty();
+      });
+    });
+
+    try{
+      const progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}');
+      const mastered=Object.values(progress).filter(v=>v&&v.mastered).length;
+      learnedCount.textContent=mastered;
+      learnedBar.style.width=Math.min(100,(mastered/TOTAL_WORDS)*100)+'%';
+    }catch(e){
+      learnedCount.textContent='0';
+      learnedBar.style.width='0%';
+    }
+
     try{
       const save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
       if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
         continueBtn.classList.add('disabled');
+      }else if(save.difficulty && NOTES[save.difficulty]){
+        continueBtn.textContent='続きから（'+({easy:'簡単',normal:'普通',hard:'難しい'}[save.difficulty])+'）';
       }
     }catch(e){
       continueBtn.classList.add('disabled');
     }
+
+    renderDifficulty();
   </script>
 </body>
 </html>
