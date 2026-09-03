@@ -2,23 +2,20 @@
   'use strict';
 
   const Store=window.MagicGameState;
+  const Quest=window.MagicQuestEngine;
   let state=Store.load();
   let stage='menu';
   let overlay=null;
   let offeredQuest=null;
+  let lastRewardQuest=null;
+
+  const sideQuests=Array.isArray(window.MAGIC_SIDE_QUESTS)?window.MAGIC_SIDE_QUESTS:[];
 
   const months=['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
   const monthFull=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const weekdays=['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];
   const weekdayFull=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const weekShort=['1st wk.','2nd wk.','3rd wk.','4th wk.','5th wk.'];
-
-  const quests=[
-    {en:'Find a monster in the old ruins.',ja:'古い遺跡でモンスターを探す。',words:[['find','探す'],['monster','モンスター'],['old','古い']]},
-    {en:'Help a worker in the ruins.',ja:'遺跡にいる作業員を助ける。',words:[['help','助ける'],['worker','作業員']]},
-    {en:'Open an old door in the ruins.',ja:'遺跡にある古い扉を開ける。',words:[['open','開ける'],['old','古い'],['door','扉']]},
-    {en:'Take an old book from the ruins.',ja:'遺跡から古い本を持ち帰る。',words:[['take','取る・持っていく'],['old','古い'],['book','本']]}
-  ];
 
   const $=id=>document.getElementById(id);
   const pick=list=>list[Math.floor(Math.random()*list.length)];
@@ -118,20 +115,81 @@
 
   function showMenu(){overlay=null;stage='menu';render()}
   function openClassroom(){overlay=null;stage='greeting';render()}
-  function newQuest(){offeredQuest=pick(quests);stage='quest';render()}
+
+  function newQuest(){
+    if(!sideQuests.length)return;
+    if(sideQuests.length===1){offeredQuest=sideQuests[0]}
+    else{
+      const choices=sideQuests.filter(quest=>quest.id!==offeredQuest?.id);
+      offeredQuest=pick(choices.length?choices:sideQuests);
+    }
+    stage='quest';
+    render();
+  }
 
   function goDungeon(){
     state.lastPlace='DUNGEON';
     save();
-    location.href='magic-dungeon.html?v=20260903-3';
+    location.href='magic-dungeon.html?v=20260903-4';
   }
 
   function acceptQuest(){
-    state.currentQuest={en:offeredQuest.en,ja:offeredQuest.ja,status:'accepted'};
-    state.magicDungeon=null;
-    state.magicBattle=null;
+    if(!offeredQuest)return;
+    state.sideQuest={id:offeredQuest.id,status:'accepted'};
+    state.currentQuest=null;
     save();
     goDungeon();
+  }
+
+  function activeQuestDef(){
+    return state.sideQuest?.id?Quest.sideQuestById(state.sideQuest.id):null;
+  }
+
+  function progressRows(status){
+    return status.details.map(item=>{
+      const req=item.req;
+      const label=req.type==='capture'
+        ? `${req.target} × ${item.required}`
+        : (req.labelEn||req.id||req.type);
+      return `<div class="quest-progress-row"><span>${esc(label)}</span><strong>${item.current} / ${item.required}</strong></div>`;
+    }).join('');
+  }
+
+  function renderActiveQuest(){
+    const quest=activeQuestDef();
+    if(!quest){
+      state.sideQuest=null;
+      save();
+      stage='jobIntro';
+      return render();
+    }
+
+    const status=Quest.sideQuestStatus(state,quest);
+    $('dailyContent').innerHTML=`
+      ${study(quest.words||[])}
+      <div class="quest-card">
+        <small>SIDE QUEST / 依頼</small>
+        <strong>${esc(quest.en)}</strong>
+        <p>${esc(quest.ja)}</p>
+        <div class="quest-progress">${progressRows(status)}</div>
+        <p><b>REWARD</b> ${esc(Quest.rewardText(quest.reward))}</p>
+      </div>`;
+
+    clearActions(false);
+    if(status.met){
+      action('Report','報告する',()=>{
+        const result=Quest.turnInSideQuest(state,quest);
+        if(!result.ok)return;
+        lastRewardQuest=quest;
+        state.sideQuest=null;
+        save();
+        stage='reward';
+        render();
+      },true);
+    }else{
+      action('Go to dungeon','遺跡へ行く',goDungeon,true);
+    }
+    action('Back','戻る',showMenu,false);
   }
 
   function renderToday(){
@@ -143,17 +201,19 @@
 
   function renderBag(){
     setHeader('BAG / かばん','Bag','WORK');
-    const items=[];
-    if(state.egg)items.push('egg / 卵');
-    if(Array.isArray(state.inventory))items.push(...state.inventory);
-    $('dailyContent').innerHTML=`${study([['bag','かばん']])}<div class="dialogue-card"><span class="speaker">BAG</span>${items.length?items.map(item=>`<p>${esc(item)}</p>`).join(''):'<p class="jp">empty / 空</p>'}</div>`;
+    const captured=Array.isArray(state.capturedMonsters)?state.capturedMonsters:[];
+    const counts={};
+    captured.forEach(monster=>{if(monster?.name)counts[monster.name]=(counts[monster.name]||0)+1});
+    const capturedHtml=Object.entries(counts).map(([name,count])=>`<p>${esc(name)} × ${count}</p>`).join('');
+    const items=Array.isArray(state.inventory)?state.inventory:[];
+    $('dailyContent').innerHTML=`${study([['bag','かばん']])}<div class="dialogue-card"><span class="speaker">BAG</span>${capturedHtml||items.length?capturedHtml+items.map(item=>`<p>${esc(item)}</p>`).join(''):'<p class="jp">empty / 空</p>'}</div>`;
     clearActions(true);
     action('Back','戻る',()=>{overlay=null;render()},true);
   }
 
   function renderStatus(){
     setHeader('STATUS / ステータス','Status','WORK');
-    $('dailyContent').innerHTML=`<div class="dialogue-card"><span class="speaker">STATUS</span><p><b>PE</b> ${esc(statText('PE'))}</p><p><b>SCIENCE</b> ${esc(statText('science'))}</p><p><b>HISTORY</b> ${esc(statText('history'))}</p><p><b>MATH</b> ${esc(statText('math'))}</p><p><b>ART</b> ${esc(statText('art'))}</p></div>`;
+    $('dailyContent').innerHTML=`<div class="dialogue-card"><span class="speaker">STATUS</span><p><b>PE</b> ${esc(statText('PE'))}</p><p><b>SCIENCE</b> ${esc(statText('science'))}</p><p><b>HISTORY</b> ${esc(statText('history'))}</p><p><b>MATH</b> ${esc(statText('math'))}</p><p><b>ART</b> ${esc(statText('art'))}</p><p><b>MONEY</b> ${Number(state.money||0)}</p></div>`;
     clearActions(true);
     action('Back','戻る',()=>{overlay=null;render()},true);
   }
@@ -181,7 +241,7 @@
     if(stage==='greeting'){
       dialogue('RECEPTION','Good morning.','おはようございます。',[['morning','朝']]);
       clearActions(true);
-      action('Next','次へ',()=>{stage='jobIntro';render()},true);
+      action('Next','次へ',()=>{stage=state.sideQuest?'activeQuest':'jobIntro';render()},true);
       return;
     }
 
@@ -192,11 +252,30 @@
       return;
     }
 
-    if(stage==='quest'){
-      if(!offeredQuest)offeredQuest=pick(quests);
-      $('dailyContent').innerHTML=`${study(offeredQuest.words)}<div class="dialogue-card"><span class="speaker">RECEPTION</span><div class="en dialogue-en">${highlighted(offeredQuest.en,offeredQuest.words)}</div><p class="jp">${esc(offeredQuest.ja)}</p></div><div class="quest-card"><small>JOB / 依頼</small><strong>${esc(offeredQuest.en)}</strong><p>${esc(offeredQuest.ja)}</p></div>`;
+    if(stage==='activeQuest')return renderActiveQuest();
+
+    if(stage==='reward'){
+      const quest=lastRewardQuest;
+      const reward=quest?Quest.rewardText(quest.reward):'Reward';
+      dialogue('RECEPTION','Good job. Here is your reward.','依頼達成です。報酬をどうぞ。',[['job','仕事・依頼'],['reward','報酬']]);
+      $('dailyContent').insertAdjacentHTML('beforeend',`<div class="quest-card"><small>REWARD</small><strong>${esc(reward)}</strong></div>`);
       clearActions(false);
-      action('Another job','別の依頼',()=>{offeredQuest=pick(quests);render()});
+      action('Another job','次の依頼',()=>{lastRewardQuest=null;newQuest()},true);
+      action('Back','戻る',showMenu,false);
+      return;
+    }
+
+    if(stage==='quest'){
+      if(!offeredQuest)offeredQuest=sideQuests.length?pick(sideQuests):null;
+      if(!offeredQuest){
+        dialogue('RECEPTION','There are no jobs now.','今は依頼がありません。',[]);
+        clearActions(true);
+        action('Back','戻る',showMenu,true);
+        return;
+      }
+      $('dailyContent').innerHTML=`${study(offeredQuest.words||[])}<div class="dialogue-card"><span class="speaker">RECEPTION</span><div class="en dialogue-en">${highlighted(offeredQuest.en,offeredQuest.words||[])}</div><p class="jp">${esc(offeredQuest.ja)}</p></div><div class="quest-card"><small>SIDE QUEST / 依頼</small><strong>${esc(offeredQuest.en)}</strong><p>${esc(offeredQuest.ja)}</p><p><b>REWARD</b> ${esc(Quest.rewardText(offeredQuest.reward))}</p></div>`;
+      clearActions(false);
+      action('Another job','別の依頼',newQuest,false);
       action('Accept','受ける',acceptQuest,true);
     }
   }
