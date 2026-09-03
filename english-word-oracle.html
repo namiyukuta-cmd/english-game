@@ -3,239 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>英単語オラクル</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #f7f7f2;
-    color: #222;
-    font-size: 18px;
-    line-height: 1.6;
-  }
-  main {
-    width: min(900px, 100%);
-    margin: 0 auto;
-    padding: 20px 16px 60px;
-  }
-  h1 { font-size: 30px; margin: 0 0 18px; }
-  h2 { font-size: 23px; margin: 34px 0 12px; }
-  .panel {
-    background: #fff;
-    border: 1px solid #d8d8d0;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 18px;
-  }
-  label { display: block; font-weight: 700; margin-bottom: 8px; }
-  select, button {
-    width: 100%;
-    min-height: 50px;
-    font-size: 18px;
-    border-radius: 10px;
-  }
-  select {
-    padding: 8px 12px;
-    background: #fff;
-    border: 1px solid #aaa;
-    margin-bottom: 12px;
-  }
-  button {
-    border: 1px solid #333;
-    background: #fff;
-    color: #111;
-    font-weight: 700;
-    padding: 10px 14px;
-  }
-  button:active { transform: translateY(1px); }
-  #result {
-    min-height: 88px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-top: 14px;
-    padding: 14px;
-    border-radius: 10px;
-    background: #f1f1ec;
-  }
-  #result .en { font-size: 28px; font-weight: 800; }
-  #result .ja { font-size: 20px; }
-  details {
-    background: #fff;
-    border: 1px solid #d8d8d0;
-    border-radius: 12px;
-    margin: 10px 0;
-    overflow: hidden;
-  }
-  summary {
-    cursor: pointer;
-    font-weight: 700;
-    padding: 14px 16px;
-  }
-  .word-list {
-    margin: 0;
-    padding: 0 16px 16px 42px;
-  }
-  .word-list li { padding: 3px 0; }
-  .count { font-weight: 400; color: #666; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f7f2;color:#222;font-size:18px;line-height:1.6}
+  main{width:min(900px,100%);margin:0 auto;padding:20px 16px 60px}
+  h1{font-size:30px;margin:0 0 22px}
+  .oracle-card{background:#fff;border:1px solid #d8d8d0;border-radius:16px;padding:16px;margin:0 0 16px}
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .card-head h2{font-size:22px;line-height:1.35;margin:0}
+  .count{font-size:17px;color:#666;white-space:nowrap}
+  .roll-btn{width:100%;min-height:54px;border:1px solid #333;border-radius:11px;background:#fff;color:#111;font-size:18px;font-weight:800;padding:10px 14px}
+  .roll-btn:active{transform:translateY(1px)}
+  .result{min-height:82px;margin-top:12px;padding:13px 14px;border-radius:11px;background:#f1f1ec;display:flex;flex-direction:column;justify-content:center}
+  .result.empty{color:#777}
+  .result .en{font-size:27px;font-weight:800;line-height:1.25}
+  .result .ja{font-size:20px;margin-top:2px}
+  details{margin-top:12px;border-top:1px solid #e5e5df;padding-top:8px}
+  summary{cursor:pointer;font-weight:700;padding:8px 2px}
+  .word-list{margin:4px 0 0;padding:0 4px 2px 34px}
+  .word-list li{padding:3px 0}
 </style>
 </head>
 <body>
 <main>
   <h1>英単語オラクル</h1>
-
-  <section class="panel">
-    <label for="category">カテゴリ</label>
-    <select id="category"></select>
-    <button id="rollButton" type="button">オラクルを振る</button>
-    <div id="result" aria-live="polite">カテゴリを選んで「オラクルを振る」を押してください。</div>
-  </section>
-
-  <h2>カテゴリごとの一覧</h2>
-  <div id="lists"></div>
+  <div id="oracleList"></div>
 </main>
-
 <script>
-const oracleData = {
-  "人物・家族・職業": [
-    ["I","私"],["my","私の"],["me","私を"],["mine","私のもの"],
-    ["you","あなた"],["your","あなたの"],["you","あなたを"],["yours","あなたのもの"],
-    ["he","彼"],["his","彼の"],["him","彼を"],["his","彼のもの"],
-    ["she","彼女"],["her","彼女の"],["her","彼女を"],["hers","彼女のもの"],
-    ["we","私たち"],["our","私たちの"],["us","私達を"],["ours","私たちのもの"],
-    ["they","彼ら"],["their","彼らの"],["them","彼らを"],["theirs","彼らのもの"],
-    ["father","父"],["mother","母"],["dad","パパ"],["mom","ママ"],["parents","両親"],
-    ["brother","兄・弟"],["sister","姉・妹"],["grandfather","祖父"],["grandmother","祖母"],
-    ["uncle","叔父"],["aunt","叔母"],["cousin","いとこ"],["baby","赤ちゃん"],
-    ["child","子供"],["children","子供たち"],["boy","男の子"],["girl","女の子"],
-    ["man","男性"],["woman","女性"],["friend","友達"],["teacher","先生"],["student","生徒"],
-    ["doctor","医師"],["nurse","看護師"],["driver","運転手"],["cook","料理人"],
-    ["singer","歌手"],["player","選手"],["police officer","警察官"]
-  ],
-  "学校・学習・教科": [
-    ["school","学校"],["classroom","教室"],["desk","机"],["chair","椅子"],["pen","ペン"],
-    ["pencil","鉛筆"],["notebook","ノート"],["book","本"],["textbook","教科書"],["dictionary","辞書"],
-    ["eraser","消しゴム"],["ruler","定規"],["pencil case","筆箱"],["bag","かばん"],["paper","紙"],
-    ["computer","パソコン"],["homework","宿題"],["test","テスト"],["class","授業"],["lesson","レッスン"],
-    ["English","英語"],["math","数学"],["science","理科"],["music","音楽"],["art","美術"],
-    ["PE","体育"],["Japanese","国語"],["history","歴史"]
-  ],
-  "生活・家庭・衣類・家具": [
-    ["house","家"],["home","家庭"],["room","部屋"],["kitchen","台所"],["door","ドア"],["window","窓"],
-    ["bed","ベッド"],["table","テーブル"],["box","箱"],["cup","カップ"],["glass","コップ"],["dish","皿"],
-    ["phone","電話"],["camera","カメラ"],["TV","テレビ"],["clock","時計"],["watch","腕時計"],
-    ["shirt","シャツ"],["T-shirt","Tシャツ"],["pants","ズボン"],["shoes","靴"],["cap","帽子"],
-    ["hat","帽子"],["coat","コート"],["jacket","上着"],["umbrella","傘"]
-  ],
-  "食べ物・飲み物": [
-    ["food","食べ物"],["breakfast","朝食"],["lunch","昼食"],["dinner","夕食"],["bread","パン"],
-    ["rice","ご飯"],["meat","肉"],["beef","牛肉"],["pork","豚肉"],["chicken","鶏肉"],["fish","魚"],
-    ["egg","卵"],["salad","サラダ"],["soup","スープ"],["cake","ケーキ"],["fruit","果物"],
-    ["apple","リンゴ"],["banana","バナナ"],["orange","オレンジ"],["strawberry","イチゴ"],["lemon","レモン"],
-    ["ice cream","アイスクリーム"],["water","水"],["milk","牛乳"],["tea","お茶"],["coffee","コーヒー"],["juice","ジュース"]
-  ],
-  "場所・施設・乗り物": [
-    ["park","公園"],["station","駅"],["library","図書館"],["hospital","病院"],["shop / store","店"],
-    ["supermarket","スーパー"],["restaurant","レストラン"],["bank","銀行"],["post office","郵便局"],
-    ["zoo","動物園"],["museum","博物館"],["city","市"],["town","町"],["country","国・田舎"],
-    ["sea","海"],["beach","浜辺"],["car","車"],["bus","バス"],["train","電車"],["bicycle / bike","自転車"],
-    ["plane","飛行機"],["ship","船"],["taxi","タクシー"],["stop","バス停"]
-  ],
-  "動物・植物・自然・天気・色": [
-    ["dog","犬"],["cat","猫"],["bird","鳥"],["fish","魚"],["bear","クマ"],["horse","馬"],["cow","牛"],
-    ["pig","豚"],["sheep","羊"],["monkey","サル"],["rabbit","ウサギ"],["elephant","ゾウ"],["lion","ライオン"],
-    ["tree","木"],["flower","花"],["plant","植物"],["grass","草"],["sun","太陽"],["moon","月"],["star","星"],
-    ["sky","空"],["rain","雨"],["snow","雪"],["wind","風"],["weather","天気"],
-    ["red","赤"],["blue","青"],["yellow","黄"],["green","緑"],["white","白"],["black","黒"],
-    ["brown","茶"],["orange","橙"],["pink","桃"],["purple","紫"]
-  ],
-  "暦・時": [
-    ["time","時間"],["year","年"],["month","月"],["week","週"],["day","日"],["hour","時間"],["minute","分"],
-    ["today","今日"],["tomorrow","明日"],["yesterday","昨日"],["morning","朝"],["afternoon","昼"],
-    ["evening","夕方"],["night","夜"],["Sunday","日"],["Monday","月"],["Tuesday","火"],
-    ["Wednesday","水"],["Thursday","木"],["Friday","金"],["Saturday","土"],
-    ["January","1月"],["February","2月"],["March","3月"],["April","4月"],["May","5月"],["June","6月"],
-    ["July","7月"],["August","8月"],["September","9月"],["October","10月"],["November","11月"],["December","12月"],
-    ["spring","春"],["summer","夏"],["fall / autumn","秋"],["winter","冬"]
-  ],
-  "動詞": [
-    ["go","行く"],["come","来る"],["run","走る"],["walk","歩く"],["swim","泳ぐ"],["fly","飛ぶ"],["jump","跳ぶ"],
-    ["sit","座る"],["stand","立つ"],["stop","止まる"],["turn","曲がる"],["open","開ける"],["close","閉める"],
-    ["push","押す"],["pull","引く"],["get","得る・着く"],["take","取る・連れて行く"],["put","置く"],
-    ["bring","持ってくる"],["carry","運ぶ"],["eat","食べる"],["drink","飲む"],["cook","料理する"],
-    ["sleep","眠る"],["wash","洗う"],["clean","掃除する"],["buy","買う"],["use","使う"],
-    ["speak","話す"],["talk","しゃべる"],["say","言う"],["tell","伝える"],["ask","尋ねる"],["answer","答える"],
-    ["listen","聴く"],["hear","聞こえる"],["look","見る"],["see","見える"],["watch","じっと見る"],
-    ["read","読む"],["write","書く"],["study","勉強する"],["learn","学ぶ"],["teach","教える"],
-    ["play","遊ぶ・演奏する"],["work","働く"],["help","手伝う"],["want","欲しい"],["like","好む"],
-    ["love","愛する"],["know","知っている"],["think","思う"],["feel","感じる"],["make","作る"],
-    ["start","始める"],["finish","終える"],["meet","会う"],["live","住む"],["need","必要とする"]
-  ],
-  "形容詞・副詞": [
-    ["good","良い"],["bad","悪い"],["big","大きい"],["small","小さい"],["new","新しい"],["old","古い"],
-    ["young","若い"],["long","長い"],["short","短い"],["tall","背が高い"],["high","高い"],["low","低い"],
-    ["hot","暑い"],["cold","寒い"],["warm","暖かい"],["cool","涼しい"],["fast","速い"],["slow","遅い"],
-    ["happy","幸せな"],["sad","悲しい"],["busy","忙しい"],["fine","元気な"],["quiet","静かな"],["dirty","汚い"],
-    ["beautiful","美しい"],["nice","素敵"],["easy","簡単な"],["hard","難しい"],["kind","親切な"],
-    ["always","いつも"],["usually","たいてい"],["often","よく"],["sometimes","時々"],["never","決して〜ない"],
-    ["now","今"],["then","その時"],["soon","すぐに"],["again","再び"],["later","後で"],["also","〜もまた"],
-    ["here","ここ"],["there","そこ"],["very","とても"],["too","〜すぎる"],["well","上手に"],["early","早く"],["late","遅く"]
-  ],
-  "疑問詞・前置詞・接続詞・指示詞": [
-    ["what","何"],["who","誰"],["whose","誰の"],["which","どちら"],["where","どこ"],["when","いつ"],
-    ["why","なぜ"],["how","どのように"],["this","これ"],["that","あれ"],["these","これら"],["those","あれら"],
-    ["in","〜の中に"],["on","〜の上に"],["at","〜で"],["under","〜の下に"],["by","〜のそばに"],
-    ["with","〜と一緒に"],["to","〜へ"],["for","〜のために"],["from","〜から"],["of","〜の"],
-    ["about","〜について"],["before","〜の前"],["after","〜の後"],["and","〜と"],["but","しかし"],
-    ["or","または"],["because","〜だから"],["so","だから"]
-  ],
-  "数詞・序数": [
-    ["one","1"],["two","2"],["three","3"],["four","4"],["five","5"],["six","6"],["seven","7"],
-    ["eight","8"],["nine","9"],["ten","10"],["eleven","11"],["twelve","12"],["thirteen","13"],
-    ["fourteen","14"],["fifteen","15"],["sixteen","16"],["seventeen","17"],["eighteen","18"],
-    ["nineteen","19"],["twenty","20"],["thirty","30"],["forty","40"],["fifty","50"],["sixty","60"],
-    ["seventy","70"],["eighty","80"],["ninety","90"],["hundred","100"],["first","1st"],
-    ["second","2nd"],["third","3rd"],["fourth","4th"],["fifth","5th"]
-  ]
+const oracleData={
+"人物・家族・職業":[["I","私"],["my","私の"],["me","私を"],["mine","私のもの"],["you","あなた"],["your","あなたの"],["you","あなたを"],["yours","あなたのもの"],["he","彼"],["his","彼の"],["him","彼を"],["his","彼のもの"],["she","彼女"],["her","彼女の"],["her","彼女を"],["hers","彼女のもの"],["we","私たち"],["our","私たちの"],["us","私達を"],["ours","私たちのもの"],["they","彼ら"],["their","彼らの"],["them","彼らを"],["theirs","彼らのもの"],["father","父"],["mother","母"],["dad","パパ"],["mom","ママ"],["parents","両親"],["brother","兄・弟"],["sister","姉・妹"],["grandfather","祖父"],["grandmother","祖母"],["uncle","叔父"],["aunt","叔母"],["cousin","いとこ"],["baby","赤ちゃん"],["child","子供"],["children","子供たち"],["boy","男の子"],["girl","女の子"],["man","男性"],["woman","女性"],["friend","友達"],["teacher","先生"],["student","生徒"],["doctor","医師"],["nurse","看護師"],["driver","運転手"],["cook","料理人"],["singer","歌手"],["player","選手"],["police officer","警察官"]],
+"学校・学習・教科":[["school","学校"],["classroom","教室"],["desk","机"],["chair","椅子"],["pen","ペン"],["pencil","鉛筆"],["notebook","ノート"],["book","本"],["textbook","教科書"],["dictionary","辞書"],["eraser","消しゴム"],["ruler","定規"],["pencil case","筆箱"],["bag","かばん"],["paper","紙"],["computer","パソコン"],["homework","宿題"],["test","テスト"],["class","授業"],["lesson","レッスン"],["English","英語"],["math","数学"],["science","理科"],["music","音楽"],["art","美術"],["PE","体育"],["Japanese","国語"],["history","歴史"]],
+"生活・家庭・衣類・家具":[["house","家"],["home","家庭"],["room","部屋"],["kitchen","台所"],["door","ドア"],["window","窓"],["bed","ベッド"],["table","テーブル"],["box","箱"],["cup","カップ"],["glass","コップ"],["dish","皿"],["phone","電話"],["camera","カメラ"],["TV","テレビ"],["clock","時計"],["watch","腕時計"],["shirt","シャツ"],["T-shirt","Tシャツ"],["pants","ズボン"],["shoes","靴"],["cap","帽子"],["hat","帽子"],["coat","コート"],["jacket","上着"],["umbrella","傘"]],
+"食べ物・飲み物":[["food","食べ物"],["breakfast","朝食"],["lunch","昼食"],["dinner","夕食"],["bread","パン"],["rice","ご飯"],["meat","肉"],["beef","牛肉"],["pork","豚肉"],["chicken","鶏肉"],["fish","魚"],["egg","卵"],["salad","サラダ"],["soup","スープ"],["cake","ケーキ"],["fruit","果物"],["apple","リンゴ"],["banana","バナナ"],["orange","オレンジ"],["strawberry","イチゴ"],["lemon","レモン"],["ice cream","アイスクリーム"],["water","水"],["milk","牛乳"],["tea","お茶"],["coffee","コーヒー"],["juice","ジュース"]],
+"場所・施設・乗り物":[["park","公園"],["station","駅"],["library","図書館"],["hospital","病院"],["shop / store","店"],["supermarket","スーパー"],["restaurant","レストラン"],["bank","銀行"],["post office","郵便局"],["zoo","動物園"],["museum","博物館"],["city","市"],["town","町"],["country","国・田舎"],["sea","海"],["beach","浜辺"],["car","車"],["bus","バス"],["train","電車"],["bicycle / bike","自転車"],["plane","飛行機"],["ship","船"],["taxi","タクシー"],["stop","バス停"]],
+"動物・植物・自然・天気・色":[["dog","犬"],["cat","猫"],["bird","鳥"],["fish","魚"],["bear","クマ"],["horse","馬"],["cow","牛"],["pig","豚"],["sheep","羊"],["monkey","サル"],["rabbit","ウサギ"],["elephant","ゾウ"],["lion","ライオン"],["tree","木"],["flower","花"],["plant","植物"],["grass","草"],["sun","太陽"],["moon","月"],["star","星"],["sky","空"],["rain","雨"],["snow","雪"],["wind","風"],["weather","天気"],["red","赤"],["blue","青"],["yellow","黄"],["green","緑"],["white","白"],["black","黒"],["brown","茶"],["orange","橙"],["pink","桃"],["purple","紫"]],
+"暦・時":[["time","時間"],["year","年"],["month","月"],["week","週"],["day","日"],["hour","時間"],["minute","分"],["today","今日"],["tomorrow","明日"],["yesterday","昨日"],["morning","朝"],["afternoon","昼"],["evening","夕方"],["night","夜"],["Sunday","日"],["Monday","月"],["Tuesday","火"],["Wednesday","水"],["Thursday","木"],["Friday","金"],["Saturday","土"],["January","1月"],["February","2月"],["March","3月"],["April","4月"],["May","5月"],["June","6月"],["July","7月"],["August","8月"],["September","9月"],["October","10月"],["November","11月"],["December","12月"],["spring","春"],["summer","夏"],["fall / autumn","秋"],["winter","冬"]],
+"動詞":[["go","行く"],["come","来る"],["run","走る"],["walk","歩く"],["swim","泳ぐ"],["fly","飛ぶ"],["jump","跳ぶ"],["sit","座る"],["stand","立つ"],["stop","止まる"],["turn","曲がる"],["open","開ける"],["close","閉める"],["push","押す"],["pull","引く"],["get","得る・着く"],["take","取る・連れて行く"],["put","置く"],["bring","持ってくる"],["carry","運ぶ"],["eat","食べる"],["drink","飲む"],["cook","料理する"],["sleep","眠る"],["wash","洗う"],["clean","掃除する"],["buy","買う"],["use","使う"],["speak","話す"],["talk","しゃべる"],["say","言う"],["tell","伝える"],["ask","尋ねる"],["answer","答える"],["listen","聴く"],["hear","聞こえる"],["look","見る"],["see","見える"],["watch","じっと見る"],["read","読む"],["write","書く"],["study","勉強する"],["learn","学ぶ"],["teach","教える"],["play","遊ぶ・演奏する"],["work","働く"],["help","手伝う"],["want","欲しい"],["like","好む"],["love","愛する"],["know","知っている"],["think","思う"],["feel","感じる"],["make","作る"],["start","始める"],["finish","終える"],["meet","会う"],["live","住む"],["need","必要とする"]],
+"形容詞・副詞":[["good","良い"],["bad","悪い"],["big","大きい"],["small","小さい"],["new","新しい"],["old","古い"],["young","若い"],["long","長い"],["short","短い"],["tall","背が高い"],["high","高い"],["low","低い"],["hot","暑い"],["cold","寒い"],["warm","暖かい"],["cool","涼しい"],["fast","速い"],["slow","遅い"],["happy","幸せな"],["sad","悲しい"],["busy","忙しい"],["fine","元気な"],["quiet","静かな"],["dirty","汚い"],["beautiful","美しい"],["nice","素敵"],["easy","簡単な"],["hard","難しい"],["kind","親切な"],["always","いつも"],["usually","たいてい"],["often","よく"],["sometimes","時々"],["never","決して〜ない"],["now","今"],["then","その時"],["soon","すぐに"],["again","再び"],["later","後で"],["also","〜もまた"],["here","ここ"],["there","そこ"],["very","とても"],["too","〜すぎる"],["well","上手に"],["early","早く"],["late","遅く"]],
+"疑問詞・前置詞・接続詞・指示詞":[["what","何"],["who","誰"],["whose","誰の"],["which","どちら"],["where","どこ"],["when","いつ"],["why","なぜ"],["how","どのように"],["this","これ"],["that","あれ"],["these","これら"],["those","あれら"],["in","〜の中に"],["on","〜の上に"],["at","〜で"],["under","〜の下に"],["by","〜のそばに"],["with","〜と一緒に"],["to","〜へ"],["for","〜のために"],["from","〜から"],["of","〜の"],["about","〜について"],["before","〜の前"],["after","〜の後"],["and","〜と"],["but","しかし"],["or","または"],["because","〜だから"],["so","だから"]],
+"数詞・序数":[["one","1"],["two","2"],["three","3"],["four","4"],["five","5"],["six","6"],["seven","7"],["eight","8"],["nine","9"],["ten","10"],["eleven","11"],["twelve","12"],["thirteen","13"],["fourteen","14"],["fifteen","15"],["sixteen","16"],["seventeen","17"],["eighteen","18"],["nineteen","19"],["twenty","20"],["thirty","30"],["forty","40"],["fifty","50"],["sixty","60"],["seventy","70"],["eighty","80"],["ninety","90"],["hundred","100"],["first","1st"],["second","2nd"],["third","3rd"],["fourth","4th"],["fifth","5th"]]
 };
 
-const categorySelect = document.getElementById('category');
-const result = document.getElementById('result');
-const lists = document.getElementById('lists');
+const root=document.getElementById('oracleList');
+Object.entries(oracleData).forEach(([category,words],categoryIndex)=>{
+  const section=document.createElement('section');
+  section.className='oracle-card';
 
-Object.entries(oracleData).forEach(([category, words]) => {
-  const option = document.createElement('option');
-  option.value = category;
-  option.textContent = `${category}（${words.length}語）`;
-  categorySelect.appendChild(option);
+  const head=document.createElement('div');
+  head.className='card-head';
+  const title=document.createElement('h2');
+  title.textContent=category;
+  const count=document.createElement('span');
+  count.className='count';
+  count.textContent=`${words.length}語`;
+  head.append(title,count);
 
-  const details = document.createElement('details');
-  const summary = document.createElement('summary');
-  summary.textContent = `${category} `;
-  const count = document.createElement('span');
-  count.className = 'count';
-  count.textContent = `（${words.length}語）`;
-  summary.appendChild(count);
-  details.appendChild(summary);
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='roll-btn';
+  button.textContent='オラクルを振る';
 
-  const ol = document.createElement('ol');
-  ol.className = 'word-list';
-  words.forEach(([en, ja]) => {
-    const li = document.createElement('li');
-    li.textContent = `${en}（${ja}）`;
+  const result=document.createElement('div');
+  result.className='result empty';
+  result.setAttribute('aria-live','polite');
+  result.textContent='—';
+
+  button.addEventListener('click',()=>{
+    const index=Math.floor(Math.random()*words.length);
+    const [en,ja]=words[index];
+    result.classList.remove('empty');
+    result.innerHTML=`<div class="en">${en}</div><div class="ja">${ja}</div>`;
+  });
+
+  const details=document.createElement('details');
+  const summary=document.createElement('summary');
+  summary.textContent='単語一覧を見る';
+  const ol=document.createElement('ol');
+  ol.className='word-list';
+  words.forEach(([en,ja])=>{
+    const li=document.createElement('li');
+    li.textContent=`${en}（${ja}）`;
     ol.appendChild(li);
   });
-  details.appendChild(ol);
-  lists.appendChild(details);
-});
-
-document.getElementById('rollButton').addEventListener('click', () => {
-  const category = categorySelect.value;
-  const words = oracleData[category];
-  const index = Math.floor(Math.random() * words.length);
-  const [en, ja] = words[index];
-  result.innerHTML = `<div>${category} ／ ${index + 1}</div><div class="en">${en}</div><div class="ja">${ja}</div>`;
+  details.append(summary,ol);
+  section.append(head,button,result,details);
+  root.appendChild(section);
 });
 </script>
 </body>
