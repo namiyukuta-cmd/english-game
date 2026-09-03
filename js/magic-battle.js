@@ -25,6 +25,31 @@
     return a;
   }
 
+  function restartClass(el,className,duration=450){
+    if(!el)return;
+    el.classList.remove(className);
+    void el.offsetWidth;
+    el.classList.add(className);
+    setTimeout(()=>el.classList.remove(className),duration);
+  }
+
+  function showEnemyHit(){
+    restartClass($('enemyCard'),'enemy-hit',320);
+  }
+
+  function showMpSpend(){
+    restartClass($('playerMpBox'),'mp-spend',460);
+  }
+
+  function showPlayerHit(){
+    restartClass($('battleShell'),'player-hit',380);
+    restartClass($('playerHpBox'),'player-hit',520);
+    document.body.classList.remove('damage-flash');
+    void document.body.offsetWidth;
+    document.body.classList.add('damage-flash');
+    setTimeout(()=>document.body.classList.remove('damage-flash'),430);
+  }
+
   function dungeonFloor(){
     const d=state.magicDungeon;
     if(!d||!d.floors)return null;
@@ -55,20 +80,23 @@
     if(!battle||battle.enemyHp<=0)return;
     const damage=Math.max(1,Number(battle.enemyAttack||1));
     state.hp=clamp(Number(state.hp||0)-damage,0,Number(state.maxHp||5));
+    save();
+    renderHud();
+    showPlayerHit();
+
     if(state.hp<=0){
       state.hp=1;
       state.magicBattle=null;
       state.lastPlace='MAGIC SCHOOL';
       save();
+      renderHud();
       $('battleMessage').textContent='You were defeated. Return Magic takes you back to Magic School.';
       $('commandGrid').innerHTML='<button id="defeatReturn" type="button" style="grid-column:1/-1">Return Magic<small>帰還魔法</small></button>';
       $('defeatReturn').onclick=()=>{location.href='magic-school.html?v=20260903-9'};
-      renderHud();
       return;
     }
+
     $('battleMessage').textContent=`${battle.enemyName} attacks. -${damage} HP`;
-    save();
-    renderHud();
   }
 
   function afterPlayerAction(message){
@@ -76,6 +104,8 @@
     state.magicBattle=battle;
     save();
     renderHud();
+    showEnemyHit();
+
     if(battle.enemyHp<=0){
       $('battleMessage').textContent=`${battle.enemyName} can no longer resist. Capture it!`;
       $('commandGrid').classList.add('hidden');
@@ -83,8 +113,9 @@
       $('backBtn').disabled=true;
       return;
     }
+
     $('battleMessage').textContent=message;
-    setTimeout(enemyTurn,220);
+    setTimeout(enemyTurn,380);
   }
 
   function attack(){
@@ -98,9 +129,11 @@
     if(!battle||battle.enemyHp<=0)return;
     if(Number(state.mp||0)<=0){$('battleMessage').textContent='Not enough MP.';return}
     state.mp=Math.max(0,Number(state.mp)-1);
+    renderHud();
+    showMpSpend();
     const damage=totalStat('art')>=3?3:2;
     battle.enemyHp-=damage;
-    afterPlayerAction(`Magic! ${battle.enemyName} takes ${damage} damage.`);
+    afterPlayerAction(`Magic! -1 MP. ${battle.enemyName} takes ${damage} damage.`);
   }
 
   function item(){
@@ -112,12 +145,14 @@
     save();
     renderHud();
     $('battleMessage').textContent='Item used. +2 HP';
-    setTimeout(enemyTurn,220);
+    setTimeout(enemyTurn,380);
   }
 
   function renderHud(){
     if(!battle)return;
+    const maxMp=Number(state.maxMp||5);
     $('playerHp').textContent=`${state.hp} / ${state.maxHp}`;
+    $('playerMp').textContent=`${state.mp} / ${maxMp}`;
     $('enemyHpTop').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;
     $('enemyHpText').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;
     $('enemyHpFill').style.width=`${battle.enemyMaxHp?Math.round((battle.enemyHp/battle.enemyMaxHp)*100):0}%`;
