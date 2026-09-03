@@ -59,7 +59,7 @@
 
   function returnToDungeon(){
     save();
-    location.href='magic-dungeon.html?v=20260903-3';
+    location.href='magic-dungeon.html?v=20260903-4';
   }
 
   function flee(){
@@ -93,7 +93,7 @@
       renderHud();
       $('battleMessage').textContent='You were defeated. Return Magic takes you back to Magic School.';
       $('commandGrid').innerHTML='<button id="defeatReturn" type="button" style="grid-column:1/-1">Return Magic<small>帰還魔法</small></button>';
-      $('defeatReturn').onclick=()=>{location.href='magic-school.html?v=20260903-9'};
+      $('defeatReturn').onclick=()=>{location.href='magic-school.html?v=20260903-10'};
       return;
     }
 
@@ -274,7 +274,7 @@
   }
 
   if(!battle){
-    location.href='magic-dungeon.html?v=20260903-3';
+    location.href='magic-dungeon.html?v=20260903-4';
     return;
   }
 
