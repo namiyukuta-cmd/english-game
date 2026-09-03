@@ -1,20 +1,79 @@
 (()=>{
 'use strict';
-const Store=window.MagicGameState,state=Store.load(),$=id=>document.getElementById(id);
+const Store=window.MagicGameState,Items=window.MagicItems,state=Store.load(),$=id=>document.getElementById(id);
 const WORDS=[['apple','りんご'],['banana','バナナ'],['egg','たまご'],['milk','牛乳'],['water','水'],['juice','ジュース'],['dog','犬'],['cat','猫'],['fish','魚'],['bird','鳥'],['book','本'],['pen','ペン'],['pencil','鉛筆'],['desk','机'],['chair','いす'],['school','学校'],['morning','朝'],['night','夜'],['red','赤'],['blue','青'],['green','緑'],['yellow','黄色'],['walk','歩く'],['run','走る'],['open','開ける'],['close','閉める'],['take','取る'],['put','置く'],['eat','食べる'],['drink','飲む']];
+const SPELLS={
+ spring:{name:'Spring',ja:'春',cost:1},
+ summer:{name:'Summer',ja:'夏',cost:1},
+ autumn:{name:'Autumn',ja:'秋',cost:1},
+ winter:{name:'Winter',ja:'冬',cost:1}
+};
 let battle=state.magicBattle||null,captureComplete=false,firstPick=null,matchedPairs=0,captureLocked=false;
-function save(){Store.save(state)}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function restartClass(el,c,d=450){if(!el)return;el.classList.remove(c);void el.offsetWidth;el.classList.add(c);setTimeout(()=>el.classList.remove(c),d)}function showEnemyHit(){restartClass($('enemyCard'),'enemy-hit',320)}function showMpSpend(){restartClass($('playerMpBox'),'mp-spend',460)}function showPlayerHit(){restartClass($('battleShell'),'player-hit',380);restartClass($('playerHpBox'),'player-hit',520);document.body.classList.remove('damage-flash');void document.body.offsetWidth;document.body.classList.add('damage-flash');setTimeout(()=>document.body.classList.remove('damage-flash'),430)}
-function dungeonFloor(){const d=state.magicDungeon;if(!d?.floors)return null;return d.floors[battle?.floorNumber||d.activeFloor]||null}function returnToDungeon(){save();location.href='magic-dungeon.html?v=20260903-5'}
+function save(){Store.save(state)}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function restartClass(el,c,d=450){if(!el)return;el.classList.remove(c);void el.offsetWidth;el.classList.add(c);setTimeout(()=>el.classList.remove(c),d)}
+function showEnemyHit(){restartClass($('enemyCard'),'enemy-hit',320)}
+function showMpSpend(){restartClass($('playerMpBox'),'mp-spend',460)}
+function showPlayerHit(){restartClass($('battleShell'),'player-hit',380);restartClass($('playerHpBox'),'player-hit',520);document.body.classList.remove('damage-flash');void document.body.offsetWidth;document.body.classList.add('damage-flash');setTimeout(()=>document.body.classList.remove('damage-flash'),430)}
+function dungeonFloor(){const d=state.magicDungeon;if(!d?.floors)return null;return d.floors[battle?.floorNumber||d.activeFloor]||null}
+function returnToDungeon(){save();location.href='magic-dungeon.html?v=20260903-6'}
 function totalStat(k){return Number(state.stats?.[k]||0)+Number(state.dailyBuff?.[k]||0)}
+function ensureBattleBuffs(){if(!battle.buffs)battle.buffs={pe:0,defense:0};if(!battle.enemyDebuffs)battle.enemyDebuffs={attack:0}}
+function closeActionPanel(){$('actionPanel').classList.add('hidden');$('actionOptions').innerHTML=''}
+function showActionPanel(title){$('actionPanelTitle').textContent=title;$('actionPanel').classList.remove('hidden');$('actionOptions').innerHTML=''}
 function flee(){if(!battle||battle.enemyHp<=0)return;const chance=Math.min(.9,.45+totalStat('art')*.1);if(Math.random()>chance){$('battleMessage').textContent='Could not escape.';setTimeout(enemyTurn,380);return}const f=dungeonFloor();if(f&&battle.returnTileId!==undefined&&battle.returnTileId!==null)f.current=battle.returnTileId;state.magicBattle=null;save();returnToDungeon()}
-function enemyTurn(){if(!battle||battle.enemyHp<=0)return;const base=Math.max(1,Number(battle.enemyAttack||1));const defense=Math.floor(totalStat('math')/3);const damage=Math.max(1,base-defense);state.hp=clamp(Number(state.hp||0)-damage,0,Number(state.maxHp||5));save();renderHud();showPlayerHit();if(state.hp<=0){state.hp=1;state.magicBattle=null;state.lastPlace='MAGIC SCHOOL';save();renderHud();$('battleMessage').textContent='You were defeated. Return Magic takes you back to Magic School.';$('commandGrid').innerHTML='<button id="defeatReturn" type="button" style="grid-column:1/-1">Return Magic<small>帰還魔法</small></button>';$('defeatReturn').onclick=()=>location.href='magic-school.html?v=20260903-10';return}$('battleMessage').textContent=`${battle.enemyName} attacks. -${damage} HP`}
-function afterPlayerAction(msg){battle.enemyHp=clamp(battle.enemyHp,0,battle.enemyMaxHp);state.magicBattle=battle;save();renderHud();showEnemyHit();if(battle.enemyHp<=0){$('battleMessage').textContent=`${battle.enemyName} can no longer resist. Capture it!`;$('commandGrid').classList.add('hidden');$('captureBtn').classList.remove('hidden');$('backBtn').disabled=true;return}$('battleMessage').textContent=msg;setTimeout(enemyTurn,380)}
-function attack(){if(!battle||battle.enemyHp<=0)return;const d=totalStat('PE')>=3?2:1;battle.enemyHp-=d;afterPlayerAction(`Attack! ${battle.enemyName} takes ${d} damage.`)}function magic(){if(!battle||battle.enemyHp<=0)return;if(Number(state.mp||0)<=0){$('battleMessage').textContent='Not enough MP.';return}state.mp=Math.max(0,Number(state.mp)-1);renderHud();showMpSpend();const d=totalStat('history')>=3?3:2;battle.enemyHp-=d;afterPlayerAction(`Magic! -1 MP. ${battle.enemyName} takes ${d} damage.`)}function item(){if(!battle||battle.enemyHp<=0)return;if(Number(state.supply||0)<=0){$('battleMessage').textContent='No items left.';return}state.supply=Math.max(0,Number(state.supply)-1);state.hp=clamp(Number(state.hp||0)+2,0,Number(state.maxHp||5));state.magicBattle=battle;save();renderHud();$('battleMessage').textContent='Item used. +2 HP';setTimeout(enemyTurn,380)}
-function renderHud(){if(!battle)return;const maxMp=Number(state.maxMp||5);$('playerHp').textContent=`${state.hp} / ${state.maxHp}`;$('playerMp').textContent=`${state.mp} / ${maxMp}`;$('enemyHpTop').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;$('enemyHpText').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;$('enemyHpFill').style.width=`${battle.enemyMaxHp?Math.round((battle.enemyHp/battle.enemyMaxHp)*100):0}%`;$('enemyVisual').textContent=battle.visual||'👺';$('enemyName').textContent=battle.enemyName||'Monster';$('enemyText').textContent=battle.description||'A monster blocks the way.'}
+function enemyTurn(){if(!battle||battle.enemyHp<=0)return;ensureBattleBuffs();const base=Math.max(1,Number(battle.enemyAttack||1)-Number(battle.enemyDebuffs.attack||0));const defense=Math.floor(totalStat('math')/3)+Number(battle.buffs.defense||0);const damage=Math.max(1,base-defense);state.hp=clamp(Number(state.hp||0)-damage,0,Number(state.maxHp||5));battle.enemyDebuffs.attack=0;state.magicBattle=battle;save();renderHud();showPlayerHit();if(state.hp<=0){state.hp=1;state.magicBattle=null;state.lastPlace='MAGIC SCHOOL';save();renderHud();closeActionPanel();$('battleMessage').textContent='You were defeated. Return Magic takes you back to Magic School.';$('commandGrid').innerHTML='<button id="defeatReturn" type="button" style="grid-column:1/-1">Return Magic<small>帰還魔法</small></button>';$('defeatReturn').onclick=()=>location.href='magic-school.html?v=20260903-10';return}$('battleMessage').textContent=`${battle.enemyName} attacks. -${damage} HP`}
+function finishPlayerAction(msg,{hit=false}={}){ensureBattleBuffs();battle.enemyHp=clamp(battle.enemyHp,0,battle.enemyMaxHp);state.magicBattle=battle;save();renderHud();closeActionPanel();if(hit)showEnemyHit();if(battle.enemyHp<=0){$('battleMessage').textContent=`${battle.enemyName} can no longer resist. Capture it!`;$('commandGrid').classList.add('hidden');$('captureBtn').classList.remove('hidden');$('backBtn').disabled=true;return}$('battleMessage').textContent=msg;setTimeout(enemyTurn,380)}
+function attack(){if(!battle||battle.enemyHp<=0)return;ensureBattleBuffs();const base=totalStat('PE')>=3?2:1;const d=base+Number(battle.buffs.pe||0);battle.buffs.pe=0;battle.enemyHp-=d;finishPlayerAction(`Pencil Knife! ${battle.enemyName} takes ${d} damage.`,{hit:true})}
+function castSpell(spellId,{free=false}={}){if(!battle||battle.enemyHp<=0)return;const spell=SPELLS[spellId];if(!spell)return;if(!free&&Number(state.mp||0)<spell.cost){$('battleMessage').textContent='Not enough MP.';return}if(!free){state.mp=Math.max(0,Number(state.mp)-spell.cost);showMpSpend()}ensureBattleBuffs();const history=totalStat('history');if(spellId==='spring'){
+  const heal=history>=4?3:2;
+  state.hp=clamp(Number(state.hp||0)+heal,0,Number(state.maxHp||5));
+  finishPlayerAction(`${spell.name}! +${heal} HP`);
+  return;
+}
+if(spellId==='summer'){
+  const d=history>=4?4:history>=2?3:2;
+  battle.enemyHp-=d;
+  finishPlayerAction(`${spell.name}! ${battle.enemyName} takes ${d} fire damage.`,{hit:true});
+  return;
+}
+if(spellId==='autumn'){
+  battle.buffs.pe=1;
+  battle.buffs.defense=1;
+  finishPlayerAction(`${spell.name}! PE and Defense rise for the next exchange.`);
+  return;
+}
+if(spellId==='winter'){
+  const d=history>=4?3:2;
+  battle.enemyHp-=d;
+  battle.enemyDebuffs.attack=1;
+  finishPlayerAction(`${spell.name}! ${battle.enemyName} takes ${d} snow damage and is chilled.`,{hit:true});
+ }
+}
+function openMagicMenu(){if(!battle||battle.enemyHp<=0)return;showActionPanel('MAGIC');const learned=Array.isArray(state.learnedMagic)?state.learnedMagic:Object.keys(SPELLS);learned.forEach(id=>{const s=SPELLS[id];if(!s)return;const b=document.createElement('button');b.type='button';b.innerHTML=`<strong>${s.name}</strong><small>${s.ja} · MP ${s.cost}</small>`;b.onclick=()=>castSpell(id);$('actionOptions').appendChild(b)})}
+function inventoryRows(){return (Array.isArray(state.inventory)?state.inventory:[]).filter(r=>r&&Number(r.qty||0)>0).map(r=>({row:r,item:Items?.get(r.id)})).filter(x=>x.item)}
+function consumeInventory(row){row.qty=Math.max(0,Number(row.qty||0)-1);state.inventory=state.inventory.filter(r=>Number(r.qty||0)>0)}
+function useItem(row,item){if(!battle||battle.enemyHp<=0)return;consumeInventory(row);if(item.type==='food'){
+  state.hp=clamp(Number(state.hp||0)+Number(item.hp||0),0,Number(state.maxHp||5));
+  finishPlayerAction(`${item.name}! +${item.hp} HP`);
+  return;
+}
+if(item.type==='drink'){
+  state.mp=clamp(Number(state.mp||0)+Number(item.mp||0),0,Number(state.maxMp||5));
+  finishPlayerAction(`${item.name}! +${item.mp} MP`);
+  return;
+}
+if(item.type==='magic-paper'){
+  save();
+  castSpell(item.spell,{free:true});
+ }
+}
+function openItemMenu(){if(!battle||battle.enemyHp<=0)return;showActionPanel('ITEM');const rows=inventoryRows();if(!rows.length){$('actionOptions').innerHTML='<p class="empty-action">No items.</p>';return}rows.forEach(({row,item})=>{const b=document.createElement('button');b.type='button';let effect='';if(item.hp)effect=`HP +${item.hp}`;else if(item.mp)effect=`MP +${item.mp}`;else if(item.type==='magic-paper')effect=`${SPELLS[item.spell]?.name||'Magic'} · MP 0`;b.innerHTML=`<strong>${item.name} ×${row.qty}</strong><small>${item.ja}${effect?' · '+effect:''}</small>`;b.onclick=()=>useItem(row,item);$('actionOptions').appendChild(b)})}
+function renderHud(){if(!battle)return;const maxMp=Number(state.maxMp||5);$('playerHp').textContent=`${state.hp} / ${state.maxHp}`;$('playerMp').textContent=`${state.mp} / ${maxMp}`;$('enemyHpTop').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;$('enemyHpText').textContent=`${battle.enemyHp} / ${battle.enemyMaxHp}`;$('enemyHpFill').style.width=`${battle.enemyMaxHp?Math.round((battle.enemyHp/battle.enemyMaxHp)*100):0}%`;$('enemyVisual').textContent=battle.visual||'🐺';$('enemyName').textContent=battle.enemyName||'Animal';$('enemyText').textContent=battle.description||'A wild animal blocks the way.'}
 function renderCaptureBoard(){firstPick=null;matchedPairs=0;captureLocked=false;captureComplete=false;const chosen=shuffle(WORDS).slice(0,6),cards=shuffle(chosen.flatMap(([en,ja],index)=>[{key:index,type:'en',text:en},{key:index,type:'ja',text:ja}]));$('wordProgress').textContent='0 / 6';$('wordQuestion').innerHTML='<small>英語と日本語を選ぶ</small>同じ意味のペアを6組そろえる';$('wordResult').textContent='';$('wordResult').className='word-result';$('wordOptions').innerHTML='';cards.forEach(card=>{const b=document.createElement('button');b.type='button';b.className='word-option pair-card';b.textContent=card.text;b.onclick=()=>pickCaptureCard(b,card);$('wordOptions').appendChild(b)})}
 function pickCaptureCard(button,card){if(captureComplete||captureLocked||button.classList.contains('matched'))return;if(!firstPick){firstPick={button,card};button.classList.add('selected');$('wordResult').textContent='もう1枚選ぶ';return}if(firstPick.button===button){button.classList.remove('selected');firstPick=null;$('wordResult').textContent='';return}const first=firstPick,correct=first.card.key===card.key&&first.card.type!==card.type;if(correct){first.button.classList.remove('selected');first.button.classList.add('matched');button.classList.add('matched');firstPick=null;matchedPairs++;$('wordProgress').textContent=`${matchedPairs} / 6`;$('wordResult').textContent='○ Correct!';$('wordResult').className='word-result correct';if(matchedPairs>=6)setTimeout(completeCapture,280);return}captureLocked=true;first.button.classList.add('wrong');button.classList.add('wrong');$('wordResult').textContent='× 違う組み合わせ';$('wordResult').className='word-result wrong';setTimeout(()=>{first.button.classList.remove('selected','wrong');button.classList.remove('wrong');firstPick=null;captureLocked=false;$('wordResult').textContent='';$('wordResult').className='word-result'},420)}
 function completeCapture(){if(captureComplete)return;captureComplete=true;const f=dungeonFloor();if(f){const t=f.tiles?.find(t=>t.id===battle.tileId);if(t){t.encounterResolved=true;t.enemyPending=null}}if(!Array.isArray(state.capturedMonsters))state.capturedMonsters=[];state.capturedMonsters.push({name:battle.enemyName,floor:battle.floorNumber,isBoss:Boolean(battle.isBoss)});if(battle.isBoss){if(!state.bossCaptures)state.bossCaptures={};state.bossCaptures[battle.floorNumber]=true}state.magicBattle=null;state.lastPlace='DUNGEON';save();$('wordProgress').textContent='6 / 6';$('wordQuestion').innerHTML=`<small>${battle.isBoss?'BOSS CAPTURE SUCCESS':'CAPTURE SUCCESS'}</small>Captured!`;$('wordOptions').innerHTML='';$('wordResult').textContent=`${battle.enemyName} を捕まえた！`;$('wordResult').className='word-result correct';$('captureDone').classList.remove('hidden')}
 function startCapture(){if(!battle||battle.enemyHp>0)return;$('captureBtn').classList.add('hidden');$('capturePanel').classList.remove('hidden');$('backBtn').disabled=true;renderCaptureBoard()}
-if(!battle){location.href='magic-dungeon.html?v=20260903-5'}else{$('attackBtn').onclick=attack;$('magicBtn').onclick=magic;$('itemBtn').onclick=item;$('runBtn').onclick=flee;$('backBtn').onclick=flee;$('captureBtn').onclick=startCapture;$('captureDone').onclick=returnToDungeon;renderHud();if(battle.enemyHp<=0){$('commandGrid').classList.add('hidden');$('captureBtn').classList.remove('hidden');$('backBtn').disabled=true;$('battleMessage').textContent=`${battle.enemyName} can no longer resist. Capture it!`}}
+if(!battle){location.href='magic-dungeon.html?v=20260903-6'}else{ensureBattleBuffs();$('attackBtn').onclick=attack;$('magicBtn').onclick=openMagicMenu;$('itemBtn').onclick=openItemMenu;$('runBtn').onclick=flee;$('backBtn').onclick=flee;$('closeActionPanel').onclick=closeActionPanel;$('captureBtn').onclick=startCapture;$('captureDone').onclick=returnToDungeon;renderHud();if(battle.enemyHp<=0){$('commandGrid').classList.add('hidden');$('captureBtn').classList.remove('hidden');$('backBtn').disabled=true;$('battleMessage').textContent=`${battle.enemyName} can no longer resist. Capture it!`}}
 })();
