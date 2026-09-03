@@ -22,8 +22,20 @@
   .result .ja{font-size:20px;margin-top:2px}
   details{margin-top:12px;border-top:1px solid #e5e5df;padding-top:8px}
   summary{cursor:pointer;font-weight:700;padding:8px 2px}
-  .word-list{margin:4px 0 0;padding:0 4px 2px 34px}
-  .word-list li{padding:3px 0}
+  .table-wrap{width:100%;overflow-x:auto;margin-top:6px}
+  .word-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:17px;line-height:1.35;background:#fff}
+  .word-table th,.word-table td{border:1px solid #d8d8d0;padding:9px 10px;text-align:left;vertical-align:middle;word-break:break-word}
+  .word-table th{background:#f1f1ec;font-weight:800}
+  .word-table .num{width:52px;text-align:center;color:#666}
+  .word-table .en-col{width:42%;font-weight:700}
+  @media(max-width:520px){
+    main{padding:18px 12px 50px}
+    .oracle-card{padding:14px 12px}
+    .card-head h2{font-size:20px}
+    .word-table th,.word-table td{padding:8px 7px}
+    .word-table .num{width:44px}
+    .word-table .en-col{width:43%}
+  }
 </style>
 </head>
 <body>
@@ -47,7 +59,7 @@ const oracleData={
 };
 
 const root=document.getElementById('oracleList');
-Object.entries(oracleData).forEach(([category,words],categoryIndex)=>{
+Object.entries(oracleData).forEach(([category,words])=>{
   const section=document.createElement('section');
   section.className='oracle-card';
 
@@ -80,14 +92,29 @@ Object.entries(oracleData).forEach(([category,words],categoryIndex)=>{
   const details=document.createElement('details');
   const summary=document.createElement('summary');
   summary.textContent='単語一覧を見る';
-  const ol=document.createElement('ol');
-  ol.className='word-list';
-  words.forEach(([en,ja])=>{
-    const li=document.createElement('li');
-    li.textContent=`${en}（${ja}）`;
-    ol.appendChild(li);
+
+  const wrap=document.createElement('div');
+  wrap.className='table-wrap';
+  const table=document.createElement('table');
+  table.className='word-table';
+  table.innerHTML='<thead><tr><th class="num">No.</th><th class="en-col">英語</th><th>日本語</th></tr></thead>';
+  const tbody=document.createElement('tbody');
+  words.forEach(([en,ja],index)=>{
+    const tr=document.createElement('tr');
+    const no=document.createElement('td');
+    no.className='num';
+    no.textContent=index+1;
+    const enTd=document.createElement('td');
+    enTd.className='en-col';
+    enTd.textContent=en;
+    const jaTd=document.createElement('td');
+    jaTd.textContent=ja;
+    tr.append(no,enTd,jaTd);
+    tbody.appendChild(tr);
   });
-  details.append(summary,ol);
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  details.append(summary,wrap);
   section.append(head,button,result,details);
   root.appendChild(section);
 });
