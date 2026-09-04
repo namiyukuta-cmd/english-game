@@ -59,10 +59,37 @@
     return parse(await res.text());
   }
 
-  function enableTypingBattleGameOverChoice(){
+  function isTypingBattle(){
     let path='';
     try{path=decodeURIComponent(location.pathname)}catch(e){path=location.pathname}
-    if(!path.endsWith('/タイピング.html')) return;
+    return path.endsWith('/タイピング.html');
+  }
+
+  function enableTypingBattleSmoothApproach(){
+    if(!isTypingBattle()) return;
+    const style=document.createElement('style');
+    style.id='typingSmoothEnemyStyle';
+    style.textContent=`
+      #enemy.enemy{
+        transition:transform 4.8s linear,margin-top 4.8s linear,filter .15s ease,opacity .18s ease !important;
+        will-change:transform,margin-top;
+      }
+      #enemy.enemy.step0{
+        animation:typingEnemyFirstApproach 4.8s linear both;
+      }
+      #enemy.enemy.hit{
+        transition:transform .22s ease-out,margin-top .22s ease-out,filter .15s ease,opacity .18s ease !important;
+      }
+      @keyframes typingEnemyFirstApproach{
+        from{transform:scale(.58);margin-top:-8px}
+        to{transform:scale(.72);margin-top:2px}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function enableTypingBattleGameOverChoice(){
+    if(!isTypingBattle()) return;
 
     const setup=()=>{
       const heroHp=document.getElementById('heroHp');
@@ -126,5 +153,6 @@
   }
 
   window.EIKEN5Vocabulary={load,parse,difficultyFor,SOURCE};
+  enableTypingBattleSmoothApproach();
   enableTypingBattleGameOverChoice();
 })();
