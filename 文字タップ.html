@@ -104,11 +104,7 @@
   <script>
     const SAVE_KEY='eiken5TypingSave';
     const PROGRESS_KEY='eiken5TypingProgress';
-    const DIFFICULTY={
-      easy:{label:'簡単',hintLetters:2},
-      normal:{label:'普通',hintLetters:1},
-      hard:{label:'難しい',hintLetters:0}
-    };
+    const DIFFICULTY={easy:'簡単',normal:'普通',hard:'難しい'};
 
     const now=document.getElementById('now');
     const jpHit=document.getElementById('jpHit');
@@ -196,16 +192,10 @@
 
     function makeHint(word){
       const clean=word.toLowerCase();
-      const cfg=DIFFICULTY[difficulty]||DIFFICULTY.normal;
-      if(cfg.hintLetters===0){
-        const letters=[...clean].filter(ch=>ch!==' ').length;
-        return 'ヒント：'+letters+'文字';
-      }
-      let revealed=0;
+      let firstShown=false;
       const parts=[...clean].map(ch=>{
         if(ch===' ')return '　';
-        if(revealed<cfg.hintLetters){revealed++;return ch;}
-        revealed++;
+        if(!firstShown){firstShown=true;return ch;}
         return '_';
       });
       return 'ヒント：'+parts.join(' ');
@@ -222,11 +212,7 @@
       try{progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')||{}}catch(e){progress={}}
       const key=word.toLowerCase();
       const old=progress[key]||{};
-      progress[key]={
-        mastered:true,
-        correct:(old.correct||0)+1,
-        lastCorrect:Date.now()
-      };
+      progress[key]={mastered:true,correct:(old.correct||0)+1,lastCorrect:Date.now()};
       localStorage.setItem(PROGRESS_KEY,JSON.stringify(progress));
     }
 
@@ -240,7 +226,7 @@
         return;
       }
       difficulty=(save.difficulty&&DIFFICULTY[save.difficulty])?save.difficulty:'normal';
-      difficultyLabel.textContent=DIFFICULTY[difficulty].label;
+      difficultyLabel.textContent=DIFFICULTY[difficulty];
       current=save.questions[save.index];
       now.textContent=save.index+1;
       jpHit.textContent=current[1];
