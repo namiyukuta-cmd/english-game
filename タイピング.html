@@ -160,12 +160,18 @@
 
     function clearStatus(){status.textContent='';status.className='status'}
 
-    function makeHint(word){
+    function makeHint(word,level){
       const clean=normalize(word);
-      let first=false;
-      return 'ヒント：'+[...clean].map(ch=>{
+      const chars=[...clean];
+      const letters=chars.filter(ch=>ch!==' ').length;
+      let revealCount=1;
+      if(level===2)revealCount=Math.max(1,Math.min(letters-1,Math.ceil(letters*.5)));
+      if(level>=3)revealCount=Math.max(1,letters-1);
+      let revealed=0;
+      return 'ヒント：'+chars.map(ch=>{
         if(ch===' ')return '　';
-        if(!first){first=true;return ch}
+        if(revealed<revealCount){revealed++;return ch}
+        revealed++;
         return '_';
       }).join(' ');
     }
@@ -289,10 +295,17 @@
       mistakes++;
       combo=0;
       updateHud();
-      status.textContent='ちがいます。ヒントを確認してください。';
       status.className='status bad';
-      hint.textContent=makeHint(current.word);
-      hint.classList.add('show');
+      if(mistakes>=4){
+        status.textContent='ぶぶー！ 答えは「'+current.word+'」です。';
+        hint.textContent='答え：'+current.word;
+        hint.classList.add('show');
+        showBattleMessage('ぶぶー！');
+      }else{
+        status.textContent='ちがいます。ヒントを確認してください。';
+        hint.textContent=makeHint(current.word,mistakes);
+        hint.classList.add('show');
+      }
       if(enemyStep<4)enemyStep++;
       updateEnemyPosition();
       typed='';
