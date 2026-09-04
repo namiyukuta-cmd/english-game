@@ -36,23 +36,19 @@
     </header>
 
     <section class="field">
-      <div class="start-msg" id="startMsg">英単語が飛んできます。<br>よく見て覚えてください。</div>
+      <div class="start-msg" id="startMsg">英検5級の単語を読み込んでいます…</div>
       <div class="word" id="word" hidden></div>
       <div class="impact"></div>
       <div class="flash" id="flash"></div>
-      <div class="error" id="error">問題データがありません。<br>「初めから」で開始してください。</div>
+      <div class="error" id="error">単語データを読み込めませんでした。<br>TOPへ戻ってやり直してください。</div>
     </section>
   </main>
 
+  <script src="data/eiken5-vocabulary.js"></script>
   <script>
     const SAVE_KEY='eiken5TypingSave';
     const DIFFICULTY_KEY='eiken5TypingDifficulty';
     const DIFFICULTY={easy:'簡単',normal:'普通',hard:'難しい'};
-    const WORDS=[
-      ["dog","犬","easy"],["cat","猫","easy"],["fish","魚","easy"],["book","本","easy"],["pen","ペン","easy"],["father","父","easy"],["mother","母","easy"],["friend","友達","easy"],["house","家","easy"],["room","部屋","easy"],["door","ドア","easy"],["table","テーブル","easy"],["apple","リンゴ","easy"],["banana","バナナ","easy"],["water","水","easy"],["milk","牛乳","easy"],["rice","ご飯","easy"],["bread","パン","easy"],["egg","卵","easy"],["car","車","easy"],["bus","バス","easy"],["sun","太陽","easy"],["moon","月","easy"],["red","赤","easy"],["blue","青","easy"],["green","緑","easy"],["go","行く","easy"],["come","来る","easy"],["run","走る","easy"],["eat","食べる","easy"],["read","読む","easy"],["play","遊ぶ","easy"],["good","良い","easy"],["big","大きい","easy"],["new","新しい","easy"],["old","古い","easy"],
-      ["bird","鳥","normal"],["pencil","鉛筆","normal"],["school","学校","normal"],["teacher","先生","normal"],["student","生徒","normal"],["brother","兄・弟","normal"],["sister","姉・妹","normal"],["window","窓","normal"],["park","公園","normal"],["station","駅","normal"],["train","電車","normal"],["star","星","normal"],["rain","雨","normal"],["snow","雪","normal"],["walk","歩く","normal"],["drink","飲む","normal"],["write","書く","normal"],["study","勉強する","normal"],["small","小さい","normal"],["happy","幸せな","normal"],["today","今日","normal"],["tomorrow","明日","normal"],["morning","朝","normal"],["night","夜","normal"],
-      ["eraser","消しゴム","hard"],["as","〜として","hard"],["dictionary","辞書","hard"],["classroom","教室","hard"],["notebook","ノート","hard"],["grandfather","祖父","hard"],["grandmother","祖母","hard"],["parents","両親","hard"],["hospital","病院","hard"],["library","図書館","hard"],["beautiful","美しい","hard"],["usually","たいてい","hard"],["because","〜だから","hard"],["Wednesday","水曜日","hard"]
-    ];
 
     const wordEl=document.getElementById('word');
     const startMsg=document.getElementById('startMsg');
@@ -64,7 +60,14 @@
     let save=null;
     let current=null;
 
-    function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+    function shuffle(arr){
+      const copy=[...arr];
+      for(let i=copy.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [copy[i],copy[j]]=[copy[j],copy[i]];
+      }
+      return copy;
+    }
 
     function getDifficultyFromUrl(){
       const params=new URLSearchParams(location.search);
@@ -77,14 +80,24 @@
       difficultyLabel.textContent=DIFFICULTY[key];
     }
 
-    function createNewGame(){
+    function toQuestion(v){
+      return [v.word,v.ja,v.alternatives,v.key];
+    }
+
+    async function createNewGame(){
       const difficulty=getDifficultyFromUrl();
       localStorage.setItem(DIFFICULTY_KEY,difficulty);
-      const pool=WORDS.filter(word=>word[2]===difficulty).map(([en,ja])=>[en,ja]);
-      save={questions:shuffle(pool).slice(0,10),index:0,difficulty};
-      localStorage.setItem(SAVE_KEY,JSON.stringify(save));
-      applyDifficulty();
-      playCurrent();
+      try{
+        const allWords=await EIKEN5Vocabulary.load();
+        const pool=allWords.filter(word=>word.difficulty===difficulty);
+        if(pool.length<10) throw new Error('not enough words');
+        save={questions:shuffle(pool).slice(0,10).map(toQuestion),index:0,difficulty,totalVocabulary:allWords.length};
+        localStorage.setItem(SAVE_KEY,JSON.stringify(save));
+        applyDifficulty();
+        playCurrent();
+      }catch(e){
+        showError();
+      }
     }
 
     function continueGame(){
@@ -130,7 +143,7 @@
       setTimeout(continueGame,450);
     }else{
       localStorage.removeItem(SAVE_KEY);
-      setTimeout(createNewGame,450);
+      setTimeout(createNewGame,250);
     }
   </script>
 </body>
