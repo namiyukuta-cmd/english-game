@@ -59,5 +59,49 @@
     return parse(await res.text());
   }
 
+  function enableTypingBattleGameOverReturn(){
+    let path='';
+    try{path=decodeURIComponent(location.pathname)}catch(e){path=location.pathname}
+    if(!path.endsWith('/タイピング.html')) return;
+
+    const heroHp=document.getElementById('heroHp');
+    if(!heroHp) return;
+    let returning=false;
+
+    const check=()=>{
+      if(returning) return;
+      const hearts=(heroHp.textContent.match(/♥/g)||[]).length;
+      if(hearts>0) return;
+      returning=true;
+
+      const status=document.getElementById('status');
+      const battleMsg=document.getElementById('battleMsg');
+      const attackBtn=document.getElementById('attackBtn');
+      const keyboard=document.getElementById('keyboard');
+
+      if(status){
+        status.textContent='ゲームオーバー';
+        status.className='status bad';
+      }
+      if(battleMsg){
+        battleMsg.textContent='GAME OVER';
+        battleMsg.classList.remove('show');
+        void battleMsg.offsetWidth;
+        battleMsg.classList.add('show');
+      }
+      if(attackBtn){
+        attackBtn.disabled=true;
+        attackBtn.textContent='終了';
+      }
+      if(keyboard) keyboard.style.pointerEvents='none';
+
+      setTimeout(()=>location.replace('シューティングtop.html'),1000);
+    };
+
+    new MutationObserver(check).observe(heroHp,{childList:true,characterData:true,subtree:true});
+    check();
+  }
+
   window.EIKEN5Vocabulary={load,parse,difficultyFor,SOURCE};
+  enableTypingBattleGameOverReturn();
 })();
