@@ -16,7 +16,7 @@
     .field{position:relative;min-height:0;overflow:hidden;border:1px solid #2c405a;border-radius:20px;background:linear-gradient(#13243a,#09121f)}
     .field:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff0d 1px,transparent 1px),linear-gradient(90deg,#ffffff0d 1px,transparent 1px);background-size:42px 42px;pointer-events:none}
     .word{position:absolute;left:50%;top:8%;transform:translate(-50%,-50%);font-size:clamp(28px,9vw,50px);font-weight:950;letter-spacing:.02em;text-shadow:0 4px 14px #000;background:#132942;border:2px solid #75dcff;border-radius:18px;padding:10px 18px;white-space:nowrap;opacity:.9;will-change:top,transform}
-    .word.fly{animation-name:flyIn;animation-timing-function:linear;animation-fill-mode:forwards}
+    .word.fly{animation:flyIn 2.4s linear forwards}
     .word.hit{top:56%;transform:translate(-50%,-50%);background:#4c2430;border-color:#ff9aac}
     .impact{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);width:68%;height:8px;border-radius:999px;background:#1b2c42;box-shadow:0 0 28px #7ee7ff44}
     .impact:before{content:"YOU";position:absolute;left:50%;top:-34px;transform:translateX(-50%);font-size:12px;color:#8094ac;font-weight:900}
@@ -47,18 +47,11 @@
   <script>
     const SAVE_KEY='eiken5TypingSave';
     const DIFFICULTY_KEY='eiken5TypingDifficulty';
-    const DIFFICULTY={
-      easy:{label:'簡単',flight:3.2},
-      normal:{label:'普通',flight:2.4},
-      hard:{label:'難しい',flight:1.55}
-    };
+    const DIFFICULTY={easy:'簡単',normal:'普通',hard:'難しい'};
     const WORDS=[
-      ["dog","犬"],["cat","猫"],["bird","鳥"],["fish","魚"],["book","本"],["pen","ペン"],["pencil","鉛筆"],["school","学校"],["teacher","先生"],["student","生徒"],
-      ["father","父"],["mother","母"],["brother","兄・弟"],["sister","姉・妹"],["friend","友達"],["house","家"],["room","部屋"],["door","ドア"],["window","窓"],["table","テーブル"],
-      ["apple","リンゴ"],["banana","バナナ"],["water","水"],["milk","牛乳"],["rice","ご飯"],["bread","パン"],["egg","卵"],["park","公園"],["station","駅"],["train","電車"],
-      ["car","車"],["bus","バス"],["sun","太陽"],["moon","月"],["star","星"],["rain","雨"],["snow","雪"],["red","赤"],["blue","青"],["green","緑"],
-      ["go","行く"],["come","来る"],["run","走る"],["walk","歩く"],["eat","食べる"],["drink","飲む"],["read","読む"],["write","書く"],["play","遊ぶ"],["study","勉強する"],
-      ["good","良い"],["big","大きい"],["small","小さい"],["new","新しい"],["old","古い"],["happy","幸せな"],["today","今日"],["tomorrow","明日"],["morning","朝"],["night","夜"]
+      ["dog","犬","easy"],["cat","猫","easy"],["fish","魚","easy"],["book","本","easy"],["pen","ペン","easy"],["father","父","easy"],["mother","母","easy"],["friend","友達","easy"],["house","家","easy"],["room","部屋","easy"],["door","ドア","easy"],["table","テーブル","easy"],["apple","リンゴ","easy"],["banana","バナナ","easy"],["water","水","easy"],["milk","牛乳","easy"],["rice","ご飯","easy"],["bread","パン","easy"],["egg","卵","easy"],["car","車","easy"],["bus","バス","easy"],["sun","太陽","easy"],["moon","月","easy"],["red","赤","easy"],["blue","青","easy"],["green","緑","easy"],["go","行く","easy"],["come","来る","easy"],["run","走る","easy"],["eat","食べる","easy"],["read","読む","easy"],["play","遊ぶ","easy"],["good","良い","easy"],["big","大きい","easy"],["new","新しい","easy"],["old","古い","easy"],
+      ["bird","鳥","normal"],["pencil","鉛筆","normal"],["school","学校","normal"],["teacher","先生","normal"],["student","生徒","normal"],["brother","兄・弟","normal"],["sister","姉・妹","normal"],["window","窓","normal"],["park","公園","normal"],["station","駅","normal"],["train","電車","normal"],["star","星","normal"],["rain","雨","normal"],["snow","雪","normal"],["walk","歩く","normal"],["drink","飲む","normal"],["write","書く","normal"],["study","勉強する","normal"],["small","小さい","normal"],["happy","幸せな","normal"],["today","今日","normal"],["tomorrow","明日","normal"],["morning","朝","normal"],["night","夜","normal"],
+      ["eraser","消しゴム","hard"],["as","〜として","hard"],["dictionary","辞書","hard"],["classroom","教室","hard"],["notebook","ノート","hard"],["grandfather","祖父","hard"],["grandmother","祖母","hard"],["parents","両親","hard"],["hospital","病院","hard"],["library","図書館","hard"],["beautiful","美しい","hard"],["usually","たいてい","hard"],["because","〜だから","hard"],["Wednesday","水曜日","hard"]
     ];
 
     const wordEl=document.getElementById('word');
@@ -81,14 +74,14 @@
 
     function applyDifficulty(){
       const key=(save&&DIFFICULTY[save.difficulty])?save.difficulty:'normal';
-      difficultyLabel.textContent=DIFFICULTY[key].label;
-      wordEl.style.animationDuration=DIFFICULTY[key].flight+'s';
+      difficultyLabel.textContent=DIFFICULTY[key];
     }
 
     function createNewGame(){
       const difficulty=getDifficultyFromUrl();
       localStorage.setItem(DIFFICULTY_KEY,difficulty);
-      save={questions:shuffle(WORDS).slice(0,10),index:0,difficulty};
+      const pool=WORDS.filter(word=>word[2]===difficulty).map(([en,ja])=>[en,ja]);
+      save={questions:shuffle(pool).slice(0,10),index:0,difficulty};
       localStorage.setItem(SAVE_KEY,JSON.stringify(save));
       applyDifficulty();
       playCurrent();
