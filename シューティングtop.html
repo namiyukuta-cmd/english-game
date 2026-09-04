@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-  <title>英検5級 英単語タイピング</title>
+  <title>英検5級 英単語ゲーム</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101722;color:#fff;display:flex;justify-content:center}
@@ -22,18 +22,19 @@
     .difficulty-btn{min-height:52px;border:1px solid #4a607d;border-radius:13px;background:#1b2b42;color:#fff;font-size:16px;font-weight:900}
     .difficulty-btn.active{background:#ffd54f;color:#172033;border-color:#ffd54f}
     .difficulty-note{margin:9px 2px 0;color:#9fb0c6;font-size:12px;line-height:1.5;min-height:18px}
-    .menu{width:100%;display:grid;gap:12px}
-    .btn{width:100%;min-height:62px;border-radius:16px;font-weight:900;font-size:21px;text-decoration:none;display:flex;align-items:center;justify-content:center}
+    .menu{width:100%;display:grid;gap:10px}
+    .btn{width:100%;min-height:58px;border-radius:16px;font-weight:900;font-size:19px;text-decoration:none;display:flex;align-items:center;justify-content:center}
     .new{background:#ffd54f;color:#1a2130}
     .continue{background:#1b2b42;color:#fff;border:1px solid #49627f}
     .continue.disabled{opacity:.42;pointer-events:none}
+    .typing{background:#14384a;color:#d9f7ff;border:2px solid #70dcff}
   </style>
 </head>
 <body>
   <main>
     <a class="back" href="story-menu.html" aria-label="戻る">←</a>
     <div class="center">
-      <h1>英単語タイピング</h1>
+      <h1>英単語ゲーム</h1>
 
       <section class="learned" aria-label="覚えた単語数">
         <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / <span id="totalCount">読込中</span>語</strong><span>正解した単語</span></div>
@@ -51,8 +52,9 @@
       </section>
 
       <div class="menu">
-        <a class="btn new" id="newBtn" href="シューティング.html?new=1&difficulty=normal">初めから</a>
-        <a class="btn continue" id="continueBtn" href="シューティング.html?continue=1">続きから</a>
+        <a class="btn typing" id="typingBtn" href="タイピング.html?difficulty=normal">タイピングバトル</a>
+        <a class="btn new" id="newBtn" href="シューティング.html?new=1&difficulty=normal">シューティング：初めから</a>
+        <a class="btn continue" id="continueBtn" href="シューティング.html?continue=1">シューティング：続きから</a>
       </div>
     </div>
   </main>
@@ -69,6 +71,7 @@
 
     const continueBtn=document.getElementById('continueBtn');
     const newBtn=document.getElementById('newBtn');
+    const typingBtn=document.getElementById('typingBtn');
     const learnedCount=document.getElementById('learnedCount');
     const totalCount=document.getElementById('totalCount');
     const learnedBar=document.getElementById('learnedBar');
@@ -84,6 +87,7 @@
       const n=counts[selectedDifficulty];
       difficultyNote.textContent=BASE_NOTES[selectedDifficulty]+(Number.isInteger(n)?'（'+n+'語）':'');
       newBtn.href='シューティング.html?new=1&difficulty='+encodeURIComponent(selectedDifficulty);
+      typingBtn.href='タイピング.html?difficulty='+encodeURIComponent(selectedDifficulty);
       localStorage.setItem(DIFFICULTY_KEY,selectedDifficulty);
     }
 
@@ -126,7 +130,7 @@
       if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
         continueBtn.classList.add('disabled');
       }else if(save.difficulty && BASE_NOTES[save.difficulty]){
-        continueBtn.textContent='続きから（'+({easy:'簡単',normal:'普通',hard:'難しい'}[save.difficulty])+'）';
+        continueBtn.textContent='シューティング：続きから（'+({easy:'簡単',normal:'普通',hard:'難しい'}[save.difficulty])+'）';
       }
     }catch(e){
       continueBtn.classList.add('disabled');
