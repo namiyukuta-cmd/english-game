@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+  <title>英検5級 タイピングバトル</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07111f;color:#fff;touch-action:manipulation}
+    button{font:inherit}
+    .app{width:min(620px,100%);height:100svh;margin:auto;padding:9px 10px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-rows:auto minmax(190px,1fr) auto auto;gap:7px;overflow:hidden}
+    .top{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:8px}
+    .back{width:40px;height:40px;border:1px solid #3a4d67;border-radius:11px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900}
+    .title{text-align:center;font-size:16px;font-weight:950}.title small{display:block;margin-top:1px;font-size:10px;color:#90a6c0}
+    .score{font-size:13px;color:#d6e1ef;white-space:nowrap;font-weight:900}
+
+    .battle{position:relative;min-height:0;overflow:hidden;border:1px solid #2c405a;border-radius:19px;background:linear-gradient(#162941,#08111d)}
+    .battle:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff0b 1px,transparent 1px),linear-gradient(90deg,#ffffff0b 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+    .enemy-hud{position:absolute;z-index:3;left:12px;right:12px;top:9px;display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12px;font-weight:900}
+    .enemy-name{color:#ffb7c5}.enemy-hp-text{color:#cbd8e8}.hpbar{height:9px;border-radius:999px;background:#172235;border:1px solid #40536b;overflow:hidden}.hpbar span{display:block;height:100%;width:100%;background:#ff6f86;transition:width .18s ease}
+    .enemy-zone{position:absolute;inset:36px 0 0;display:flex;align-items:flex-start;justify-content:center;pointer-events:none}
+    .enemy{width:118px;height:118px;object-fit:contain;filter:drop-shadow(0 8px 10px #0008);transform-origin:center center;transition:transform .45s ease,margin-top .45s ease,filter .15s ease,opacity .18s ease;margin-top:4px}
+    .enemy.step0{transform:scale(.72);margin-top:2px}.enemy.step1{transform:scale(.86);margin-top:14px}.enemy.step2{transform:scale(1.02);margin-top:28px}.enemy.step3{transform:scale(1.18);margin-top:43px}.enemy.step4{transform:scale(1.36);margin-top:57px}
+    .enemy.hit{filter:drop-shadow(0 0 13px #fff) brightness(1.7);transform:scale(.85)}
+    .enemy.dead{opacity:0;transform:scale(.45) rotate(14deg)}
+    .danger-line{position:absolute;left:17%;right:17%;bottom:15px;height:6px;border-radius:999px;background:#1a2b40;box-shadow:0 0 24px #67dfff3a}.danger-line:before{content:"YOU";position:absolute;left:50%;top:-25px;transform:translateX(-50%);font-size:10px;font-weight:950;color:#8498af}
+    .hero-hp{position:absolute;z-index:3;left:12px;bottom:10px;font-size:14px;letter-spacing:.08em;color:#ff8294;text-shadow:0 2px 7px #000}
+    .battle-msg{position:absolute;z-index:4;left:50%;top:47%;transform:translate(-50%,-50%);padding:7px 12px;border-radius:10px;background:#07111fdc;font-size:14px;font-weight:950;opacity:0;pointer-events:none}.battle-msg.show{animation:popmsg .48s ease}
+    @keyframes popmsg{0%{opacity:0;transform:translate(-50%,-45%) scale(.9)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-55%) scale(1)}}
+
+    .question{border:1px solid #334964;border-radius:17px;background:#111e30;padding:8px 10px}
+    .question-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .label{font-size:11px;color:#92a7c0;font-weight:850}.combo{font-size:12px;color:#7ee7ff;font-weight:950}
+    .jp{margin:2px 0 5px;text-align:center;color:#ffd75a;font-size:clamp(24px,7vw,34px);line-height:1.1;font-weight:950}
+    .hint{display:none;margin:0 0 5px;text-align:center;color:#bfeaff;font-size:13px;font-weight:900}.hint.show{display:block}
+    .answer-row{display:grid;grid-template-columns:1fr auto;gap:6px}
+    .answer{height:45px;border:2px solid #72dbff;border-radius:12px;background:#07111d;color:#fff;padding:0 12px;font-size:21px;font-weight:850;display:flex;align-items:center;min-width:0;overflow:hidden;white-space:nowrap}
+    .answer.placeholder{color:#51657d}
+    .attack{height:45px;border:0;border-radius:12px;background:#ffd54f;color:#172033;padding:0 17px;font-size:17px;font-weight:950;touch-action:manipulation}
+    .status{min-height:17px;margin-top:3px;text-align:center;font-size:12px;font-weight:850}.status.good{color:#78eca5}.status.bad{color:#ff8c8c}
+
+    .keyboard{border:1px solid #334964;border-radius:17px;background:#101c2d;padding:5px 4px 6px;display:grid;gap:2px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .keyboard *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .key-row{display:flex;height:47px;justify-content:center;align-items:center}
+    .key-hit{height:100%;min-width:0;display:flex;padding:1.5px;flex:1;cursor:pointer}
+    .keycap{width:100%;height:100%;border-radius:7px;background:#e8edf3;color:#101722;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:650;box-shadow:0 1px 0 #65748a,0 2px 3px #0006;pointer-events:none}
+    .key-hit.pressed .keycap,.utility-hit.pressed .keycap,.side-hit.pressed .keycap{transform:translateY(1px);background:#cbd5e1;box-shadow:0 1px 1px #0004}
+    .row2{padding-left:4.5%;padding-right:4.5%}
+    .side-hit{height:100%;display:flex;padding:1.5px;flex:1.28;cursor:pointer}.side-hit .keycap{background:#aeb9c8;font-size:17px;font-weight:900}
+    .utility-row{display:grid;grid-template-columns:1.15fr 3.6fr 1.15fr;height:45px}
+    .utility-hit{height:100%;display:flex;padding:1.5px;cursor:pointer}.utility-hit .keycap{background:#aeb9c8;font-size:13px;font-weight:900}.utility-hit.space .keycap{background:#eef2f6}
+    .loading{position:fixed;inset:0;background:#07111f;display:flex;align-items:center;justify-content:center;z-index:20;color:#aebed1;font-weight:900}.loading.hide{display:none}
+
+    @media(max-height:700px){
+      .app{grid-template-rows:auto minmax(150px,1fr) auto auto;gap:5px;padding-top:6px}.enemy{width:100px;height:100px}.enemy.step4{margin-top:43px}.question{padding:6px 8px}.jp{font-size:22px}.answer,.attack{height:40px}.key-row{height:42px}.utility-row{height:40px}.keycap{font-size:19px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <a class="back" href="シューティングtop.html" aria-label="戻る">←</a>
+      <div class="title">タイピングバトル<small id="difficultyLabel">普通</small></div>
+      <div class="score">撃破 <span id="kills">0</span> / 正解 <span id="score">0</span></div>
+    </header>
+
+    <section class="battle">
+      <div class="enemy-hud">
+        <span class="enemy-name">SLIME</span>
+        <div class="hpbar"><span id="enemyHpBar"></span></div>
+        <span class="enemy-hp-text"><span id="enemyHp">5</span>/5</span>
+      </div>
+      <div class="enemy-zone"><img class="enemy step0" id="enemy" src="assets/enemies/slime_red.png" alt="敵"></div>
+      <div class="battle-msg" id="battleMsg"></div>
+      <div class="hero-hp" id="heroHp">♥ ♥ ♥</div>
+      <div class="danger-line"></div>
+    </section>
+
+    <section class="question">
+      <div class="question-top"><span class="label">日本語を英語で打って攻撃</span><span class="combo">COMBO <span id="combo">0</span></span></div>
+      <div class="jp" id="jp">読込中…</div>
+      <div class="hint" id="hint"></div>
+      <div class="answer-row">
+        <div class="answer placeholder" id="answer">英単語を入力</div>
+        <button class="attack" id="attackBtn" type="button">攻撃</button>
+      </div>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section class="keyboard" id="keyboard" aria-label="英語キーボード">
+      <div class="key-row" id="row1"></div>
+      <div class="key-row row2" id="row2"></div>
+      <div class="key-row" id="row3"></div>
+      <div class="utility-row">
+        <div class="utility-hit" id="clearHit"><div class="keycap">全消し</div></div>
+        <div class="utility-hit space" id="spaceHit"><div class="keycap">SPACE</div></div>
+        <div class="utility-hit" id="deleteHit"><div class="keycap">⌫</div></div>
+      </div>
+    </section>
+  </main>
+  <div class="loading" id="loading">英検5級単語を読み込み中…</div>
+
+  <script src="data/eiken5-vocabulary.js"></script>
+  <script>
+    const PROGRESS_KEY='eiken5TypingProgress';
+    const DIFFICULTY_KEY='eiken5TypingDifficulty';
+    const DIFFICULTY={easy:'簡単',normal:'普通',hard:'難しい'};
+    const ENEMIES=['slime_red.png','slime_blue.png','slime_green.png','slime_purple.png'];
+
+    const jp=document.getElementById('jp');
+    const answerEl=document.getElementById('answer');
+    const hint=document.getElementById('hint');
+    const status=document.getElementById('status');
+    const enemy=document.getElementById('enemy');
+    const enemyHpBar=document.getElementById('enemyHpBar');
+    const enemyHpEl=document.getElementById('enemyHp');
+    const heroHpEl=document.getElementById('heroHp');
+    const scoreEl=document.getElementById('score');
+    const killsEl=document.getElementById('kills');
+    const comboEl=document.getElementById('combo');
+    const battleMsg=document.getElementById('battleMsg');
+    const attackBtn=document.getElementById('attackBtn');
+    const difficultyLabel=document.getElementById('difficultyLabel');
+    const loading=document.getElementById('loading');
+
+    let pool=[];
+    let queue=[];
+    let current=null;
+    let typed='';
+    let mistakes=0;
+    let enemyHp=5;
+    let heroHp=3;
+    let enemyStep=0;
+    let score=0;
+    let kills=0;
+    let combo=0;
+    let locked=false;
+    let advanceTimer=null;
+
+    const params=new URLSearchParams(location.search);
+    let difficulty=params.get('difficulty')||localStorage.getItem(DIFFICULTY_KEY)||'normal';
+    if(!DIFFICULTY[difficulty])difficulty='normal';
+    localStorage.setItem(DIFFICULTY_KEY,difficulty);
+    difficultyLabel.textContent=DIFFICULTY[difficulty];
+
+    function shuffle(a){
+      const arr=[...a];
+      for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+      return arr;
+    }
+
+    function normalize(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
+
+    function setAnswer(){
+      if(typed){answerEl.textContent=typed;answerEl.classList.remove('placeholder')}
+      else{answerEl.textContent='英単語を入力';answerEl.classList.add('placeholder')}
+    }
+
+    function clearStatus(){status.textContent='';status.className='status'}
+
+    function makeHint(word){
+      const clean=normalize(word);
+      let first=false;
+      return 'ヒント：'+[...clean].map(ch=>{
+        if(ch===' ')return '　';
+        if(!first){first=true;return ch}
+        return '_';
+      }).join(' ');
+    }
+
+    function showBattleMessage(text){
+      battleMsg.textContent=text;
+      battleMsg.classList.remove('show');
+      void battleMsg.offsetWidth;
+      battleMsg.classList.add('show');
+    }
+
+    function updateEnemyPosition(){
+      enemy.classList.remove('step0','step1','step2','step3','step4');
+      enemy.classList.add('step'+enemyStep);
+    }
+
+    function updateHud(){
+      enemyHpEl.textContent=enemyHp;
+      enemyHpBar.style.width=(enemyHp/5*100)+'%';
+      heroHpEl.textContent='♥ '.repeat(heroHp).trim()||'—';
+      scoreEl.textContent=score;
+      killsEl.textContent=kills;
+      comboEl.textContent=combo;
+    }
+
+    function resetAdvanceTimer(){
+      clearTimeout(advanceTimer);
+      advanceTimer=setTimeout(advanceEnemy,4800);
+    }
+
+    function advanceEnemy(){
+      if(locked||!current)return;
+      if(enemyStep<4){
+        enemyStep++;
+        updateEnemyPosition();
+        resetAdvanceTimer();
+        return;
+      }
+      heroHp--;
+      combo=0;
+      updateHud();
+      showBattleMessage('HIT!');
+      if(heroHp<=0){
+        status.textContent='ゲームオーバー。タップすると再開します。';
+        status.className='status bad';
+        locked=true;
+        attackBtn.textContent='再開';
+        clearTimeout(advanceTimer);
+        return;
+      }
+      enemyStep=1;
+      updateEnemyPosition();
+      resetAdvanceTimer();
+    }
+
+    function nextWord(){
+      if(!queue.length)queue=shuffle(pool);
+      current=queue.shift();
+      typed='';
+      mistakes=0;
+      jp.textContent=current.ja;
+      hint.textContent='';
+      hint.classList.remove('show');
+      clearStatus();
+      setAnswer();
+      resetAdvanceTimer();
+    }
+
+    function markMastered(word){
+      let progress={};
+      try{progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')||{}}catch(e){progress={}}
+      const legacy=normalize(word.word);
+      const old=progress[word.key]||progress[legacy]||{};
+      progress[word.key]={mastered:true,correct:(old.correct||0)+1,lastCorrect:Date.now(),word:word.word,ja:word.ja};
+      localStorage.setItem(PROGRESS_KEY,JSON.stringify(progress));
+    }
+
+    function correctAttack(){
+      clearTimeout(advanceTimer);
+      locked=true;
+      score++;
+      combo++;
+      enemyHp--;
+      enemyStep=Math.max(0,enemyStep-1);
+      markMastered(current);
+      updateHud();
+      enemy.classList.add('hit');
+      showBattleMessage('ATTACK!');
+      status.textContent='正解：'+current.word;
+      status.className='status good';
+
+      if(enemyHp<=0){
+        kills++;
+        updateHud();
+        setTimeout(()=>{
+          enemy.classList.remove('hit');
+          enemy.classList.add('dead');
+          showBattleMessage('DEFEAT!');
+        },130);
+        setTimeout(()=>{
+          enemyHp=5;
+          enemyStep=0;
+          enemy.src='assets/enemies/'+ENEMIES[kills%ENEMIES.length];
+          enemy.classList.remove('dead','hit');
+          updateEnemyPosition();
+          updateHud();
+          locked=false;
+          nextWord();
+        },520);
+      }else{
+        setTimeout(()=>{
+          enemy.classList.remove('hit');
+          updateEnemyPosition();
+          locked=false;
+          nextWord();
+        },260);
+      }
+    }
+
+    function wrongAttack(){
+      mistakes++;
+      combo=0;
+      updateHud();
+      status.textContent='ちがいます。ヒントを確認してください。';
+      status.className='status bad';
+      hint.textContent=makeHint(current.word);
+      hint.classList.add('show');
+      if(enemyStep<4)enemyStep++;
+      updateEnemyPosition();
+      typed='';
+      setAnswer();
+      resetAdvanceTimer();
+    }
+
+    function attack(){
+      if(!current)return;
+      if(locked&&heroHp<=0){
+        heroHp=3;enemyHp=5;enemyStep=0;score=0;kills=0;combo=0;locked=false;attackBtn.textContent='攻撃';updateEnemyPosition();updateHud();nextWord();return;
+      }
+      if(locked||!typed)return;
+      const accepted=(current.alternatives&&current.alternatives.length?current.alternatives:[current.word]).map(normalize);
+      if(accepted.includes(normalize(typed)))correctAttack();
+      else wrongAttack();
+    }
+
+    function pressEffect(el){el.classList.add('pressed');setTimeout(()=>el.classList.remove('pressed'),80)}
+    function addChar(ch){if(locked||!current||typed.length>=28)return;typed+=ch;clearStatus();setAnswer()}
+    function del(){if(locked)return;typed=typed.slice(0,-1);clearStatus();setAnswer()}
+
+    function makeLetter(row,ch){
+      const hit=document.createElement('div');hit.className='key-hit';hit.innerHTML='<div class="keycap">'+ch+'</div>';
+      hit.addEventListener('pointerdown',e=>{e.preventDefault();pressEffect(hit);addChar(ch)});row.appendChild(hit);
+    }
+
+    function makeKeyboard(){
+      const r1=document.getElementById('row1'),r2=document.getElementById('row2'),r3=document.getElementById('row3');
+      'qwertyuiop'.split('').forEach(c=>makeLetter(r1,c));
+      'asdfghjkl'.split('').forEach(c=>makeLetter(r2,c));
+      const left=document.createElement('div');left.className='side-hit';left.innerHTML='<div class="keycap">⇧</div>';r3.appendChild(left);
+      'zxcvbnm'.split('').forEach(c=>makeLetter(r3,c));
+      const right=document.createElement('div');right.className='side-hit';right.innerHTML='<div class="keycap">⌫</div>';right.addEventListener('pointerdown',e=>{e.preventDefault();pressEffect(right);del()});r3.appendChild(right);
+    }
+
+    document.getElementById('clearHit').addEventListener('pointerdown',e=>{e.preventDefault();pressEffect(e.currentTarget);if(!locked){typed='';setAnswer();clearStatus()}});
+    document.getElementById('spaceHit').addEventListener('pointerdown',e=>{e.preventDefault();pressEffect(e.currentTarget);if(!locked&&typed&&!typed.endsWith(' '))addChar(' ')});
+    document.getElementById('deleteHit').addEventListener('pointerdown',e=>{e.preventDefault();pressEffect(e.currentTarget);del()});
+    attackBtn.addEventListener('click',attack);
+
+    ['gesturestart','gesturechange','gestureend'].forEach(type=>document.addEventListener(type,e=>{if(e.target&&e.target.closest&&e.target.closest('#keyboard'))e.preventDefault()},{passive:false}));
+    document.addEventListener('dblclick',e=>{if(e.target&&e.target.closest&&e.target.closest('#keyboard'))e.preventDefault()},{passive:false});
+
+    async function init(){
+      makeKeyboard();
+      try{
+        const words=await EIKEN5Vocabulary.load();
+        pool=words.filter(w=>w.difficulty===difficulty);
+        if(!pool.length)pool=words;
+        queue=shuffle(pool);
+        loading.classList.add('hide');
+        updateHud();
+        nextWord();
+      }catch(e){
+        loading.textContent='単語データを読み込めませんでした。';
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
