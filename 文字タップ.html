@@ -190,8 +190,12 @@
       msg.className='msg';
     }
 
+    function normalize(value){
+      return String(value||'').trim().toLowerCase().replace(/\s+/g,' ');
+    }
+
     function makeHint(word){
-      const clean=word.toLowerCase();
+      const clean=normalize(word);
       let firstShown=false;
       const parts=[...clean].map(ch=>{
         if(ch===' ')return '　';
@@ -207,12 +211,13 @@
       hint.classList.add('show');
     }
 
-    function markMastered(word){
+    function markMastered(){
       let progress={};
       try{progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')||{}}catch(e){progress={}}
-      const key=word.toLowerCase();
-      const old=progress[key]||{};
-      progress[key]={mastered:true,correct:(old.correct||0)+1,lastCorrect:Date.now()};
+      const key=current[3]||normalize(current[0]);
+      const legacy=normalize(current[0]);
+      const old=progress[key]||progress[legacy]||{};
+      progress[key]={mastered:true,correct:(old.correct||0)+1,lastCorrect:Date.now(),word:current[0],ja:current[1]};
       localStorage.setItem(PROGRESS_KEY,JSON.stringify(progress));
     }
 
@@ -239,12 +244,12 @@
 
     function submitAnswer(){
       if(locked || !current)return;
-      const typed=answer.value.trim().toLowerCase().replace(/\s+/g,' ');
-      const correct=current[0].toLowerCase().replace(/\s+/g,' ');
+      const typed=normalize(answer.value);
+      const accepted=(Array.isArray(current[2])&&current[2].length?current[2]:[current[0]]).map(normalize);
       if(!typed)return;
-      if(typed===correct){
+      if(accepted.includes(typed)){
         locked=true;
-        markMastered(current[0]);
+        markMastered();
         msg.textContent='正解！ ★ 覚えた：'+current[0]+' ＝ '+current[1];
         msg.className='msg good';
         save.index++;
