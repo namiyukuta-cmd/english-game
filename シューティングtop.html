@@ -36,12 +36,12 @@
       <h1>英単語タイピング</h1>
 
       <section class="learned" aria-label="覚えた単語数">
-        <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / 60語</strong><span>正解した単語</span></div>
+        <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / 74語</strong><span>正解した単語</span></div>
         <div class="bar"><span id="learnedBar"></span></div>
       </section>
 
       <section class="difficulty" aria-label="難易度">
-        <div class="difficulty-title">難易度</div>
+        <div class="difficulty-title">出てくる単語の難しさ</div>
         <div class="difficulty-grid">
           <button class="difficulty-btn" type="button" data-difficulty="easy">簡単</button>
           <button class="difficulty-btn" type="button" data-difficulty="normal">普通</button>
@@ -60,11 +60,11 @@
     const SAVE_KEY='eiken5TypingSave';
     const PROGRESS_KEY='eiken5TypingProgress';
     const DIFFICULTY_KEY='eiken5TypingDifficulty';
-    const TOTAL_WORDS=60;
+    const TOTAL_WORDS=74;
     const NOTES={
-      easy:'ゆっくり表示・1回間違えると最初の2文字を表示',
-      normal:'標準速度・1回間違えると最初の1文字を表示',
-      hard:'速めに表示・1回間違えると文字数だけ表示'
+      easy:'dog・apple など、短くて身近な単語',
+      normal:'teacher・station など、少し長い単語',
+      hard:'eraser・as・dictionary など、綴りや意味を思い出しにくい単語'
     };
 
     const continueBtn=document.getElementById('continueBtn');
