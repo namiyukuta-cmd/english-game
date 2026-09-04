@@ -36,7 +36,7 @@
       <h1>英単語タイピング</h1>
 
       <section class="learned" aria-label="覚えた単語数">
-        <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / 74語</strong><span>正解した単語</span></div>
+        <div class="learned-head"><strong>覚えた <span id="learnedCount">0</span> / <span id="totalCount">読込中</span>語</strong><span>正解した単語</span></div>
         <div class="bar"><span id="learnedBar"></span></div>
       </section>
 
@@ -56,30 +56,33 @@
       </div>
     </div>
   </main>
+  <script src="data/eiken5-vocabulary.js"></script>
   <script>
     const SAVE_KEY='eiken5TypingSave';
     const PROGRESS_KEY='eiken5TypingProgress';
     const DIFFICULTY_KEY='eiken5TypingDifficulty';
-    const TOTAL_WORDS=74;
-    const NOTES={
+    const BASE_NOTES={
       easy:'dog・apple など、短くて身近な単語',
-      normal:'teacher・station など、少し長い単語',
+      normal:'少し長い単語や、意味を区別して覚える単語',
       hard:'eraser・as・dictionary など、綴りや意味を思い出しにくい単語'
     };
 
     const continueBtn=document.getElementById('continueBtn');
     const newBtn=document.getElementById('newBtn');
     const learnedCount=document.getElementById('learnedCount');
+    const totalCount=document.getElementById('totalCount');
     const learnedBar=document.getElementById('learnedBar');
     const difficultyNote=document.getElementById('difficultyNote');
     const difficultyButtons=[...document.querySelectorAll('.difficulty-btn')];
 
     let selectedDifficulty=localStorage.getItem(DIFFICULTY_KEY)||'normal';
-    if(!NOTES[selectedDifficulty])selectedDifficulty='normal';
+    let counts={easy:null,normal:null,hard:null};
+    if(!BASE_NOTES[selectedDifficulty])selectedDifficulty='normal';
 
     function renderDifficulty(){
       difficultyButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.difficulty===selectedDifficulty));
-      difficultyNote.textContent=NOTES[selectedDifficulty];
+      const n=counts[selectedDifficulty];
+      difficultyNote.textContent=BASE_NOTES[selectedDifficulty]+(Number.isInteger(n)?'（'+n+'語）':'');
       newBtn.href='シューティング.html?new=1&difficulty='+encodeURIComponent(selectedDifficulty);
       localStorage.setItem(DIFFICULTY_KEY,selectedDifficulty);
     }
@@ -91,21 +94,38 @@
       });
     });
 
-    try{
-      const progress=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}');
-      const mastered=Object.values(progress).filter(v=>v&&v.mastered).length;
-      learnedCount.textContent=mastered;
-      learnedBar.style.width=Math.min(100,(mastered/TOTAL_WORDS)*100)+'%';
-    }catch(e){
-      learnedCount.textContent='0';
-      learnedBar.style.width='0%';
+    function readProgress(){
+      try{return JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}')||{}}catch(e){return {}}
+    }
+
+    async function loadVocabularyInfo(){
+      try{
+        const words=await EIKEN5Vocabulary.load();
+        totalCount.textContent=words.length;
+        counts={
+          easy:words.filter(w=>w.difficulty==='easy').length,
+          normal:words.filter(w=>w.difficulty==='normal').length,
+          hard:words.filter(w=>w.difficulty==='hard').length
+        };
+        const progress=readProgress();
+        const mastered=words.filter(w=>{
+          const oldKey=w.word.toLowerCase();
+          return (progress[w.key]&&progress[w.key].mastered)||(progress[oldKey]&&progress[oldKey].mastered);
+        }).length;
+        learnedCount.textContent=mastered;
+        learnedBar.style.width=words.length?Math.min(100,(mastered/words.length)*100)+'%':'0%';
+        renderDifficulty();
+      }catch(e){
+        totalCount.textContent='600';
+        learnedCount.textContent=Object.values(readProgress()).filter(v=>v&&v.mastered).length;
+      }
     }
 
     try{
       const save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
       if(!save || !Array.isArray(save.questions) || save.index<0 || save.index>=save.questions.length){
         continueBtn.classList.add('disabled');
-      }else if(save.difficulty && NOTES[save.difficulty]){
+      }else if(save.difficulty && BASE_NOTES[save.difficulty]){
         continueBtn.textContent='続きから（'+({easy:'簡単',normal:'普通',hard:'難しい'}[save.difficulty])+'）';
       }
     }catch(e){
@@ -113,6 +133,7 @@
     }
 
     renderDifficulty();
+    loadVocabularyInfo();
   </script>
 </body>
 </html>
