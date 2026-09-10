@@ -174,7 +174,6 @@ function createCell(cx,cz){
   const wz=cz*CELL+(random()-.5)*CELL*.68;
   const type=random();
 
-  // 固定水場の上に通常の大砂丘や岩が生えないよう、周辺の景観生成だけ空ける。
   const nearFixedWater=markpoints.some(p=>{
     if(p.type!=='water')return false;
     const clearRadius=p.subtype==='oasis'?14:5;
@@ -218,7 +217,6 @@ function createCell(cx,cz){
     activePickups.set(pickupId,{group:pickup,cellGroup:group,itemId});
   }
 
-  // 石と枯れ枝は別々に判定する。片方の率を変えても、もう片方には影響しない。
   spawnPickup('stone',PICKUP_SPAWN_CHANCE.stone);
   spawnPickup('dry_branch',PICKUP_SPAWN_CHANCE.dry_branch);
 
@@ -352,6 +350,74 @@ function animatePlacedObjects(now){
 
 /* ---------- mark points ---------- */
 const markObjects=new Map();
+const waterActionSprites=new Map();
+
+function makeWaterActionTexture(label,full=false){
+  const c=document.createElement('canvas');
+  c.width=256;c.height=96;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle=full?'rgba(72,77,72,.88)':'rgba(31,66,74,.90)';
+  ctx.strokeStyle='rgba(255,255,255,.92)';
+  ctx.lineWidth=6;
+  ctx.beginPath();
+  ctx.roundRect(5,5,246,86,32);
+  ctx.fill();ctx.stroke();
+
+  ctx.fillStyle=full?'#b8d0d4':'#62cdea';
+  ctx.beginPath();
+  ctx.moveTo(54,20);
+  ctx.bezierCurveTo(40,40,34,48,34,60);
+  ctx.arc(54,60,20,Math.PI,0,true);
+  ctx.bezierCurveTo(74,48,68,40,54,20);
+  ctx.fill();
+
+  ctx.fillStyle='#fff';
+  ctx.font='900 32px -apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(label,162,49);
+  const texture=new THREE.CanvasTexture(c);
+  texture.colorSpace=THREE.SRGBColorSpace;
+  texture.needsUpdate=true;
+  return texture;
+}
+
+const waterDrinkTexture=makeWaterActionTexture('飲む',false);
+const waterFullTexture=makeWaterActionTexture('満タン',true);
+
+function addWaterActionSprite(parent,point){
+  const material=new THREE.SpriteMaterial({
+    map:waterDrinkTexture,
+    transparent:true,
+    depthTest:false,
+    depthWrite:false,
+    fog:false
+  });
+  const sprite=new THREE.Sprite(material);
+  sprite.scale.set(4.9,1.84,1);
+  if(point.subtype==='oasis'&&point.waterArea){
+    sprite.position.set(Number(point.waterArea.offsetX||0),.92,Number(point.waterArea.offsetZ||0));
+  }else{
+    sprite.position.set(0,1.05,0);
+  }
+  sprite.renderOrder=80;
+  sprite.userData={waterAction:true,markpointId:point.id};
+  parent.add(sprite);
+  waterActionSprites.set(point.id,sprite);
+}
+
+function refreshWaterActionSprites(){
+  const full=Number(game.player?.water??100)>=100;
+  const texture=full?waterFullTexture:waterDrinkTexture;
+  for(const sprite of waterActionSprites.values()){
+    if(sprite.material.map!==texture){
+      sprite.material.map=texture;
+      sprite.material.needsUpdate=true;
+    }
+    sprite.material.opacity=full?.82:1;
+  }
+}
 
 function makeWellMarkpoint(){
   const g=new THREE.Group();
@@ -465,6 +531,7 @@ function makeOasisMarkpoint(){
 function buildMarkpoints(){
   for(const obj of markObjects.values())scene.remove(obj);
   markObjects.clear();
+  waterActionSprites.clear();
   for(const p of markpoints){
     if(!Number.isFinite(+p.x)||!Number.isFinite(+p.z))continue;
     let g;
@@ -487,11 +554,13 @@ function buildMarkpoints(){
         m.position.y=1.1;g.add(m);
       }
     }
+    if(p.type==='water')addWaterActionSprite(g,p);
     g.position.set(+p.x,0,+p.z);
     g.userData={markpointId:p.id,type:p.type,subtype:p.subtype||null};
     scene.add(g);
     markObjects.set(p.id,g);
   }
+  refreshWaterActionSprites();
 }
 
 function discoverNearbyMarkpoints(){
@@ -676,15 +745,27 @@ function waterPointInRange(markpointId=null){
   return point;
 }
 
-function drinkFromWaterPoint(event){
-  const point=waterPointInRange(event.detail?.markpointId);
-  if(!point)return;
+function performDrink(point){
+  if(!point)return false;
+  if(Number(game.player.water||0)>=100){
+    showFieldToast('水は満タンです');
+    refreshWaterActionSprites();
+    return false;
+  }
   game.player.water=100;
   normalizePlayer(game.player);
   setActiveGame(game);
   showFieldToast(`${point.name||'水場'}の水を飲んだ`);
   drawHud();
+  refreshWaterActionSprites();
   window.dispatchEvent(new CustomEvent('desert:player-changed'));
+  return true;
+}
+
+function drinkFromWaterPoint(event){
+  const point=waterPointInRange(event.detail?.markpointId);
+  if(!point)return;
+  performDrink(point);
 }
 
 window.addEventListener('desert:drink-water',drinkFromWaterPoint);
@@ -705,6 +786,35 @@ const AUTO_WALK_SPEED=11.5;
 const raycaster=new THREE.Raycaster();
 const pointerNdc=new THREE.Vector2();
 
+function waterApproachTarget(point){
+  if(point?.subtype==='oasis'&&point.waterArea){
+    return {
+      x:Number(point.x)+Number(point.waterArea.offsetX||0),
+      z:Number(point.z)+Number(point.waterArea.offsetZ||0),
+      stopDistance:.45
+    };
+  }
+  return {x:Number(point?.x||0),z:Number(point?.z||0),stopDistance:2.2};
+}
+
+function startWaterDrink(point){
+  if(!point)return;
+  if(Number(game.player.water||0)>=100){
+    showFieldToast('水は満タンです');
+    return;
+  }
+  const target=waterApproachTarget(point);
+  autoDirection=null;
+  autoTarget={
+    x:target.x,
+    z:target.z,
+    pickupId:null,
+    action:'drink',
+    markpointId:point.id,
+    stopDistance:target.stopDistance
+  };
+}
+
 function minuteTick(){
   advanceTime(game.time,1);
   updateWeather(game.weather,game.time);
@@ -716,7 +826,7 @@ function minuteTick(){
     sheltered:game.world.sheltered,
     inWater:Boolean(oasisWater)
   },1);
-  drawHud();maps();updateLight();
+  drawHud();maps();updateLight();refreshWaterActionSprites();
 }
 
 function applyMovement(nx,nz,speed,dt){
@@ -735,6 +845,19 @@ function applyMovement(nx,nz,speed,dt){
   maps();
   updateCamera();
   return true;
+}
+
+function finishAutoTarget(){
+  const target=autoTarget;
+  if(!target)return;
+  collectNearbyPickups();
+  if(target.action==='drink'){
+    const point=markpoints.find(p=>p.id===target.markpointId)||null;
+    const inRange=waterPointInRange(target.markpointId);
+    if(inRange)performDrink(inRange);
+    else if(point)showFieldToast('水場まで近づけませんでした');
+  }
+  autoTarget=null;
 }
 
 function updateMovement(dt){
@@ -767,10 +890,11 @@ function updateMovement(dt){
   const dx=autoTarget.x-game.world.x;
   const dz=autoTarget.z-game.world.z;
   const distance=Math.hypot(dx,dz);
-  const stopDistance=autoTarget.pickupId?.length?0.85:0.35;
+  const stopDistance=Number.isFinite(Number(autoTarget.stopDistance))
+    ?Math.max(0,Number(autoTarget.stopDistance))
+    :(autoTarget.pickupId?.length?0.85:0.35);
   if(distance<=stopDistance){
-    collectNearbyPickups();
-    autoTarget=null;
+    finishAutoTarget();
     return;
   }
 
@@ -790,6 +914,7 @@ function frame(now){
   if(Math.hypot(ix,iy)<.05&&!autoTarget&&!autoDirection)player.position.y+=(0-player.position.y)*.2;
   animatePickups(now);
   animatePlacedObjects(now);
+  refreshWaterActionSprites();
   timeAcc+=dt*(1000/TIME_SCALE.realMillisecondsPerGameMinute);
   while(timeAcc>=1){minuteTick();timeAcc-=1;}
   saveAcc+=dt;
@@ -823,6 +948,16 @@ function prepareRay(clientX,clientY){
   camera.updateMatrixWorld(true);
   raycaster.setFromCamera(pointerNdc,camera);
   return true;
+}
+
+function waterActionPointFromScreen(clientX,clientY){
+  if(!prepareRay(clientX,clientY))return null;
+  const sprites=[...waterActionSprites.values()];
+  if(!sprites.length)return null;
+  const hit=raycaster.intersectObjects(sprites,false)[0];
+  if(!hit?.object?.userData?.waterAction)return null;
+  const id=hit.object.userData.markpointId;
+  return markpoints.find(p=>p.id===id)||null;
 }
 
 function groundPointFromScreen(clientX,clientY){
@@ -897,7 +1032,6 @@ function handleFieldTap(clientX,clientY,stoppedContinuousAuto=false){
   lastTapY=clientY;
   clearPendingTap();
 
-  // A single tap while continuous auto-walk is active only stops it.
   if(stoppedContinuousAuto)return;
 
   pendingTapTimer=setTimeout(()=>{
@@ -975,7 +1109,15 @@ function endFieldMove(e){
   const stoppedContinuousAuto=pointerStartedWithContinuousAuto;
   pointerStartedWithContinuousAuto=false;
   clearFieldPointer(e);
-  if(wasTap)handleFieldTap(clientX,clientY,stoppedContinuousAuto);
+  if(!wasTap)return;
+
+  const waterPoint=waterActionPointFromScreen(clientX,clientY);
+  if(waterPoint){
+    resetTapSequence();
+    startWaterDrink(waterPoint);
+    return;
+  }
+  handleFieldTap(clientX,clientY,stoppedContinuousAuto);
 }
 
 function cancelFieldMove(e=null){
