@@ -540,13 +540,18 @@ function useHotbarItem(event){
 
 window.addEventListener('desert:use-hotbar-item',useHotbarItem);
 
-/* ---------- movement: drag + tap-to-walk ---------- */
+/* ---------- movement: drag + tap-to-walk + double-tap auto-walk ---------- */
 let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,dragMoved=false,pointerDownAt=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
 let autoTarget=null;
+let autoDirection=null;
+let pointerStartedWithContinuousAuto=false;
+let lastTapAt=0,lastTapX=0,lastTapY=0,pendingTapTimer=null;
 const MOVE_RADIUS=56;
 const MOVE_DEADZONE=7;
 const TAP_MAX_DISTANCE=10;
 const TAP_MAX_MS=450;
+const DOUBLE_TAP_MS=280;
+const DOUBLE_TAP_DISTANCE=52;
 const AUTO_WALK_SPEED=11.5;
 const raycaster=new THREE.Raycaster();
 const pointerNdc=new THREE.Vector2();
@@ -586,7 +591,14 @@ function updateMovement(dt){
     const speed=11.5*Math.min(1,manualMag);
     game.world.running=false;
     autoTarget=null;
+    autoDirection=null;
     applyMovement(nx,nz,speed,dt);
+    return;
+  }
+
+  if(autoDirection){
+    game.world.running=false;
+    if(!applyMovement(autoDirection.x,autoDirection.z,AUTO_WALK_SPEED,dt))autoDirection=null;
     return;
   }
 
@@ -619,7 +631,7 @@ function frame(now){
   const dt=Math.min(.05,Math.max(0,(now-last)/1000));
   last=now;
   updateMovement(dt);
-  if(Math.hypot(ix,iy)<.05&&!autoTarget)player.position.y+=(0-player.position.y)*.2;
+  if(Math.hypot(ix,iy)<.05&&!autoTarget&&!autoDirection)player.position.y+=(0-player.position.y)*.2;
   animatePickups(now);
   animatePlacedObjects(now);
   timeAcc+=dt*(1000/TIME_SCALE.realMillisecondsPerGameMinute);
@@ -644,23 +656,34 @@ function pickupGroupFromObject(object){
   return null;
 }
 
-function setTapDestination(clientX,clientY){
+function prepareRay(clientX,clientY){
   const rect=canvas.getBoundingClientRect();
-  if(rect.width<=0||rect.height<=0)return;
+  if(rect.width<=0||rect.height<=0)return false;
   pointerNdc.set(
     ((clientX-rect.left)/rect.width)*2-1,
     -((clientY-rect.top)/rect.height)*2+1
   );
-
   scene.updateMatrixWorld(true);
   camera.updateMatrixWorld(true);
   raycaster.setFromCamera(pointerNdc,camera);
+  return true;
+}
+
+function groundPointFromScreen(clientX,clientY){
+  if(!prepareRay(clientX,clientY))return null;
+  const hit=raycaster.intersectObject(ground,false)[0];
+  return hit?.point||null;
+}
+
+function setTapDestination(clientX,clientY){
+  if(!prepareRay(clientX,clientY))return;
 
   const pickupGroups=[...activePickups.values()].map(entry=>entry.group);
   const pickupHits=pickupGroups.length?raycaster.intersectObjects(pickupGroups,true):[];
   if(pickupHits.length){
     const pickupGroup=pickupGroupFromObject(pickupHits[0].object);
     if(pickupGroup){
+      autoDirection=null;
       autoTarget={
         x:pickupGroup.position.x,
         z:pickupGroup.position.z,
@@ -672,8 +695,61 @@ function setTapDestination(clientX,clientY){
 
   const groundHit=raycaster.intersectObject(ground,false)[0];
   if(groundHit){
+    autoDirection=null;
     autoTarget={x:groundHit.point.x,z:groundHit.point.z,pickupId:null};
   }
+}
+
+function setContinuousDirection(clientX,clientY){
+  const point=groundPointFromScreen(clientX,clientY);
+  if(!point)return;
+  const dx=point.x-game.world.x;
+  const dz=point.z-game.world.z;
+  const distance=Math.hypot(dx,dz);
+  if(distance<.01)return;
+  autoTarget=null;
+  autoDirection={x:dx/distance,z:dz/distance};
+}
+
+function clearPendingTap(){
+  if(pendingTapTimer!==null){
+    clearTimeout(pendingTapTimer);
+    pendingTapTimer=null;
+  }
+}
+
+function resetTapSequence(){
+  clearPendingTap();
+  lastTapAt=0;
+  lastTapX=0;
+  lastTapY=0;
+}
+
+function handleFieldTap(clientX,clientY,stoppedContinuousAuto=false){
+  const now=performance.now();
+  const isDouble=lastTapAt>0&&now-lastTapAt<=DOUBLE_TAP_MS&&Math.hypot(clientX-lastTapX,clientY-lastTapY)<=DOUBLE_TAP_DISTANCE;
+
+  if(isDouble){
+    clearPendingTap();
+    lastTapAt=0;
+    setContinuousDirection(clientX,clientY);
+    return;
+  }
+
+  lastTapAt=now;
+  lastTapX=clientX;
+  lastTapY=clientY;
+  clearPendingTap();
+
+  // A single tap while continuous auto-walk is active only stops it.
+  if(stoppedContinuousAuto)return;
+
+  pendingTapTimer=setTimeout(()=>{
+    pendingTapTimer=null;
+    if(lastTapAt!==now)return;
+    lastTapAt=0;
+    setTapDestination(clientX,clientY);
+  },DOUBLE_TAP_MS);
 }
 
 function updateFieldMove(e){
@@ -686,7 +762,9 @@ function updateFieldMove(e){
     return;
   }
   dragMoved=true;
+  resetTapSequence();
   autoTarget=null;
+  autoDirection=null;
   const scale=1/MOVE_RADIUS;
   ix=dx*scale;
   iy=dy*scale;
@@ -705,7 +783,9 @@ function beginFieldMove(e){
   dragStartY=e.clientY;
   dragMoved=false;
   pointerDownAt=performance.now();
+  pointerStartedWithContinuousAuto=Boolean(autoDirection);
   autoTarget=null;
+  autoDirection=null;
   ix=0;
   iy=0;
   fieldStage.setPointerCapture?.(pointerId);
@@ -736,13 +816,18 @@ function endFieldMove(e){
   const wasTap=!dragMoved&&distance<=TAP_MAX_DISTANCE&&elapsed<=TAP_MAX_MS;
   const clientX=e.clientX;
   const clientY=e.clientY;
+  const stoppedContinuousAuto=pointerStartedWithContinuousAuto;
+  pointerStartedWithContinuousAuto=false;
   clearFieldPointer(e);
-  if(wasTap)setTapDestination(clientX,clientY);
+  if(wasTap)handleFieldTap(clientX,clientY,stoppedContinuousAuto);
 }
 
 function cancelFieldMove(e=null){
   if(!clearFieldPointer(e))return;
+  pointerStartedWithContinuousAuto=false;
   autoTarget=null;
+  autoDirection=null;
+  resetTapSequence();
 }
 
 if(fieldStage){
