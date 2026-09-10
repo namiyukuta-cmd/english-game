@@ -10,63 +10,72 @@
   <title>Desert Survival - Field</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-topui3">
   <link rel="stylesheet" href="./css/hud-sketch.css?v=20260910-topui3">
+  <link rel="stylesheet" href="./css/field-layout.css?v=20260910-fieldlayout1">
   <style>
     .legacy-player-hud,.field-hud{display:none!important}
   </style>
 </head>
 <body class="screen screen-field">
   <main id="fieldRoot" class="field-root">
-    <canvas id="worldCanvas" class="world-canvas" aria-label="砂漠フィールド"></canvas>
 
-    <section id="playerHud" class="player-hud legacy-player-hud" aria-hidden="true"></section>
-
-    <header class="field-top-ui" aria-label="サバイバル情報">
-      <div id="topDay" class="top-day">DAY 1</div>
-      <div class="top-survival" aria-label="食料・水・睡眠">
-        <span class="top-stat"><span aria-hidden="true">🍖</span><b id="topFood">100/100</b></span>
-        <span class="top-stat"><span aria-hidden="true">💧</span><b id="topWater">100/100</b></span>
-        <span class="top-stat"><span aria-hidden="true">🌙</span><b id="topSleep">100/100</b></span>
-      </div>
-      <div class="quick-menu-wrap">
-        <button id="quickMenuBtn" class="quick-menu-btn" type="button" aria-label="メニュー" aria-expanded="false">…</button>
-        <nav id="quickMenuBar" class="quick-menu-bar" hidden aria-label="ゲームメニュー">
-          <button id="quickTopBtn" type="button">TOP</button>
-          <button id="quickLogBtn" type="button">LOG</button>
-          <button id="quickLoadBtn" type="button">LOAD</button>
-          <button id="quickSaveBtn" type="button">SAVE</button>
-        </nav>
-      </div>
-    </header>
-
-    <aside class="field-left-info" aria-label="時間・天気・気温">
-      <div id="fieldTime" class="field-time">🕐 00:00</div>
-      <div id="fieldWeather" class="field-weather">☀ 晴れ</div>
-      <div class="field-temp-meter" aria-label="外気温">
-        <span id="fieldTempFill" class="field-temp-fill"></span>
-        <span id="fieldTempBulb" class="field-temp-bulb"></span>
-      </div>
-    </aside>
-
-    <div class="field-map-anchor">
-      <button id="miniMapBtn" class="mini-map-button" type="button" aria-label="全体マップを開く">
-        <canvas id="miniMapCanvas" width="150" height="150"></canvas>
-      </button>
+    <div class="field-top-band">
+      <header class="field-top-ui" aria-label="サバイバル情報">
+        <div id="topDay" class="top-day">DAY 1</div>
+        <div class="top-survival" aria-label="食料・水・睡眠">
+          <span class="top-stat"><span aria-hidden="true">🍖</span><b id="topFood">100/100</b></span>
+          <span class="top-stat"><span aria-hidden="true">💧</span><b id="topWater">100/100</b></span>
+          <span class="top-stat"><span aria-hidden="true">🌙</span><b id="topSleep">100/100</b></span>
+        </div>
+        <div class="quick-menu-wrap">
+          <button id="quickMenuBtn" class="quick-menu-btn" type="button" aria-label="メニュー" aria-expanded="false">…</button>
+          <nav id="quickMenuBar" class="quick-menu-bar" hidden aria-label="ゲームメニュー">
+            <button id="quickTopBtn" type="button">TOP</button>
+            <button id="quickLogBtn" type="button">LOG</button>
+            <button id="quickLoadBtn" type="button">LOAD</button>
+            <button id="quickSaveBtn" type="button">SAVE</button>
+          </nav>
+        </div>
+      </header>
     </div>
 
-    <div id="pickupToast" class="pickup-toast" hidden aria-live="polite"></div>
+    <section class="field-stage" aria-label="砂漠フィールド">
+      <canvas id="worldCanvas" class="world-canvas" aria-label="砂漠フィールド"></canvas>
+      <section id="playerHud" class="player-hud legacy-player-hud" aria-hidden="true"></section>
 
-    <div class="field-bottom-left">
-      <button id="itemBtn" class="round-action icon-action" type="button" aria-label="所持品">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V6.5A5 5 0 0112 2a5 5 0 015 4.5V8"/><path d="M5 8h14l1 13H4L5 8z"/><path d="M9 12h6"/></svg>
-      </button>
-      <a id="craftBtn" class="round-action icon-action" href="./desertsurvival_craft.html" aria-label="クラフト">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
-      </a>
-    </div>
+      <aside class="field-left-info" aria-label="時間・天気・気温">
+        <div id="fieldTime" class="field-time">🕐 00:00</div>
+        <div id="fieldWeather" class="field-weather">☀ 晴れ</div>
+        <div class="field-temp-meter" aria-label="外気温">
+          <span id="fieldTempFill" class="field-temp-fill"></span>
+          <span id="fieldTempBulb" class="field-temp-bulb"></span>
+        </div>
+      </aside>
 
-    <div class="field-bottom-right">
-      <button id="runBtn" class="round-action" type="button" hidden aria-hidden="true">RUN</button>
-      <div id="movePad" class="move-pad" aria-label="移動スティック"><div id="moveKnob" class="move-knob"></div></div>
+      <div class="field-map-anchor">
+        <button id="miniMapBtn" class="mini-map-button" type="button" aria-label="全体マップを開く">
+          <canvas id="miniMapCanvas" width="150" height="150"></canvas>
+        </button>
+      </div>
+
+      <div id="pickupToast" class="pickup-toast" hidden aria-live="polite"></div>
+
+      <div class="field-bottom-left">
+        <button id="itemBtn" class="round-action icon-action" type="button" aria-label="所持品">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V6.5A5 5 0 0112 2a5 5 0 015 4.5V8"/><path d="M5 8h14l1 13H4L5 8z"/><path d="M9 12h6"/></svg>
+        </button>
+        <a id="craftBtn" class="round-action icon-action" href="./desertsurvival_craft.html" aria-label="クラフト">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
+        </a>
+      </div>
+
+      <div class="field-bottom-right">
+        <button id="runBtn" class="round-action" type="button" hidden aria-hidden="true">RUN</button>
+        <div id="movePad" class="move-pad" aria-label="移動スティック"><div id="moveKnob" class="move-knob"></div></div>
+      </div>
+    </section>
+
+    <div class="field-hotbar-band" aria-label="クイックアイテム">
+      <div id="fieldHotbar" class="field-hotbar"></div>
     </div>
 
     <section id="mapOverlay" class="overlay" hidden aria-label="全体マップ">
@@ -88,8 +97,9 @@
     </section>
   </main>
 
-  <script type="module" src="./js/field3d.js?v=20260910-topui3"></script>
-  <script type="module" src="./js/field-ui.js?v=20260910-topui3"></script>
+  <script type="module" src="./js/field3d.js?v=20260910-fieldlayout1"></script>
+  <script type="module" src="./js/field-ui.js?v=20260910-fieldlayout1"></script>
   <script type="module" src="./js/map-ui.js?v=20260910-worldmap1"></script>
+  <script type="module" src="./js/hotbar.js?v=20260910-hotbar1"></script>
 </body>
 </html>
