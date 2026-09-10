@@ -101,6 +101,32 @@
   bottom:126px;
 }
 
+/* Selected usable item: one action button above the movement stick. */
+.field-use-button{
+  position:absolute;
+  z-index:28;
+  right:29px;
+  bottom:146px;
+  width:64px;
+  height:64px;
+  padding:4px;
+  border:2px solid rgba(255,255,255,.78);
+  border-radius:50%;
+  background:rgba(37,31,22,.78);
+  color:#fff8e9;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  box-shadow:0 3px 12px rgba(0,0,0,.22);
+  touch-action:manipulation;
+}
+
+.field-use-button[hidden]{display:none;}
+.field-use-icon{font-size:24px;line-height:1;}
+.field-use-label{font-size:10px;line-height:1;font-weight:900;}
+
 /* Bottom hotbar */
 .field-hotbar-band{
   position:relative;
@@ -209,6 +235,15 @@
   .field-stage .pickup-toast{
     bottom:112px;
   }
+
+  .field-use-button{
+    right:24px;
+    bottom:122px;
+    width:56px;
+    height:56px;
+  }
+  .field-use-icon{font-size:21px;}
+  .field-use-label{font-size:9px;}
 
   .field-hotbar-band{
     padding:6px 7px max(6px,env(safe-area-inset-bottom));
