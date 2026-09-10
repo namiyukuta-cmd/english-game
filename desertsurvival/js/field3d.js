@@ -7,7 +7,7 @@ import {advanceTime,TIME_SCALE} from './time.js';
 import {getAmbientTemperature} from './temperature.js';
 import {updateWeather} from './weather.js';
 import {moveWorldPosition} from './world.js';
-import {markpoints} from './markpoints.js';
+import {markpoints} from './markpoints.js?v=20260911-oasis1';
 import {drawMiniMap,drawWorldMap} from './map.js';
 import {drawClock} from './clock.js';
 
@@ -174,28 +174,37 @@ function createCell(cx,cz){
   const wz=cz*CELL+(random()-.5)*CELL*.68;
   const type=random();
 
-  if(type<0.46){
-    const dune=new THREE.Mesh(duneGeo,random()>.5?duneMatA:duneMatB);
-    dune.scale.set(3.1+random()*3.7,.55+random()*.65,2.5+random()*3.9);
-    dune.position.set(wx,-.14,wz);
-    dune.rotation.y=random()*Math.PI;
-    group.add(dune);
-  }else if(type<0.78){
-    const rock=new THREE.Mesh(rockGeo,rockMat);
-    const s=.45+random()*1.05;
-    rock.scale.set(s*(.75+random()*.55),s,s*(.78+random()*.55));
-    rock.position.set(wx,s*.62,wz);
-    rock.rotation.set(random()*.4,random()*Math.PI,random()*.25);
-    group.add(rock);
-  }else if(type<0.91){
-    const count=2+Math.floor(random()*3);
-    for(let i=0;i<count;i++){
-      const scrub=new THREE.Mesh(scrubGeo,scrubMat);
-      const s=.22+random()*.32;
-      scrub.scale.set(s,s*(1.8+random()),s);
-      scrub.position.set(wx+(random()-.5)*2.4,s,wz+(random()-.5)*2.4);
-      scrub.rotation.z=(random()-.5)*.35;
-      group.add(scrub);
+  // 固定水場の上に通常の大砂丘や岩が生えないよう、周辺の景観生成だけ空ける。
+  const nearFixedWater=markpoints.some(p=>{
+    if(p.type!=='water')return false;
+    const clearRadius=p.subtype==='oasis'?14:5;
+    return Math.hypot(wx-Number(p.x),wz-Number(p.z))<clearRadius;
+  });
+
+  if(!nearFixedWater){
+    if(type<0.46){
+      const dune=new THREE.Mesh(duneGeo,random()>.5?duneMatA:duneMatB);
+      dune.scale.set(3.1+random()*3.7,.55+random()*.65,2.5+random()*3.9);
+      dune.position.set(wx,-.14,wz);
+      dune.rotation.y=random()*Math.PI;
+      group.add(dune);
+    }else if(type<0.78){
+      const rock=new THREE.Mesh(rockGeo,rockMat);
+      const s=.45+random()*1.05;
+      rock.scale.set(s*(.75+random()*.55),s,s*(.78+random()*.55));
+      rock.position.set(wx,s*.62,wz);
+      rock.rotation.set(random()*.4,random()*Math.PI,random()*.25);
+      group.add(rock);
+    }else if(type<0.91){
+      const count=2+Math.floor(random()*3);
+      for(let i=0;i<count;i++){
+        const scrub=new THREE.Mesh(scrubGeo,scrubMat);
+        const s=.22+random()*.32;
+        scrub.scale.set(s,s*(1.8+random()),s);
+        scrub.position.set(wx+(random()-.5)*2.4,s,wz+(random()-.5)*2.4);
+        scrub.rotation.z=(random()-.5)*.35;
+        group.add(scrub);
+      }
     }
   }
 
@@ -343,25 +352,143 @@ function animatePlacedObjects(now){
 
 /* ---------- mark points ---------- */
 const markObjects=new Map();
+
+function makeWellMarkpoint(){
+  const g=new THREE.Group();
+  const stoneMat=new THREE.MeshLambertMaterial({color:0x7f6a50});
+  const darkMat=new THREE.MeshLambertMaterial({color:0x263133});
+  const woodMat=new THREE.MeshLambertMaterial({color:0x6c472c});
+
+  const darkCenter=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,.08,16),darkMat);
+  darkCenter.position.y=.05;
+  g.add(darkCenter);
+
+  for(let i=0;i<12;i++){
+    const a=i/12*Math.PI*2;
+    const stone=new THREE.Mesh(new THREE.DodecahedronGeometry(.38,0),stoneMat);
+    stone.position.set(Math.cos(a)*1.35,.28,Math.sin(a)*1.35);
+    stone.scale.set(1.15,.72,.9);
+    stone.rotation.y=a;
+    g.add(stone);
+  }
+
+  for(const x of [-1.45,1.45]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,2.5,6),woodMat);
+    post.position.set(x,1.55,0);
+    g.add(post);
+  }
+  const crossbar=new THREE.Mesh(new THREE.BoxGeometry(3.3,.18,.18),woodMat);
+  crossbar.position.y=2.78;
+  g.add(crossbar);
+
+  const rope=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1.5,5),new THREE.MeshLambertMaterial({color:0x5b4937}));
+  rope.position.set(0,2.02,0);
+  g.add(rope);
+
+  return g;
+}
+
+function addPalm(parent,x,z,scale=1){
+  const trunkMat=new THREE.MeshLambertMaterial({color:0x72502f});
+  const leafMat=new THREE.MeshLambertMaterial({color:0x47613b});
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18*scale,.30*scale,4.5*scale,7),trunkMat);
+  trunk.position.set(x,2.25*scale,z);
+  trunk.rotation.z=(x+z)*.012;
+  parent.add(trunk);
+
+  const crownY=4.55*scale;
+  for(let i=0;i<7;i++){
+    const a=i/7*Math.PI*2;
+    const leaf=new THREE.Mesh(new THREE.SphereGeometry(1,6,4),leafMat);
+    leaf.scale.set(.30*scale,.09*scale,1.45*scale);
+    leaf.rotation.y=a;
+    leaf.rotation.z=(i%2?-.10:.08);
+    leaf.position.set(
+      x+Math.sin(a)*1.05*scale,
+      crownY-(i%2)*.10*scale,
+      z+Math.cos(a)*1.05*scale
+    );
+    parent.add(leaf);
+  }
+}
+
+function addGrassClump(parent,x,z,scale=1){
+  const grassMat=new THREE.MeshLambertMaterial({color:0x667744});
+  const bladeGeo=new THREE.ConeGeometry(.10*scale,.72*scale,4);
+  for(let i=0;i<4;i++){
+    const blade=new THREE.Mesh(bladeGeo,grassMat);
+    const a=i/4*Math.PI*2;
+    blade.position.set(x+Math.cos(a)*.16*scale,.34*scale,z+Math.sin(a)*.16*scale);
+    blade.rotation.z=(i-1.5)*.10;
+    parent.add(blade);
+  }
+}
+
+function makeOasisMarkpoint(){
+  const g=new THREE.Group();
+  const oasisGroundMat=new THREE.MeshLambertMaterial({color:0x8e8a55});
+  const wetSandMat=new THREE.MeshLambertMaterial({color:0x80694b});
+  const waterMat=new THREE.MeshLambertMaterial({color:0x397886});
+
+  const greenPatch=new THREE.Mesh(new THREE.CylinderGeometry(10.5,10.5,.08,20),oasisGroundMat);
+  greenPatch.position.y=.02;
+  g.add(greenPatch);
+
+  const pondEdge=new THREE.Mesh(new THREE.CylinderGeometry(5.6,5.6,.10,20),wetSandMat);
+  pondEdge.scale.set(1.18,1,.82);
+  pondEdge.position.set(-1.4,.07,-.3);
+  pondEdge.rotation.y=.28;
+  g.add(pondEdge);
+
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(4.85,4.85,.06,20),waterMat);
+  water.scale.set(1.18,1,.82);
+  water.position.set(-1.4,.14,-.3);
+  water.rotation.y=.28;
+  g.add(water);
+
+  addPalm(g,-6.4,2.4,1.05);
+  addPalm(g,5.7,3.2,.95);
+  addPalm(g,-4.9,-5.0,.90);
+  addPalm(g,6.0,-4.2,1.10);
+  addPalm(g,1.1,6.0,.88);
+
+  const grassPositions=[
+    [-7.4,-1.2,.9],[-6.2,-3.0,.8],[-3.2,6.9,1],[-1.4,7.6,.9],
+    [3.5,6.6,.85],[6.8,1.1,1],[7.3,-1.0,.8],[4.0,-6.7,.9],
+    [1.3,-7.5,.85],[-2.8,-7.0,1],[-7.6,3.9,.75],[7.4,4.5,.8]
+  ];
+  for(const [x,z,s] of grassPositions)addGrassClump(g,x,z,s);
+
+  return g;
+}
+
 function buildMarkpoints(){
   for(const obj of markObjects.values())scene.remove(obj);
   markObjects.clear();
   for(const p of markpoints){
     if(!Number.isFinite(+p.x)||!Number.isFinite(+p.z))continue;
-    const g=new THREE.Group();
-    if(p.type==='water'){
-      const rim=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,.55,18),new THREE.MeshLambertMaterial({color:0x8c7356}));
-      rim.position.y=.27;g.add(rim);
-      const water=new THREE.Mesh(new THREE.CylinderGeometry(1.55,1.55,.05,18),new THREE.MeshLambertMaterial({color:0x4f8290}));
-      water.position.y=.57;g.add(water);
-    }else if(p.type==='town'){
-      const b=new THREE.Mesh(new THREE.BoxGeometry(5.5,3.4,5.5),new THREE.MeshLambertMaterial({color:0xa1845d}));
-      b.position.y=1.7;g.add(b);
+    let g;
+    if(p.type==='water'&&p.subtype==='oasis'){
+      g=makeOasisMarkpoint();
+    }else if(p.type==='water'&&p.subtype==='well'){
+      g=makeWellMarkpoint();
     }else{
-      const m=new THREE.Mesh(new THREE.CylinderGeometry(.8,1.1,2.2,6),new THREE.MeshLambertMaterial({color:0x77644d}));
-      m.position.y=1.1;g.add(m);
+      g=new THREE.Group();
+      if(p.type==='water'){
+        const rim=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,.55,18),new THREE.MeshLambertMaterial({color:0x8c7356}));
+        rim.position.y=.27;g.add(rim);
+        const water=new THREE.Mesh(new THREE.CylinderGeometry(1.55,1.55,.05,18),new THREE.MeshLambertMaterial({color:0x4f8290}));
+        water.position.y=.57;g.add(water);
+      }else if(p.type==='town'){
+        const b=new THREE.Mesh(new THREE.BoxGeometry(5.5,3.4,5.5),new THREE.MeshLambertMaterial({color:0xa1845d}));
+        b.position.y=1.7;g.add(b);
+      }else{
+        const m=new THREE.Mesh(new THREE.CylinderGeometry(.8,1.1,2.2,6),new THREE.MeshLambertMaterial({color:0x77644d}));
+        m.position.y=1.1;g.add(m);
+      }
     }
     g.position.set(+p.x,0,+p.z);
+    g.userData={markpointId:p.id,type:p.type,subtype:p.subtype||null};
     scene.add(g);
     markObjects.set(p.id,g);
   }
@@ -372,7 +499,8 @@ function discoverNearbyMarkpoints(){
   for(const p of markpoints){
     if(!Number.isFinite(+p.x)||!Number.isFinite(+p.z))continue;
     const distance=Math.hypot(+p.x-game.world.x,+p.z-game.world.z);
-    if(distance<8&&!game.world.discoveredMarkpoints.includes(p.id)){
+    const discoverRadius=Math.max(1,Number(p.discoverRadius||8));
+    if(distance<discoverRadius&&!game.world.discoveredMarkpoints.includes(p.id)){
       game.world.discoveredMarkpoints.push(p.id);
       changed=true;
     }
