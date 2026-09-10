@@ -1,0 +1,125 @@
+/* 手描きラフに合わせた時計・日付・天気・温度計の配置 */
+.hud-visual-row{
+  position:relative;
+  width:124px;
+  height:250px;
+  margin-top:14px;
+  padding:0;
+  display:block;
+}
+
+.time-weather-stack{
+  position:absolute;
+  left:0;
+  top:18px;
+  width:124px;
+  height:124px;
+  display:block;
+}
+
+.clock-ring,
+.clock-ring canvas{
+  width:124px;
+  height:124px;
+  display:block;
+}
+
+.clock-ring{
+  position:absolute;
+  inset:0;
+  margin:0;
+}
+
+/* ラフの「9」「3」 */
+.clock-ring::before,
+.clock-ring::after{
+  position:absolute;
+  top:50%;
+  z-index:4;
+  transform:translateY(-50%);
+  color:#f7efdf;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  text-shadow:0 1px 2px rgba(0,0,0,.45);
+  pointer-events:none;
+}
+.clock-ring::before{content:"9";left:8px;}
+.clock-ring::after{content:"3";right:8px;}
+
+/* DAY は時計の12時位置に重ねる */
+.day-badge{
+  position:absolute;
+  z-index:5;
+  left:50%;
+  top:-19px;
+  transform:translateX(-50%);
+  width:43px;
+  height:43px;
+  margin:0;
+  border:1.5px solid rgba(255,255,255,.78);
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(24,20,14,.88);
+  box-shadow:0 2px 8px rgba(0,0,0,.22);
+}
+.day-badge span{font-size:8px;letter-spacing:.08em;line-height:1;}
+.day-badge strong{font-size:16px;line-height:1;margin-top:2px;}
+
+/* 天気は時計の6時位置に重ねる */
+.weather-badge{
+  position:absolute;
+  z-index:5;
+  left:50%;
+  bottom:-19px;
+  transform:translateX(-50%);
+  width:43px;
+  height:43px;
+  margin:0;
+  border:1.5px solid rgba(255,255,255,.76);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(24,20,14,.88);
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.weather-badge svg{width:25px;height:25px;}
+
+/* 温度計は時計・天気の真下に一本だけ伸ばす */
+.temp-widget{
+  position:absolute;
+  left:50%;
+  top:162px;
+  transform:translateX(-50%);
+  width:28px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+}
+.thermometer{
+  width:13px;
+  height:76px;
+  border-width:2px;
+}
+.thermometer::after{
+  width:20px;
+  height:20px;
+  bottom:-7px;
+}
+.temp-reading{display:none;}
+
+@media(max-width:480px){
+  .hud-visual-row{width:112px;height:232px;margin-top:12px;}
+  .time-weather-stack{width:112px;height:112px;top:17px;}
+  .clock-ring,.clock-ring canvas{width:112px;height:112px;}
+  .day-badge{width:39px;height:39px;top:-17px;}
+  .weather-badge{width:39px;height:39px;bottom:-17px;}
+  .weather-badge svg{width:23px;height:23px;}
+  .temp-widget{top:147px;}
+  .thermometer{height:70px;}
+  .clock-ring::before{left:7px;}
+  .clock-ring::after{right:7px;}
+}
