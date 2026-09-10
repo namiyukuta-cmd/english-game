@@ -21,9 +21,7 @@ const closeMap=$('closeMapBtn');
 const worldMap=$('worldMapCanvas');
 const pickupToast=$('pickupToast');
 const item=$('itemBtn');
-const run=$('runBtn');
-const pad=$('movePad');
-const knob=$('moveKnob');
+const fieldStage=document.querySelector('.field-stage');
 
 let game=getActiveGame()||createNewGameState();
 normalizePlayer(game.player);
@@ -511,7 +509,7 @@ function placeCampfire(){
 
 function useHotbarItem(event){
   const slot=Number(event.detail?.slot);
-  if(!Number.isInteger(slot)||slot<0||slot>5)return;
+  if(!Number.isInteger(slot)||slot<0||slot>4)return;
   const index=inventoryIndexAtHotbarSlot(slot);
   if(index<0)return;
 
@@ -542,8 +540,10 @@ function useHotbarItem(event){
 
 window.addEventListener('desert:use-hotbar-item',useHotbarItem);
 
-/* ---------- movement ---------- */
-let ix=0,iy=0,pointerId=null,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
+/* ---------- movement: drag anywhere on the field ---------- */
+let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
+const MOVE_RADIUS=56;
+const MOVE_DEADZONE=7;
 
 function minuteTick(){
   advanceTime(game.time,1);
@@ -558,7 +558,7 @@ function updateMovement(dt){
   if(mag<.05)return;
   const nx=ix/mag;
   const nz=iy/mag;
-  const speed=11.5;
+  const speed=11.5*Math.min(1,mag);
   game.world.running=false;
   const moved=moveWorldPosition(game.world,nx*speed*dt,nz*speed*dt);
   if(!moved.moved)return;
@@ -591,34 +591,72 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 
-function stick(e){
-  const r=pad.getBoundingClientRect();
-  const cx=r.left+r.width/2,cy=r.top+r.height/2,max=Math.max(20,r.width*.32);
-  let dx=e.clientX-cx,dy=e.clientY-cy;
-  const d=Math.hypot(dx,dy);
-  if(d>max){dx=dx/d*max;dy=dy/d*max;}
-  ix=dx/max;iy=dy/max;
-  knob.style.transform=`translate(${dx}px,${dy}px)`;
-}
-pad.addEventListener('pointerdown',e=>{pointerId=e.pointerId;pad.setPointerCapture(pointerId);stick(e);});
-pad.addEventListener('pointermove',e=>{if(e.pointerId===pointerId)stick(e);});
-function release(e){if(e&&pointerId!==null&&e.pointerId!==pointerId)return;pointerId=null;ix=0;iy=0;knob.style.transform='translate(0,0)';}
-pad.addEventListener('pointerup',release);
-pad.addEventListener('pointercancel',release);
-
-function stopRun(){game.world.running=false;if(run)run.textContent='RUN';}
-if(run){
-  run.addEventListener('pointerdown',()=>{game.world.running=false;});
-  run.addEventListener('pointerup',stopRun);
-  run.addEventListener('pointercancel',stopRun);
+function isFieldUiTarget(target){
+  if(!(target instanceof Element))return false;
+  return Boolean(target.closest('#miniMapBtn,#fieldUseButton,.field-left-info,button,a'));
 }
 
-miniBtn.addEventListener('click',()=>{release();stopRun();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
+function updateFieldMove(e){
+  const dx=e.clientX-dragStartX;
+  const dy=e.clientY-dragStartY;
+  const distance=Math.hypot(dx,dy);
+  if(distance<MOVE_DEADZONE){
+    ix=0;
+    iy=0;
+    return;
+  }
+  const scale=1/MOVE_RADIUS;
+  ix=dx*scale;
+  iy=dy*scale;
+  const mag=Math.hypot(ix,iy);
+  if(mag>1){
+    ix/=mag;
+    iy/=mag;
+  }
+}
+
+function beginFieldMove(e){
+  if(!fieldStage||pointerId!==null||!overlay.hidden||isFieldUiTarget(e.target))return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  pointerId=e.pointerId;
+  dragStartX=e.clientX;
+  dragStartY=e.clientY;
+  ix=0;
+  iy=0;
+  fieldStage.setPointerCapture?.(pointerId);
+  e.preventDefault();
+}
+
+function moveFieldMove(e){
+  if(e.pointerId!==pointerId)return;
+  updateFieldMove(e);
+  e.preventDefault();
+}
+
+function stopFieldMove(e=null){
+  if(e&&pointerId!==null&&e.pointerId!==pointerId)return;
+  if(fieldStage&&pointerId!==null&&fieldStage.hasPointerCapture?.(pointerId)){
+    fieldStage.releasePointerCapture?.(pointerId);
+  }
+  pointerId=null;
+  ix=0;
+  iy=0;
+}
+
+if(fieldStage){
+  fieldStage.addEventListener('pointerdown',beginFieldMove,{passive:false});
+  fieldStage.addEventListener('pointermove',moveFieldMove,{passive:false});
+  fieldStage.addEventListener('pointerup',stopFieldMove);
+  fieldStage.addEventListener('pointercancel',stopFieldMove);
+}
+
+miniBtn.addEventListener('click',()=>{stopFieldMove();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
 closeMap.addEventListener('click',()=>{overlay.hidden=true;});
-item.addEventListener('click',()=>{setActiveGame(game);location.href='./desertsurvival_item.html';});
+item.addEventListener('click',()=>{stopFieldMove();setActiveGame(game);location.href='./desertsurvival_item.html';});
 
+window.addEventListener('blur',()=>stopFieldMove());
 window.addEventListener('resize',()=>{resize();drawHud();maps();updateCamera();});
-window.addEventListener('pagehide',()=>setActiveGame(game));
+window.addEventListener('pagehide',()=>{stopFieldMove();setActiveGame(game);});
 
 buildPlacedObjects();
 buildMarkpoints();
