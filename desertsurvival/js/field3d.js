@@ -1,13 +1,13 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 import {getActiveGame,setActiveGame,createNewGameState} from './save.js';
-import {normalizePlayer,advancePlayer} from './player.js';
+import {normalizePlayer,advancePlayer} from './player.js?v=20260911-oasiscool1';
 import {addItem,itemData} from './items.js?v=20260910-itemuse1';
 import {advanceTime,TIME_SCALE} from './time.js';
 import {getAmbientTemperature} from './temperature.js';
 import {updateWeather} from './weather.js';
 import {moveWorldPosition} from './world.js';
-import {markpoints} from './markpoints.js?v=20260911-oasis1';
+import {markpoints,findDrinkableWaterAt,findOasisWaterAt} from './markpoints.js?v=20260911-waterarea1';
 import {drawMiniMap,drawWorldMap} from './map.js';
 import {drawClock} from './clock.js';
 
@@ -669,32 +669,16 @@ function useHotbarItem(event){
 window.addEventListener('desert:use-hotbar-item',useHotbarItem);
 
 function waterPointInRange(markpointId=null){
+  const point=findDrinkableWaterAt(game.world.x,game.world.z);
+  if(!point)return null;
   const wanted=markpointId?String(markpointId).padStart(3,'0'):null;
-  let nearest=null;
-  let nearestDistance=Infinity;
-  for(const p of markpoints){
-    if(p.type!=='water')continue;
-    if(wanted&&p.id!==wanted)continue;
-    const px=Number(p.x);
-    const pz=Number(p.z);
-    if(!Number.isFinite(px)||!Number.isFinite(pz))continue;
-    const distance=Math.hypot(px-game.world.x,pz-game.world.z);
-    const radius=Math.max(0,Number(p.interactionRadius||3));
-    if(distance<=radius&&distance<nearestDistance){
-      nearest=p;
-      nearestDistance=distance;
-    }
-  }
-  return nearest;
+  if(wanted&&point.id!==wanted)return null;
+  return point;
 }
 
 function drinkFromWaterPoint(event){
   const point=waterPointInRange(event.detail?.markpointId);
   if(!point)return;
-  if(Number(game.player.water||0)>=100){
-    showFieldToast('水は十分です');
-    return;
-  }
   game.player.water=100;
   normalizePlayer(game.player);
   setActiveGame(game);
@@ -724,7 +708,14 @@ const pointerNdc=new THREE.Vector2();
 function minuteTick(){
   advanceTime(game.time,1);
   updateWeather(game.weather,game.time);
-  advancePlayer(game.player,{ambientTemp:getAmbientTemperature(game.time,game.weather.type),weather:game.weather.type,running:false,sheltered:game.world.sheltered},1);
+  const oasisWater=findOasisWaterAt(game.world.x,game.world.z);
+  advancePlayer(game.player,{
+    ambientTemp:getAmbientTemperature(game.time,game.weather.type),
+    weather:game.weather.type,
+    running:false,
+    sheltered:game.world.sheltered,
+    inWater:Boolean(oasisWater)
+  },1);
   drawHud();maps();updateLight();
 }
 
