@@ -1,6 +1,5 @@
 import { getActiveGame } from './save.js';
 import { itemData, normalizeInventory } from './items.js?v=20260910-itemuse1';
-import { findDrinkableWaterAt } from './markpoints.js?v=20260911-waterarea1';
 
 const hotbar = document.getElementById('fieldHotbar');
 const useButton = document.getElementById('fieldUseButton');
@@ -12,39 +11,18 @@ function entryAtSlot(inventory, slot) {
   return inventory.find(entry => Number(entry?.slot) === slot) || null;
 }
 
-function nearbyWaterPoint(game) {
-  const x = Number(game?.world?.x);
-  const z = Number(game?.world?.z);
-  if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
-  return findDrinkableWaterAt(x, z);
-}
-
-function updateUseButton(inventory, game) {
+function updateUseButton(inventory) {
   if (!useButton) return;
-
-  const waterPoint = nearbyWaterPoint(game);
-  if (waterPoint) {
-    useButton.hidden = false;
-    useButton.dataset.action = 'drink-water';
-    useButton.dataset.markpointId = waterPoint.id;
-    useButton.innerHTML = '<span class="field-use-icon">💧</span><span class="field-use-label">飲む</span>';
-    useButton.setAttribute('aria-label', `${waterPoint.name || '水場'}の水を飲む`);
-    return;
-  }
-
-  delete useButton.dataset.markpointId;
   const entry = entryAtSlot(inventory, selectedSlot);
   const data = entry ? itemData[entry.id] : null;
 
   if (!data?.useType) {
     useButton.hidden = true;
-    useButton.dataset.action = '';
     useButton.textContent = '';
     return;
   }
 
   useButton.hidden = false;
-  useButton.dataset.action = 'item';
   useButton.innerHTML = `<span class="field-use-icon">${data.useIcon || '●'}</span><span class="field-use-label">${data.useLabel || '使う'}</span>`;
   useButton.setAttribute('aria-label', `${data.name || entry.id}を${data.useLabel || '使う'}`);
 }
@@ -53,11 +31,9 @@ function render() {
   if (!hotbar) return;
   const game = getActiveGame();
   const inventory = normalizeInventory(game?.inventory || []);
-  const waterPoint = nearbyWaterPoint(game);
-  const waterSignature = waterPoint ? waterPoint.id : '';
-  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < HOTBAR_SLOT_COUNT)) + `|${selectedSlot}|${waterSignature}`;
+  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < HOTBAR_SLOT_COUNT)) + `|${selectedSlot}`;
   if (signature === lastSignature) {
-    updateUseButton(inventory, game);
+    updateUseButton(inventory);
     return;
   }
   lastSignature = signature;
@@ -100,21 +76,12 @@ function render() {
     hotbar.appendChild(button);
   }
 
-  updateUseButton(inventory, game);
+  updateUseButton(inventory);
 }
 
 if (useButton) {
   useButton.addEventListener('click', () => {
     const game = getActiveGame();
-    const waterPoint = nearbyWaterPoint(game);
-    if (waterPoint) {
-      window.dispatchEvent(new CustomEvent('desert:drink-water', {
-        detail:{ markpointId:waterPoint.id }
-      }));
-      lastSignature = '';
-      return;
-    }
-
     const inventory = normalizeInventory(game?.inventory || []);
     const entry = entryAtSlot(inventory, selectedSlot);
     const data = entry ? itemData[entry.id] : null;
@@ -127,10 +94,6 @@ if (useButton) {
 }
 
 window.addEventListener('desert:inventory-changed', () => {
-  lastSignature = '';
-  render();
-});
-window.addEventListener('desert:player-changed', () => {
   lastSignature = '';
   render();
 });
