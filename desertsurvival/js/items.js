@@ -1,4 +1,4 @@
-export const INVENTORY_SLOT_COUNT = 36;
+export const INVENTORY_SLOT_COUNT = 30;
 
 export const ITEM_TYPES = Object.freeze({
   MATERIAL: 'material',
