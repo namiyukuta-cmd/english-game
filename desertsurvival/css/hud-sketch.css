@@ -1,152 +1,320 @@
-/* 手描きラフに合わせた時計・日付・天気・温度計の配置 */
+/* Desert Survival field HUD: DAY left / survival center / menu right */
 
-/* 体力・水・食・睡眠などの四角いパネルはレイアウトから外す。
-   数値データは残し、後で上部中央へ別配置する。 */
-.survival-compact{
+.legacy-player-hud{
   display:none !important;
 }
 
-.player-hud{
-  width:98px !important;
-}
-
-.hud-visual-row{
-  position:relative;
-  width:98px;
-  height:172px;
-  margin-top:0;
-  padding:0;
-  display:block;
-}
-
-.time-weather-stack{
+.field-top-ui{
   position:absolute;
-  left:0;
-  top:8px;
-  width:98px;
-  height:98px;
-  display:block;
-}
-
-.clock-ring,
-.clock-ring canvas{
-  width:98px;
-  height:98px;
-  display:block;
-}
-
-.clock-ring{
-  position:absolute;
-  inset:0;
-  margin:0;
-}
-
-/* 時計盤は透けさせる。9・3は別レイヤーなのでくっきり残す。 */
-.clock-ring canvas{
-  opacity:.88;
-}
-
-.clock-ring::before,
-.clock-ring::after{
-  position:absolute;
-  top:50%;
-  z-index:6;
-  transform:translateY(-50%);
-  color:#fffaf0;
-  font-size:15px;
-  font-weight:1000;
-  line-height:1;
-  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 2px rgba(255,255,255,.35);
+  z-index:35;
+  top:max(10px,env(safe-area-inset-top));
+  left:10px;
+  right:10px;
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr) 42px;
+  align-items:center;
+  gap:6px;
   pointer-events:none;
 }
-.clock-ring::before{content:"9";left:4px;}
-.clock-ring::after{content:"3";right:4px;}
 
-/* DAY は時計の12時位置に重ねる */
-.day-badge{
-  position:absolute;
-  z-index:7;
-  left:50%;
-  top:-14px;
-  transform:translateX(-50%);
-  width:34px;
-  height:34px;
-  margin:0;
-  border:1.5px solid rgba(255,255,255,.82);
+.field-top-ui > *{
+  pointer-events:auto;
+}
+
+.top-day{
+  justify-self:start;
+  color:#fff8e9;
+  font-size:17px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.02em;
+  text-shadow:0 2px 4px rgba(0,0,0,.55);
+  white-space:nowrap;
+}
+
+.top-survival{
+  min-width:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:7px;
+  color:#fff8e9;
+  white-space:nowrap;
+  text-shadow:0 2px 4px rgba(0,0,0,.55);
+}
+
+.top-stat{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  font-size:12px;
+  line-height:1;
+}
+
+.top-stat > span{
+  font-size:15px;
+  line-height:1;
+}
+
+.top-stat b{
+  font-size:11px;
+  font-weight:900;
+}
+
+.quick-menu-wrap{
+  position:relative;
+  justify-self:end;
+}
+
+.quick-menu-btn{
+  width:40px;
+  height:40px;
+  padding:0 0 7px;
+  border:1.5px solid rgba(255,255,255,.64);
   border-radius:50%;
+  background:rgba(35,29,20,.50);
+  color:#fff8e9;
+  font-size:27px;
+  font-weight:900;
+  line-height:1;
+}
+
+.quick-menu-bar{
+  position:absolute;
+  top:0;
+  right:46px;
+  display:flex;
+  gap:4px;
+  padding:3px;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:11px;
+  background:rgba(29,24,17,.76);
+  box-shadow:0 3px 12px rgba(0,0,0,.22);
+  white-space:nowrap;
+}
+
+.quick-menu-bar[hidden]{display:none;}
+
+.quick-menu-bar button{
+  min-width:43px;
+  height:32px;
+  padding:0 6px;
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.09);
+  color:#fff7e5;
+  font-size:10px;
+  font-weight:900;
+}
+
+/* DAY の下：デジタル時刻 → 天気 → 太く短い温度計 */
+.field-left-info{
+  position:absolute;
+  z-index:24;
+  top:max(47px,calc(env(safe-area-inset-top) + 45px));
+  left:11px;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  background:rgba(24,20,14,.48);
-  box-shadow:0 1px 5px rgba(0,0,0,.18);
+  align-items:flex-start;
+  gap:7px;
+  color:#fff8e9;
+  pointer-events:none;
+  text-shadow:0 2px 4px rgba(0,0,0,.58);
 }
-.day-badge span{font-size:7px;letter-spacing:.08em;line-height:1;font-weight:800;}
-.day-badge strong{font-size:14px;line-height:1;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.75);}
 
-/* 天気は時計の6時位置に重ねる */
-.weather-badge{
+.field-time{
+  font-size:15px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.field-weather{
+  font-size:14px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.field-temp-meter{
+  position:relative;
+  width:20px;
+  height:46px;
+  margin-left:4px;
+  border:3px solid rgba(255,255,255,.86);
+  border-radius:11px 11px 7px 7px;
+  background:rgba(25,21,15,.34);
+  box-shadow:0 2px 5px rgba(0,0,0,.18);
+}
+
+.field-temp-fill{
   position:absolute;
-  z-index:7;
+  left:4px;
+  right:4px;
+  bottom:4px;
+  height:50%;
+  border-radius:6px;
+  background:#e7c84f;
+}
+
+.field-temp-bulb{
+  position:absolute;
   left:50%;
-  bottom:-14px;
+  bottom:-10px;
+  width:24px;
+  height:24px;
   transform:translateX(-50%);
-  width:34px;
-  height:34px;
-  margin:0;
-  border:1.5px solid rgba(255,255,255,.82);
+  border:3px solid rgba(255,255,255,.86);
   border-radius:50%;
+  background:#e7c84f;
+}
+
+/* ミニマップは右上メニューの下 */
+.field-map-anchor{
+  position:absolute;
+  z-index:22;
+  top:max(57px,calc(env(safe-area-inset-top) + 55px));
+  right:10px;
+  pointer-events:auto;
+}
+
+.field-map-anchor .mini-map-button{
+  width:78px;
+  height:78px;
+  padding:0;
+  border-width:1.5px;
+}
+
+/* field3d.js で使っていた header レイアウトは無効化 */
+.field-hud{display:none !important;}
+
+/* SAVE / LOAD / LOG */
+.field-system-overlay{
+  position:absolute;
+  inset:0;
+  z-index:70;
   display:grid;
   place-items:center;
-  background:rgba(24,20,14,.48);
-  box-shadow:0 1px 5px rgba(0,0,0,.18);
+  padding:18px;
+  background:rgba(10,9,7,.68);
 }
-.weather-badge svg{width:21px;height:21px;stroke-width:2.1;}
 
-/* 温度計は短く、太く。天気のすぐ下へ。 */
-.temp-widget{
-  position:absolute;
-  left:50%;
-  top:119px;
-  transform:translateX(-50%);
-  width:30px;
-  display:flex;
+.field-system-overlay[hidden]{display:none;}
+
+.field-system-card{
+  width:min(430px,94vw);
+  max-height:72vh;
+  overflow:hidden;
+  border:1px solid #9a845e;
+  border-radius:14px;
+  background:#1d1811;
+  box-shadow:0 12px 36px rgba(0,0,0,.42);
+}
+
+.field-system-head{
+  display:grid;
+  grid-template-columns:1fr 38px;
   align-items:center;
-  justify-content:flex-start;
+  gap:8px;
+  padding:10px 10px 8px 14px;
+  border-bottom:1px solid #574a37;
 }
-.thermometer{
-  width:22px;
-  height:43px;
-  border-width:2.5px;
-  border-radius:12px 12px 14px 14px;
-}
-.thermometer::after{
-  width:25px;
-  height:25px;
-  bottom:-9px;
-  border-width:2.5px;
-}
-.thermometer-fill{
-  left:5px;
-  right:5px;
-  bottom:4px;
-  border-radius:8px;
-}
-.temp-reading{display:none;}
 
-@media(max-width:480px){
-  .player-hud{width:90px !important;}
-  .hud-visual-row{width:90px;height:158px;margin-top:0;}
-  .time-weather-stack{width:90px;height:90px;top:7px;}
-  .clock-ring,.clock-ring canvas{width:90px;height:90px;}
-  .clock-ring::before,.clock-ring::after{font-size:14px;}
-  .clock-ring::before{left:3px;}
-  .clock-ring::after{right:3px;}
-  .day-badge{width:31px;height:31px;top:-12px;}
-  .day-badge strong{font-size:13px;}
-  .weather-badge{width:31px;height:31px;bottom:-12px;}
-  .weather-badge svg{width:19px;height:19px;}
-  .temp-widget{top:108px;}
-  .thermometer{width:21px;height:39px;}
-  .thermometer::after{width:24px;height:24px;}
+.field-system-head h2{
+  margin:0;
+  font-size:17px;
+  letter-spacing:.06em;
+}
+
+.field-system-head button{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:50%;
+  font-size:22px;
+  line-height:1;
+}
+
+.field-system-content{
+  max-height:calc(72vh - 56px);
+  overflow:auto;
+  padding:12px;
+}
+
+.field-system-empty{
+  margin:12px 4px;
+  color:#cbbb9c;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.field-new-save{
+  width:100%;
+  min-height:44px;
+  margin-bottom:10px;
+  border-radius:10px;
+  font-weight:900;
+}
+
+.field-save-list,.field-log-list{
+  display:grid;
+  gap:7px;
+}
+
+.field-save-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:8px;
+  min-height:48px;
+  padding:7px 8px 7px 11px;
+  border:1px solid #574a37;
+  border-radius:9px;
+  background:#241e15;
+}
+
+.field-save-row span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:800;
+}
+
+.field-save-row button{
+  min-width:68px;
+  min-height:34px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.field-log-row{
+  padding:9px 10px;
+  border-bottom:1px solid #4b4030;
+  font-size:13px;
+  line-height:1.45;
+}
+
+@media(max-width:390px){
+  .field-top-ui{
+    left:8px;
+    right:8px;
+    grid-template-columns:57px minmax(0,1fr) 38px;
+    gap:3px;
+  }
+  .top-day{font-size:15px;}
+  .top-survival{gap:4px;}
+  .top-stat{gap:1px;}
+  .top-stat > span{font-size:13px;}
+  .top-stat b{font-size:10px;}
+  .quick-menu-btn{width:37px;height:37px;font-size:25px;}
+  .quick-menu-bar{right:42px;gap:3px;}
+  .quick-menu-bar button{min-width:39px;padding:0 4px;font-size:9px;}
+  .field-left-info{left:9px;top:max(44px,calc(env(safe-area-inset-top) + 42px));}
+  .field-time{font-size:14px;}
+  .field-weather{font-size:13px;}
+  .field-temp-meter{width:19px;height:42px;}
+  .field-map-anchor{right:8px;top:max(53px,calc(env(safe-area-inset-top) + 51px));}
+  .field-map-anchor .mini-map-button{width:70px;height:70px;}
 }
