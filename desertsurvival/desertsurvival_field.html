@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Desert Survival - Field</title>
-  <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-pickup1">
+  <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-menuicons1">
 </head>
 <body class="screen screen-field">
   <main id="fieldRoot" class="field-root">
@@ -24,7 +24,12 @@
     <div id="pickupToast" class="pickup-toast" hidden aria-live="polite"></div>
 
     <div class="field-bottom-left">
-      <button id="itemBtn" class="round-action" type="button">ITEM</button>
+      <button id="itemBtn" class="round-action icon-action" type="button" aria-label="所持品">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V6.5A5 5 0 0112 2a5 5 0 015 4.5V8"/><path d="M5 8h14l1 13H4L5 8z"/><path d="M9 12h6"/></svg>
+      </button>
+      <a id="craftBtn" class="round-action icon-action" href="./desertsurvival_craft.html" aria-label="クラフト">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
+      </a>
     </div>
 
     <div class="field-bottom-right">
