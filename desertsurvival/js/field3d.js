@@ -540,10 +540,16 @@ function useHotbarItem(event){
 
 window.addEventListener('desert:use-hotbar-item',useHotbarItem);
 
-/* ---------- movement: drag anywhere on the field ---------- */
-let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
+/* ---------- movement: drag + tap-to-walk ---------- */
+let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,dragMoved=false,pointerDownAt=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
+let autoTarget=null;
 const MOVE_RADIUS=56;
 const MOVE_DEADZONE=7;
+const TAP_MAX_DISTANCE=10;
+const TAP_MAX_MS=450;
+const AUTO_WALK_SPEED=11.5;
+const raycaster=new THREE.Raycaster();
+const pointerNdc=new THREE.Vector2();
 
 function minuteTick(){
   advanceTime(game.time,1);
@@ -552,16 +558,9 @@ function minuteTick(){
   drawHud();maps();updateLight();
 }
 
-function updateMovement(dt){
-  if(!overlay.hidden)return;
-  const mag=Math.hypot(ix,iy);
-  if(mag<.05)return;
-  const nx=ix/mag;
-  const nz=iy/mag;
-  const speed=11.5*Math.min(1,mag);
-  game.world.running=false;
+function applyMovement(nx,nz,speed,dt){
   const moved=moveWorldPosition(game.world,nx*speed*dt,nz*speed*dt);
-  if(!moved.moved)return;
+  if(!moved.moved)return false;
 
   player.position.x=game.world.x;
   player.position.z=game.world.z;
@@ -574,13 +573,53 @@ function updateMovement(dt){
   discoverNearbyMarkpoints();
   maps();
   updateCamera();
+  return true;
+}
+
+function updateMovement(dt){
+  if(!overlay.hidden)return;
+
+  const manualMag=Math.hypot(ix,iy);
+  if(manualMag>=.05){
+    const nx=ix/manualMag;
+    const nz=iy/manualMag;
+    const speed=11.5*Math.min(1,manualMag);
+    game.world.running=false;
+    autoTarget=null;
+    applyMovement(nx,nz,speed,dt);
+    return;
+  }
+
+  if(!autoTarget)return;
+  if(autoTarget.pickupId&&!activePickups.has(autoTarget.pickupId)){
+    autoTarget=null;
+    return;
+  }
+
+  const dx=autoTarget.x-game.world.x;
+  const dz=autoTarget.z-game.world.z;
+  const distance=Math.hypot(dx,dz);
+  const stopDistance=autoTarget.pickupId?.length?0.85:0.35;
+  if(distance<=stopDistance){
+    collectNearbyPickups();
+    autoTarget=null;
+    return;
+  }
+
+  const nx=dx/distance;
+  const nz=dz/distance;
+  const maxStep=AUTO_WALK_SPEED*dt;
+  const usableDistance=Math.max(0,distance-stopDistance);
+  const speed=maxStep>usableDistance&&dt>0?usableDistance/dt:AUTO_WALK_SPEED;
+  game.world.running=false;
+  if(!applyMovement(nx,nz,speed,dt))autoTarget=null;
 }
 
 function frame(now){
   const dt=Math.min(.05,Math.max(0,(now-last)/1000));
   last=now;
   updateMovement(dt);
-  if(Math.hypot(ix,iy)<.05)player.position.y+=(0-player.position.y)*.2;
+  if(Math.hypot(ix,iy)<.05&&!autoTarget)player.position.y+=(0-player.position.y)*.2;
   animatePickups(now);
   animatePlacedObjects(now);
   timeAcc+=dt*(1000/TIME_SCALE.realMillisecondsPerGameMinute);
@@ -596,6 +635,47 @@ function isFieldUiTarget(target){
   return Boolean(target.closest('#miniMapBtn,#fieldUseButton,.field-left-info,button,a'));
 }
 
+function pickupGroupFromObject(object){
+  let current=object;
+  while(current&&current!==scene){
+    if(current.userData?.pickupId)return current;
+    current=current.parent;
+  }
+  return null;
+}
+
+function setTapDestination(clientX,clientY){
+  const rect=canvas.getBoundingClientRect();
+  if(rect.width<=0||rect.height<=0)return;
+  pointerNdc.set(
+    ((clientX-rect.left)/rect.width)*2-1,
+    -((clientY-rect.top)/rect.height)*2+1
+  );
+
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  raycaster.setFromCamera(pointerNdc,camera);
+
+  const pickupGroups=[...activePickups.values()].map(entry=>entry.group);
+  const pickupHits=pickupGroups.length?raycaster.intersectObjects(pickupGroups,true):[];
+  if(pickupHits.length){
+    const pickupGroup=pickupGroupFromObject(pickupHits[0].object);
+    if(pickupGroup){
+      autoTarget={
+        x:pickupGroup.position.x,
+        z:pickupGroup.position.z,
+        pickupId:pickupGroup.userData.pickupId
+      };
+      return;
+    }
+  }
+
+  const groundHit=raycaster.intersectObject(ground,false)[0];
+  if(groundHit){
+    autoTarget={x:groundHit.point.x,z:groundHit.point.z,pickupId:null};
+  }
+}
+
 function updateFieldMove(e){
   const dx=e.clientX-dragStartX;
   const dy=e.clientY-dragStartY;
@@ -605,6 +685,8 @@ function updateFieldMove(e){
     iy=0;
     return;
   }
+  dragMoved=true;
+  autoTarget=null;
   const scale=1/MOVE_RADIUS;
   ix=dx*scale;
   iy=dy*scale;
@@ -621,6 +703,9 @@ function beginFieldMove(e){
   pointerId=e.pointerId;
   dragStartX=e.clientX;
   dragStartY=e.clientY;
+  dragMoved=false;
+  pointerDownAt=performance.now();
+  autoTarget=null;
   ix=0;
   iy=0;
   fieldStage.setPointerCapture?.(pointerId);
@@ -633,30 +718,47 @@ function moveFieldMove(e){
   e.preventDefault();
 }
 
-function stopFieldMove(e=null){
-  if(e&&pointerId!==null&&e.pointerId!==pointerId)return;
+function clearFieldPointer(e=null){
+  if(e&&pointerId!==null&&e.pointerId!==pointerId)return false;
   if(fieldStage&&pointerId!==null&&fieldStage.hasPointerCapture?.(pointerId)){
     fieldStage.releasePointerCapture?.(pointerId);
   }
   pointerId=null;
   ix=0;
   iy=0;
+  return true;
+}
+
+function endFieldMove(e){
+  if(e.pointerId!==pointerId)return;
+  const distance=Math.hypot(e.clientX-dragStartX,e.clientY-dragStartY);
+  const elapsed=performance.now()-pointerDownAt;
+  const wasTap=!dragMoved&&distance<=TAP_MAX_DISTANCE&&elapsed<=TAP_MAX_MS;
+  const clientX=e.clientX;
+  const clientY=e.clientY;
+  clearFieldPointer(e);
+  if(wasTap)setTapDestination(clientX,clientY);
+}
+
+function cancelFieldMove(e=null){
+  if(!clearFieldPointer(e))return;
+  autoTarget=null;
 }
 
 if(fieldStage){
   fieldStage.addEventListener('pointerdown',beginFieldMove,{passive:false});
   fieldStage.addEventListener('pointermove',moveFieldMove,{passive:false});
-  fieldStage.addEventListener('pointerup',stopFieldMove);
-  fieldStage.addEventListener('pointercancel',stopFieldMove);
+  fieldStage.addEventListener('pointerup',endFieldMove);
+  fieldStage.addEventListener('pointercancel',cancelFieldMove);
 }
 
-miniBtn.addEventListener('click',()=>{stopFieldMove();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
+miniBtn.addEventListener('click',()=>{cancelFieldMove();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
 closeMap.addEventListener('click',()=>{overlay.hidden=true;});
-item.addEventListener('click',()=>{stopFieldMove();setActiveGame(game);location.href='./desertsurvival_item.html';});
+item.addEventListener('click',()=>{cancelFieldMove();setActiveGame(game);location.href='./desertsurvival_item.html';});
 
-window.addEventListener('blur',()=>stopFieldMove());
+window.addEventListener('blur',()=>cancelFieldMove());
 window.addEventListener('resize',()=>{resize();drawHud();maps();updateCamera();});
-window.addEventListener('pagehide',()=>{stopFieldMove();setActiveGame(game);});
+window.addEventListener('pagehide',()=>{cancelFieldMove();setActiveGame(game);});
 
 buildPlacedObjects();
 buildMarkpoints();
