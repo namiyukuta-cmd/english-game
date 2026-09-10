@@ -1,10 +1,10 @@
 import { getActiveGame, setActiveGame, createNewGameState } from './save.js';
-import { itemData } from './items.js';
+import { itemData, normalizeInventory } from './items.js';
 import { recipes, canCraft, craftRecipe } from './recipes.js';
 
 const content = document.getElementById('craftContent');
 let game = getActiveGame() || createNewGameState();
-game.inventory = Array.isArray(game.inventory) ? game.inventory : [];
+game.inventory = normalizeInventory(game.inventory);
 
 function itemName(id) {
   return itemData[id]?.name || id;
@@ -12,7 +12,7 @@ function itemName(id) {
 
 function ownedAmount(itemId) {
   return game.inventory
-    .filter(entry => entry.id === itemId)
+    .filter(entry => entry && entry.id === itemId)
     .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 }
 
@@ -67,4 +67,5 @@ function render() {
 }
 
 window.addEventListener('pagehide', () => setActiveGame(game));
+setActiveGame(game);
 render();
