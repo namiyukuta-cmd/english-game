@@ -1,6 +1,23 @@
 // 主人公の所持品。
 // アイテム種類は、内容が決まったものだけここへ追加する。
-export const itemData = Object.freeze({});
+export const itemData = Object.freeze({
+  stone: {
+    id: 'stone',
+    name: '石',
+    type: 'material',
+    equipSlot: null,
+    stackMax: 99,
+    weight: 0.3
+  },
+  dry_branch: {
+    id: 'dry_branch',
+    name: '枯れ枝',
+    type: 'material',
+    equipSlot: null,
+    stackMax: 99,
+    weight: 0.2
+  }
+});
 
 export function createDefaultInventory() {
   return [];
