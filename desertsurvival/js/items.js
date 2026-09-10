@@ -10,8 +10,29 @@ export const itemData = Object.freeze({
   stone: { id:'stone', name:'石', type:ITEM_TYPES.MATERIAL, stackMax:99, weight:0.3, description:'砂漠や礫地で拾える石。' },
   dry_branch: { id:'dry_branch', name:'枯れ枝', type:ITEM_TYPES.MATERIAL, stackMax:99, weight:0.2, description:'乾燥した低木などから落ちた枯れ枝。' },
   grass: { id:'grass', name:'草', type:ITEM_TYPES.MATERIAL, stackMax:99, weight:0.05, description:'砂漠にまばらに生える草。' },
-  raw_meat: { id:'raw_meat', name:'生肉', type:ITEM_TYPES.FOOD, stackMax:99, weight:0.3, description:'動物から得た生肉。加熱前。' },
-  campfire: { id:'campfire', name:'焚き火', type:ITEM_TYPES.PLACEABLE, stackMax:1, weight:1.5, description:'地面に設置して使う焚き火。' }
+  raw_meat: {
+    id:'raw_meat',
+    name:'生肉',
+    type:ITEM_TYPES.FOOD,
+    stackMax:99,
+    weight:0.3,
+    description:'動物から得た生肉。加熱前。',
+    useType:'eat',
+    useLabel:'食べる',
+    useIcon:'🍖',
+    foodRestore:12
+  },
+  campfire: {
+    id:'campfire',
+    name:'焚き火',
+    type:ITEM_TYPES.PLACEABLE,
+    stackMax:1,
+    weight:1.5,
+    description:'地面に設置して使う焚き火。',
+    useType:'place',
+    useLabel:'設置',
+    useIcon:'🔥'
+  }
 });
 
 export function getItemData(itemId) {
