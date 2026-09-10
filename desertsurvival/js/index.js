@@ -9,7 +9,7 @@ import {
   setActiveGame
 } from './save.js';
 
-const FIELD_URL = './desertsurvival_field.html?v=20260910-topui1';
+const FIELD_URL = './desertsurvival_field.html?v=20260910-topui2';
 
 const newGameBtn = document.getElementById('newGameBtn');
 const continueBtn = document.getElementById('continueBtn');
