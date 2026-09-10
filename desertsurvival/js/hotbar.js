@@ -1,5 +1,6 @@
 import { getActiveGame } from './save.js';
 import { itemData, normalizeInventory } from './items.js?v=20260910-itemuse1';
+import { markpoints } from './markpoints.js?v=20260911-oasis1';
 
 const hotbar = document.getElementById('fieldHotbar');
 const useButton = document.getElementById('fieldUseButton');
@@ -11,18 +12,54 @@ function entryAtSlot(inventory, slot) {
   return inventory.find(entry => Number(entry?.slot) === slot) || null;
 }
 
-function updateUseButton(inventory) {
+function nearbyWaterPoint(game) {
+  const x = Number(game?.world?.x);
+  const z = Number(game?.world?.z);
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+
+  let nearest = null;
+  let nearestDistance = Infinity;
+  for (const point of markpoints) {
+    if (point.type !== 'water') continue;
+    const px = Number(point.x);
+    const pz = Number(point.z);
+    if (!Number.isFinite(px) || !Number.isFinite(pz)) continue;
+    const distance = Math.hypot(px - x, pz - z);
+    const radius = Math.max(0, Number(point.interactionRadius || 3));
+    if (distance <= radius && distance < nearestDistance) {
+      nearest = point;
+      nearestDistance = distance;
+    }
+  }
+  return nearest;
+}
+
+function updateUseButton(inventory, game) {
   if (!useButton) return;
+
+  const waterPoint = nearbyWaterPoint(game);
+  if (waterPoint && Number(game?.player?.water || 0) < 100) {
+    useButton.hidden = false;
+    useButton.dataset.action = 'drink-water';
+    useButton.dataset.markpointId = waterPoint.id;
+    useButton.innerHTML = '<span class="field-use-icon">💧</span><span class="field-use-label">飲む</span>';
+    useButton.setAttribute('aria-label', `${waterPoint.name || '水場'}の水を飲む`);
+    return;
+  }
+
+  delete useButton.dataset.markpointId;
   const entry = entryAtSlot(inventory, selectedSlot);
   const data = entry ? itemData[entry.id] : null;
 
   if (!data?.useType) {
     useButton.hidden = true;
+    useButton.dataset.action = '';
     useButton.textContent = '';
     return;
   }
 
   useButton.hidden = false;
+  useButton.dataset.action = 'item';
   useButton.innerHTML = `<span class="field-use-icon">${data.useIcon || '●'}</span><span class="field-use-label">${data.useLabel || '使う'}</span>`;
   useButton.setAttribute('aria-label', `${data.name || entry.id}を${data.useLabel || '使う'}`);
 }
@@ -31,9 +68,11 @@ function render() {
   if (!hotbar) return;
   const game = getActiveGame();
   const inventory = normalizeInventory(game?.inventory || []);
-  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < HOTBAR_SLOT_COUNT)) + `|${selectedSlot}`;
+  const waterPoint = nearbyWaterPoint(game);
+  const waterSignature = waterPoint && Number(game?.player?.water || 0) < 100 ? `${waterPoint.id}:${Math.round(Number(game?.player?.water || 0) * 10)}` : '';
+  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < HOTBAR_SLOT_COUNT)) + `|${selectedSlot}|${waterSignature}`;
   if (signature === lastSignature) {
-    updateUseButton(inventory);
+    updateUseButton(inventory, game);
     return;
   }
   lastSignature = signature;
@@ -76,12 +115,21 @@ function render() {
     hotbar.appendChild(button);
   }
 
-  updateUseButton(inventory);
+  updateUseButton(inventory, game);
 }
 
 if (useButton) {
   useButton.addEventListener('click', () => {
     const game = getActiveGame();
+    const waterPoint = nearbyWaterPoint(game);
+    if (waterPoint && Number(game?.player?.water || 0) < 100) {
+      window.dispatchEvent(new CustomEvent('desert:drink-water', {
+        detail:{ markpointId:waterPoint.id }
+      }));
+      lastSignature = '';
+      return;
+    }
+
     const inventory = normalizeInventory(game?.inventory || []);
     const entry = entryAtSlot(inventory, selectedSlot);
     const data = entry ? itemData[entry.id] : null;
@@ -94,6 +142,10 @@ if (useButton) {
 }
 
 window.addEventListener('desert:inventory-changed', () => {
+  lastSignature = '';
+  render();
+});
+window.addEventListener('desert:player-changed', () => {
   lastSignature = '';
   render();
 });
