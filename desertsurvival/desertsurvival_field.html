@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#17140f">
+  <title>Desert Survival - Field</title>
+  <link rel="stylesheet" href="./css/desertsurvival.css">
+</head>
+<body class="screen screen-field">
+  <main id="fieldRoot" class="field-root">
+    <canvas id="worldCanvas" class="world-canvas" aria-label="砂漠フィールド"></canvas>
+
+    <header class="field-hud">
+      <section id="playerHud" class="player-hud" aria-label="プレイヤー状態"></section>
+      <button id="miniMapBtn" class="mini-map-button" type="button" aria-label="全体マップを開く">
+        <canvas id="miniMapCanvas" width="150" height="150"></canvas>
+      </button>
+    </header>
+
+    <div class="field-bottom-left">
+      <button id="interactBtn" class="round-action" type="button">調べる</button>
+      <button id="itemBtn" class="round-action" type="button">ITEM</button>
+    </div>
+
+    <div class="field-bottom-right">
+      <button id="runBtn" class="round-action" type="button">RUN</button>
+      <div id="movePad" class="move-pad" aria-label="移動スティック">
+        <div id="moveKnob" class="move-knob"></div>
+      </div>
+    </div>
+
+    <section id="mapOverlay" class="overlay" hidden aria-label="全体マップ">
+      <div class="overlay-head">
+        <h2>WORLD MAP</h2>
+        <button id="closeMapBtn" class="close-btn" type="button" aria-label="全体マップを閉じる">×</button>
+      </div>
+      <canvas id="worldMapCanvas" class="world-map-canvas"></canvas>
+    </section>
+  </main>
+
+  <script type="module" src="./js/field.js"></script>
+</body>
+</html>
