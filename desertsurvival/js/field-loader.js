@@ -8,5 +8,5 @@ if (!game) {
   await import('./field3d.js?v=20260910-pickupspawn2');
   await import('./field-ui.js?v=20260910-fieldlayout1');
   await import('./map-ui.js?v=20260910-worldmap1');
-  await import('./hotbar.js?v=20260910-itemuse1');
+  await import('./hotbar.js?v=20260910-inventorylayout1');
 }
