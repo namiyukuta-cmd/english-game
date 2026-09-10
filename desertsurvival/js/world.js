@@ -1,8 +1,9 @@
 export const WORLD = Object.freeze({
   width: 12000,
   height: 12000,
+  // 新規ゲームはオアシスの水際ではなく、木陰のある縁から始める。
   startX: 6000,
-  startZ: 6000,
+  startZ: 6008,
   travelMinutesPerWorldUnit: 0.035
 });
 
