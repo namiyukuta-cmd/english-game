@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 import {getActiveGame,setActiveGame,createNewGameState} from './save.js';
 import {normalizePlayer,advancePlayer} from './player.js';
 import {addItem,itemData} from './items.js';
-import {advanceTime,TIME_SCALE,formatTime} from './time.js';
+import {advanceTime,TIME_SCALE} from './time.js';
 import {getAmbientTemperature} from './temperature.js';
 import {updateWeather} from './weather.js';
 import {moveWorldPosition} from './world.js';
@@ -81,7 +81,6 @@ function makePlayer(){
   directionMark.rotation.x=-Math.PI/2;
   directionMark.position.set(0,1.90,-0.43);
   g.add(directionMark);
-
   return g;
 }
 
@@ -107,27 +106,9 @@ const scrubMat=new THREE.MeshLambertMaterial({color:0x746a43});
 
 const pickupStoneGeo=new THREE.OctahedronGeometry(.48,0);
 const pickupBranchGeo=new THREE.CylinderGeometry(.08,.11,1.25,6);
-const pickupStoneMat=new THREE.MeshStandardMaterial({
-  color:0xaefaff,
-  emissive:0x00b8c6,
-  emissiveIntensity:1.45,
-  roughness:.28,
-  metalness:.05
-});
-const pickupBranchMat=new THREE.MeshStandardMaterial({
-  color:0xffd46d,
-  emissive:0xd87900,
-  emissiveIntensity:1.25,
-  roughness:.42,
-  metalness:.02
-});
-const pickupGlowMat=new THREE.MeshBasicMaterial({
-  color:0xffffff,
-  transparent:true,
-  opacity:.72,
-  depthWrite:false,
-  blending:THREE.AdditiveBlending
-});
+const pickupStoneMat=new THREE.MeshStandardMaterial({color:0xaefaff,emissive:0x00b8c6,emissiveIntensity:1.45,roughness:.28,metalness:.05});
+const pickupBranchMat=new THREE.MeshStandardMaterial({color:0xffd46d,emissive:0xd87900,emissiveIntensity:1.25,roughness:.42,metalness:.02});
+const pickupGlowMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.72,depthWrite:false,blending:THREE.AdditiveBlending});
 const pickupHaloGeo=new THREE.TorusGeometry(.78,.045,6,22);
 const pickupSparkGeo=new THREE.OctahedronGeometry(.10,0);
 
@@ -153,7 +134,6 @@ function pickupIdForCell(cx,cz){
 function makePickup(itemId,pickupId,wx,wz,phase){
   const g=new THREE.Group();
   let core;
-
   if(itemId==='dry_branch'){
     core=new THREE.Mesh(pickupBranchGeo,pickupBranchMat);
     core.rotation.z=Math.PI/2;
@@ -215,7 +195,6 @@ function createCell(cx,cz){
     }
   }
 
-  // 通常素材。世界座標から決まるので、画面を出入りしても同じ場所に出る。
   const pickupRoll=random();
   const pickupId=pickupIdForCell(cx,cz);
   if(pickupRoll<0.038&&!game.world.collectedPickups.includes(pickupId)){
@@ -271,7 +250,6 @@ function collectNearbyPickups(){
     const dx=entry.group.position.x-game.world.x;
     const dz=entry.group.position.z-game.world.z;
     if(Math.hypot(dx,dz)>PICKUP_RADIUS)continue;
-
     addItem(game.inventory,entry.itemId,1);
     game.world.collectedPickups.push(pickupId);
     entry.cellGroup.remove(entry.group);
@@ -336,18 +314,63 @@ function discoverNearbyMarkpoints(){
   if(changed)maps();
 }
 
-/* ---------- HUD / map ---------- */
-function bar(name,value){
+/* ---------- compact HUD / map ---------- */
+function compactBar(icon,value,label){
   const safe=Math.max(0,Math.min(100,Number(value||0)));
-  return `<div class="hud-row"><b>${name}</b><span class="hud-bar"><i style="width:${safe}%"></i></span><span>${Math.round(value)}</span></div>`;
+  return `<div class="compact-stat" aria-label="${label} ${Math.round(safe)}"><span class="compact-stat-icon">${icon}</span><span class="compact-stat-track"><i class="compact-stat-fill" style="width:${safe}%"></i></span><span class="compact-stat-value">${Math.round(safe)}</span></div>`;
 }
+
+function weatherMarkup(){
+  if(game.weather.type==='sandstorm'){
+    return `<div class="weather-badge" aria-label="砂嵐" title="砂嵐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h12c2.7 0 2.7-4 0-4-1.2 0-2 .6-2.4 1.4"/><path d="M3 12h16c2.7 0 2.7 4 0 4-1.2 0-2-.6-2.4-1.4"/><path d="M5 16h7"/><path d="M4 20h11"/></svg></div>`;
+  }
+  return `<div class="weather-badge" aria-label="晴れ" title="晴れ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></div>`;
+}
+
+function tempState(temp){
+  if(temp>=48||temp<=0)return 'danger';
+  if(temp>=35)return 'hot';
+  if(temp>=18)return 'normal';
+  if(temp>=8)return 'cool';
+  return 'cold';
+}
+
 function drawHud(){
   const ambient=getAmbientTemperature(game.time,game.weather.type);
-  const status=game.player.status?.length?game.player.status.join(' / '):'正常';
-  hud.innerHTML=`${bar('体力',game.player.health)}${bar('水',game.player.water)}${bar('食',game.player.food)}${bar('睡眠',game.player.sleep)}<div class="hud-row"><b>体温</b><span>${game.player.bodyTemp.toFixed(1)}℃</span><span></span></div><div class="hud-row"><b>外気</b><span>${ambient.toFixed(1)}℃</span><span></span></div><div class="hud-row"><b>状態</b><span>${status}</span><span></span></div><div class="hud-clock-row"><canvas id="clockCanvas" width="84" height="84"></canvas><span>${formatTime(game.time)}</span></div>`;
+  const tempClass=tempState(ambient);
+  const fill=Math.max(8,Math.min(94,((ambient+10)/65)*100));
+  const statuses=Array.isArray(game.player.status)?game.player.status.filter(Boolean):[];
+  const statusHtml=statuses.length?`<div class="status-alert">${statuses.join(' / ')}</div>`:'';
+
+  hud.innerHTML=`
+    <div class="survival-compact">
+      ${compactBar('♥',game.player.health,'体力')}
+      ${compactBar('◇',game.player.water,'水')}
+      ${compactBar('◆',game.player.food,'食')}
+      ${compactBar('☾',game.player.sleep,'睡眠')}
+      <div class="body-temp-mini" aria-label="体温 ${game.player.bodyTemp.toFixed(1)}度">
+        <svg viewBox="0 0 12 18" aria-hidden="true"><path d="M4.5 3a1.5 1.5 0 013 0v7.2a3.5 3.5 0 11-3 0V3z"/><path d="M6 6v6"/></svg>
+        <span>${game.player.bodyTemp.toFixed(1)}°</span>
+      </div>
+    </div>
+    <div class="hud-visual-row">
+      <div class="time-weather-stack">
+        <div class="day-badge"><span>DAY</span><strong>${Number(game.time.day||1)}</strong></div>
+        <div class="clock-ring"><canvas id="clockCanvas" width="96" height="96" aria-label="ゲーム内時計"></canvas></div>
+        ${weatherMarkup()}
+      </div>
+      <div class="temp-widget ${tempClass}" aria-label="外気温 ${ambient.toFixed(1)}度">
+        <div class="thermometer"><i class="thermometer-fill" style="height:${fill}%"></i></div>
+        <div class="temp-reading">${Math.round(ambient)}°</div>
+      </div>
+    </div>
+    ${statusHtml}
+  `;
+
   const cc=$('clockCanvas');
-  if(cc){cc.style.width='72px';cc.style.height='72px';drawClock(cc,game.time);}
+  if(cc)drawClock(cc,game.time);
 }
+
 function maps(){
   drawMiniMap(mini,game.world,markpoints);
   if(!overlay.hidden)drawWorldMap(worldMap,game.world,markpoints);
@@ -397,7 +420,7 @@ let ix=0,iy=0,pointerId=null,last=performance.now(),timeAcc=0,saveAcc=0,walkPhas
 function minuteTick(){
   advanceTime(game.time,1);
   updateWeather(game.weather,game.time);
-  advancePlayer(game.player,{ambientTemp:getAmbientTemperature(game.time,game.weather.type),weather:game.weather.type,running:game.world.running,sheltered:game.world.sheltered},1);
+  advancePlayer(game.player,{ambientTemp:getAmbientTemperature(game.time,game.weather.type),weather:game.weather.type,running:false,sheltered:game.world.sheltered},1);
   drawHud();maps();updateLight();
 }
 
@@ -407,14 +430,15 @@ function updateMovement(dt){
   if(mag<.05)return;
   const nx=ix/mag;
   const nz=iy/mag;
-  const speed=game.world.running?20:11.5;
+  const speed=11.5;
+  game.world.running=false;
   const moved=moveWorldPosition(game.world,nx*speed*dt,nz*speed*dt);
   if(!moved.moved)return;
 
   player.position.x=game.world.x;
   player.position.z=game.world.z;
   player.rotation.y=Math.atan2(-nx,-nz);
-  walkPhase+=dt*(game.world.running?13:8);
+  walkPhase+=dt*8;
   player.position.y=Math.abs(Math.sin(walkPhase))*.055;
   timeAcc+=moved.gameMinutes;
   updateCells();
@@ -453,15 +477,16 @@ function release(e){if(e&&pointerId!==null&&e.pointerId!==pointerId)return;point
 pad.addEventListener('pointerup',release);
 pad.addEventListener('pointercancel',release);
 
-function stopRun(){game.world.running=false;run.textContent='RUN';}
-run.addEventListener('pointerdown',()=>{game.world.running=true;run.textContent='RUNNING';});
-run.addEventListener('pointerup',stopRun);
-run.addEventListener('pointercancel',stopRun);
-run.addEventListener('pointerleave',stopRun);
+function stopRun(){game.world.running=false;if(run)run.textContent='RUN';}
+if(run){
+  run.addEventListener('pointerdown',()=>{game.world.running=false;});
+  run.addEventListener('pointerup',stopRun);
+  run.addEventListener('pointercancel',stopRun);
+}
 
 miniBtn.addEventListener('click',()=>{release();stopRun();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
 closeMap.addEventListener('click',()=>{overlay.hidden=true;});
-item.addEventListener('click',()=>{setActiveGame(game);location.href='./desertsurvival_menu.html';});
+item.addEventListener('click',()=>{setActiveGame(game);location.href='./desertsurvival_item.html';});
 
 window.addEventListener('resize',()=>{resize();drawHud();maps();updateCamera();});
 window.addEventListener('pagehide',()=>setActiveGame(game));
