@@ -9,7 +9,7 @@ import {
   setActiveGame
 } from './save.js';
 
-const FIELD_URL = './desertsurvival_field.html?v=20260910-hud2';
+const FIELD_URL = './desertsurvival_field.html?v=20260910-hudsketch1';
 
 const newGameBtn = document.getElementById('newGameBtn');
 const continueBtn = document.getElementById('continueBtn');
