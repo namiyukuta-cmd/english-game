@@ -2,7 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 
 import {getActiveGame,setActiveGame,createNewGameState} from './save.js';
 import {normalizePlayer,advancePlayer} from './player.js';
-import {addItem,itemData} from './items.js';
+import {addItem,itemData} from './items.js?v=20260910-itemuse1';
 import {advanceTime,TIME_SCALE} from './time.js';
 import {getAmbientTemperature} from './temperature.js';
 import {updateWeather} from './weather.js';
@@ -30,6 +30,7 @@ normalizePlayer(game.player);
 game.inventory=Array.isArray(game.inventory)?game.inventory:[];
 game.world.discoveredMarkpoints=Array.isArray(game.world.discoveredMarkpoints)?game.world.discoveredMarkpoints:[];
 game.world.collectedPickups=Array.isArray(game.world.collectedPickups)?game.world.collectedPickups:[];
+game.world.placedObjects=Array.isArray(game.world.placedObjects)?game.world.placedObjects:[];
 setActiveGame(game);
 
 /* ---------- 3D scene ---------- */
@@ -95,6 +96,7 @@ const RADIUS_Z=10;
 const PICKUP_RADIUS=1.25;
 const cells=new Map();
 const activePickups=new Map();
+const placedObjects=new Map();
 
 const duneGeo=new THREE.SphereGeometry(1,10,6);
 const duneMatA=new THREE.MeshLambertMaterial({color:0xd9bf8d});
@@ -237,12 +239,15 @@ function updateCells(force=false){
 
 /* ---------- automatic material pickup ---------- */
 let toastTimer=null;
-function showPickupToast(itemId){
-  const name=itemData[itemId]?.name||itemId;
-  pickupToast.textContent=`${name} を拾った`;
+function showFieldToast(text){
+  pickupToast.textContent=String(text||'');
   pickupToast.hidden=false;
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{pickupToast.hidden=true;},900);
+  toastTimer=setTimeout(()=>{pickupToast.hidden=true;},1000);
+}
+function showPickupToast(itemId){
+  const name=itemData[itemId]?.name||itemId;
+  showFieldToast(`${name} を拾った`);
 }
 
 function collectNearbyPickups(){
@@ -257,6 +262,7 @@ function collectNearbyPickups(){
     activePickups.delete(pickupId);
     showPickupToast(entry.itemId);
     setActiveGame(game);
+    window.dispatchEvent(new CustomEvent('desert:inventory-changed'));
   }
 }
 
@@ -272,6 +278,61 @@ function animatePickups(now){
     const pulse=.75+Math.sin(t*3.4+phase)*.25;
     d.sparkA.scale.setScalar(.75+pulse*.55);
     d.sparkB.scale.setScalar(.55+pulse*.35);
+  }
+}
+
+/* ---------- placed items ---------- */
+function makeCampfireObject(data){
+  const g=new THREE.Group();
+  const stoneMat=new THREE.MeshLambertMaterial({color:0x665a4c});
+  const woodMat=new THREE.MeshLambertMaterial({color:0x6d4327});
+  const flameMat=new THREE.MeshBasicMaterial({color:0xffa52f});
+
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2;
+    const stone=new THREE.Mesh(new THREE.DodecahedronGeometry(.22,0),stoneMat);
+    stone.position.set(Math.cos(a)*.72,.18,Math.sin(a)*.72);
+    stone.scale.y=.7;
+    g.add(stone);
+  }
+
+  for(const rot of [-.65,.65]){
+    const log=new THREE.Mesh(new THREE.CylinderGeometry(.11,.13,1.25,6),woodMat);
+    log.rotation.z=Math.PI/2;
+    log.rotation.y=rot;
+    log.position.y=.25;
+    g.add(log);
+  }
+
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(.34,.9,7),flameMat);
+  flame.position.y=.78;
+  g.add(flame);
+
+  g.position.set(Number(data.x||0),0,Number(data.z||0));
+  g.userData={placedId:data.id,type:'campfire',flame};
+  return g;
+}
+
+function addPlacedObject(data){
+  if(!data?.id||placedObjects.has(data.id))return;
+  let obj=null;
+  if(data.type==='campfire')obj=makeCampfireObject(data);
+  if(!obj)return;
+  scene.add(obj);
+  placedObjects.set(data.id,obj);
+}
+
+function buildPlacedObjects(){
+  for(const data of game.world.placedObjects)addPlacedObject(data);
+}
+
+function animatePlacedObjects(now){
+  const t=now*.001;
+  for(const obj of placedObjects.values()){
+    if(obj.userData.type==='campfire'&&obj.userData.flame){
+      const s=.92+Math.sin(t*7+obj.position.x*.1)*.10;
+      obj.userData.flame.scale.set(1,s,1);
+    }
   }
 }
 
@@ -414,6 +475,66 @@ function updateLight(){
   scene.fog.color.copy(sky.clone().lerp(new THREE.Color(0xc9ad78),.45));
 }
 
+/* ---------- item use ---------- */
+function inventoryIndexAtHotbarSlot(slot){
+  return game.inventory.findIndex(entry=>Number(entry?.slot)===Number(slot));
+}
+
+function consumeInventoryIndex(index,amount=1){
+  const entry=game.inventory[index];
+  if(!entry)return false;
+  entry.amount=Number(entry.amount||1)-amount;
+  if(entry.amount<=0)game.inventory.splice(index,1);
+  return true;
+}
+
+function placeCampfire(){
+  const distance=2.6;
+  const x=game.world.x-Math.sin(player.rotation.y)*distance;
+  const z=game.world.z-Math.cos(player.rotation.y)*distance;
+  const data={
+    id:`campfire_${Date.now()}`,
+    type:'campfire',
+    x,
+    z
+  };
+  game.world.placedObjects.push(data);
+  addPlacedObject(data);
+}
+
+function useHotbarItem(event){
+  const slot=Number(event.detail?.slot);
+  if(!Number.isInteger(slot)||slot<0||slot>5)return;
+  const index=inventoryIndexAtHotbarSlot(slot);
+  if(index<0)return;
+
+  const entry=game.inventory[index];
+  const data=itemData[entry.id];
+  if(!data?.useType)return;
+
+  if(data.useType==='eat'){
+    if(Number(game.player.food||0)>=100){
+      showFieldToast('今は満腹です');
+      return;
+    }
+    game.player.food=Math.min(100,Number(game.player.food||0)+Number(data.foodRestore||10));
+    consumeInventoryIndex(index,1);
+    normalizePlayer(game.player);
+    showFieldToast(`${data.name} を食べた`);
+  }else if(data.useType==='place'&&entry.id==='campfire'){
+    placeCampfire();
+    consumeInventoryIndex(index,1);
+    showFieldToast('焚き火を設置した');
+  }else{
+    return;
+  }
+
+  setActiveGame(game);
+  window.dispatchEvent(new CustomEvent('desert:inventory-changed'));
+}
+
+window.addEventListener('desert:use-hotbar-item',useHotbarItem);
+
 /* ---------- movement ---------- */
 let ix=0,iy=0,pointerId=null,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
 
@@ -454,6 +575,7 @@ function frame(now){
   updateMovement(dt);
   if(Math.hypot(ix,iy)<.05)player.position.y+=(0-player.position.y)*.2;
   animatePickups(now);
+  animatePlacedObjects(now);
   timeAcc+=dt*(1000/TIME_SCALE.realMillisecondsPerGameMinute);
   while(timeAcc>=1){minuteTick();timeAcc-=1;}
   saveAcc+=dt;
@@ -491,6 +613,7 @@ item.addEventListener('click',()=>{setActiveGame(game);location.href='./desertsu
 window.addEventListener('resize',()=>{resize();drawHud();maps();updateCamera();});
 window.addEventListener('pagehide',()=>setActiveGame(game));
 
+buildPlacedObjects();
 buildMarkpoints();
 updateCells(true);
 resize();
