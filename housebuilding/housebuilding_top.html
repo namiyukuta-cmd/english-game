@@ -2,52 +2,453 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>House Building - Game</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#d8d3c8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>House Building</title>
   <style>
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #d9d9d9;
-      color: #222;
+      background: #d8d3c8;
+      color: #26231f;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      touch-action: none;
     }
-
-    body {
-      min-height: 100dvh;
-    }
-
-    #game {
+    button { font: inherit; }
+    #app {
+      position: relative;
       width: 100%;
       height: 100dvh;
+      overflow: hidden;
+      background: linear-gradient(#cfd9df 0%, #e2ebf0 48%, #c9bfaa 48%, #c9bfaa 100%);
+    }
+    #scene {
+      position: absolute;
+      inset: 0;
+    }
+    #scene canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+    .topbar {
+      position: absolute;
+      top: max(10px, env(safe-area-inset-top));
+      left: 10px;
+      right: 10px;
+      z-index: 10;
       display: grid;
-      place-items: center;
+      grid-template-columns: 46px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
     }
-
-    .placeholder {
+    .topbar > * { pointer-events: auto; }
+    .icon-btn, .status {
+      min-height: 44px;
+      border: 1px solid rgba(50, 45, 38, .25);
+      background: rgba(255,255,255,.88);
+      color: #27231d;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      backdrop-filter: blur(8px);
+    }
+    .icon-btn {
+      width: 46px;
+      border-radius: 13px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .status {
+      border-radius: 13px;
+      padding: 7px 11px;
+      min-width: 0;
+    }
+    .status strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .status small {
+      display: block;
+      margin-top: 2px;
+      color: #6e675d;
+      font-size: 10px;
+    }
+    .count {
+      border-radius: 13px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .camera-controls {
+      position: absolute;
+      right: 10px;
+      top: calc(max(10px, env(safe-area-inset-top)) + 58px);
+      z-index: 10;
+      display: grid;
+      gap: 6px;
+    }
+    .camera-controls button {
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(50,45,38,.22);
+      border-radius: 12px;
+      background: rgba(255,255,255,.84);
+      color: #2e2922;
+      font-size: 17px;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-wrap {
+      position: absolute;
+      z-index: 10;
+      left: 10px;
+      right: 10px;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .toolbar {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 7px;
+      padding: 8px;
+      border: 1px solid rgba(50,45,38,.24);
+      border-radius: 18px;
+      background: rgba(248,246,241,.9);
+      box-shadow: 0 4px 16px rgba(0,0,0,.10);
+      backdrop-filter: blur(10px);
+    }
+    .tool {
+      min-width: 0;
+      min-height: 54px;
+      border: 1px solid #c9c1b5;
+      border-radius: 13px;
+      background: #fff;
+      color: #332e27;
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .tool span { font-size: 19px; line-height: 1; }
+    .tool.active {
+      border-color: #5f574c;
+      background: #5f574c;
+      color: white;
+    }
+    .hint {
+      pointer-events: none;
+      width: max-content;
+      max-width: calc(100% - 20px);
+      margin: 0 auto 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(32,29,25,.72);
+      color: white;
+      font-size: 11px;
       text-align: center;
-      padding: 24px;
     }
-
-    .placeholder h1 {
-      margin: 0 0 10px;
-      font-size: 24px;
-    }
-
-    .placeholder p {
-      margin: 0;
-      color: #555;
+    #error {
+      position: absolute;
+      inset: 20% 18px auto;
+      z-index: 30;
+      display: none;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fff;
+      color: #222;
+      border: 1px solid #aaa;
+      line-height: 1.6;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <main id="game">
-    <section class="placeholder">
-      <h1>家作りゲーム</h1>
-      <p>ここに3Dマス座標式のゲーム画面を作成します。</p>
-    </section>
+  <main id="app">
+    <div id="scene" aria-label="3D家作りフィールド"></div>
+
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="戻る">←</button>
+      <div class="status">
+        <strong id="cellStatus">マスをタップしてください</strong>
+        <small>12 × 12 GRID / X・Z座標で管理</small>
+      </div>
+      <div class="status count" id="objectCount">0 個</div>
+    </header>
+
+    <div class="camera-controls" aria-label="視点操作">
+      <button id="rotateLeft" aria-label="左へ回転">↶</button>
+      <button id="rotateRight" aria-label="右へ回転">↷</button>
+      <button id="zoomIn" aria-label="拡大">＋</button>
+      <button id="zoomOut" aria-label="縮小">−</button>
+    </div>
+
+    <div class="toolbar-wrap">
+      <div class="hint">マスをタップして配置します</div>
+      <nav class="toolbar" aria-label="建築ツール">
+        <button class="tool active" data-tool="floor"><span>▱</span>床</button>
+        <button class="tool" data-tool="wall"><span>▥</span>壁</button>
+        <button class="tool" data-tool="block"><span>■</span>箱</button>
+        <button class="tool" data-tool="delete"><span>×</span>削除</button>
+      </nav>
+    </div>
+
+    <div id="error">3D表示を読み込めませんでした。通信状態を確認して、ページを再読み込みしてください。</div>
   </main>
+
+  <script type="module">
+    const root = document.getElementById('scene');
+    const errorBox = document.getElementById('error');
+
+    try {
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js');
+
+      const GRID_SIZE = 12;
+      const CELL = 1;
+      const HALF = GRID_SIZE / 2;
+      const objects = new Map();
+      let currentTool = 'floor';
+      let cameraAngle = Math.PI / 4;
+      let cameraRadius = 13.5;
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xdce5e8);
+      scene.fog = new THREE.Fog(0xdce5e8, 16, 30);
+
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      root.appendChild(renderer.domElement);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x8d806c, 2.2));
+      const sun = new THREE.DirectionalLight(0xffffff, 2.1);
+      sun.position.set(8, 13, 7);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      sun.shadow.camera.left = -10;
+      sun.shadow.camera.right = 10;
+      sun.shadow.camera.top = 10;
+      sun.shadow.camera.bottom = -10;
+      scene.add(sun);
+
+      const groundMat = new THREE.MeshStandardMaterial({ color: 0xbbae92, roughness: 1 });
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(GRID_SIZE, GRID_SIZE), groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.035;
+      ground.receiveShadow = true;
+      ground.userData.isGround = true;
+      scene.add(ground);
+
+      const grid = new THREE.GridHelper(GRID_SIZE, GRID_SIZE, 0x4d463c, 0x82786a);
+      grid.position.y = 0;
+      const gridMaterials = Array.isArray(grid.material) ? grid.material : [grid.material];
+      gridMaterials.forEach(m => { m.transparent = true; m.opacity = 0.8; });
+      scene.add(grid);
+
+      const selector = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.94, 0.94),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, side: THREE.DoubleSide })
+      );
+      selector.rotation.x = -Math.PI / 2;
+      selector.position.y = 0.015;
+      selector.visible = false;
+      scene.add(selector);
+
+      const materials = {
+        floor: new THREE.MeshStandardMaterial({ color: 0xd8c5a7, roughness: 0.9 }),
+        wall: new THREE.MeshStandardMaterial({ color: 0xeee8dc, roughness: 0.86 }),
+        block: new THREE.MeshStandardMaterial({ color: 0x96765b, roughness: 0.82 })
+      };
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      let pointerDown = null;
+
+      function keyFor(x, z) { return `${x},${z}`; }
+
+      function worldFromCell(x, z) {
+        return {
+          x: x - HALF + 0.5,
+          z: z - HALF + 0.5
+        };
+      }
+
+      function cellFromPoint(point) {
+        const x = Math.floor(point.x + HALF);
+        const z = Math.floor(point.z + HALF);
+        if (x < 0 || x >= GRID_SIZE || z < 0 || z >= GRID_SIZE) return null;
+        return { x, z };
+      }
+
+      function updateCamera() {
+        const h = 10;
+        camera.position.set(
+          Math.cos(cameraAngle) * cameraRadius,
+          h,
+          Math.sin(cameraAngle) * cameraRadius
+        );
+        camera.lookAt(0, 0, 0);
+      }
+
+      function resize() {
+        const w = Math.max(1, root.clientWidth);
+        const h = Math.max(1, root.clientHeight);
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+
+      function updateCount() {
+        document.getElementById('objectCount').textContent = `${objects.size} 個`;
+      }
+
+      function setSelectedCell(cell) {
+        if (!cell) {
+          selector.visible = false;
+          return;
+        }
+        const p = worldFromCell(cell.x, cell.z);
+        selector.position.set(p.x, 0.018, p.z);
+        selector.visible = true;
+        document.getElementById('cellStatus').textContent = `選択 X:${cell.x} / Z:${cell.z}`;
+      }
+
+      function makeObject(type, cell) {
+        const p = worldFromCell(cell.x, cell.z);
+        let mesh;
+
+        if (type === 'floor') {
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.12, 0.94), materials.floor);
+          mesh.position.set(p.x, 0.06, p.z);
+        } else if (type === 'wall') {
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 1.35, 0.22), materials.wall);
+          mesh.position.set(p.x, 0.675, p.z);
+        } else {
+          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.82, 0.82), materials.block);
+          mesh.position.set(p.x, 0.41, p.z);
+        }
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { isBuildObject: true, type, cellX: cell.x, cellZ: cell.z };
+        return mesh;
+      }
+
+      function placeAt(cell) {
+        const key = keyFor(cell.x, cell.z);
+        const old = objects.get(key);
+
+        if (currentTool === 'delete') {
+          if (old) {
+            scene.remove(old);
+            old.geometry.dispose();
+            objects.delete(key);
+            updateCount();
+          }
+          return;
+        }
+
+        if (old) {
+          scene.remove(old);
+          old.geometry.dispose();
+          objects.delete(key);
+        }
+
+        const mesh = makeObject(currentTool, cell);
+        objects.set(key, mesh);
+        scene.add(mesh);
+        updateCount();
+      }
+
+      function pointerToCell(clientX, clientY) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObject(ground, false)[0];
+        return hit ? cellFromPoint(hit.point) : null;
+      }
+
+      renderer.domElement.addEventListener('pointerdown', e => {
+        pointerDown = { x: e.clientX, y: e.clientY };
+        setSelectedCell(pointerToCell(e.clientX, e.clientY));
+      });
+
+      renderer.domElement.addEventListener('pointermove', e => {
+        if (!pointerDown) setSelectedCell(pointerToCell(e.clientX, e.clientY));
+      });
+
+      renderer.domElement.addEventListener('pointerup', e => {
+        if (!pointerDown) return;
+        const moved = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y);
+        const cell = pointerToCell(e.clientX, e.clientY);
+        pointerDown = null;
+        setSelectedCell(cell);
+        if (cell && moved < 12) placeAt(cell);
+      });
+
+      renderer.domElement.addEventListener('pointercancel', () => { pointerDown = null; });
+
+      document.querySelectorAll('.tool').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tool').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentTool = btn.dataset.tool;
+        });
+      });
+
+      document.getElementById('rotateLeft').addEventListener('click', () => {
+        cameraAngle -= Math.PI / 8;
+        updateCamera();
+      });
+      document.getElementById('rotateRight').addEventListener('click', () => {
+        cameraAngle += Math.PI / 8;
+        updateCamera();
+      });
+      document.getElementById('zoomIn').addEventListener('click', () => {
+        cameraRadius = Math.max(9, cameraRadius - 1.3);
+        updateCamera();
+      });
+      document.getElementById('zoomOut').addEventListener('click', () => {
+        cameraRadius = Math.min(19, cameraRadius + 1.3);
+        updateCamera();
+      });
+      document.getElementById('backBtn').addEventListener('click', () => {
+        location.href = 'housebuilding_index.html';
+      });
+
+      window.addEventListener('resize', resize);
+      resize();
+      updateCamera();
+      updateCount();
+
+      function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    } catch (err) {
+      console.error(err);
+      errorBox.style.display = 'block';
+    }
+  </script>
 </body>
 </html>
