@@ -1,4 +1,4 @@
-import { itemData, INVENTORY_SLOT_COUNT } from './items.js';
+import { itemData, INVENTORY_SLOT_COUNT } from './items.js?v=20260910-inventory2';
 
 export const EQUIPMENT_SLOTS = Object.freeze([
   'head',
@@ -96,7 +96,7 @@ export function unequipItem(inventory, equipment, slot, targetSlotIndex = null) 
   const entry = equipment[slot];
   if (!entry) return false;
 
-  let inventorySlot = Number.isInteger(targetSlotIndex) ? targetSlotIndex : firstFreeInventorySlot(inventory);
+  const inventorySlot = Number.isInteger(targetSlotIndex) ? targetSlotIndex : firstFreeInventorySlot(inventory);
   if (inventorySlot < 0 || inventorySlot >= INVENTORY_SLOT_COUNT) return false;
   if ((inventory || []).some(value => Number(value?.slot) === inventorySlot)) return false;
 
