@@ -1,9 +1,6 @@
 // 主人公の所持品。
-// アイテムそのものの種類が増えたら itemData を別ファイルへ分離してもよい。
-export const itemData = Object.freeze({
-  water_skin: { id:'water_skin', name:'水袋', type:'container', equipSlot:null, stackMax:1, weight:0.4 },
-  cloth_wrap: { id:'cloth_wrap', name:'布', type:'material', equipSlot:null, stackMax:20, weight:0.1 }
-});
+// アイテム種類は、内容が決まったものだけここへ追加する。
+export const itemData = Object.freeze({});
 
 export function createDefaultInventory() {
   return [];
