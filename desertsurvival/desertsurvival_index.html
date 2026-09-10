@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#17140f">
+  <title>Desert Survival</title>
+  <link rel="stylesheet" href="./css/desertsurvival.css">
+</head>
+<body class="screen screen-index">
+  <main class="index-shell">
+    <h1>DESERT SURVIVAL</h1>
+
+    <nav class="index-menu" aria-label="メインメニュー">
+      <button id="newGameBtn" type="button">新しく始める</button>
+      <button id="continueBtn" type="button">続きから</button>
+      <button id="settingsBtn" type="button">設定</button>
+    </nav>
+
+    <section id="continuePanel" class="panel" hidden>
+      <div class="panel-head">
+        <h2>続きから</h2>
+        <button class="close-btn" data-close="continuePanel" type="button" aria-label="閉じる">×</button>
+      </div>
+      <p class="subtext">private-game-data に保存された Desert Survival のセーブデータを読み込みます。</p>
+      <div id="saveList" class="save-list"></div>
+      <p id="continueStatus" class="status" aria-live="polite"></p>
+    </section>
+
+    <section id="settingsPanel" class="panel" hidden>
+      <div class="panel-head">
+        <h2>設定</h2>
+        <button class="close-btn" data-close="settingsPanel" type="button" aria-label="閉じる">×</button>
+      </div>
+      <label for="githubToken">GitHubトークン</label>
+      <input id="githubToken" type="password" autocomplete="off" placeholder="GitHub token">
+      <div class="setting-actions">
+        <button id="saveTokenBtn" type="button">保存</button>
+        <button id="clearTokenBtn" type="button">削除</button>
+      </div>
+      <p class="subtext">トークンはこのブラウザの localStorage のみに保存します。private-game-data の読み書きには Contents 権限が必要です。</p>
+      <p id="settingsStatus" class="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script type="module" src="./js/index.js"></script>
+</body>
+</html>
