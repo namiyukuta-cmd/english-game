@@ -8,14 +8,14 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Desert Survival - Field</title>
-  <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-controls2">
+  <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-hud1">
 </head>
 <body class="screen screen-field">
   <main id="fieldRoot" class="field-root">
     <canvas id="worldCanvas" class="world-canvas" aria-label="砂漠フィールド"></canvas>
 
     <header class="field-hud">
-      <section id="playerHud" class="player-hud" aria-label="プレイヤー状態"></section>
+      <section id="playerHud" class="player-hud" aria-label="プレイヤー状態・時間・天気"></section>
       <button id="miniMapBtn" class="mini-map-button" type="button" aria-label="全体マップを開く">
         <canvas id="miniMapCanvas" width="150" height="150"></canvas>
       </button>
@@ -48,6 +48,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/field3d.js?v=20260910-controls2"></script>
+  <script type="module" src="./js/field3d.js?v=20260910-hud1"></script>
 </body>
 </html>
