@@ -10,7 +10,7 @@ import {
 } from './save.js';
 import { WORLD } from './world.js?v=20260911-oasisstart1';
 
-const FIELD_URL = './desertsurvival_field_v2.html?v=20260911-waterworld1';
+const FIELD_URL = './desertsurvival_field_v2.html?v=20260911-waterworld2';
 
 const newGameBtn = document.getElementById('newGameBtn');
 const continueBtn = document.getElementById('continueBtn');
