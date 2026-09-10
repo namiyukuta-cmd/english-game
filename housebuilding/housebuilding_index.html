@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>House Building</title>
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #f3f0e8;
+      color: #222;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .menu {
+      width: min(100%, 420px);
+      display: grid;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    button {
+      width: 100%;
+      min-height: 58px;
+      border: 1px solid #777;
+      background: #fff;
+      color: #222;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main class="menu">
+    <h1>家作り</h1>
+    <button id="newGame">新しく始める</button>
+    <button id="continueGame">続きから</button>
+    <button id="settings">設定</button>
+  </main>
+
+  <script>
+    document.getElementById('newGame').addEventListener('click', () => {
+      location.href = './housebuilding_top.html?mode=new';
+    });
+
+    document.getElementById('continueGame').addEventListener('click', () => {
+      location.href = './housebuilding_top.html?mode=continue';
+    });
+
+    document.getElementById('settings').addEventListener('click', () => {
+      alert('設定画面はこれから作成します。');
+    });
+  </script>
+</body>
+</html>
