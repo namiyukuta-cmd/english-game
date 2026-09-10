@@ -1,9 +1,20 @@
 /* 手描きラフに合わせた時計・日付・天気・温度計の配置 */
+
+/* 体力・水・食・睡眠などの四角いパネルは、レイアウトからいったん外す。
+   数値データ自体は残し、後で上部中央へ別配置する。 */
+.survival-compact{
+  display:none !important;
+}
+
+.player-hud{
+  width:124px !important;
+}
+
 .hud-visual-row{
   position:relative;
   width:124px;
   height:250px;
-  margin-top:14px;
+  margin-top:0;
   padding:0;
   display:block;
 }
@@ -112,7 +123,8 @@
 .temp-reading{display:none;}
 
 @media(max-width:480px){
-  .hud-visual-row{width:112px;height:232px;margin-top:12px;}
+  .player-hud{width:112px !important;}
+  .hud-visual-row{width:112px;height:232px;margin-top:0;}
   .time-weather-stack{width:112px;height:112px;top:17px;}
   .clock-ring,.clock-ring canvas{width:112px;height:112px;}
   .day-badge{width:39px;height:39px;top:-17px;}
