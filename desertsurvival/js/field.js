@@ -1,5 +1,3 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-
 import { getActiveGame, setActiveGame, createNewGameState } from './save.js';
 import { normalizePlayer, advancePlayer } from './player.js';
 import { advanceTime, TIME_SCALE, formatTime } from './time.js';
@@ -28,82 +26,21 @@ let game = getActiveGame() || createNewGameState();
 normalizePlayer(game.player);
 setActiveGame(game);
 
-/* ------------------------------
-   Three.js / 3D world
------------------------------- */
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9ec6dc);
-scene.fog = new THREE.Fog(0xc9b98f, 70, 380);
+let inputX = 0;
+let inputY = 0;
+let joystickPointerId = null;
+let lastFrame = performance.now();
+let timeAccumulator = 0;
+let saveAccumulator = 0;
+let playerDirection = 0;
+let walkPhase = 0;
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: worldCanvas,
-  antialias: true,
-  alpha: false,
-  powerPreference: 'high-performance'
-});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+const VIEW_SCALE = 1.0;
+const CHUNK_SIZE = 280;
 
-const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 650);
-camera.position.set(game.world.x, 6.4, game.world.z + 10.5);
-
-const hemiLight = new THREE.HemisphereLight(0xd8ebff, 0x7f5d31, 2.0);
-scene.add(hemiLight);
-
-const sunLight = new THREE.DirectionalLight(0xffefc7, 2.4);
-sunLight.position.set(80, 120, 40);
-scene.add(sunLight);
-
-const groundMaterial = new THREE.MeshLambertMaterial({ color: 0xc9ad78 });
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), groundMaterial);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.03;
-scene.add(ground);
-
-function makePlayerModel() {
-  const group = new THREE.Group();
-
-  const robe = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.52, 0.78, 1.78, 7),
-    new THREE.MeshLambertMaterial({ color: 0x2f302b })
-  );
-  robe.position.y = 0.94;
-  group.add(robe);
-
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.49, 14, 10),
-    new THREE.MeshLambertMaterial({ color: 0xb88459 })
-  );
-  head.position.y = 2.18;
-  group.add(head);
-
-  const faceMark = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.20, 0.16),
-    new THREE.MeshBasicMaterial({ color: 0xe4c39b, side: THREE.DoubleSide })
-  );
-  faceMark.position.set(0, 2.15, -0.47);
-  group.add(faceMark);
-
-  group.userData.robe = robe;
-  group.userData.head = head;
-  return group;
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
-
-const playerModel = makePlayerModel();
-playerModel.position.set(game.world.x, 0, game.world.z);
-scene.add(playerModel);
-
-const duneGeometry = new THREE.SphereGeometry(1, 10, 6);
-const duneMaterialA = new THREE.MeshLambertMaterial({ color: 0xd7bd88 });
-const duneMaterialB = new THREE.MeshLambertMaterial({ color: 0xc5a56c });
-const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
-const rockMaterial = new THREE.MeshLambertMaterial({ color: 0x725f49 });
-const scrubGeometry = new THREE.ConeGeometry(0.35, 1.25, 5);
-const scrubMaterial = new THREE.MeshLambertMaterial({ color: 0x756b3d });
-
-const CHUNK_SIZE = 120;
-const CHUNK_RADIUS = 2;
-const chunks = new Map();
 
 function hashSeed(x, z) {
   let h = Math.imul((x | 0) ^ 0x9e3779b9, 0x85ebca6b);
@@ -123,107 +60,27 @@ function mulberry32(seed) {
   };
 }
 
-function createChunk(cx, cz) {
-  const random = mulberry32(hashSeed(cx, cz));
-  const group = new THREE.Group();
-  const baseX = cx * CHUNK_SIZE;
-  const baseZ = cz * CHUNK_SIZE;
+function fitCanvas(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+  const width = Math.max(1, Math.floor(rect.width));
+  const height = Math.max(1, Math.floor(rect.height));
+  const pixelWidth = Math.max(1, Math.floor(width * dpr));
+  const pixelHeight = Math.max(1, Math.floor(height * dpr));
 
-  const duneCount = 5 + Math.floor(random() * 5);
-  for (let i = 0; i < duneCount; i++) {
-    const dune = new THREE.Mesh(duneGeometry, random() > 0.45 ? duneMaterialA : duneMaterialB);
-    dune.position.set(
-      baseX + random() * CHUNK_SIZE,
-      0.35 + random() * 0.65,
-      baseZ + random() * CHUNK_SIZE
-    );
-    dune.scale.set(5 + random() * 12, 0.7 + random() * 1.5, 6 + random() * 14);
-    dune.rotation.y = random() * Math.PI;
-    group.add(dune);
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
   }
 
-  const rockCount = 3 + Math.floor(random() * 5);
-  for (let i = 0; i < rockCount; i++) {
-    const rock = new THREE.Mesh(rockGeometry, rockMaterial);
-    const s = 0.35 + random() * 1.35;
-    rock.scale.set(s * (0.8 + random() * 0.9), s, s * (0.8 + random() * 0.9));
-    rock.position.set(
-      baseX + random() * CHUNK_SIZE,
-      s * 0.65,
-      baseZ + random() * CHUNK_SIZE
-    );
-    rock.rotation.set(random() * 0.6, random() * Math.PI, random() * 0.4);
-    group.add(rock);
-  }
-
-  const scrubCount = Math.floor(random() * 4);
-  for (let i = 0; i < scrubCount; i++) {
-    const scrub = new THREE.Mesh(scrubGeometry, scrubMaterial);
-    scrub.position.set(
-      baseX + random() * CHUNK_SIZE,
-      0.60,
-      baseZ + random() * CHUNK_SIZE
-    );
-    scrub.rotation.z = (random() - 0.5) * 0.35;
-    group.add(scrub);
-  }
-
-  scene.add(group);
-  chunks.set(`${cx},${cz}`, group);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  return { ctx, width, height };
 }
-
-function updateChunks() {
-  const centerCX = Math.floor(game.world.x / CHUNK_SIZE);
-  const centerCZ = Math.floor(game.world.z / CHUNK_SIZE);
-  const needed = new Set();
-
-  for (let dz = -CHUNK_RADIUS; dz <= CHUNK_RADIUS; dz++) {
-    for (let dx = -CHUNK_RADIUS; dx <= CHUNK_RADIUS; dx++) {
-      const cx = centerCX + dx;
-      const cz = centerCZ + dz;
-      const key = `${cx},${cz}`;
-      needed.add(key);
-      if (!chunks.has(key)) createChunk(cx, cz);
-    }
-  }
-
-  for (const [key, group] of chunks) {
-    if (!needed.has(key)) {
-      scene.remove(group);
-      chunks.delete(key);
-    }
-  }
-}
-
-const sandParticleCount = 420;
-const sandPositions = new Float32Array(sandParticleCount * 3);
-for (let i = 0; i < sandParticleCount; i++) {
-  sandPositions[i * 3] = (Math.random() - 0.5) * 70;
-  sandPositions[i * 3 + 1] = Math.random() * 18;
-  sandPositions[i * 3 + 2] = (Math.random() - 0.5) * 70;
-}
-const sandParticleGeometry = new THREE.BufferGeometry();
-sandParticleGeometry.setAttribute('position', new THREE.BufferAttribute(sandPositions, 3));
-const sandParticles = new THREE.Points(
-  sandParticleGeometry,
-  new THREE.PointsMaterial({ color: 0xe5c58e, size: 0.18, transparent: true, opacity: 0.52 })
-);
-sandParticles.visible = false;
-scene.add(sandParticles);
-
-let inputX = 0;
-let inputY = 0;
-let joystickPointerId = null;
-let lastFrame = performance.now();
-let timeAccumulator = 0;
-let saveAccumulator = 0;
-let cameraYaw = Math.PI;
-let walkPhase = 0;
-let lastChunkX = null;
-let lastChunkZ = null;
 
 function hudBar(label, value, suffix = '') {
-  const safe = Math.max(0, Math.min(100, Number(value || 0)));
+  const safe = clamp(Number(value || 0), 0, 100);
   return `<div class="hud-row"><b>${label}</b><span class="hud-bar"><i style="width:${safe}%"></i></span><span>${Math.round(value)}${suffix}</span></div>`;
 }
 
@@ -240,21 +97,13 @@ function renderHud() {
     <div class="hud-row"><b>状態</b><span>${statuses}</span><span></span></div>
     <div class="hud-clock-row"><canvas id="clockCanvas" width="84" height="84"></canvas><span>${formatTime(game.time)}</span></div>
   `;
+
   const clockCanvas = document.getElementById('clockCanvas');
   if (clockCanvas) {
     clockCanvas.style.width = '72px';
     clockCanvas.style.height = '72px';
     drawClock(clockCanvas, game.time);
   }
-}
-
-function resize3D() {
-  const rect = worldCanvas.getBoundingClientRect();
-  const width = Math.max(1, Math.floor(rect.width));
-  const height = Math.max(1, Math.floor(rect.height));
-  renderer.setSize(width, height, false);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
 }
 
 function renderMaps() {
@@ -266,54 +115,259 @@ function updateNearbyPoint() {
   const point = getNearbyMarkpoint(game.world, markpoints);
   interactBtn.disabled = !point;
   interactBtn.title = point?.name || '';
+
   if (point && !game.world.discoveredMarkpoints.includes(point.id)) {
     game.world.discoveredMarkpoints.push(point.id);
+    renderMaps();
   }
 }
 
-function colorForTime() {
-  const hour = Number(game.time.hour || 0) + Number(game.time.minute || 0) / 60;
-  const night = new THREE.Color(0x172033);
-  const dawn = new THREE.Color(0xb88467);
-  const day = new THREE.Color(0x9ec6dc);
-  const dusk = new THREE.Color(0xb26e55);
-
-  if (hour < 5) return night;
-  if (hour < 7) return dawn.clone().lerp(day, (hour - 5) / 2);
-  if (hour < 17) return day;
-  if (hour < 19) return day.clone().lerp(dusk, (hour - 17) / 2);
-  if (hour < 21) return dusk.clone().lerp(night, (hour - 19) / 2);
-  return night;
+function worldToScreen(worldX, worldZ, width, height) {
+  const playerScreenX = width * 0.5;
+  const playerScreenY = height * 0.56;
+  return {
+    x: playerScreenX + (worldX - game.world.x) * VIEW_SCALE,
+    y: playerScreenY + (worldZ - game.world.z) * VIEW_SCALE
+  };
 }
 
-function updateEnvironment() {
-  const sky = colorForTime();
-  const storm = game.weather.type === 'sandstorm';
-  scene.background.copy(storm ? sky.clone().lerp(new THREE.Color(0xa98555), 0.52) : sky);
+function drawDune(ctx, x, y, radius, rotation, shade) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.scale(1.9, 0.72);
+  ctx.fillStyle = shade;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, radius, radius, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(115,83,43,.16)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(0, -radius * 0.08, radius * 0.72, Math.PI * 0.1, Math.PI * 0.9);
+  ctx.stroke();
+  ctx.restore();
+}
 
-  if (storm) {
-    scene.fog.color.set(0xb49569);
-    scene.fog.near = 16;
-    scene.fog.far = 120;
-    sandParticles.visible = true;
-  } else {
-    scene.fog.color.copy(sky.clone().lerp(new THREE.Color(0xc9ad78), 0.48));
-    scene.fog.near = 72;
-    scene.fog.far = 380;
-    sandParticles.visible = false;
+function drawRock(ctx, x, y, radius, rotation) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.fillStyle = '#75604a';
+  ctx.strokeStyle = 'rgba(55,43,32,.45)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let i = 0; i < 7; i++) {
+    const a = (Math.PI * 2 * i) / 7;
+    const r = radius * (i % 2 ? 0.82 : 1.08);
+    const px = Math.cos(a) * r;
+    const py = Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawScrub(ctx, x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = '#75683f';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 * i) / 5;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * size, Math.sin(a) * size);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawChunkDecorations(ctx, cx, cz, width, height) {
+  const random = mulberry32(hashSeed(cx, cz));
+  const baseX = cx * CHUNK_SIZE;
+  const baseZ = cz * CHUNK_SIZE;
+
+  const duneCount = 4 + Math.floor(random() * 5);
+  for (let i = 0; i < duneCount; i++) {
+    const wx = baseX + random() * CHUNK_SIZE;
+    const wz = baseZ + random() * CHUNK_SIZE;
+    const p = worldToScreen(wx, wz, width, height);
+    const radius = 14 + random() * 24;
+    if (p.x < -90 || p.x > width + 90 || p.y < -60 || p.y > height + 60) continue;
+    drawDune(ctx, p.x, p.y, radius, random() * Math.PI, random() > 0.5 ? '#d4bd8f' : '#cbb181');
   }
 
-  const hour = Number(game.time.hour || 0) + Number(game.time.minute || 0) / 60;
-  const daylight = Math.max(0.12, Math.sin(((hour - 6) / 12) * Math.PI));
-  hemiLight.intensity = 0.45 + daylight * 1.55;
-  sunLight.intensity = 0.20 + daylight * 2.35;
+  const rockCount = 2 + Math.floor(random() * 5);
+  for (let i = 0; i < rockCount; i++) {
+    const wx = baseX + random() * CHUNK_SIZE;
+    const wz = baseZ + random() * CHUNK_SIZE;
+    const p = worldToScreen(wx, wz, width, height);
+    const radius = 5 + random() * 11;
+    if (p.x < -30 || p.x > width + 30 || p.y < -30 || p.y > height + 30) continue;
+    drawRock(ctx, p.x, p.y, radius, random() * Math.PI);
+  }
 
-  const sunAngle = ((hour - 6) / 24) * Math.PI * 2;
-  sunLight.position.set(
-    playerModel.position.x + Math.cos(sunAngle) * 100,
-    18 + Math.max(0, Math.sin(sunAngle)) * 115,
-    playerModel.position.z + Math.sin(sunAngle) * 80
-  );
+  const scrubCount = Math.floor(random() * 4);
+  for (let i = 0; i < scrubCount; i++) {
+    const wx = baseX + random() * CHUNK_SIZE;
+    const wz = baseZ + random() * CHUNK_SIZE;
+    const p = worldToScreen(wx, wz, width, height);
+    if (p.x < -30 || p.x > width + 30 || p.y < -30 || p.y > height + 30) continue;
+    drawScrub(ctx, p.x, p.y, 6 + random() * 7);
+  }
+}
+
+function drawMarkpoints(ctx, width, height) {
+  for (const point of markpoints) {
+    if (!Number.isFinite(Number(point.x)) || !Number.isFinite(Number(point.z))) continue;
+
+    const p = worldToScreen(Number(point.x), Number(point.z), width, height);
+    if (p.x < -70 || p.x > width + 70 || p.y < -70 || p.y > height + 70) continue;
+
+    const type = point.type || '';
+    if (type === 'water') {
+      ctx.fillStyle = '#527d8c';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, 22, 13, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(232,245,245,.55)';
+      ctx.stroke();
+    } else if (type === 'town') {
+      ctx.fillStyle = '#8b6844';
+      ctx.fillRect(p.x - 20, p.y - 17, 40, 34);
+      ctx.fillStyle = '#6f5137';
+      ctx.beginPath();
+      ctx.moveTo(p.x - 24, p.y - 17);
+      ctx.lineTo(p.x, p.y - 34);
+      ctx.lineTo(p.x + 24, p.y - 17);
+      ctx.closePath();
+      ctx.fill();
+    } else if (type === 'camp') {
+      ctx.fillStyle = '#72594a';
+      ctx.beginPath();
+      ctx.moveTo(p.x - 19, p.y + 13);
+      ctx.lineTo(p.x, p.y - 20);
+      ctx.lineTo(p.x + 19, p.y + 13);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#594c3c';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const discovered = game.world.discoveredMarkpoints.includes(point.id);
+    if (discovered || Math.hypot(Number(point.x) - game.world.x, Number(point.z) - game.world.z) < 95) {
+      ctx.fillStyle = 'rgba(44,35,26,.82)';
+      ctx.font = '600 12px -apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(point.name || point.id || '', p.x, p.y - 42);
+    }
+  }
+}
+
+function drawPlayer(ctx, width, height, moving) {
+  const x = width * 0.5;
+  const y = height * 0.56;
+  const bob = moving ? Math.sin(walkPhase) * 1.5 : 0;
+
+  ctx.save();
+  ctx.translate(x, y + bob);
+  ctx.rotate(playerDirection);
+
+  ctx.fillStyle = 'rgba(61,48,33,.18)';
+  ctx.beginPath();
+  ctx.ellipse(0, 13, 17, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#37342d';
+  ctx.beginPath();
+  ctx.moveTo(-11, 16);
+  ctx.lineTo(-9, -7);
+  ctx.quadraticCurveTo(0, -14, 9, -7);
+  ctx.lineTo(11, 16);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#b98a61';
+  ctx.beginPath();
+  ctx.arc(0, -15, 9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 向いている方向を示す小さな布。
+  ctx.fillStyle = '#e4c39b';
+  ctx.beginPath();
+  ctx.moveTo(-3, -24);
+  ctx.lineTo(3, -24);
+  ctx.lineTo(0, -30);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function timeTint() {
+  const hour = Number(game.time.hour || 0) + Number(game.time.minute || 0) / 60;
+  if (hour >= 7 && hour < 17) return null;
+  if (hour >= 5 && hour < 7) return 'rgba(181,111,76,.10)';
+  if (hour >= 17 && hour < 19.5) return 'rgba(154,78,59,.16)';
+  return 'rgba(17,29,53,.46)';
+}
+
+function drawSandstorm(ctx, width, height, now) {
+  if (game.weather.type !== 'sandstorm') return;
+
+  ctx.fillStyle = 'rgba(148,112,65,.25)';
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = 'rgba(246,226,181,.34)';
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i < 34; i++) {
+    const y = (i * 53 + now * 0.07) % (height + 100) - 50;
+    const x = ((i * 91 + now * 0.10) % (width + 180)) - 90;
+    ctx.beginPath();
+    ctx.moveTo(x - 34, y + 14);
+    ctx.lineTo(x + 38, y - 14);
+    ctx.stroke();
+  }
+}
+
+function drawField(now = performance.now()) {
+  const { ctx, width, height } = fitCanvas(worldCanvas);
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = '#c8ae7d';
+  ctx.fillRect(0, 0, width, height);
+
+  const marginWorldX = width / (2 * VIEW_SCALE) + CHUNK_SIZE;
+  const marginWorldZ = height / (2 * VIEW_SCALE) + CHUNK_SIZE;
+  const minCX = Math.floor((game.world.x - marginWorldX) / CHUNK_SIZE);
+  const maxCX = Math.floor((game.world.x + marginWorldX) / CHUNK_SIZE);
+  const minCZ = Math.floor((game.world.z - marginWorldZ) / CHUNK_SIZE);
+  const maxCZ = Math.floor((game.world.z + marginWorldZ) / CHUNK_SIZE);
+
+  for (let cz = minCZ; cz <= maxCZ; cz++) {
+    for (let cx = minCX; cx <= maxCX; cx++) {
+      drawChunkDecorations(ctx, cx, cz, width, height);
+    }
+  }
+
+  drawMarkpoints(ctx, width, height);
+
+  const moving = Math.hypot(inputX, inputY) > 0.05 && mapOverlay.hidden;
+  drawPlayer(ctx, width, height, moving);
+
+  const tint = timeTint();
+  if (tint) {
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  drawSandstorm(ctx, width, height, now);
 }
 
 function gameMinuteTick() {
@@ -328,91 +382,25 @@ function gameMinuteTick() {
   }, 1);
   renderHud();
   renderMaps();
-  updateEnvironment();
-}
-
-function shortestAngle(from, to) {
-  let delta = (to - from + Math.PI) % (Math.PI * 2) - Math.PI;
-  if (delta < -Math.PI) delta += Math.PI * 2;
-  return delta;
 }
 
 function updateMovement(dt) {
-  if (!mapOverlay.hidden) return false;
+  if (!mapOverlay.hidden) return;
 
   const magnitude = Math.hypot(inputX, inputY);
-  if (magnitude <= 0.05) return false;
+  if (magnitude <= 0.05) return;
 
   const nx = inputX / magnitude;
-  const ny = inputY / magnitude;
+  const nz = inputY / magnitude;
+  const speed = game.world.running ? 132 : 76;
+  const movement = moveWorldPosition(game.world, nx * speed * dt, nz * speed * dt);
 
-  // カメラから主人公へ向かう方向が、画面上の「前」。
-  const forwardX = -Math.sin(cameraYaw);
-  const forwardZ = -Math.cos(cameraYaw);
-  const rightX = Math.cos(cameraYaw);
-  const rightZ = -Math.sin(cameraYaw);
-
-  let moveX = forwardX * -ny + rightX * nx;
-  let moveZ = forwardZ * -ny + rightZ * nx;
-  const moveLen = Math.hypot(moveX, moveZ) || 1;
-  moveX /= moveLen;
-  moveZ /= moveLen;
-
-  const speed = game.world.running ? 28 : 15;
-  const movement = moveWorldPosition(game.world, moveX * speed * dt, moveZ * speed * dt);
-  timeAccumulator += movement.gameMinutes;
-
-  playerModel.position.x = game.world.x;
-  playerModel.position.z = game.world.z;
-
-  const targetHeading = Math.atan2(moveX, moveZ);
-  playerModel.rotation.y += shortestAngle(playerModel.rotation.y, targetHeading) * Math.min(1, dt * 10);
-  cameraYaw += shortestAngle(cameraYaw, targetHeading + Math.PI) * Math.min(1, dt * 2.6);
-
-  walkPhase += dt * (game.world.running ? 11 : 7);
-  playerModel.userData.robe.position.y = 0.94 + Math.sin(walkPhase * 2) * 0.035;
-  playerModel.userData.head.position.y = 2.18 + Math.abs(Math.sin(walkPhase)) * 0.045;
-
-  updateNearbyPoint();
-  renderMaps();
-  return true;
-}
-
-function updateCamera(dt) {
-  const distance = 8.6;
-  const desiredX = playerModel.position.x + Math.sin(cameraYaw) * distance;
-  const desiredZ = playerModel.position.z + Math.cos(cameraYaw) * distance;
-  const desiredY = 5.4;
-  const smoothing = 1 - Math.pow(0.001, dt);
-
-  camera.position.x += (desiredX - camera.position.x) * smoothing;
-  camera.position.y += (desiredY - camera.position.y) * smoothing;
-  camera.position.z += (desiredZ - camera.position.z) * smoothing;
-  camera.lookAt(playerModel.position.x, 1.15, playerModel.position.z);
-
-  ground.position.x = playerModel.position.x;
-  ground.position.z = playerModel.position.z;
-
-  if (sandParticles.visible) {
-    sandParticles.position.set(playerModel.position.x, 0, playerModel.position.z);
-    sandParticles.rotation.y += dt * 0.8;
-    const positions = sandParticleGeometry.attributes.position.array;
-    for (let i = 0; i < sandParticleCount; i++) {
-      positions[i * 3] += dt * 8.5;
-      positions[i * 3 + 1] += Math.sin(performance.now() * 0.002 + i) * dt * 0.12;
-      if (positions[i * 3] > 35) positions[i * 3] = -35;
-    }
-    sandParticleGeometry.attributes.position.needsUpdate = true;
-  }
-}
-
-function maybeUpdateChunks() {
-  const cx = Math.floor(game.world.x / CHUNK_SIZE);
-  const cz = Math.floor(game.world.z / CHUNK_SIZE);
-  if (cx !== lastChunkX || cz !== lastChunkZ) {
-    lastChunkX = cx;
-    lastChunkZ = cz;
-    updateChunks();
+  if (movement.moved > 0) {
+    playerDirection = Math.atan2(nx, -nz);
+    walkPhase += dt * (game.world.running ? 13 : 8);
+    timeAccumulator += movement.gameMinutes;
+    updateNearbyPoint();
+    renderMaps();
   }
 }
 
@@ -421,10 +409,8 @@ function frame(now) {
   lastFrame = now;
 
   updateMovement(dt);
-  updateCamera(dt);
-  maybeUpdateChunks();
-
   timeAccumulator += dt * (1000 / TIME_SCALE.realMillisecondsPerGameMinute);
+
   while (timeAccumulator >= 1) {
     gameMinuteTick();
     timeAccumulator -= 1;
@@ -436,7 +422,7 @@ function frame(now) {
     saveAccumulator = 0;
   }
 
-  renderer.render(scene, camera);
+  drawField(now);
   requestAnimationFrame(frame);
 }
 
@@ -444,14 +430,16 @@ function setJoystickFromEvent(event) {
   const rect = movePad.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-  const max = rect.width * 0.32;
+  const max = Math.max(20, rect.width * 0.32);
   let dx = event.clientX - cx;
   let dy = event.clientY - cy;
   const distance = Math.hypot(dx, dy);
+
   if (distance > max) {
     dx = dx / distance * max;
     dy = dy / distance * max;
   }
+
   inputX = dx / max;
   inputY = dy / max;
   moveKnob.style.transform = `translate(${dx}px,${dy}px)`;
@@ -462,9 +450,11 @@ movePad.addEventListener('pointerdown', event => {
   movePad.setPointerCapture(event.pointerId);
   setJoystickFromEvent(event);
 });
+
 movePad.addEventListener('pointermove', event => {
   if (event.pointerId === joystickPointerId) setJoystickFromEvent(event);
 });
+
 function releaseJoystick(event) {
   if (joystickPointerId !== null && event.pointerId !== joystickPointerId) return;
   joystickPointerId = null;
@@ -472,34 +462,41 @@ function releaseJoystick(event) {
   inputY = 0;
   moveKnob.style.transform = 'translate(0,0)';
 }
+
 movePad.addEventListener('pointerup', releaseJoystick);
 movePad.addEventListener('pointercancel', releaseJoystick);
 
-function startRun(event) {
-  event.preventDefault();
-  game.world.running = true;
-  runBtn.textContent = 'RUNNING';
-}
-function stopRun() {
+function stopRunning() {
   game.world.running = false;
   runBtn.textContent = 'RUN';
 }
-runBtn.addEventListener('pointerdown', startRun);
-runBtn.addEventListener('pointerup', stopRun);
-runBtn.addEventListener('pointercancel', stopRun);
-runBtn.addEventListener('pointerleave', event => {
-  if (event.buttons === 0) stopRun();
+
+runBtn.addEventListener('pointerdown', () => {
+  game.world.running = true;
+  runBtn.textContent = 'RUNNING';
 });
+runBtn.addEventListener('pointerup', stopRunning);
+runBtn.addEventListener('pointercancel', stopRunning);
+runBtn.addEventListener('pointerleave', stopRunning);
 
 miniMapBtn.addEventListener('click', () => {
+  inputX = 0;
+  inputY = 0;
+  moveKnob.style.transform = 'translate(0,0)';
+  stopRunning();
   mapOverlay.hidden = false;
   drawWorldMap(worldMapCanvas, game.world, markpoints);
 });
-closeMapBtn.addEventListener('click', () => { mapOverlay.hidden = true; });
+
+closeMapBtn.addEventListener('click', () => {
+  mapOverlay.hidden = true;
+});
+
 itemBtn.addEventListener('click', () => {
   setActiveGame(game);
   location.href = './desertsurvival_menu.html';
 });
+
 interactBtn.addEventListener('click', () => {
   const point = getNearbyMarkpoint(game.world, markpoints);
   if (!point) return;
@@ -507,17 +504,14 @@ interactBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('resize', () => {
-  resize3D();
   renderHud();
   renderMaps();
+  drawField();
 });
 window.addEventListener('pagehide', () => setActiveGame(game));
 
-resize3D();
 renderHud();
 updateNearbyPoint();
 renderMaps();
-updateChunks();
-updateEnvironment();
-updateCamera(1);
+drawField();
 requestAnimationFrame(frame);
