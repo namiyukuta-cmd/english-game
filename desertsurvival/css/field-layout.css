@@ -1,0 +1,226 @@
+/* Desert Survival: solid top HUD / central 3D field / solid bottom hotbar */
+
+.screen-field{
+  background:#17140f;
+}
+
+.field-root{
+  width:100%;
+  height:100dvh;
+  display:grid;
+  grid-template-rows:58px minmax(0,1fr) 74px;
+  overflow:hidden;
+  background:#17140f;
+}
+
+.field-top-band{
+  position:relative;
+  z-index:40;
+  min-height:0;
+  background:#17140f;
+  border-bottom:1px solid #3a3022;
+}
+
+.field-stage{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  background:#8e7753;
+}
+
+.field-stage .world-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* Upper band: DAY / food-water-sleep / menu */
+.field-top-band .field-top-ui{
+  position:relative;
+  inset:auto;
+  width:100%;
+  height:100%;
+  padding:0 11px;
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr) 42px;
+  align-items:center;
+  gap:5px;
+  background:#17140f;
+}
+
+.field-top-band .top-day{
+  font-size:16px;
+}
+
+.field-top-band .top-survival{
+  gap:7px;
+}
+
+.field-top-band .top-stat{
+  font-size:12px;
+}
+
+.field-top-band .top-stat > span{
+  font-size:15px;
+}
+
+.field-top-band .top-stat b{
+  font-size:11px;
+}
+
+.field-top-band .quick-menu-bar{
+  top:3px;
+  right:46px;
+}
+
+/* Central field UI */
+.field-stage .field-left-info{
+  top:12px;
+  left:11px;
+}
+
+.field-stage .field-map-anchor{
+  top:12px;
+  right:10px;
+}
+
+.field-stage .field-bottom-left{
+  left:10px;
+  bottom:12px;
+}
+
+.field-stage .field-bottom-right{
+  right:4px;
+  bottom:10px;
+}
+
+.field-stage .pickup-toast{
+  bottom:126px;
+}
+
+/* Bottom hotbar */
+.field-hotbar-band{
+  position:relative;
+  z-index:40;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 8px max(8px,env(safe-area-inset-bottom));
+  background:#17140f;
+  border-top:1px solid #3a3022;
+}
+
+.field-hotbar{
+  width:min(348px,calc(100vw - 20px));
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:4px;
+}
+
+.hotbar-slot{
+  position:relative;
+  aspect-ratio:1/1;
+  min-width:0;
+  padding:2px;
+  overflow:hidden;
+  border:2px solid #77664c;
+  border-radius:3px;
+  background:#d9ccb0;
+  color:#17130e;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
+  touch-action:manipulation;
+}
+
+.hotbar-slot.selected{
+  border:3px solid #f5efe2;
+  box-shadow:0 0 0 2px #6e5d43,inset 0 0 0 1px rgba(255,255,255,.4);
+}
+
+.hotbar-item-name{
+  position:absolute;
+  inset:50% 3px auto;
+  transform:translateY(-50%);
+  text-align:center;
+  font-size:10px;
+  line-height:1.05;
+  font-weight:900;
+  color:#17130e;
+  pointer-events:none;
+}
+
+.hotbar-count{
+  position:absolute;
+  right:3px;
+  bottom:2px;
+  font-size:10px;
+  line-height:1;
+  font-weight:900;
+  color:#17130e;
+  text-shadow:0 1px 0 #fff;
+  pointer-events:none;
+}
+
+.hotbar-empty{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:rgba(0,0,0,.14);
+  font-size:16px;
+  pointer-events:none;
+}
+
+/* Full-screen overlays remain above all three bands. */
+.field-root > .overlay,
+.field-root > .field-system-overlay{
+  position:absolute;
+  inset:0;
+}
+
+@media(max-width:390px){
+  .field-root{
+    grid-template-rows:54px minmax(0,1fr) 68px;
+  }
+
+  .field-top-band .field-top-ui{
+    padding:0 8px;
+    grid-template-columns:57px minmax(0,1fr) 38px;
+    gap:3px;
+  }
+
+  .field-top-band .top-day{font-size:15px;}
+  .field-top-band .top-survival{gap:4px;}
+  .field-top-band .top-stat > span{font-size:13px;}
+  .field-top-band .top-stat b{font-size:10px;}
+
+  .field-stage .field-left-info{
+    top:10px;
+    left:9px;
+  }
+
+  .field-stage .field-map-anchor{
+    top:10px;
+    right:8px;
+  }
+
+  .field-stage .pickup-toast{
+    bottom:112px;
+  }
+
+  .field-hotbar-band{
+    padding:6px 7px max(6px,env(safe-area-inset-bottom));
+  }
+
+  .field-hotbar{
+    width:min(326px,calc(100vw - 16px));
+    gap:3px;
+  }
+
+  .hotbar-item-name,
+  .hotbar-count{
+    font-size:9px;
+  }
+}
