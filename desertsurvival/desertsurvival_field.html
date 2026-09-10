@@ -9,18 +9,51 @@
   <meta http-equiv="Expires" content="0">
   <title>Desert Survival - Field</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-hud2">
-  <link rel="stylesheet" href="./css/hud-sketch.css?v=20260910-hudsketch3">
+  <link rel="stylesheet" href="./css/hud-sketch.css?v=20260910-topui1">
 </head>
 <body class="screen screen-field">
   <main id="fieldRoot" class="field-root">
     <canvas id="worldCanvas" class="world-canvas" aria-label="砂漠フィールド"></canvas>
 
-    <header class="field-hud">
-      <section id="playerHud" class="player-hud" aria-label="プレイヤー状態・時間・天気"></section>
+    <!-- field3d.js が内部更新に使うHUD。画面上では非表示 -->
+    <section id="playerHud" class="player-hud legacy-player-hud" aria-hidden="true"></section>
+
+    <!-- 新しい上部レイアウト -->
+    <header class="field-top-ui" aria-label="サバイバル情報">
+      <div id="topDay" class="top-day">DAY 1</div>
+
+      <div class="top-survival" aria-label="食料・水・睡眠">
+        <span class="top-stat"><span aria-hidden="true">🍖</span><b id="topFood">100/100</b></span>
+        <span class="top-stat"><span aria-hidden="true">💧</span><b id="topWater">100/100</b></span>
+        <span class="top-stat"><span aria-hidden="true">🌙</span><b id="topSleep">100/100</b></span>
+      </div>
+
+      <div class="quick-menu-wrap">
+        <button id="quickMenuBtn" class="quick-menu-btn" type="button" aria-label="メニュー" aria-expanded="false">…</button>
+        <nav id="quickMenuBar" class="quick-menu-bar" hidden aria-label="ゲームメニュー">
+          <button id="quickTopBtn" type="button">TOP</button>
+          <button id="quickLogBtn" type="button">LOG</button>
+          <button id="quickLoadBtn" type="button">LOAD</button>
+          <button id="quickSaveBtn" type="button">SAVE</button>
+        </nav>
+      </div>
+    </header>
+
+    <aside class="field-left-info" aria-label="時間・天気・気温">
+      <div id="fieldTime" class="field-time">🕐 00:00</div>
+      <div id="fieldWeather" class="field-weather">☀ 晴れ</div>
+      <div class="field-temp-meter" aria-label="外気温">
+        <span id="fieldTempFill" class="field-temp-fill"></span>
+        <span id="fieldTempBulb" class="field-temp-bulb"></span>
+      </div>
+    </aside>
+
+    <!-- ミニマップは上部右メニューの下へ -->
+    <div class="field-map-anchor">
       <button id="miniMapBtn" class="mini-map-button" type="button" aria-label="全体マップを開く">
         <canvas id="miniMapCanvas" width="150" height="150"></canvas>
       </button>
-    </header>
+    </div>
 
     <div id="pickupToast" class="pickup-toast" hidden aria-live="polite"></div>
 
@@ -47,8 +80,19 @@
       </div>
       <canvas id="worldMapCanvas" class="world-map-canvas"></canvas>
     </section>
+
+    <section id="fieldSystemOverlay" class="field-system-overlay" hidden aria-label="システムメニュー">
+      <div class="field-system-card">
+        <header class="field-system-head">
+          <h2 id="fieldSystemTitle"></h2>
+          <button id="fieldSystemClose" type="button" aria-label="閉じる">×</button>
+        </header>
+        <div id="fieldSystemContent" class="field-system-content"></div>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="./js/field3d.js?v=20260910-hud3"></script>
+  <script type="module" src="./js/field-ui.js?v=20260910-topui1"></script>
 </body>
 </html>
