@@ -1,4 +1,4 @@
-/* Desert Survival: solid top HUD / central 3D field / solid bottom hotbar */
+/* Desert Survival: solid top HUD / central 3D field / solid bottom controls */
 
 .screen-field{
   background:#17140f;
@@ -51,55 +51,18 @@
   background:#17140f;
 }
 
-.field-top-band .top-day{
-  font-size:16px;
-}
-
-.field-top-band .top-survival{
-  gap:7px;
-}
-
-.field-top-band .top-stat{
-  font-size:12px;
-}
-
-.field-top-band .top-stat > span{
-  font-size:15px;
-}
-
-.field-top-band .top-stat b{
-  font-size:11px;
-}
-
-.field-top-band .quick-menu-bar{
-  top:3px;
-  right:46px;
-}
+.field-top-band .top-day{font-size:16px;}
+.field-top-band .top-survival{gap:7px;}
+.field-top-band .top-stat{font-size:12px;}
+.field-top-band .top-stat > span{font-size:15px;}
+.field-top-band .top-stat b{font-size:11px;}
+.field-top-band .quick-menu-bar{top:3px;right:46px;}
 
 /* Central field UI */
-.field-stage .field-left-info{
-  top:12px;
-  left:11px;
-}
-
-.field-stage .field-map-anchor{
-  top:12px;
-  right:10px;
-}
-
-.field-stage .field-bottom-left{
-  left:10px;
-  bottom:12px;
-}
-
-.field-stage .field-bottom-right{
-  right:4px;
-  bottom:10px;
-}
-
-.field-stage .pickup-toast{
-  bottom:126px;
-}
+.field-stage .field-left-info{top:12px;left:11px;}
+.field-stage .field-map-anchor{top:12px;right:10px;}
+.field-stage .field-bottom-right{right:4px;bottom:10px;}
+.field-stage .pickup-toast{bottom:126px;}
 
 /* Selected usable item: one action button above the movement stick. */
 .field-use-button{
@@ -122,34 +85,36 @@
   box-shadow:0 3px 12px rgba(0,0,0,.22);
   touch-action:manipulation;
 }
-
 .field-use-button[hidden]{display:none;}
 .field-use-icon{font-size:24px;line-height:1;}
 .field-use-label{font-size:10px;line-height:1;font-weight:900;}
 
-/* Bottom hotbar */
+/* Bottom: bag / craft / five quick slots */
 .field-hotbar-band{
   position:relative;
   z-index:40;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:8px 8px max(8px,env(safe-area-inset-bottom));
+  padding:8px 7px max(8px,env(safe-area-inset-bottom));
   background:#17140f;
   border-top:1px solid #3a3022;
 }
 
-.field-hotbar{
-  width:min(348px,calc(100vw - 20px));
+.field-footer-bar{
+  width:min(394px,calc(100vw - 14px));
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:4px;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:3px;
+  align-items:stretch;
 }
 
+.field-footer-action,
 .hotbar-slot{
   position:relative;
   aspect-ratio:1/1;
   min-width:0;
+  min-height:0;
   padding:2px;
   overflow:hidden;
   border:2px solid #77664c;
@@ -158,6 +123,29 @@
   color:#17130e;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
   touch-action:manipulation;
+}
+
+.field-footer-action{
+  display:grid;
+  place-items:center;
+  text-decoration:none;
+}
+.field-footer-action svg{
+  width:54%;
+  height:54%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.field-hotbar{
+  grid-column:3 / span 5;
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:3px;
 }
 
 .hotbar-slot.selected{
@@ -222,19 +210,9 @@
   .field-top-band .top-stat > span{font-size:13px;}
   .field-top-band .top-stat b{font-size:10px;}
 
-  .field-stage .field-left-info{
-    top:10px;
-    left:9px;
-  }
-
-  .field-stage .field-map-anchor{
-    top:10px;
-    right:8px;
-  }
-
-  .field-stage .pickup-toast{
-    bottom:112px;
-  }
+  .field-stage .field-left-info{top:10px;left:9px;}
+  .field-stage .field-map-anchor{top:10px;right:8px;}
+  .field-stage .pickup-toast{bottom:112px;}
 
   .field-use-button{
     right:24px;
@@ -246,16 +224,15 @@
   .field-use-label{font-size:9px;}
 
   .field-hotbar-band{
-    padding:6px 7px max(6px,env(safe-area-inset-bottom));
+    padding:6px 5px max(6px,env(safe-area-inset-bottom));
   }
 
-  .field-hotbar{
-    width:min(326px,calc(100vw - 16px));
-    gap:3px;
+  .field-footer-bar{
+    width:min(366px,calc(100vw - 10px));
+    gap:2px;
   }
 
-  .hotbar-item-name,
-  .hotbar-count{
-    font-size:9px;
-  }
+  .field-hotbar{gap:2px;}
+  .field-footer-action,.hotbar-slot{border-width:1.5px;}
+  .hotbar-item-name,.hotbar-count{font-size:9px;}
 }
