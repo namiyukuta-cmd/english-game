@@ -415,7 +415,7 @@ function refreshWaterActionSprites(){
       sprite.material.map=texture;
       sprite.material.needsUpdate=true;
     }
-    sprite.material.opacity=full?.82:1;
+    sprite.material.opacity=full?0.82:1;
   }
 }
 
