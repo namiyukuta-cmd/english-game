@@ -94,6 +94,10 @@ const CELL=18;
 const RADIUS_X=8;
 const RADIUS_Z=10;
 const PICKUP_RADIUS=1.25;
+const PICKUP_SPAWN_CHANCE=Object.freeze({
+  stone:0.07,
+  dry_branch:0.07
+});
 const cells=new Map();
 const activePickups=new Map();
 const placedObjects=new Map();
@@ -129,8 +133,8 @@ function rng(seed){
   };
 }
 
-function pickupIdForCell(cx,cz){
-  return `material_${cx}_${cz}`;
+function pickupIdForCell(itemId,cx,cz){
+  return `material_${itemId}_${cx}_${cz}`;
 }
 
 function makePickup(itemId,pickupId,wx,wz,phase){
@@ -197,17 +201,19 @@ function createCell(cx,cz){
     }
   }
 
-  const pickupRoll=random();
-  const pickupId=pickupIdForCell(cx,cz);
-  if(pickupRoll<0.09&&!game.world.collectedPickups.includes(pickupId)){
-    const itemId=random()<.72?'dry_branch':'stone';
+  function spawnPickup(itemId,chance){
+    const pickupId=pickupIdForCell(itemId,cx,cz);
+    if(random()>=chance||game.world.collectedPickups.includes(pickupId))return;
     const px=cx*CELL+(random()-.5)*CELL*.56;
     const pz=cz*CELL+(random()-.5)*CELL*.56;
     const pickup=makePickup(itemId,pickupId,px,pz,random()*Math.PI*2);
     group.add(pickup);
-    group.userData.pickupId=pickupId;
     activePickups.set(pickupId,{group:pickup,cellGroup:group,itemId});
   }
+
+  // 石と枯れ枝は別々に判定する。片方の率を変えても、もう片方には影響しない。
+  spawnPickup('stone',PICKUP_SPAWN_CHANCE.stone);
+  spawnPickup('dry_branch',PICKUP_SPAWN_CHANCE.dry_branch);
 
   scene.add(group);
   cells.set(`${cx},${cz}`,group);
@@ -230,7 +236,9 @@ function updateCells(force=false){
   }
   for(const [key,group] of cells){
     if(!needed.has(key)){
-      if(group.userData.pickupId)activePickups.delete(group.userData.pickupId);
+      for(const [pickupId,entry] of activePickups){
+        if(entry.cellGroup===group)activePickups.delete(pickupId);
+      }
       scene.remove(group);
       cells.delete(key);
     }
@@ -258,7 +266,6 @@ function collectNearbyPickups(){
     addItem(game.inventory,entry.itemId,1);
     game.world.collectedPickups.push(pickupId);
     entry.cellGroup.remove(entry.group);
-    entry.cellGroup.userData.pickupId=null;
     activePickups.delete(pickupId);
     showPickupToast(entry.itemId);
     setActiveGame(game);
