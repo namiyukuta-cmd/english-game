@@ -7,176 +7,29 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>House Building</title>
   <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #d8d3c8;
-      color: #26231f;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      touch-action: none;
-    }
-    button { font: inherit; }
-    #app {
-      position: relative;
-      width: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background: linear-gradient(#cfd9df 0%, #e2ebf0 48%, #c9bfaa 48%, #c9bfaa 100%);
-    }
-    #scene {
-      position: absolute;
-      inset: 0;
-    }
-    #scene canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-    .topbar {
-      position: absolute;
-      top: max(10px, env(safe-area-inset-top));
-      left: 10px;
-      right: 10px;
-      z-index: 10;
-      display: grid;
-      grid-template-columns: 46px 1fr auto;
-      gap: 8px;
-      align-items: center;
-      pointer-events: none;
-    }
-    .topbar > * { pointer-events: auto; }
-    .icon-btn, .status {
-      min-height: 44px;
-      border: 1px solid rgba(50, 45, 38, .25);
-      background: rgba(255,255,255,.88);
-      color: #27231d;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-      backdrop-filter: blur(8px);
-    }
-    .icon-btn {
-      width: 46px;
-      border-radius: 13px;
-      font-size: 20px;
-      font-weight: 800;
-    }
-    .status {
-      border-radius: 13px;
-      padding: 7px 11px;
-      min-width: 0;
-    }
-    .status strong {
-      display: block;
-      font-size: 13px;
-      line-height: 1.25;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .status small {
-      display: block;
-      margin-top: 2px;
-      color: #6e675d;
-      font-size: 10px;
-    }
-    .count {
-      border-radius: 13px;
-      padding: 0 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-    .camera-controls {
-      position: absolute;
-      right: 10px;
-      top: calc(max(10px, env(safe-area-inset-top)) + 58px);
-      z-index: 10;
-      display: grid;
-      gap: 6px;
-    }
-    .camera-controls button {
-      width: 44px;
-      height: 44px;
-      border: 1px solid rgba(50,45,38,.22);
-      border-radius: 12px;
-      background: rgba(255,255,255,.84);
-      color: #2e2922;
-      font-size: 17px;
-      font-weight: 800;
-      backdrop-filter: blur(8px);
-    }
-    .toolbar-wrap {
-      position: absolute;
-      z-index: 10;
-      left: 10px;
-      right: 10px;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      pointer-events: none;
-    }
-    .toolbar {
-      pointer-events: auto;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 7px;
-      padding: 8px;
-      border: 1px solid rgba(50,45,38,.24);
-      border-radius: 18px;
-      background: rgba(248,246,241,.9);
-      box-shadow: 0 4px 16px rgba(0,0,0,.10);
-      backdrop-filter: blur(10px);
-    }
-    .tool {
-      min-width: 0;
-      min-height: 54px;
-      border: 1px solid #c9c1b5;
-      border-radius: 13px;
-      background: #fff;
-      color: #332e27;
-      font-weight: 800;
-      font-size: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-    }
-    .tool span { font-size: 19px; line-height: 1; }
-    .tool.active {
-      border-color: #5f574c;
-      background: #5f574c;
-      color: white;
-    }
-    .hint {
-      pointer-events: none;
-      width: max-content;
-      max-width: calc(100% - 20px);
-      margin: 0 auto 7px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(32,29,25,.72);
-      color: white;
-      font-size: 11px;
-      text-align: center;
-    }
-    #error {
-      position: absolute;
-      inset: 20% 18px auto;
-      z-index: 30;
-      display: none;
-      padding: 16px;
-      border-radius: 14px;
-      background: #fff;
-      color: #222;
-      border: 1px solid #aaa;
-      line-height: 1.6;
-      font-size: 14px;
-    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c8;color:#26231f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
+    button{font:inherit}
+    #app{position:relative;width:100%;height:100dvh;overflow:hidden;background:linear-gradient(#cfd9df 0%,#e2ebf0 48%,#c9bfaa 48%,#c9bfaa 100%)}
+    #scene{position:absolute;inset:0}
+    #scene canvas{display:block;width:100%;height:100%;touch-action:none}
+    .topbar{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;z-index:10;display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;pointer-events:none}
+    .topbar>*{pointer-events:auto}
+    .icon-btn,.status{min-height:44px;border:1px solid rgba(50,45,38,.25);background:rgba(255,255,255,.9);color:#27231d;box-shadow:0 2px 8px rgba(0,0,0,.08);backdrop-filter:blur(8px)}
+    .icon-btn{width:46px;border-radius:13px;font-size:20px;font-weight:800}
+    .status{border-radius:13px;padding:7px 11px;min-width:0}
+    .status strong{display:block;font-size:13px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .status small{display:block;margin-top:2px;color:#6e675d;font-size:10px}
+    .count{border-radius:13px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;white-space:nowrap}
+    .camera-controls{position:absolute;right:10px;top:calc(max(10px,env(safe-area-inset-top)) + 58px);z-index:10;display:grid;gap:6px}
+    .camera-controls button{width:44px;height:44px;border:1px solid rgba(50,45,38,.22);border-radius:12px;background:rgba(255,255,255,.86);color:#2e2922;font-size:17px;font-weight:800;backdrop-filter:blur(8px)}
+    .toolbar-wrap{position:absolute;z-index:10;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
+    .hint{pointer-events:none;width:max-content;max-width:calc(100% - 20px);margin:0 auto 7px;padding:6px 10px;border-radius:999px;background:rgba(32,29,25,.72);color:#fff;font-size:11px;text-align:center}
+    .toolbar{pointer-events:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px;border:1px solid rgba(50,45,38,.24);border-radius:18px;background:rgba(248,246,241,.92);box-shadow:0 4px 16px rgba(0,0,0,.10);backdrop-filter:blur(10px)}
+    .tool{min-width:0;min-height:54px;border:1px solid #c9c1b5;border-radius:13px;background:#fff;color:#332e27;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+    .tool span{font-size:19px;line-height:1}
+    .tool.active{border-color:#5f574c;background:#5f574c;color:#fff}
+    #error{position:absolute;inset:20% 18px auto;z-index:30;display:none;padding:16px;border-radius:14px;background:#fff;color:#222;border:1px solid #aaa;line-height:1.6;font-size:14px}
   </style>
 </head>
 <body>
@@ -187,7 +40,7 @@
       <button class="icon-btn" id="backBtn" aria-label="戻る">←</button>
       <div class="status">
         <strong id="cellStatus">マスをタップしてください</strong>
-        <small>12 × 12 GRID / X・Z座標で管理</small>
+        <small>12 × 12 GRID / X・Y・Z座標で管理</small>
       </div>
       <div class="status count" id="objectCount">0 個</div>
     </header>
@@ -200,11 +53,9 @@
     </div>
 
     <div class="toolbar-wrap">
-      <div class="hint">マスをタップして配置します</div>
+      <div class="hint">地面をタップ＝置く / ブロックをタップ＝その上に積む</div>
       <nav class="toolbar" aria-label="建築ツール">
-        <button class="tool active" data-tool="floor"><span>▱</span>床</button>
-        <button class="tool" data-tool="wall"><span>▥</span>壁</button>
-        <button class="tool" data-tool="block"><span>■</span>箱</button>
+        <button class="tool active" data-tool="block"><span>■</span>ブロック</button>
         <button class="tool" data-tool="delete"><span>×</span>削除</button>
       </nav>
     </div>
@@ -213,241 +64,209 @@
   </main>
 
   <script type="module">
-    const root = document.getElementById('scene');
-    const errorBox = document.getElementById('error');
+    const root=document.getElementById('scene');
+    const errorBox=document.getElementById('error');
 
-    try {
-      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js');
+    try{
+      const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js');
 
-      const GRID_SIZE = 12;
-      const CELL = 1;
-      const HALF = GRID_SIZE / 2;
-      const objects = new Map();
-      let currentTool = 'floor';
-      let cameraAngle = Math.PI / 4;
-      let cameraRadius = 13.5;
+      const GRID_SIZE=12;
+      const HALF=GRID_SIZE/2;
+      const MAX_Y=12;
+      const blocks=new Map();
+      let currentTool='block';
+      let cameraAngle=Math.PI/4;
+      let cameraRadius=14;
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xdce5e8);
-      scene.fog = new THREE.Fog(0xdce5e8, 16, 30);
+      const scene=new THREE.Scene();
+      scene.background=new THREE.Color(0xdce5e8);
+      scene.fog=new THREE.Fog(0xdce5e8,18,34);
 
-      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const camera=new THREE.PerspectiveCamera(42,1,.1,100);
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      renderer.shadowMap.enabled=true;
+      renderer.shadowMap.type=THREE.PCFSoftShadowMap;
       root.appendChild(renderer.domElement);
 
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x8d806c, 2.2));
-      const sun = new THREE.DirectionalLight(0xffffff, 2.1);
-      sun.position.set(8, 13, 7);
-      sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024);
-      sun.shadow.camera.left = -10;
-      sun.shadow.camera.right = 10;
-      sun.shadow.camera.top = 10;
-      sun.shadow.camera.bottom = -10;
+      scene.add(new THREE.HemisphereLight(0xffffff,0x8d806c,2.2));
+      const sun=new THREE.DirectionalLight(0xffffff,2.1);
+      sun.position.set(8,13,7);
+      sun.castShadow=true;
+      sun.shadow.mapSize.set(1024,1024);
+      sun.shadow.camera.left=-12;
+      sun.shadow.camera.right=12;
+      sun.shadow.camera.top=12;
+      sun.shadow.camera.bottom=-12;
       scene.add(sun);
 
-      const groundMat = new THREE.MeshStandardMaterial({ color: 0xbbae92, roughness: 1 });
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(GRID_SIZE, GRID_SIZE), groundMat);
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -0.035;
-      ground.receiveShadow = true;
-      ground.userData.isGround = true;
+      const ground=new THREE.Mesh(
+        new THREE.PlaneGeometry(GRID_SIZE,GRID_SIZE),
+        new THREE.MeshStandardMaterial({color:0xbbae92,roughness:1})
+      );
+      ground.rotation.x=-Math.PI/2;
+      ground.position.y=-.01;
+      ground.receiveShadow=true;
+      ground.userData.isGround=true;
       scene.add(ground);
 
-      const grid = new THREE.GridHelper(GRID_SIZE, GRID_SIZE, 0x4d463c, 0x82786a);
-      grid.position.y = 0;
-      const gridMaterials = Array.isArray(grid.material) ? grid.material : [grid.material];
-      gridMaterials.forEach(m => { m.transparent = true; m.opacity = 0.8; });
+      const grid=new THREE.GridHelper(GRID_SIZE,GRID_SIZE,0x4d463c,0x82786a);
+      grid.position.y=.002;
+      const gm=Array.isArray(grid.material)?grid.material:[grid.material];
+      gm.forEach(m=>{m.transparent=true;m.opacity=.82});
       scene.add(grid);
 
-      const selector = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.94, 0.94),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, side: THREE.DoubleSide })
-      );
-      selector.rotation.x = -Math.PI / 2;
-      selector.position.y = 0.015;
-      selector.visible = false;
-      scene.add(selector);
+      const blockGeometry=new THREE.BoxGeometry(.94,.94,.94);
+      const blockMaterial=new THREE.MeshStandardMaterial({color:0x9b7758,roughness:.82});
+      const highlightMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.28,depthWrite:false});
+      const highlight=new THREE.Mesh(new THREE.BoxGeometry(.98,.98,.98),highlightMaterial);
+      highlight.visible=false;
+      scene.add(highlight);
 
-      const materials = {
-        floor: new THREE.MeshStandardMaterial({ color: 0xd8c5a7, roughness: 0.9 }),
-        wall: new THREE.MeshStandardMaterial({ color: 0xeee8dc, roughness: 0.86 }),
-        block: new THREE.MeshStandardMaterial({ color: 0x96765b, roughness: 0.82 })
-      };
+      const raycaster=new THREE.Raycaster();
+      const pointer=new THREE.Vector2();
+      let pointerDown=null;
 
-      const raycaster = new THREE.Raycaster();
-      const pointer = new THREE.Vector2();
-      let pointerDown = null;
-
-      function keyFor(x, z) { return `${x},${z}`; }
-
-      function worldFromCell(x, z) {
-        return {
-          x: x - HALF + 0.5,
-          z: z - HALF + 0.5
-        };
+      function keyFor(x,y,z){return `${x},${y},${z}`}
+      function worldFromCell(x,y,z){return{x:x-HALF+.5,y:y+.47,z:z-HALF+.5}}
+      function groundCellFromPoint(point){
+        const x=Math.floor(point.x+HALF);
+        const z=Math.floor(point.z+HALF);
+        if(x<0||x>=GRID_SIZE||z<0||z>=GRID_SIZE)return null;
+        return{x,y:0,z};
       }
-
-      function cellFromPoint(point) {
-        const x = Math.floor(point.x + HALF);
-        const z = Math.floor(point.z + HALF);
-        if (x < 0 || x >= GRID_SIZE || z < 0 || z >= GRID_SIZE) return null;
-        return { x, z };
+      function updateCamera(){
+        const h=10;
+        camera.position.set(Math.cos(cameraAngle)*cameraRadius,h,Math.sin(cameraAngle)*cameraRadius);
+        camera.lookAt(0,2.1,0);
       }
-
-      function updateCamera() {
-        const h = 10;
-        camera.position.set(
-          Math.cos(cameraAngle) * cameraRadius,
-          h,
-          Math.sin(cameraAngle) * cameraRadius
-        );
-        camera.lookAt(0, 0, 0);
-      }
-
-      function resize() {
-        const w = Math.max(1, root.clientWidth);
-        const h = Math.max(1, root.clientHeight);
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
+      function resize(){
+        const w=Math.max(1,root.clientWidth);
+        const h=Math.max(1,root.clientHeight);
+        renderer.setSize(w,h,false);
+        camera.aspect=w/h;
         camera.updateProjectionMatrix();
       }
-
-      function updateCount() {
-        document.getElementById('objectCount').textContent = `${objects.size} 個`;
+      function updateCount(){document.getElementById('objectCount').textContent=`${blocks.size} 個`}
+      function showTarget(cell,label='選択'){
+        if(!cell){highlight.visible=false;return}
+        const p=worldFromCell(cell.x,cell.y,cell.z);
+        highlight.position.set(p.x,p.y,p.z);
+        highlight.visible=true;
+        document.getElementById('cellStatus').textContent=`${label} X:${cell.x} / Y:${cell.y} / Z:${cell.z}`;
       }
-
-      function setSelectedCell(cell) {
-        if (!cell) {
-          selector.visible = false;
-          return;
-        }
-        const p = worldFromCell(cell.x, cell.z);
-        selector.position.set(p.x, 0.018, p.z);
-        selector.visible = true;
-        document.getElementById('cellStatus').textContent = `選択 X:${cell.x} / Z:${cell.z}`;
-      }
-
-      function makeObject(type, cell) {
-        const p = worldFromCell(cell.x, cell.z);
-        let mesh;
-
-        if (type === 'floor') {
-          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.12, 0.94), materials.floor);
-          mesh.position.set(p.x, 0.06, p.z);
-        } else if (type === 'wall') {
-          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 1.35, 0.22), materials.wall);
-          mesh.position.set(p.x, 0.675, p.z);
-        } else {
-          mesh = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.82, 0.82), materials.block);
-          mesh.position.set(p.x, 0.41, p.z);
-        }
-
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.userData = { isBuildObject: true, type, cellX: cell.x, cellZ: cell.z };
+      function makeBlock(cell){
+        const p=worldFromCell(cell.x,cell.y,cell.z);
+        const mesh=new THREE.Mesh(blockGeometry.clone(),blockMaterial.clone());
+        mesh.position.set(p.x,p.y,p.z);
+        mesh.castShadow=true;
+        mesh.receiveShadow=true;
+        mesh.userData={isBlock:true,cellX:cell.x,cellY:cell.y,cellZ:cell.z};
         return mesh;
       }
-
-      function placeAt(cell) {
-        const key = keyFor(cell.x, cell.z);
-        const old = objects.get(key);
-
-        if (currentTool === 'delete') {
-          if (old) {
-            scene.remove(old);
-            old.geometry.dispose();
-            objects.delete(key);
-            updateCount();
-          }
-          return;
-        }
-
-        if (old) {
-          scene.remove(old);
-          old.geometry.dispose();
-          objects.delete(key);
-        }
-
-        const mesh = makeObject(currentTool, cell);
-        objects.set(key, mesh);
+      function addBlock(cell){
+        if(cell.y<0||cell.y>=MAX_Y)return;
+        const key=keyFor(cell.x,cell.y,cell.z);
+        if(blocks.has(key))return;
+        const mesh=makeBlock(cell);
+        blocks.set(key,mesh);
         scene.add(mesh);
         updateCount();
       }
-
-      function pointerToCell(clientX, clientY) {
-        const rect = renderer.domElement.getBoundingClientRect();
-        pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-        pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-        const hit = raycaster.intersectObject(ground, false)[0];
-        return hit ? cellFromPoint(hit.point) : null;
+      function removeBlock(mesh){
+        const {cellX:x,cellY:y,cellZ:z}=mesh.userData;
+        const key=keyFor(x,y,z);
+        if(!blocks.has(key))return;
+        scene.remove(mesh);
+        mesh.geometry.dispose();
+        mesh.material.dispose();
+        blocks.delete(key);
+        updateCount();
+      }
+      function raycast(clientX,clientY){
+        const rect=renderer.domElement.getBoundingClientRect();
+        pointer.x=((clientX-rect.left)/rect.width)*2-1;
+        pointer.y=-((clientY-rect.top)/rect.height)*2+1;
+        raycaster.setFromCamera(pointer,camera);
+        const blockHits=raycaster.intersectObjects([...blocks.values()],false);
+        const groundHits=raycaster.intersectObject(ground,false);
+        const hits=[...blockHits,...groundHits].sort((a,b)=>a.distance-b.distance);
+        return hits[0]||null;
+      }
+      function targetFromHit(hit){
+        if(!hit)return null;
+        if(hit.object.userData.isBlock){
+          const d=hit.object.userData;
+          return{x:d.cellX,y:d.cellY+1,z:d.cellZ};
+        }
+        return groundCellFromPoint(hit.point);
+      }
+      function previewAt(clientX,clientY){
+        const hit=raycast(clientX,clientY);
+        if(!hit){showTarget(null);return}
+        if(currentTool==='delete'&&hit.object.userData.isBlock){
+          const d=hit.object.userData;
+          showTarget({x:d.cellX,y:d.cellY,z:d.cellZ},'削除');
+          return;
+        }
+        if(currentTool==='delete'){showTarget(null);return}
+        showTarget(targetFromHit(hit));
+      }
+      function actAt(clientX,clientY){
+        const hit=raycast(clientX,clientY);
+        if(!hit)return;
+        if(currentTool==='delete'){
+          if(hit.object.userData.isBlock){
+            removeBlock(hit.object);
+            showTarget(null);
+          }
+          return;
+        }
+        const target=targetFromHit(hit);
+        if(target){addBlock(target);showTarget(target)}
       }
 
-      renderer.domElement.addEventListener('pointerdown', e => {
-        pointerDown = { x: e.clientX, y: e.clientY };
-        setSelectedCell(pointerToCell(e.clientX, e.clientY));
+      renderer.domElement.addEventListener('pointerdown',e=>{
+        pointerDown={x:e.clientX,y:e.clientY};
+        previewAt(e.clientX,e.clientY);
       });
-
-      renderer.domElement.addEventListener('pointermove', e => {
-        if (!pointerDown) setSelectedCell(pointerToCell(e.clientX, e.clientY));
+      renderer.domElement.addEventListener('pointermove',e=>{
+        if(!pointerDown)previewAt(e.clientX,e.clientY);
       });
-
-      renderer.domElement.addEventListener('pointerup', e => {
-        if (!pointerDown) return;
-        const moved = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y);
-        const cell = pointerToCell(e.clientX, e.clientY);
-        pointerDown = null;
-        setSelectedCell(cell);
-        if (cell && moved < 12) placeAt(cell);
+      renderer.domElement.addEventListener('pointerup',e=>{
+        if(!pointerDown)return;
+        const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);
+        pointerDown=null;
+        if(moved<12)actAt(e.clientX,e.clientY);
       });
+      renderer.domElement.addEventListener('pointercancel',()=>{pointerDown=null});
 
-      renderer.domElement.addEventListener('pointercancel', () => { pointerDown = null; });
-
-      document.querySelectorAll('.tool').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.tool').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tool').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
           btn.classList.add('active');
-          currentTool = btn.dataset.tool;
+          currentTool=btn.dataset.tool;
+          highlight.visible=false;
+          document.getElementById('cellStatus').textContent=currentTool==='delete'?'削除するブロックをタップ':'マスまたはブロックをタップ';
         });
       });
 
-      document.getElementById('rotateLeft').addEventListener('click', () => {
-        cameraAngle -= Math.PI / 8;
-        updateCamera();
-      });
-      document.getElementById('rotateRight').addEventListener('click', () => {
-        cameraAngle += Math.PI / 8;
-        updateCamera();
-      });
-      document.getElementById('zoomIn').addEventListener('click', () => {
-        cameraRadius = Math.max(9, cameraRadius - 1.3);
-        updateCamera();
-      });
-      document.getElementById('zoomOut').addEventListener('click', () => {
-        cameraRadius = Math.min(19, cameraRadius + 1.3);
-        updateCamera();
-      });
-      document.getElementById('backBtn').addEventListener('click', () => {
-        location.href = 'housebuilding_index.html';
-      });
+      document.getElementById('rotateLeft').addEventListener('click',()=>{cameraAngle-=Math.PI/8;updateCamera()});
+      document.getElementById('rotateRight').addEventListener('click',()=>{cameraAngle+=Math.PI/8;updateCamera()});
+      document.getElementById('zoomIn').addEventListener('click',()=>{cameraRadius=Math.max(8,cameraRadius-1.2);updateCamera()});
+      document.getElementById('zoomOut').addEventListener('click',()=>{cameraRadius=Math.min(22,cameraRadius+1.2);updateCamera()});
+      document.getElementById('backBtn').addEventListener('click',()=>{location.href='housebuilding_index.html'});
 
-      window.addEventListener('resize', resize);
-      resize();
+      window.addEventListener('resize',resize);
       updateCamera();
+      resize();
       updateCount();
 
-      function animate() {
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
+      function animate(){renderer.render(scene,camera);requestAnimationFrame(animate)}
       animate();
-    } catch (err) {
+    }catch(err){
       console.error(err);
-      errorBox.style.display = 'block';
+      errorBox.style.display='block';
     }
   </script>
 </body>
