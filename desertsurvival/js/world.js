@@ -13,7 +13,8 @@ export function createDefaultWorldState() {
     running: false,
     sheltered: false,
     currentRegion: 'desert_001',
-    discoveredMarkpoints: []
+    discoveredMarkpoints: [],
+    collectedPickups: []
   };
 }
 
