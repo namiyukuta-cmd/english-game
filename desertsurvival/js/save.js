@@ -11,7 +11,8 @@ export const SAVE_CONFIG = Object.freeze({
   branch: 'main',
   saveDir: 'desertsurvival-saves',
   tokenKey: 'desertSurvivalGithubToken',
-  activeKey: 'desertSurvivalActiveGame'
+  activeKey: 'desertSurvivalActiveGame',
+  backupKey: 'desertSurvivalActiveGameBackup'
 });
 
 export function createNewGameState() {
@@ -43,17 +44,44 @@ export function clearToken() {
   localStorage.removeItem(SAVE_CONFIG.tokenKey);
 }
 
-export function getActiveGame() {
+function parseGame(raw) {
+  if (!raw) return null;
   try {
-    return JSON.parse(localStorage.getItem(SAVE_CONFIG.activeKey) || 'null');
+    const game = JSON.parse(raw);
+    return game && typeof game === 'object' ? game : null;
   } catch (_) {
     return null;
   }
 }
 
+export function getActiveGame() {
+  const activeRaw = localStorage.getItem(SAVE_CONFIG.activeKey);
+  const active = parseGame(activeRaw);
+  if (active) return active;
+
+  const backupRaw = localStorage.getItem(SAVE_CONFIG.backupKey);
+  const backup = parseGame(backupRaw);
+  if (backup) {
+    localStorage.setItem(SAVE_CONFIG.activeKey, backupRaw);
+    return backup;
+  }
+  return null;
+}
+
+export function getActiveGameBackup() {
+  return parseGame(localStorage.getItem(SAVE_CONFIG.backupKey));
+}
+
 export function setActiveGame(game) {
   if (!game) return;
   game.updatedAt = new Date().toISOString();
+
+  const previousRaw = localStorage.getItem(SAVE_CONFIG.activeKey);
+  const previous = parseGame(previousRaw);
+  if (previous && previousRaw) {
+    localStorage.setItem(SAVE_CONFIG.backupKey, previousRaw);
+  }
+
   localStorage.setItem(SAVE_CONFIG.activeKey, JSON.stringify(game));
 }
 
