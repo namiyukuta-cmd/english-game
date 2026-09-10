@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#17140f">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Desert Survival - Items</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-menucompact1">
+  <link rel="stylesheet" href="./css/inventory.css?v=20260910-inventory1">
 </head>
-<body class="screen screen-menu">
+<body class="screen screen-menu inventory-screen">
   <main class="menu-shell">
     <header class="menu-head">
       <a class="back-btn icon-nav-btn" href="./desertsurvival_field_v2.html?v=20260910-topui3" aria-label="フィールドへ戻る">
@@ -19,8 +22,16 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
       </a>
     </header>
-    <section id="itemContent" class="menu-content"></section>
+
+    <section id="itemDescription" class="inventory-description empty-description" aria-live="polite">
+      <h2>アイテム</h2>
+      <p>マスをタップすると、ここに説明が表示されます。</p>
+    </section>
+
+    <section id="equipmentGrid" class="equipment-area" aria-label="装備"></section>
+    <section id="inventoryGrid" class="inventory-grid" aria-label="所持品 36マス"></section>
   </main>
-  <script type="module" src="./js/item-page.js?v=20260910-menucompact1"></script>
+
+  <script type="module" src="./js/item-page.js?v=20260910-inventory1"></script>
 </body>
 </html>
