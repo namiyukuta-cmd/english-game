@@ -1,19 +1,19 @@
 /* 手描きラフに合わせた時計・日付・天気・温度計の配置 */
 
-/* 体力・水・食・睡眠などの四角いパネルは、レイアウトからいったん外す。
-   数値データ自体は残し、後で上部中央へ別配置する。 */
+/* 体力・水・食・睡眠などの四角いパネルはレイアウトから外す。
+   数値データは残し、後で上部中央へ別配置する。 */
 .survival-compact{
   display:none !important;
 }
 
 .player-hud{
-  width:124px !important;
+  width:98px !important;
 }
 
 .hud-visual-row{
   position:relative;
-  width:124px;
-  height:250px;
+  width:98px;
+  height:172px;
   margin-top:0;
   padding:0;
   display:block;
@@ -22,16 +22,16 @@
 .time-weather-stack{
   position:absolute;
   left:0;
-  top:18px;
-  width:124px;
-  height:124px;
+  top:8px;
+  width:98px;
+  height:98px;
   display:block;
 }
 
 .clock-ring,
 .clock-ring canvas{
-  width:124px;
-  height:124px;
+  width:98px;
+  height:98px;
   display:block;
 }
 
@@ -41,97 +41,112 @@
   margin:0;
 }
 
-/* ラフの「9」「3」 */
+/* 時計盤は透けさせる。9・3は別レイヤーなのでくっきり残す。 */
+.clock-ring canvas{
+  opacity:.88;
+}
+
 .clock-ring::before,
 .clock-ring::after{
   position:absolute;
   top:50%;
-  z-index:4;
+  z-index:6;
   transform:translateY(-50%);
-  color:#f7efdf;
-  font-size:13px;
-  font-weight:900;
+  color:#fffaf0;
+  font-size:15px;
+  font-weight:1000;
   line-height:1;
-  text-shadow:0 1px 2px rgba(0,0,0,.45);
+  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 2px rgba(255,255,255,.35);
   pointer-events:none;
 }
-.clock-ring::before{content:"9";left:8px;}
-.clock-ring::after{content:"3";right:8px;}
+.clock-ring::before{content:"9";left:4px;}
+.clock-ring::after{content:"3";right:4px;}
 
 /* DAY は時計の12時位置に重ねる */
 .day-badge{
   position:absolute;
-  z-index:5;
+  z-index:7;
   left:50%;
-  top:-19px;
+  top:-14px;
   transform:translateX(-50%);
-  width:43px;
-  height:43px;
+  width:34px;
+  height:34px;
   margin:0;
-  border:1.5px solid rgba(255,255,255,.78);
+  border:1.5px solid rgba(255,255,255,.82);
   border-radius:50%;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  background:rgba(24,20,14,.88);
-  box-shadow:0 2px 8px rgba(0,0,0,.22);
+  background:rgba(24,20,14,.48);
+  box-shadow:0 1px 5px rgba(0,0,0,.18);
 }
-.day-badge span{font-size:8px;letter-spacing:.08em;line-height:1;}
-.day-badge strong{font-size:16px;line-height:1;margin-top:2px;}
+.day-badge span{font-size:7px;letter-spacing:.08em;line-height:1;font-weight:800;}
+.day-badge strong{font-size:14px;line-height:1;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.75);}
 
 /* 天気は時計の6時位置に重ねる */
 .weather-badge{
   position:absolute;
-  z-index:5;
+  z-index:7;
   left:50%;
-  bottom:-19px;
+  bottom:-14px;
   transform:translateX(-50%);
-  width:43px;
-  height:43px;
+  width:34px;
+  height:34px;
   margin:0;
-  border:1.5px solid rgba(255,255,255,.76);
+  border:1.5px solid rgba(255,255,255,.82);
   border-radius:50%;
   display:grid;
   place-items:center;
-  background:rgba(24,20,14,.88);
-  box-shadow:0 2px 8px rgba(0,0,0,.2);
+  background:rgba(24,20,14,.48);
+  box-shadow:0 1px 5px rgba(0,0,0,.18);
 }
-.weather-badge svg{width:25px;height:25px;}
+.weather-badge svg{width:21px;height:21px;stroke-width:2.1;}
 
-/* 温度計は時計・天気の真下に一本だけ伸ばす */
+/* 温度計は短く、太く。天気のすぐ下へ。 */
 .temp-widget{
   position:absolute;
   left:50%;
-  top:162px;
+  top:119px;
   transform:translateX(-50%);
-  width:28px;
+  width:30px;
   display:flex;
   align-items:center;
   justify-content:flex-start;
 }
 .thermometer{
-  width:13px;
-  height:76px;
-  border-width:2px;
+  width:22px;
+  height:43px;
+  border-width:2.5px;
+  border-radius:12px 12px 14px 14px;
 }
 .thermometer::after{
-  width:20px;
-  height:20px;
-  bottom:-7px;
+  width:25px;
+  height:25px;
+  bottom:-9px;
+  border-width:2.5px;
+}
+.thermometer-fill{
+  left:5px;
+  right:5px;
+  bottom:4px;
+  border-radius:8px;
 }
 .temp-reading{display:none;}
 
 @media(max-width:480px){
-  .player-hud{width:112px !important;}
-  .hud-visual-row{width:112px;height:232px;margin-top:0;}
-  .time-weather-stack{width:112px;height:112px;top:17px;}
-  .clock-ring,.clock-ring canvas{width:112px;height:112px;}
-  .day-badge{width:39px;height:39px;top:-17px;}
-  .weather-badge{width:39px;height:39px;bottom:-17px;}
-  .weather-badge svg{width:23px;height:23px;}
-  .temp-widget{top:147px;}
-  .thermometer{height:70px;}
-  .clock-ring::before{left:7px;}
-  .clock-ring::after{right:7px;}
+  .player-hud{width:90px !important;}
+  .hud-visual-row{width:90px;height:158px;margin-top:0;}
+  .time-weather-stack{width:90px;height:90px;top:7px;}
+  .clock-ring,.clock-ring canvas{width:90px;height:90px;}
+  .clock-ring::before,.clock-ring::after{font-size:14px;}
+  .clock-ring::before{left:3px;}
+  .clock-ring::after{right:3px;}
+  .day-badge{width:31px;height:31px;top:-12px;}
+  .day-badge strong{font-size:13px;}
+  .weather-badge{width:31px;height:31px;bottom:-12px;}
+  .weather-badge svg{width:19px;height:19px;}
+  .temp-widget{top:108px;}
+  .thermometer{width:21px;height:39px;}
+  .thermometer::after{width:24px;height:24px;}
 }
