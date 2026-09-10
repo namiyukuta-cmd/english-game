@@ -107,9 +107,9 @@ const scrubGeo=new THREE.ConeGeometry(1,1,5);
 const scrubMat=new THREE.MeshLambertMaterial({color:0x746a43});
 
 const pickupStoneGeo=new THREE.OctahedronGeometry(.48,0);
-const pickupBranchGeo=new THREE.CylinderGeometry(.08,.11,1.25,6);
+const pickupBranchGeo=new THREE.CylinderGeometry(.09,.13,1.45,6);
 const pickupStoneMat=new THREE.MeshStandardMaterial({color:0xaefaff,emissive:0x00b8c6,emissiveIntensity:1.45,roughness:.28,metalness:.05});
-const pickupBranchMat=new THREE.MeshStandardMaterial({color:0xffd46d,emissive:0xd87900,emissiveIntensity:1.25,roughness:.42,metalness:.02});
+const pickupBranchMat=new THREE.MeshStandardMaterial({color:0xffdf7a,emissive:0xe38700,emissiveIntensity:1.55,roughness:.38,metalness:.02});
 const pickupGlowMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.72,depthWrite:false,blending:THREE.AdditiveBlending});
 const pickupHaloGeo=new THREE.TorusGeometry(.78,.045,6,22);
 const pickupSparkGeo=new THREE.OctahedronGeometry(.10,0);
@@ -199,8 +199,8 @@ function createCell(cx,cz){
 
   const pickupRoll=random();
   const pickupId=pickupIdForCell(cx,cz);
-  if(pickupRoll<0.038&&!game.world.collectedPickups.includes(pickupId)){
-    const itemId=random()<.58?'stone':'dry_branch';
+  if(pickupRoll<0.09&&!game.world.collectedPickups.includes(pickupId)){
+    const itemId=random()<.72?'dry_branch':'stone';
     const px=cx*CELL+(random()-.5)*CELL*.56;
     const pz=cz*CELL+(random()-.5)*CELL*.56;
     const pickup=makePickup(itemId,pickupId,px,pz,random()*Math.PI*2);
