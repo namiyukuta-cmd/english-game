@@ -54,7 +54,6 @@ const sunLight = new THREE.DirectionalLight(0xffefc7, 2.4);
 sunLight.position.set(80, 120, 40);
 scene.add(sunLight);
 
-// 地面は主人公と一緒に移動させる。遠景はチャンクで生成する。
 const groundMaterial = new THREE.MeshLambertMaterial({ color: 0xc9ad78 });
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), groundMaterial);
 ground.rotation.x = -Math.PI / 2;
@@ -78,7 +77,6 @@ function makePlayerModel() {
   head.position.y = 2.18;
   group.add(head);
 
-  // 顔の向きが分かる小さな布。後で本物のキャラクターモデルへ交換可能。
   const faceMark = new THREE.Mesh(
     new THREE.PlaneGeometry(0.20, 0.16),
     new THREE.MeshBasicMaterial({ color: 0xe4c39b, side: THREE.DoubleSide })
@@ -95,7 +93,6 @@ const playerModel = makePlayerModel();
 playerModel.position.set(game.world.x, 0, game.world.z);
 scene.add(playerModel);
 
-// 共通ジオメトリ。チャンクごとに作り直さない。
 const duneGeometry = new THREE.SphereGeometry(1, 10, 6);
 const duneMaterialA = new THREE.MeshLambertMaterial({ color: 0xd7bd88 });
 const duneMaterialB = new THREE.MeshLambertMaterial({ color: 0xc5a56c });
@@ -132,7 +129,6 @@ function createChunk(cx, cz) {
   const baseX = cx * CHUNK_SIZE;
   const baseZ = cz * CHUNK_SIZE;
 
-  // 低い砂丘。通行を塞がない背景オブジェクトとして置く。
   const duneCount = 5 + Math.floor(random() * 5);
   for (let i = 0; i < duneCount; i++) {
     const dune = new THREE.Mesh(duneGeometry, random() > 0.45 ? duneMaterialA : duneMaterialB);
@@ -199,7 +195,6 @@ function updateChunks() {
   }
 }
 
-// 砂嵐用の軽量パーティクル。
 const sandParticleCount = 420;
 const sandPositions = new Float32Array(sandParticleCount * 3);
 for (let i = 0; i < sandParticleCount; i++) {
@@ -346,17 +341,14 @@ function updateMovement(dt) {
   if (!mapOverlay.hidden) return false;
 
   const magnitude = Math.hypot(inputX, inputY);
-  if (magnitude <= 0.05) {
-    game.world.running = false;
-    return false;
-  }
+  if (magnitude <= 0.05) return false;
 
   const nx = inputX / magnitude;
   const ny = inputY / magnitude;
 
-  // カメラ基準で「上」が前になる。
-  const forwardX = Math.sin(cameraYaw);
-  const forwardZ = Math.cos(cameraYaw);
+  // カメラから主人公へ向かう方向が、画面上の「前」。
+  const forwardX = -Math.sin(cameraYaw);
+  const forwardZ = -Math.cos(cameraYaw);
   const rightX = Math.cos(cameraYaw);
   const rightZ = -Math.sin(cameraYaw);
 
@@ -483,7 +475,6 @@ function releaseJoystick(event) {
 movePad.addEventListener('pointerup', releaseJoystick);
 movePad.addEventListener('pointercancel', releaseJoystick);
 
-// RUNは押している間だけ有効。
 function startRun(event) {
   event.preventDefault();
   game.world.running = true;
