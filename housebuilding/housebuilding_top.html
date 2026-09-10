@@ -53,12 +53,10 @@
       <button id="view3d">3D</button>
       <button id="rotateLeft" class="icon-only" aria-label="左へ回転" disabled>↶</button>
       <button id="rotateRight" class="icon-only" aria-label="右へ回転" disabled>↷</button>
-      <button id="zoomIn" class="icon-only" aria-label="拡大">＋</button>
-      <button id="zoomOut" class="icon-only" aria-label="縮小">−</button>
     </div>
 
     <div class="toolbar-wrap">
-      <div class="hint">地面をタップ＝置く / ブロックをタップ＝その上に積む</div>
+      <div class="hint">1本指で配置 / 2本指で拡大・縮小</div>
       <nav class="toolbar" aria-label="建築ツール">
         <button class="tool active" data-tool="block"><span>■</span>ブロック</button>
         <button class="tool" data-tool="delete"><span>×</span>削除</button>
@@ -131,7 +129,10 @@
 
       const raycaster=new THREE.Raycaster();
       const pointer=new THREE.Vector2();
-      let pointerDown=null;
+      const activePointers=new Map();
+      let gestureHadPinch=false;
+      let pinchStartDistance=0;
+      let pinchStartZoom=0;
 
       function keyFor(x,y,z){return `${x},${y},${z}`}
       function worldFromCell(x,y,z){return{x:x-HALF+.5,y:y+.47,z:z-HALF+.5}}
@@ -253,20 +254,78 @@
         if(target){addBlock(target);showTarget(target)}
       }
 
+      function getPinchDistance(){
+        const pts=[...activePointers.values()];
+        if(pts.length<2)return 0;
+        return Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+      }
+
+      function beginPinch(){
+        if(activePointers.size<2)return;
+        gestureHadPinch=true;
+        pinchStartDistance=getPinchDistance();
+        pinchStartZoom=viewMode==='top'?topHeight:cameraDistance;
+        highlight.visible=false;
+      }
+
+      function updatePinch(){
+        if(activePointers.size<2||pinchStartDistance<=0)return;
+        const distance=getPinchDistance();
+        if(distance<=0)return;
+        const ratio=distance/pinchStartDistance;
+        if(viewMode==='top'){
+          topHeight=THREE.MathUtils.clamp(pinchStartZoom/ratio,11,28);
+        }else{
+          cameraDistance=THREE.MathUtils.clamp(pinchStartZoom/ratio,13,40);
+        }
+        updateCamera();
+      }
+
       renderer.domElement.addEventListener('pointerdown',e=>{
-        pointerDown={x:e.clientX,y:e.clientY};
-        previewAt(e.clientX,e.clientY);
+        renderer.domElement.setPointerCapture?.(e.pointerId);
+        activePointers.set(e.pointerId,{startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY});
+        if(activePointers.size===1){
+          gestureHadPinch=false;
+          previewAt(e.clientX,e.clientY);
+        }else if(activePointers.size===2){
+          beginPinch();
+        }
       });
+
       renderer.domElement.addEventListener('pointermove',e=>{
-        if(!pointerDown)previewAt(e.clientX,e.clientY);
+        const p=activePointers.get(e.pointerId);
+        if(!p)return;
+        p.x=e.clientX;
+        p.y=e.clientY;
+        if(activePointers.size>=2)updatePinch();
       });
+
       renderer.domElement.addEventListener('pointerup',e=>{
-        if(!pointerDown)return;
-        const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);
-        pointerDown=null;
-        if(moved<12)actAt(e.clientX,e.clientY);
+        const p=activePointers.get(e.pointerId);
+        if(!p)return;
+        p.x=e.clientX;
+        p.y=e.clientY;
+        const moved=Math.hypot(p.x-p.startX,p.y-p.startY);
+        const shouldAct=activePointers.size===1&&!gestureHadPinch&&moved<12;
+        activePointers.delete(e.pointerId);
+        if(activePointers.size<2){
+          pinchStartDistance=0;
+          pinchStartZoom=0;
+        }
+        if(activePointers.size===0){
+          if(shouldAct)actAt(e.clientX,e.clientY);
+          gestureHadPinch=false;
+        }
       });
-      renderer.domElement.addEventListener('pointercancel',()=>{pointerDown=null});
+
+      renderer.domElement.addEventListener('pointercancel',e=>{
+        activePointers.delete(e.pointerId);
+        if(activePointers.size===0){
+          gestureHadPinch=false;
+          pinchStartDistance=0;
+          pinchStartZoom=0;
+        }
+      });
 
       document.querySelectorAll('.tool').forEach(btn=>{
         btn.addEventListener('click',()=>{
@@ -282,16 +341,6 @@
       document.getElementById('view3d').addEventListener('click',()=>setViewMode('3d'));
       document.getElementById('rotateLeft').addEventListener('click',()=>{if(viewMode==='3d'){cameraAngle-=Math.PI/8;updateCamera()}});
       document.getElementById('rotateRight').addEventListener('click',()=>{if(viewMode==='3d'){cameraAngle+=Math.PI/8;updateCamera()}});
-      document.getElementById('zoomIn').addEventListener('click',()=>{
-        if(viewMode==='top')topHeight=Math.max(11,topHeight-1.2);
-        else cameraDistance=Math.max(13,cameraDistance-1.5);
-        updateCamera();
-      });
-      document.getElementById('zoomOut').addEventListener('click',()=>{
-        if(viewMode==='top')topHeight=Math.min(28,topHeight+1.2);
-        else cameraDistance=Math.min(40,cameraDistance+1.5);
-        updateCamera();
-      });
       document.getElementById('backBtn').addEventListener('click',()=>{location.href='housebuilding_index.html'});
 
       window.addEventListener('resize',resize);
