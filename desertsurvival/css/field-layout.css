@@ -27,6 +27,7 @@
   min-height:0;
   overflow:hidden;
   background:#8e7753;
+  touch-action:none;
 }
 
 .field-stage .world-canvas{
@@ -61,15 +62,14 @@
 /* Central field UI */
 .field-stage .field-left-info{top:12px;left:11px;}
 .field-stage .field-map-anchor{top:12px;right:10px;}
-.field-stage .field-bottom-right{right:4px;bottom:10px;}
-.field-stage .pickup-toast{bottom:126px;}
+.field-stage .pickup-toast{bottom:84px;}
 
-/* Selected usable item: one action button above the movement stick. */
+/* Selected usable item: contextual action in the free lower-right field area. */
 .field-use-button{
   position:absolute;
   z-index:28;
-  right:29px;
-  bottom:146px;
+  right:16px;
+  bottom:16px;
   width:64px;
   height:64px;
   padding:4px;
@@ -212,11 +212,11 @@
 
   .field-stage .field-left-info{top:10px;left:9px;}
   .field-stage .field-map-anchor{top:10px;right:8px;}
-  .field-stage .pickup-toast{bottom:112px;}
+  .field-stage .pickup-toast{bottom:74px;}
 
   .field-use-button{
-    right:24px;
-    bottom:122px;
+    right:14px;
+    bottom:14px;
     width:56px;
     height:56px;
   }
