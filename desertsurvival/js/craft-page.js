@@ -1,9 +1,13 @@
-import { getActiveGame, setActiveGame, createNewGameState } from './save.js';
-import { itemData, normalizeInventory } from './items.js';
+import { getActiveGame, setActiveGame } from './save.js?v=20260910-stateprotect1';
+import { itemData, normalizeInventory } from './items.js?v=20260910-itemuse1';
 import { recipes, canCraft, craftRecipe } from './recipes.js';
 
 const content = document.getElementById('craftContent');
-let game = getActiveGame() || createNewGameState();
+let game = getActiveGame();
+if (!game) {
+  location.replace('./desertsurvival_index.html');
+  throw new Error('Desert Survival の進行中データがありません。');
+}
 game.inventory = normalizeInventory(game.inventory);
 
 function itemName(id) {
