@@ -1,5 +1,5 @@
-import { getActiveGame, setActiveGame, createNewGameState } from './save.js';
-import { itemData, normalizeInventory, INVENTORY_SLOT_COUNT } from './items.js?v=20260910-inventory2';
+import { getActiveGame, setActiveGame } from './save.js?v=20260910-stateprotect1';
+import { itemData, normalizeInventory, INVENTORY_SLOT_COUNT } from './items.js?v=20260910-itemuse1';
 import {
   EQUIPMENT_SLOTS,
   EQUIPMENT_SLOT_NAMES,
@@ -13,7 +13,12 @@ const description = document.getElementById('itemDescription');
 const equipmentGrid = document.getElementById('equipmentGrid');
 const inventoryGrid = document.getElementById('inventoryGrid');
 
-let game = getActiveGame() || createNewGameState();
+let game = getActiveGame();
+if (!game) {
+  location.replace('./desertsurvival_index.html');
+  throw new Error('Desert Survival の進行中データがありません。');
+}
+
 game.inventory = normalizeInventory(game.inventory);
 game.equipment = normalizeEquipment(game.equipment);
 
@@ -159,10 +164,12 @@ function clickInventory(slot) {
       moved = unequipItem(game.inventory, game.equipment, selected.slot, slot);
     } else if (canEquipToSlot(target.id, selected.slot)) {
       const equipped = game.equipment[selected.slot];
-      game.equipment[selected.slot] = { id:target.id, amount:1 };
-      target.id = equipped.id;
-      target.amount = equipped.amount || 1;
-      moved = true;
+      if (equipped) {
+        game.equipment[selected.slot] = { id:target.id, amount:1 };
+        target.id = equipped.id;
+        target.amount = equipped.amount || 1;
+        moved = true;
+      }
     }
   }
 
