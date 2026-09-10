@@ -499,8 +499,8 @@ function discoverNearbyMarkpoints(){
   for(const p of markpoints){
     if(!Number.isFinite(+p.x)||!Number.isFinite(+p.z))continue;
     const distance=Math.hypot(+p.x-game.world.x,+p.z-game.world.z);
-    const discoverRadius=Math.max(1,Number(p.discoverRadius||8));
-    if(distance<discoverRadius&&!game.world.discoveredMarkpoints.includes(p.id)){
+    const radius=Math.max(0,Number(p.discoverRadius||8));
+    if(distance<radius&&!game.world.discoveredMarkpoints.includes(p.id)){
       game.world.discoveredMarkpoints.push(p.id);
       changed=true;
     }
@@ -667,6 +667,43 @@ function useHotbarItem(event){
 }
 
 window.addEventListener('desert:use-hotbar-item',useHotbarItem);
+
+function waterPointInRange(markpointId=null){
+  const wanted=markpointId?String(markpointId).padStart(3,'0'):null;
+  let nearest=null;
+  let nearestDistance=Infinity;
+  for(const p of markpoints){
+    if(p.type!=='water')continue;
+    if(wanted&&p.id!==wanted)continue;
+    const px=Number(p.x);
+    const pz=Number(p.z);
+    if(!Number.isFinite(px)||!Number.isFinite(pz))continue;
+    const distance=Math.hypot(px-game.world.x,pz-game.world.z);
+    const radius=Math.max(0,Number(p.interactionRadius||3));
+    if(distance<=radius&&distance<nearestDistance){
+      nearest=p;
+      nearestDistance=distance;
+    }
+  }
+  return nearest;
+}
+
+function drinkFromWaterPoint(event){
+  const point=waterPointInRange(event.detail?.markpointId);
+  if(!point)return;
+  if(Number(game.player.water||0)>=100){
+    showFieldToast('水は十分です');
+    return;
+  }
+  game.player.water=100;
+  normalizePlayer(game.player);
+  setActiveGame(game);
+  showFieldToast(`${point.name||'水場'}の水を飲んだ`);
+  drawHud();
+  window.dispatchEvent(new CustomEvent('desert:player-changed'));
+}
+
+window.addEventListener('desert:drink-water',drinkFromWaterPoint);
 
 /* ---------- movement: drag + tap-to-walk + double-tap auto-walk ---------- */
 let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,dragMoved=false,pointerDownAt=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
