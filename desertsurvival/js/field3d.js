@@ -384,7 +384,6 @@ function makeWaterActionTexture(label,full=false){
 }
 
 const waterDrinkTexture=makeWaterActionTexture('飲む',false);
-const waterFullTexture=makeWaterActionTexture('満タン',true);
 
 function addWaterActionSprite(parent,point){
   const material=new THREE.SpriteMaterial({
@@ -408,14 +407,12 @@ function addWaterActionSprite(parent,point){
 }
 
 function refreshWaterActionSprites(){
-  const full=Number(game.player?.water??100)>=100;
-  const texture=full?waterFullTexture:waterDrinkTexture;
   for(const sprite of waterActionSprites.values()){
-    if(sprite.material.map!==texture){
-      sprite.material.map=texture;
+    if(sprite.material.map!==waterDrinkTexture){
+      sprite.material.map=waterDrinkTexture;
       sprite.material.needsUpdate=true;
     }
-    sprite.material.opacity=full?0.82:1;
+    sprite.material.opacity=1;
   }
 }
 
@@ -748,8 +745,7 @@ function waterPointInRange(markpointId=null){
 function performDrink(point){
   if(!point)return false;
   if(Number(game.player.water||0)>=100){
-    showFieldToast('水は満タンです');
-    refreshWaterActionSprites();
+    showFieldToast('もう飲めない');
     return false;
   }
   game.player.water=100;
@@ -757,7 +753,6 @@ function performDrink(point){
   setActiveGame(game);
   showFieldToast(`${point.name||'水場'}の水を飲んだ`);
   drawHud();
-  refreshWaterActionSprites();
   window.dispatchEvent(new CustomEvent('desert:player-changed'));
   return true;
 }
@@ -799,10 +794,6 @@ function waterApproachTarget(point){
 
 function startWaterDrink(point){
   if(!point)return;
-  if(Number(game.player.water||0)>=100){
-    showFieldToast('水は満タンです');
-    return;
-  }
   const target=waterApproachTarget(point);
   autoDirection=null;
   autoTarget={
