@@ -2,12 +2,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 
 import {getActiveGame,setActiveGame,createNewGameState} from './save.js';
 import {normalizePlayer,advancePlayer} from './player.js';
+import {addItem,itemData} from './items.js';
 import {advanceTime,TIME_SCALE,formatTime} from './time.js';
 import {getAmbientTemperature} from './temperature.js';
 import {updateWeather} from './weather.js';
 import {moveWorldPosition} from './world.js';
 import {markpoints} from './markpoints.js';
-import {getNearbyMarkpoint} from './markpoint-common.js';
 import {drawMiniMap,drawWorldMap} from './map.js';
 import {drawClock} from './clock.js';
 
@@ -19,7 +19,7 @@ const miniBtn=$('miniMapBtn');
 const overlay=$('mapOverlay');
 const closeMap=$('closeMapBtn');
 const worldMap=$('worldMapCanvas');
-const interact=$('interactBtn');
+const pickupToast=$('pickupToast');
 const item=$('itemBtn');
 const run=$('runBtn');
 const pad=$('movePad');
@@ -27,6 +27,9 @@ const knob=$('moveKnob');
 
 let game=getActiveGame()||createNewGameState();
 normalizePlayer(game.player);
+game.inventory=Array.isArray(game.inventory)?game.inventory:[];
+game.world.discoveredMarkpoints=Array.isArray(game.world.discoveredMarkpoints)?game.world.discoveredMarkpoints:[];
+game.world.collectedPickups=Array.isArray(game.world.collectedPickups)?game.world.collectedPickups:[];
 setActiveGame(game);
 
 /* ---------- 3D scene ---------- */
@@ -79,8 +82,6 @@ function makePlayer(){
   directionMark.position.set(0,1.90,-0.43);
   g.add(directionMark);
 
-  g.userData.robe=robe;
-  g.userData.head=head;
   return g;
 }
 
@@ -92,7 +93,9 @@ scene.add(player);
 const CELL=18;
 const RADIUS_X=8;
 const RADIUS_Z=10;
+const PICKUP_RADIUS=1.25;
 const cells=new Map();
+const activePickups=new Map();
 
 const duneGeo=new THREE.SphereGeometry(1,10,6);
 const duneMatA=new THREE.MeshLambertMaterial({color:0xd9bf8d});
@@ -101,6 +104,32 @@ const rockGeo=new THREE.DodecahedronGeometry(1,0);
 const rockMat=new THREE.MeshLambertMaterial({color:0x71614f});
 const scrubGeo=new THREE.ConeGeometry(1,1,5);
 const scrubMat=new THREE.MeshLambertMaterial({color:0x746a43});
+
+const pickupStoneGeo=new THREE.OctahedronGeometry(.48,0);
+const pickupBranchGeo=new THREE.CylinderGeometry(.08,.11,1.25,6);
+const pickupStoneMat=new THREE.MeshStandardMaterial({
+  color:0xaefaff,
+  emissive:0x00b8c6,
+  emissiveIntensity:1.45,
+  roughness:.28,
+  metalness:.05
+});
+const pickupBranchMat=new THREE.MeshStandardMaterial({
+  color:0xffd46d,
+  emissive:0xd87900,
+  emissiveIntensity:1.25,
+  roughness:.42,
+  metalness:.02
+});
+const pickupGlowMat=new THREE.MeshBasicMaterial({
+  color:0xffffff,
+  transparent:true,
+  opacity:.72,
+  depthWrite:false,
+  blending:THREE.AdditiveBlending
+});
+const pickupHaloGeo=new THREE.TorusGeometry(.78,.045,6,22);
+const pickupSparkGeo=new THREE.OctahedronGeometry(.10,0);
 
 function hash(x,z){
   let h=Math.imul(x|0,374761393)^Math.imul(z|0,668265263);
@@ -115,6 +144,43 @@ function rng(seed){
     t=t+Math.imul(t^t>>>7,61|t)^t;
     return((t^t>>>14)>>>0)/4294967296;
   };
+}
+
+function pickupIdForCell(cx,cz){
+  return `material_${cx}_${cz}`;
+}
+
+function makePickup(itemId,pickupId,wx,wz,phase){
+  const g=new THREE.Group();
+  let core;
+
+  if(itemId==='dry_branch'){
+    core=new THREE.Mesh(pickupBranchGeo,pickupBranchMat);
+    core.rotation.z=Math.PI/2;
+    core.rotation.y=.35;
+    core.position.y=.50;
+  }else{
+    core=new THREE.Mesh(pickupStoneGeo,pickupStoneMat);
+    core.position.y=.55;
+  }
+  g.add(core);
+
+  const halo=new THREE.Mesh(pickupHaloGeo,pickupGlowMat);
+  halo.rotation.x=Math.PI/2;
+  halo.position.y=.08;
+  g.add(halo);
+
+  const sparkA=new THREE.Mesh(pickupSparkGeo,pickupGlowMat);
+  sparkA.position.set(.58,1.05,0);
+  g.add(sparkA);
+  const sparkB=new THREE.Mesh(pickupSparkGeo,pickupGlowMat);
+  sparkB.scale.setScalar(.72);
+  sparkB.position.set(-.44,.82,.28);
+  g.add(sparkB);
+
+  g.position.set(wx,0,wz);
+  g.userData={pickupId,itemId,phase,halo,sparkA,sparkB};
+  return g;
 }
 
 function createCell(cx,cz){
@@ -149,6 +215,19 @@ function createCell(cx,cz){
     }
   }
 
+  // 通常素材。世界座標から決まるので、画面を出入りしても同じ場所に出る。
+  const pickupRoll=random();
+  const pickupId=pickupIdForCell(cx,cz);
+  if(pickupRoll<0.038&&!game.world.collectedPickups.includes(pickupId)){
+    const itemId=random()<.58?'stone':'dry_branch';
+    const px=cx*CELL+(random()-.5)*CELL*.56;
+    const pz=cz*CELL+(random()-.5)*CELL*.56;
+    const pickup=makePickup(itemId,pickupId,px,pz,random()*Math.PI*2);
+    group.add(pickup);
+    group.userData.pickupId=pickupId;
+    activePickups.set(pickupId,{group:pickup,cellGroup:group,itemId});
+  }
+
   scene.add(group);
   cells.set(`${cx},${cz}`,group);
 }
@@ -170,9 +249,51 @@ function updateCells(force=false){
   }
   for(const [key,group] of cells){
     if(!needed.has(key)){
+      if(group.userData.pickupId)activePickups.delete(group.userData.pickupId);
       scene.remove(group);
       cells.delete(key);
     }
+  }
+}
+
+/* ---------- automatic material pickup ---------- */
+let toastTimer=null;
+function showPickupToast(itemId){
+  const name=itemData[itemId]?.name||itemId;
+  pickupToast.textContent=`${name} を拾った`;
+  pickupToast.hidden=false;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{pickupToast.hidden=true;},900);
+}
+
+function collectNearbyPickups(){
+  for(const [pickupId,entry] of activePickups){
+    const dx=entry.group.position.x-game.world.x;
+    const dz=entry.group.position.z-game.world.z;
+    if(Math.hypot(dx,dz)>PICKUP_RADIUS)continue;
+
+    addItem(game.inventory,entry.itemId,1);
+    game.world.collectedPickups.push(pickupId);
+    entry.cellGroup.remove(entry.group);
+    entry.cellGroup.userData.pickupId=null;
+    activePickups.delete(pickupId);
+    showPickupToast(entry.itemId);
+    setActiveGame(game);
+  }
+}
+
+function animatePickups(now){
+  const t=now*.001;
+  for(const entry of activePickups.values()){
+    const g=entry.group;
+    const d=g.userData;
+    const phase=d.phase||0;
+    g.position.y=.06+Math.sin(t*2.2+phase)*.10;
+    g.rotation.y=t*.65+phase;
+    d.halo.rotation.z=t*1.8+phase;
+    const pulse=.75+Math.sin(t*3.4+phase)*.25;
+    d.sparkA.scale.setScalar(.75+pulse*.55);
+    d.sparkB.scale.setScalar(.55+pulse*.35);
   }
 }
 
@@ -202,6 +323,19 @@ function buildMarkpoints(){
   }
 }
 
+function discoverNearbyMarkpoints(){
+  let changed=false;
+  for(const p of markpoints){
+    if(!Number.isFinite(+p.x)||!Number.isFinite(+p.z))continue;
+    const distance=Math.hypot(+p.x-game.world.x,+p.z-game.world.z);
+    if(distance<8&&!game.world.discoveredMarkpoints.includes(p.id)){
+      game.world.discoveredMarkpoints.push(p.id);
+      changed=true;
+    }
+  }
+  if(changed)maps();
+}
+
 /* ---------- HUD / map ---------- */
 function bar(name,value){
   const safe=Math.max(0,Math.min(100,Number(value||0)));
@@ -217,15 +351,6 @@ function drawHud(){
 function maps(){
   drawMiniMap(mini,game.world,markpoints);
   if(!overlay.hidden)drawWorldMap(worldMap,game.world,markpoints);
-}
-function nearby(){
-  const p=getNearbyMarkpoint(game.world,markpoints);
-  interact.disabled=!p;
-  interact.title=p?.name||'';
-  if(p&&!game.world.discoveredMarkpoints.includes(p.id)){
-    game.world.discoveredMarkpoints.push(p.id);
-    maps();
-  }
 }
 
 /* ---------- environment ---------- */
@@ -292,7 +417,11 @@ function updateMovement(dt){
   walkPhase+=dt*(game.world.running?13:8);
   player.position.y=Math.abs(Math.sin(walkPhase))*.055;
   timeAcc+=moved.gameMinutes;
-  updateCells();nearby();maps();updateCamera();
+  updateCells();
+  collectNearbyPickups();
+  discoverNearbyMarkpoints();
+  maps();
+  updateCamera();
 }
 
 function frame(now){
@@ -300,6 +429,7 @@ function frame(now){
   last=now;
   updateMovement(dt);
   if(Math.hypot(ix,iy)<.05)player.position.y+=(0-player.position.y)*.2;
+  animatePickups(now);
   timeAcc+=dt*(1000/TIME_SCALE.realMillisecondsPerGameMinute);
   while(timeAcc>=1){minuteTick();timeAcc-=1;}
   saveAcc+=dt;
@@ -332,7 +462,6 @@ run.addEventListener('pointerleave',stopRun);
 miniBtn.addEventListener('click',()=>{release();stopRun();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
 closeMap.addEventListener('click',()=>{overlay.hidden=true;});
 item.addEventListener('click',()=>{setActiveGame(game);location.href='./desertsurvival_menu.html';});
-interact.addEventListener('click',()=>{const p=getNearbyMarkpoint(game.world,markpoints);if(p)alert(p.name||'地点');});
 
 window.addEventListener('resize',()=>{resize();drawHud();maps();updateCamera();});
 window.addEventListener('pagehide',()=>setActiveGame(game));
@@ -341,7 +470,7 @@ buildMarkpoints();
 updateCells(true);
 resize();
 drawHud();
-nearby();
+discoverNearbyMarkpoints();
 maps();
 updateCamera();
 updateLight();
