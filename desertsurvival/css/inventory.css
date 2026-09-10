@@ -1,4 +1,4 @@
-/* Desert Survival inventory: description / equipment / 6x6 bag */
+/* Desert Survival inventory: description / equipment / 6x5 bag */
 
 .screen-menu.inventory-screen{
   background:#17140f;
@@ -72,10 +72,10 @@
 .inventory-grid{
   display:grid;
   grid-template-columns:repeat(6,minmax(0,1fr));
-  grid-template-rows:repeat(6,1fr);
+  grid-template-rows:repeat(5,1fr);
   gap:3px;
   width:100%;
-  aspect-ratio:1/1;
+  aspect-ratio:6/5;
   min-height:0;
 }
 
