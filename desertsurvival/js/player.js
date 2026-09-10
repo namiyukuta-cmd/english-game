@@ -34,6 +34,7 @@ export function advancePlayer(player, environment, minutes = 1) {
   const sandstorm = environment?.weather === 'sandstorm';
   const running = !!environment?.running;
   const sheltered = !!environment?.sheltered;
+  const inWater = !!environment?.inWater;
 
   const heat = Math.max(0, ambient - 30);
   const cold = Math.max(0, 16 - ambient);
@@ -42,7 +43,8 @@ export function advancePlayer(player, environment, minutes = 1) {
   let foodLoss = 0.006 * step;
   let sleepLoss = 0.004 * step;
 
-  waterLoss += heat * 0.0018 * step;
+  // オアシスの水に入っている間は、暑さによる追加の水分消費を受けない。
+  if (!inWater) waterLoss += heat * 0.0018 * step;
   if (running) waterLoss *= 1.8;
   if (sandstorm && !sheltered) waterLoss *= 1.25;
 
@@ -51,11 +53,16 @@ export function advancePlayer(player, environment, minutes = 1) {
   player.sleep = clamp(player.sleep - sleepLoss, 0, 100);
 
   let targetBodyTemp = 37.0;
-  if (!sheltered) {
+  if (inWater) {
+    // 水に入ると熱が抜け、平常体温付近へ戻りやすくなる。
+    targetBodyTemp = ambient >= 24 ? 36.7 : 36.5;
+  } else if (!sheltered) {
     targetBodyTemp += heat * 0.025;
     targetBodyTemp -= cold * 0.018;
   }
-  const approach = Math.min(1, step / 60) * 0.16;
+
+  let approach = Math.min(1, step / 60) * 0.16;
+  if (inWater) approach = Math.max(approach, Math.min(1, step / 20) * 0.22);
   player.bodyTemp += (targetBodyTemp - player.bodyTemp) * approach;
   player.bodyTemp = clamp(player.bodyTemp, 30, 43);
 
