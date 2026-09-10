@@ -19,16 +19,16 @@ export const WATER_SUBTYPES = Object.freeze({
 
 // 地点そのものの情報はここで一元管理する。
 // x / z はワールド座標。史料に合わせた本配置は後から差し替えられる。
-// 001・002 は水場の動作確認用として開始地点のすぐ近くに仮配置。
+// 002 は新規ゲームの開始オアシス。001 の井戸は少し離して別地点として確認できるようにする。
 export const markpoints = [
   {
     id: '001',
     type: 'water',
     subtype: WATER_SUBTYPES.well,
     name: '井戸',
-    x: 6000,
-    z: 5992,
-    discoverRadius: 8,
+    x: 6036,
+    z: 5988,
+    discoverRadius: 9,
     interactionRadius: 3
   },
   {
@@ -36,10 +36,12 @@ export const markpoints = [
     type: 'water',
     subtype: WATER_SUBTYPES.oasis,
     name: 'オアシス',
-    x: 6008,
-    z: 5984,
-    discoverRadius: 14,
-    interactionRadius: 8
+    x: 6000,
+    z: 6000,
+    discoverRadius: 18,
+    interactionRadius: 10,
+    visualRadius: 11,
+    startingArea: true
   }
 ];
 
