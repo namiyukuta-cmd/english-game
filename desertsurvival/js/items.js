@@ -1,3 +1,5 @@
+export const INVENTORY_SLOT_COUNT = 36;
+
 export const ITEM_TYPES = Object.freeze({
   MATERIAL: 'material',
   FOOD: 'food',
@@ -16,50 +18,71 @@ export function getItemData(itemId) {
   return itemData[itemId] || null;
 }
 
+export function normalizeInventory(inventory) {
+  const source = Array.isArray(inventory) ? inventory : [];
+  const packed = source
+    .filter(entry => entry && entry.id && Number(entry.amount || 0) > 0)
+    .map(entry => ({ id:entry.id, amount:Math.max(1, Math.floor(Number(entry.amount || 1))) }));
+
+  const slots = Array(INVENTORY_SLOT_COUNT).fill(null);
+  for (let i = 0; i < Math.min(packed.length, INVENTORY_SLOT_COUNT); i += 1) {
+    slots[i] = packed[i];
+  }
+  return slots;
+}
+
 export function createDefaultInventory() {
-  return [];
+  return Array(INVENTORY_SLOT_COUNT).fill(null);
 }
 
 export function addItem(inventory, itemId, amount = 1) {
   const data = getItemData(itemId);
   if (!data) throw new Error(`不明なアイテム: ${itemId}`);
+
+  if (!Array.isArray(inventory)) return inventory;
+  while (inventory.length < INVENTORY_SLOT_COUNT) inventory.push(null);
+  if (inventory.length > INVENTORY_SLOT_COUNT) inventory.length = INVENTORY_SLOT_COUNT;
+
   let remaining = Math.max(1, Math.floor(Number(amount) || 1));
   const max = Math.max(1, Number(data.stackMax) || 1);
 
   if (max > 1) {
     for (const slot of inventory) {
-      if (slot.id !== itemId || slot.amount >= max) continue;
-      const add = Math.min(max - slot.amount, remaining);
-      slot.amount += add;
+      if (!slot || slot.id !== itemId || Number(slot.amount || 0) >= max) continue;
+      const add = Math.min(max - Number(slot.amount || 0), remaining);
+      slot.amount = Number(slot.amount || 0) + add;
       remaining -= add;
       if (remaining <= 0) return inventory;
     }
   }
 
-  while (remaining > 0) {
+  for (let i = 0; i < inventory.length && remaining > 0; i += 1) {
+    if (inventory[i]) continue;
     const add = Math.min(max, remaining);
-    inventory.push({ id:itemId, amount:add });
+    inventory[i] = { id:itemId, amount:add };
     remaining -= add;
   }
+
   return inventory;
 }
 
 export function countItem(inventory, itemId) {
-  return inventory.reduce((total, slot) => total + (slot.id === itemId ? Number(slot.amount || 0) : 0), 0);
+  return (Array.isArray(inventory) ? inventory : []).reduce((total, slot) => {
+    return total + (slot?.id === itemId ? Number(slot.amount || 0) : 0);
+  }, 0);
 }
 
 export function removeItem(inventory, itemId, amount = 1) {
   let remaining = Math.max(1, Math.floor(Number(amount) || 1));
   if (countItem(inventory, itemId) < remaining) return false;
 
-  for (let i = 0; i < inventory.length && remaining > 0;) {
+  for (let i = 0; i < inventory.length && remaining > 0; i += 1) {
     const slot = inventory[i];
-    if (slot.id !== itemId) { i += 1; continue; }
-    const take = Math.min(slot.amount, remaining);
+    if (!slot || slot.id !== itemId) continue;
+    const take = Math.min(Number(slot.amount || 0), remaining);
     slot.amount -= take;
     remaining -= take;
-    if (slot.amount <= 0) inventory.splice(i, 1);
-    else i += 1;
+    if (slot.amount <= 0) inventory[i] = null;
   }
   return true;
 }
