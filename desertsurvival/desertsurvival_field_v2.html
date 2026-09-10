@@ -10,7 +10,7 @@
   <title>Desert Survival - Field</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-topui3">
   <link rel="stylesheet" href="./css/hud-sketch.css?v=20260910-topui3">
-  <link rel="stylesheet" href="./css/field-layout.css?v=20260910-itemuse1">
+  <link rel="stylesheet" href="./css/field-layout.css?v=20260910-inventorylayout1">
   <style>
     .legacy-player-hud,.field-hud{display:none!important}
   </style>
@@ -59,15 +59,6 @@
 
       <div id="pickupToast" class="pickup-toast" hidden aria-live="polite"></div>
 
-      <div class="field-bottom-left">
-        <button id="itemBtn" class="round-action icon-action" type="button" aria-label="所持品">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V6.5A5 5 0 0112 2a5 5 0 015 4.5V8"/><path d="M5 8h14l1 13H4L5 8z"/><path d="M9 12h6"/></svg>
-        </button>
-        <a id="craftBtn" class="round-action icon-action" href="./desertsurvival_craft.html?v=20260910-stateprotect1" aria-label="クラフト">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
-        </a>
-      </div>
-
       <button id="fieldUseButton" class="field-use-button" type="button" hidden aria-label="選択中のアイテムを使う"></button>
 
       <div class="field-bottom-right">
@@ -77,7 +68,15 @@
     </section>
 
     <div class="field-hotbar-band" aria-label="クイックアイテム">
-      <div id="fieldHotbar" class="field-hotbar"></div>
+      <div class="field-footer-bar">
+        <button id="itemBtn" class="field-footer-action" type="button" aria-label="所持品">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V6.5A5 5 0 0112 2a5 5 0 015 4.5V8"/><path d="M5 8h14l1 13H4L5 8z"/><path d="M9 12h6"/></svg>
+        </button>
+        <a id="craftBtn" class="field-footer-action" href="./desertsurvival_craft.html?v=20260910-stateprotect1" aria-label="クラフト">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5"/><path d="M13 6l5 5-7.5 7.5a2.1 2.1 0 01-3 0l-2-2a2.1 2.1 0 010-3L13 6z"/><path d="M5 19l-2 2"/></svg>
+        </a>
+        <div id="fieldHotbar" class="field-hotbar"></div>
+      </div>
     </div>
 
     <section id="mapOverlay" class="overlay" hidden aria-label="全体マップ">
@@ -99,6 +98,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/field-loader.js?v=20260910-pickupspawn2"></script>
+  <script type="module" src="./js/field-loader.js?v=20260910-inventorylayout1"></script>
 </body>
 </html>
