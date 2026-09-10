@@ -1,4 +1,4 @@
-import { itemData } from './items.js';
+import { itemData, INVENTORY_SLOT_COUNT } from './items.js';
 
 export const EQUIPMENT_SLOTS = Object.freeze([
   'head',
@@ -32,12 +32,9 @@ export function createDefaultEquipment() {
 export function normalizeEquipment(equipment) {
   const source = equipment && typeof equipment === 'object' ? equipment : {};
   const normalized = createDefaultEquipment();
-
   for (const slot of EQUIPMENT_SLOTS) {
     if (source[slot]) normalized[slot] = source[slot];
   }
-
-  // 旧セーブの hands は右手へ移す。
   if (!normalized.rightHand && source.hands) normalized.rightHand = source.hands;
   return normalized;
 }
@@ -47,8 +44,19 @@ export function canEquipToSlot(itemId, slot) {
   if (!data?.equipSlot) return false;
   const allowed = Array.isArray(data.equipSlot) ? data.equipSlot : [data.equipSlot];
   if (allowed.includes(slot)) return true;
-  if (allowed.includes('hand') && (slot === 'rightHand' || slot === 'leftHand')) return true;
-  return false;
+  return allowed.includes('hand') && (slot === 'rightHand' || slot === 'leftHand');
+}
+
+function usedInventorySlots(inventory) {
+  return new Set((inventory || []).map(entry => Number(entry?.slot)).filter(slot => Number.isInteger(slot)));
+}
+
+function firstFreeInventorySlot(inventory) {
+  const used = usedInventorySlots(inventory);
+  for (let i = 0; i < INVENTORY_SLOT_COUNT; i += 1) {
+    if (!used.has(i)) return i;
+  }
+  return -1;
 }
 
 export function equipItem(inventory, equipment, inventoryIndex, targetSlot = null) {
@@ -65,21 +73,34 @@ export function equipItem(inventory, equipment, inventoryIndex, targetSlot = nul
   if (!(slot in equipment) || !canEquipToSlot(entry.id, slot)) return false;
 
   const previous = equipment[slot];
+  const sourceSlot = Number(entry.slot);
   equipment[slot] = { id:entry.id, amount:1 };
+
   entry.amount -= 1;
-  if (entry.amount <= 0) inventory[inventoryIndex] = null;
-  if (previous) inventory[inventoryIndex] = previous;
+  if (entry.amount <= 0) inventory.splice(inventoryIndex, 1);
+
+  if (previous) {
+    const targetInventorySlot = Number.isInteger(sourceSlot) ? sourceSlot : firstFreeInventorySlot(inventory);
+    if (targetInventorySlot < 0) {
+      equipment[slot] = previous;
+      if (entry.amount <= 0) inventory.splice(inventoryIndex, 0, { id:entry.id, amount:1, slot:sourceSlot });
+      else entry.amount += 1;
+      return false;
+    }
+    inventory.push({ ...previous, slot:targetInventorySlot });
+  }
   return true;
 }
 
-export function unequipItem(inventory, equipment, slot, targetIndex = null) {
+export function unequipItem(inventory, equipment, slot, targetSlotIndex = null) {
   const entry = equipment[slot];
   if (!entry) return false;
 
-  let index = Number.isInteger(targetIndex) ? targetIndex : inventory.findIndex(value => !value);
-  if (index < 0 || index >= inventory.length || inventory[index]) return false;
+  let inventorySlot = Number.isInteger(targetSlotIndex) ? targetSlotIndex : firstFreeInventorySlot(inventory);
+  if (inventorySlot < 0 || inventorySlot >= INVENTORY_SLOT_COUNT) return false;
+  if ((inventory || []).some(value => Number(value?.slot) === inventorySlot)) return false;
 
-  inventory[index] = entry;
+  inventory.push({ ...entry, slot:inventorySlot });
   equipment[slot] = null;
   return true;
 }
