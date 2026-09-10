@@ -5,9 +5,8 @@ const game = getActiveGame();
 if (!game) {
   location.replace('./desertsurvival_index.html');
 } else {
-  await import('./field3d.js?v=20260911-waterdrink2');
+  await import('./field3d.js?v=20260911-waterworld1');
   await import('./field-ui.js?v=20260910-fieldlayout1');
   await import('./map-ui.js?v=20260910-worldmap1');
-  await import('./hotbar.js?v=20260911-waterbutton1');
-  await import('./water-ui.js?v=20260911-waterbutton1');
+  await import('./hotbar.js?v=20260911-waterworld1');
 }
