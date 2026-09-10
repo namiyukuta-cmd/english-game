@@ -3,6 +3,7 @@ import { itemData, normalizeInventory } from './items.js?v=20260910-itemuse1';
 
 const hotbar = document.getElementById('fieldHotbar');
 const useButton = document.getElementById('fieldUseButton');
+const HOTBAR_SLOT_COUNT = 5;
 let selectedSlot = 0;
 let lastSignature = '';
 
@@ -30,7 +31,7 @@ function render() {
   if (!hotbar) return;
   const game = getActiveGame();
   const inventory = normalizeInventory(game?.inventory || []);
-  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < 6)) + `|${selectedSlot}`;
+  const signature = JSON.stringify(inventory.filter(entry => Number(entry?.slot) < HOTBAR_SLOT_COUNT)) + `|${selectedSlot}`;
   if (signature === lastSignature) {
     updateUseButton(inventory);
     return;
@@ -38,7 +39,7 @@ function render() {
   lastSignature = signature;
 
   hotbar.innerHTML = '';
-  for (let slot = 0; slot < 6; slot += 1) {
+  for (let slot = 0; slot < HOTBAR_SLOT_COUNT; slot += 1) {
     const entry = entryAtSlot(inventory, slot);
     const button = document.createElement('button');
     button.type = 'button';
