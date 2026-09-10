@@ -12,10 +12,47 @@ export const MARKPOINT_RANGES = Object.freeze({
   special: [400, 499]
 });
 
-// 実際の地点は史料・ゲーム設計が固まったらここへ追加する。
-export const markpoints = [];
+export const WATER_SUBTYPES = Object.freeze({
+  well: 'well',
+  oasis: 'oasis'
+});
+
+// 地点そのものの情報はここで一元管理する。
+// x / z はワールド座標。史料に合わせた本配置は後から差し替えられる。
+export const markpoints = [
+  {
+    id: '001',
+    type: 'water',
+    subtype: WATER_SUBTYPES.well,
+    name: '井戸',
+    x: 6038,
+    z: 5972,
+    discoverRadius: 8,
+    interactionRadius: 3
+  },
+  {
+    id: '002',
+    type: 'water',
+    subtype: WATER_SUBTYPES.oasis,
+    name: 'オアシス',
+    x: 6105,
+    z: 5905,
+    discoverRadius: 14,
+    interactionRadius: 8
+  }
+];
 
 export function getMarkpointById(id) {
   const target = String(id).padStart(3, '0');
   return markpoints.find(point => point.id === target) || null;
+}
+
+export function getMarkpointsByType(type) {
+  return markpoints.filter(point => point.type === type);
+}
+
+export function getWaterMarkpoints(subtype = null) {
+  return markpoints.filter(point =>
+    point.type === 'water' && (!subtype || point.subtype === subtype)
+  );
 }
