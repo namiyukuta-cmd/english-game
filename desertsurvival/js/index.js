@@ -10,7 +10,7 @@ import {
 } from './save.js';
 import { WORLD } from './world.js?v=20260911-oasisstart1';
 
-const FIELD_URL = './desertsurvival_field_v2.html?v=20260911-waterbutton1';
+const FIELD_URL = './desertsurvival_field_v2.html?v=20260911-waterworld1';
 
 const newGameBtn = document.getElementById('newGameBtn');
 const continueBtn = document.getElementById('continueBtn');
@@ -41,7 +41,6 @@ document.querySelectorAll('[data-close]').forEach(button => {
 
 newGameBtn.addEventListener('click', () => {
   const game = createNewGameState();
-  // save.js が古い world.js をキャッシュしていても、新規開始位置は必ず最新のオアシス側に合わせる。
   game.world.x = WORLD.startX;
   game.world.z = WORLD.startZ;
   setActiveGame(game);
