@@ -10,7 +10,7 @@
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c8;color:#26231f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
     button{font:inherit}
-    #app{position:relative;width:100%;height:100dvh;overflow:hidden;background:linear-gradient(#cfd9df 0%,#e2ebf0 48%,#c9bfaa 48%,#c9bfaa 100%)}
+    #app{position:relative;width:100%;height:100dvh;overflow:hidden;background:#dce5e8}
     #scene{position:absolute;inset:0}
     #scene canvas{display:block;width:100%;height:100%;touch-action:none}
     .topbar{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;z-index:10;display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;pointer-events:none}
@@ -22,9 +22,10 @@
     .status small{display:block;margin-top:2px;color:#6e675d;font-size:10px}
     .count{border-radius:13px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;white-space:nowrap}
     .camera-controls{position:absolute;right:10px;top:calc(max(10px,env(safe-area-inset-top)) + 58px);z-index:10;display:grid;grid-template-columns:repeat(2,54px);gap:6px;justify-content:end}
-    .camera-controls button{height:44px;border:1px solid rgba(50,45,38,.22);border-radius:12px;background:rgba(255,255,255,.88);color:#2e2922;font-size:13px;font-weight:800;backdrop-filter:blur(8px)}
+    .camera-controls button{height:44px;border:1px solid rgba(50,45,38,.22);border-radius:12px;background:rgba(255,255,255,.9);color:#2e2922;font-size:13px;font-weight:800;backdrop-filter:blur(8px)}
     .camera-controls button.icon-only{font-size:18px}
     .camera-controls button.view-active{background:#5f574c;color:#fff;border-color:#5f574c}
+    .camera-controls button:disabled{opacity:.38}
     .toolbar-wrap{position:absolute;z-index:10;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
     .hint{pointer-events:none;width:max-content;max-width:calc(100% - 20px);margin:0 auto 7px;padding:6px 10px;border-radius:999px;background:rgba(32,29,25,.72);color:#fff;font-size:11px;text-align:center}
     .toolbar{pointer-events:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px;border:1px solid rgba(50,45,38,.24);border-radius:18px;background:rgba(248,246,241,.92);box-shadow:0 4px 16px rgba(0,0,0,.10);backdrop-filter:blur(10px)}
@@ -49,9 +50,9 @@
 
     <div class="camera-controls" aria-label="視点操作">
       <button id="viewTop" class="view-active">見下ろし</button>
-      <button id="viewAngle">斜め</button>
-      <button id="rotateLeft" class="icon-only" aria-label="左へ回転">↶</button>
-      <button id="rotateRight" class="icon-only" aria-label="右へ回転">↷</button>
+      <button id="view3d">3D</button>
+      <button id="rotateLeft" class="icon-only" aria-label="左へ回転" disabled>↶</button>
+      <button id="rotateRight" class="icon-only" aria-label="右へ回転" disabled>↷</button>
       <button id="zoomIn" class="icon-only" aria-label="拡大">＋</button>
       <button id="zoomOut" class="icon-only" aria-label="縮小">−</button>
     </div>
@@ -80,12 +81,12 @@
       const blocks=new Map();
       let currentTool='block';
       let cameraAngle=Math.PI/4;
-      let cameraDistance=28;
+      let cameraDistance=24;
+      let topHeight=18;
       let viewMode='top';
 
       const scene=new THREE.Scene();
       scene.background=new THREE.Color(0xdce5e8);
-      scene.fog=new THREE.Fog(0xdce5e8,28,48);
 
       const camera=new THREE.PerspectiveCamera(42,1,.1,100);
       const renderer=new THREE.WebGLRenderer({antialias:true});
@@ -142,26 +143,31 @@
       }
 
       function updateCamera(){
-        const elevation=viewMode==='top' ? THREE.MathUtils.degToRad(64) : THREE.MathUtils.degToRad(34);
-        const horizontal=Math.cos(elevation)*cameraDistance;
-        const height=Math.sin(elevation)*cameraDistance;
-        camera.position.set(
-          Math.cos(cameraAngle)*horizontal,
-          height,
-          Math.sin(cameraAngle)*horizontal
-        );
-        camera.lookAt(0,viewMode==='top' ? .35 : 2.0,0);
+        if(viewMode==='top'){
+          camera.up.set(0,0,-1);
+          camera.position.set(0,topHeight,0.001);
+          camera.lookAt(0,0,0);
+        }else{
+          camera.up.set(0,1,0);
+          const elevation=THREE.MathUtils.degToRad(34);
+          const horizontal=Math.cos(elevation)*cameraDistance;
+          const height=Math.sin(elevation)*cameraDistance;
+          camera.position.set(
+            Math.cos(cameraAngle)*horizontal,
+            height,
+            Math.sin(cameraAngle)*horizontal
+          );
+          camera.lookAt(0,2,0);
+        }
+        camera.updateProjectionMatrix();
       }
 
       function setViewMode(mode){
         viewMode=mode;
-        if(mode==='top'){
-          cameraDistance=28;
-        }else{
-          cameraDistance=24;
-        }
         document.getElementById('viewTop').classList.toggle('view-active',mode==='top');
-        document.getElementById('viewAngle').classList.toggle('view-active',mode==='angle');
+        document.getElementById('view3d').classList.toggle('view-active',mode==='3d');
+        document.getElementById('rotateLeft').disabled=mode==='top';
+        document.getElementById('rotateRight').disabled=mode==='top';
         updateCamera();
       }
 
@@ -215,8 +221,7 @@
         raycaster.setFromCamera(pointer,camera);
         const blockHits=raycaster.intersectObjects([...blocks.values()],false);
         const groundHits=raycaster.intersectObject(ground,false);
-        const hits=[...blockHits,...groundHits].sort((a,b)=>a.distance-b.distance);
-        return hits[0]||null;
+        return [...blockHits,...groundHits].sort((a,b)=>a.distance-b.distance)[0]||null;
       }
       function targetFromHit(hit){
         if(!hit)return null;
@@ -241,10 +246,7 @@
         const hit=raycast(clientX,clientY);
         if(!hit)return;
         if(currentTool==='delete'){
-          if(hit.object.userData.isBlock){
-            removeBlock(hit.object);
-            showTarget(null);
-          }
+          if(hit.object.userData.isBlock){removeBlock(hit.object);showTarget(null)}
           return;
         }
         const target=targetFromHit(hit);
@@ -277,17 +279,25 @@
       });
 
       document.getElementById('viewTop').addEventListener('click',()=>setViewMode('top'));
-      document.getElementById('viewAngle').addEventListener('click',()=>setViewMode('angle'));
-      document.getElementById('rotateLeft').addEventListener('click',()=>{cameraAngle-=Math.PI/8;updateCamera()});
-      document.getElementById('rotateRight').addEventListener('click',()=>{cameraAngle+=Math.PI/8;updateCamera()});
-      document.getElementById('zoomIn').addEventListener('click',()=>{cameraDistance=Math.max(13,cameraDistance-1.5);updateCamera()});
-      document.getElementById('zoomOut').addEventListener('click',()=>{cameraDistance=Math.min(40,cameraDistance+1.5);updateCamera()});
+      document.getElementById('view3d').addEventListener('click',()=>setViewMode('3d'));
+      document.getElementById('rotateLeft').addEventListener('click',()=>{if(viewMode==='3d'){cameraAngle-=Math.PI/8;updateCamera()}});
+      document.getElementById('rotateRight').addEventListener('click',()=>{if(viewMode==='3d'){cameraAngle+=Math.PI/8;updateCamera()}});
+      document.getElementById('zoomIn').addEventListener('click',()=>{
+        if(viewMode==='top')topHeight=Math.max(11,topHeight-1.2);
+        else cameraDistance=Math.max(13,cameraDistance-1.5);
+        updateCamera();
+      });
+      document.getElementById('zoomOut').addEventListener('click',()=>{
+        if(viewMode==='top')topHeight=Math.min(28,topHeight+1.2);
+        else cameraDistance=Math.min(40,cameraDistance+1.5);
+        updateCamera();
+      });
       document.getElementById('backBtn').addEventListener('click',()=>{location.href='housebuilding_index.html'});
 
       window.addEventListener('resize',resize);
-      setViewMode('top');
       resize();
       updateCount();
+      setViewMode('top');
 
       function animate(){renderer.render(scene,camera);requestAnimationFrame(animate)}
       animate();
