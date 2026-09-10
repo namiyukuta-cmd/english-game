@@ -9,6 +9,8 @@ import {
   setActiveGame
 } from './save.js';
 
+const FIELD_URL = './desertsurvival_field.html?v=20260910-topdown2';
+
 const newGameBtn = document.getElementById('newGameBtn');
 const continueBtn = document.getElementById('continueBtn');
 const settingsBtn = document.getElementById('settingsBtn');
@@ -39,7 +41,7 @@ document.querySelectorAll('[data-close]').forEach(button => {
 newGameBtn.addEventListener('click', () => {
   const game = createNewGameState();
   setActiveGame(game);
-  location.href = './desertsurvival_field.html';
+  location.href = FIELD_URL;
 });
 
 continueBtn.addEventListener('click', async () => {
@@ -66,7 +68,7 @@ continueBtn.addEventListener('click', async () => {
         continueStatus.textContent = `${file.name} を読み込んでいます…`;
         try {
           await loadRemoteSave(file.name);
-          location.href = './desertsurvival_field.html';
+          location.href = FIELD_URL;
         } catch (error) {
           continueStatus.textContent = error.message || 'ロードに失敗しました。';
           loadButton.disabled = false;
