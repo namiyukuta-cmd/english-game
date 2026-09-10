@@ -10,7 +10,7 @@
   <title>Desert Survival - Field</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-topui3">
   <link rel="stylesheet" href="./css/hud-sketch.css?v=20260910-topui3">
-  <link rel="stylesheet" href="./css/field-layout.css?v=20260910-fieldlayout1">
+  <link rel="stylesheet" href="./css/field-layout.css?v=20260910-itemuse1">
   <style>
     .legacy-player-hud,.field-hud{display:none!important}
   </style>
@@ -68,6 +68,8 @@
         </a>
       </div>
 
+      <button id="fieldUseButton" class="field-use-button" type="button" hidden aria-label="選択中のアイテムを使う"></button>
+
       <div class="field-bottom-right">
         <button id="runBtn" class="round-action" type="button" hidden aria-hidden="true">RUN</button>
         <div id="movePad" class="move-pad" aria-label="移動スティック"><div id="moveKnob" class="move-knob"></div></div>
@@ -97,9 +99,9 @@
     </section>
   </main>
 
-  <script type="module" src="./js/field3d.js?v=20260910-fieldlayout1"></script>
+  <script type="module" src="./js/field3d.js?v=20260910-itemuse1"></script>
   <script type="module" src="./js/field-ui.js?v=20260910-fieldlayout1"></script>
   <script type="module" src="./js/map-ui.js?v=20260910-worldmap1"></script>
-  <script type="module" src="./js/hotbar.js?v=20260910-hotbar1"></script>
+  <script type="module" src="./js/hotbar.js?v=20260910-itemuse1"></script>
 </body>
 </html>
