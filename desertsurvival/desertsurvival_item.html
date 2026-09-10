@@ -9,12 +9,12 @@
   <meta http-equiv="Expires" content="0">
   <title>Desert Survival - Items</title>
   <link rel="stylesheet" href="./css/desertsurvival.css?v=20260910-menucompact1">
-  <link rel="stylesheet" href="./css/inventory.css?v=20260910-inventory3">
+  <link rel="stylesheet" href="./css/inventory.css?v=20260910-inventorylayout1">
 </head>
 <body class="screen screen-menu inventory-screen">
   <main class="menu-shell">
     <header class="menu-head">
-      <a class="back-btn icon-nav-btn" href="./desertsurvival_field_v2.html?v=20260910-itemuse2" aria-label="フィールドへ戻る">
+      <a class="back-btn icon-nav-btn" href="./desertsurvival_field_v2.html?v=20260910-inventorylayout1" aria-label="フィールドへ戻る">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
       </a>
       <h1>所持品</h1>
@@ -28,8 +28,10 @@
       <p>マスをタップすると、ここに説明が表示されます。</p>
     </section>
 
-    <section id="equipmentGrid" class="equipment-area" aria-label="装備"></section>
-    <section id="inventoryGrid" class="inventory-grid" aria-label="所持品 30マス"></section>
+    <section class="inventory-layout" aria-label="所持品と装備">
+      <section id="inventoryGrid" class="inventory-grid" aria-label="所持品 30マス"></section>
+      <section id="equipmentGrid" class="equipment-area" aria-label="装備 6マス"></section>
+    </section>
   </main>
 
   <script type="module" src="./js/item-page.js?v=20260910-stateprotect1"></script>
