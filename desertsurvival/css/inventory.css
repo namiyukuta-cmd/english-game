@@ -1,181 +1,24 @@
 /* Desert Survival inventory: description / equipment / 6x5 bag */
 
-.screen-menu.inventory-screen{
-  background:#17140f;
-}
-
-.inventory-screen .menu-shell{
-  width:min(560px,100%);
-  height:100dvh;
-  min-height:100dvh;
-  padding:12px 10px max(10px,env(safe-area-inset-bottom));
-  display:grid;
-  grid-template-rows:48px minmax(112px,1fr) auto auto;
-  gap:8px;
-  overflow:hidden;
-}
-
-.inventory-screen .menu-head{
-  height:48px;
-  grid-template-columns:44px 1fr 44px;
-}
-
-.inventory-screen .menu-head h1{
-  font-size:22px;
-}
-
-.inventory-screen .icon-nav-btn,
-.inventory-screen .menu-switch-btn{
-  width:42px;
-  height:42px;
-  border-radius:12px;
-}
-
-.inventory-description{
-  min-height:112px;
-  padding:12px 14px;
-  border:2px solid #342d24;
-  background:#f7f4ec;
-  color:#171717;
-  overflow:hidden;
-}
-
-.inventory-description.empty-description{
-  color:#6c6961;
-}
-
-.inventory-description h2{
-  margin:0 0 6px;
-  font-size:20px;
-  line-height:1.2;
-}
-
-.inventory-description .item-meta{
-  margin:0 0 7px;
-  font-size:12px;
-  font-weight:800;
-  color:#5e5b54;
-}
-
-.inventory-description p{
-  margin:0;
-  font-size:14px;
-  line-height:1.45;
-}
-
-.equipment-area{
-  display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:4px;
-}
-
-.inventory-grid{
-  display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  grid-template-rows:repeat(5,1fr);
-  gap:3px;
-  width:100%;
-  aspect-ratio:6/5;
-  min-height:0;
-}
-
-.inventory-slot,
-.equipment-slot{
-  position:relative;
-  min-width:0;
-  min-height:0;
-  padding:2px;
-  border:2px solid #171717;
-  border-radius:0;
-  color:#111;
-  touch-action:manipulation;
-  overflow:hidden;
-}
-
-.inventory-slot{
-  background:#fff;
-}
-
-.equipment-slot{
-  aspect-ratio:1/1;
-  background:#dcefff;
-  border-color:#42647a;
-}
-
-.inventory-slot.selected,
-.equipment-slot.selected{
-  outline:4px solid #36b64a;
-  outline-offset:-4px;
-  z-index:2;
-}
-
-.slot-label{
-  position:absolute;
-  inset:3px 2px auto;
-  text-align:center;
-  font-size:9px;
-  line-height:1.05;
-  font-weight:900;
-  color:#456174;
-  pointer-events:none;
-}
-
-.slot-item-name{
-  position:absolute;
-  inset:50% 3px auto;
-  transform:translateY(-50%);
-  text-align:center;
-  font-size:10px;
-  line-height:1.05;
-  font-weight:900;
-  color:#111;
-  overflow:hidden;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  pointer-events:none;
-}
-
-.slot-count{
-  position:absolute;
-  right:3px;
-  bottom:2px;
-  font-size:10px;
-  line-height:1;
-  font-weight:900;
-  color:#111;
-  text-shadow:0 1px 0 #fff;
-  pointer-events:none;
-}
-
-.slot-empty-mark{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  font-size:16px;
-  color:rgba(0,0,0,.13);
-  pointer-events:none;
-}
-
-@media(max-width:390px){
-  .inventory-screen .menu-shell{
-    padding-left:8px;
-    padding-right:8px;
-    grid-template-rows:44px minmax(104px,1fr) auto auto;
-    gap:6px;
-  }
-  .inventory-screen .menu-head{height:44px;}
-  .inventory-screen .menu-head h1{font-size:20px;}
-  .inventory-screen .icon-nav-btn,
-  .inventory-screen .menu-switch-btn{width:39px;height:39px;}
-  .inventory-description{min-height:104px;padding:10px 12px;}
-  .inventory-description h2{font-size:18px;}
-  .inventory-description p{font-size:13px;}
-  .equipment-area{gap:3px;}
-  .inventory-grid{gap:2px;}
-  .inventory-slot,.equipment-slot{border-width:1.5px;}
-  .slot-label{font-size:8px;}
-  .slot-item-name{font-size:9px;}
-  .slot-count{font-size:9px;}
-}
+.screen-menu.inventory-screen{background:#17140f}
+.inventory-screen .menu-shell{width:min(560px,100%);height:100dvh;min-height:100dvh;padding:12px 10px max(10px,env(safe-area-inset-bottom));display:grid;grid-template-rows:48px minmax(112px,1fr) auto auto;gap:8px;overflow:hidden}
+.inventory-screen .menu-head{height:48px;grid-template-columns:44px 1fr 44px}
+.inventory-screen .menu-head h1{font-size:22px}
+.inventory-screen .icon-nav-btn,.inventory-screen .menu-switch-btn{width:42px;height:42px;border-radius:12px}
+.inventory-description{min-height:112px;padding:12px 14px;border:2px solid #342d24;background:#f7f4ec;color:#171717;overflow:hidden}
+.inventory-description.empty-description{color:#6c6961}
+.inventory-description h2{margin:0 0 6px;font-size:20px;line-height:1.2}
+.inventory-description .item-meta{margin:0 0 7px;font-size:12px;font-weight:800;color:#5e5b54}
+.inventory-description p{margin:0;font-size:14px;line-height:1.45}
+.equipment-area{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.inventory-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(5,1fr);gap:3px;width:100%;aspect-ratio:6/5;min-height:0}
+.inventory-grid .inventory-slot:nth-child(n+31){display:none}
+.inventory-slot,.equipment-slot{position:relative;min-width:0;min-height:0;padding:2px;border:2px solid #171717;border-radius:0;color:#111;touch-action:manipulation;overflow:hidden}
+.inventory-slot{background:#fff}
+.equipment-slot{aspect-ratio:1/1;background:#dcefff;border-color:#42647a}
+.inventory-slot.selected,.equipment-slot.selected{outline:4px solid #36b64a;outline-offset:-4px;z-index:2}
+.slot-label{position:absolute;inset:3px 2px auto;text-align:center;font-size:9px;line-height:1.05;font-weight:900;color:#456174;pointer-events:none}
+.slot-item-name{position:absolute;inset:50% 3px auto;transform:translateY(-50%);text-align:center;font-size:10px;line-height:1.05;font-weight:900;color:#111;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;pointer-events:none}
+.slot-count{position:absolute;right:3px;bottom:2px;font-size:10px;line-height:1;font-weight:900;color:#111;text-shadow:0 1px 0 #fff;pointer-events:none}
+.slot-empty-mark{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;color:rgba(0,0,0,.13);pointer-events:none}
+@media(max-width:390px){.inventory-screen .menu-shell{padding-left:8px;padding-right:8px;grid-template-rows:44px minmax(104px,1fr) auto auto;gap:6px}.inventory-screen .menu-head{height:44px}.inventory-screen .menu-head h1{font-size:20px}.inventory-screen .icon-nav-btn,.inventory-screen .menu-switch-btn{width:39px;height:39px}.inventory-description{min-height:104px;padding:10px 12px}.inventory-description h2{font-size:18px}.inventory-description p{font-size:13px}.equipment-area{gap:3px}.inventory-grid{gap:2px}.inventory-slot,.equipment-slot{border-width:1.5px}.slot-label{font-size:8px}.slot-item-name{font-size:9px}.slot-count{font-size:9px}}
