@@ -20,7 +20,6 @@
       background:#dce5e8;
     }
 
-    /* 1段目：上部 */
     #topSection{
       position:relative;
       z-index:20;
@@ -47,7 +46,6 @@
     .status small{display:block;margin-top:2px;color:#6e675d;font-size:10px}
     .count{border-radius:13px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;white-space:nowrap}
 
-    /* 2段目：建築表示 */
     #buildSection{
       position:relative;
       min-height:0;
@@ -60,7 +58,6 @@
     #scene canvas{display:block;width:100%;height:100%;touch-action:none}
     #error{position:absolute;inset:20% 18px auto;z-index:30;display:none;padding:16px;border-radius:14px;background:#fff;color:#222;border:1px solid #aaa;line-height:1.6;font-size:14px}
 
-    /* 3段目：下部 */
     #lowerSection{
       position:relative;
       z-index:20;
@@ -97,7 +94,6 @@
     .tool span{font-size:19px;line-height:1}
     .tool.active{border-color:#5f574c;background:#5f574c;color:#fff}
 
-    /* 4段目：最下部メニュー */
     #bottomMenu{
       position:relative;
       z-index:30;
@@ -123,7 +119,6 @@
 <body>
   <main id="app">
 
-    <!-- 1段目：マス・座標・個数など -->
     <section id="topSection">
       <header class="topbar">
         <button class="icon-btn" id="backBtn" aria-label="戻る">←</button>
@@ -135,13 +130,11 @@
       </header>
     </section>
 
-    <!-- 2段目：建築マス -->
     <section id="buildSection" aria-label="建築マス">
       <div id="scene" aria-label="3D家作りフィールド"></div>
       <div id="error">3D表示を読み込めませんでした。通信状態を確認して、ページを再読み込みしてください。</div>
     </section>
 
-    <!-- 3段目：その画面専用の下部UI -->
     <section id="lowerSection" aria-label="建築操作">
       <div class="camera-controls" aria-label="視点操作">
         <button id="viewTop" class="view-active">見下ろし</button>
@@ -159,7 +152,6 @@
       </div>
     </section>
 
-    <!-- 4段目：ゲーム共通メニュー -->
     <nav id="bottomMenu" aria-label="ゲームメニュー">
       <button class="menu-btn" type="button">ステータス</button>
       <button class="menu-btn" type="button">スキル</button>
@@ -169,5 +161,6 @@
   </main>
 
   <script type="module" src="./js/housebuilding_3d.js?v=20260911-1"></script>
+  <script src="./js/housebuilding_画面移動.js?v=20260911-nohistory1"></script>
 </body>
 </html>
