@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - 2D</title>
-  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-topmenu1" />
+  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-purchase1" />
 </head>
 <body>
   <main id="app">
@@ -52,9 +52,37 @@
       <button class="menu-btn" type="button">メニュー</button>
     </nav>
 
+    <section id="purchasePanel" class="purchasePanel" aria-label="建設アイテム購入" hidden>
+      <div class="purchaseCard" role="dialog" aria-modal="true" aria-labelledby="purchaseName">
+        <button id="purchaseClose" class="purchaseClose" type="button" aria-label="購入画面を閉じる">×</button>
+
+        <div class="purchaseItemRow">
+          <div id="purchaseIcon" class="purchaseIcon"></div>
+          <div class="purchaseInfo">
+            <strong id="purchaseName"></strong>
+            <span id="purchaseOwned"></span>
+            <span id="purchasePrice"></span>
+          </div>
+        </div>
+
+        <div id="purchaseMoney" class="purchaseMoney"></div>
+
+        <div class="purchaseQtyRow">
+          <button id="purchaseMinus" type="button">−</button>
+          <span id="purchaseQty">1</span>
+          <button id="purchasePlus" type="button">＋</button>
+        </div>
+
+        <div id="purchaseTotal" class="purchaseTotal"></div>
+        <div id="purchaseMessage" class="purchaseMessage" aria-live="polite"></div>
+        <button id="purchaseBuy" class="purchaseBuy" type="button">購入</button>
+      </div>
+    </section>
+
   </main>
 
-  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-topmenu1"></script>
-  <script src="./js/housebuilding_2d.js?v=20260911-topmenu1"></script>
+  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-purchase1"></script>
+  <script src="./js/housebuilding_平面_購入.js?v=20260911-purchase1"></script>
+  <script src="./js/housebuilding_2d.js?v=20260911-purchase1"></script>
 </body>
 </html>
