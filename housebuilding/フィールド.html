@@ -3,15 +3,42 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>House Building - フィールド</title>
+  <link rel="stylesheet" href="./css/フィールド_レイアウト.css?v=20260911-layout1" />
 </head>
 <body>
   <main id="fieldApp">
-    <header id="fieldHud"></header>
+    <header id="fieldHud" aria-label="状態表示"></header>
+
     <section id="fieldView" aria-label="フィールド"></section>
-    <nav id="fieldControls" aria-label="フィールド操作"></nav>
+
+    <section id="fieldPanel" aria-label="装備・持ち物・スキル">
+      <section class="panelBox" aria-label="装備">
+        <div class="panelTitle">装備</div>
+        <div id="equipList" class="equipList"></div>
+      </section>
+
+      <section class="panelBox" aria-label="持ち物">
+        <div class="panelTitle">持ち物</div>
+        <div id="inventoryGrid"></div>
+      </section>
+
+      <section class="panelBox" aria-label="スキル">
+        <div class="panelTitle">スキル</div>
+        <div id="skillList" class="skillList"></div>
+      </section>
+    </section>
+
+    <nav id="fieldControls" aria-label="フィールドメニュー">
+      <button id="fieldLog" type="button">LOG</button>
+      <button id="fieldSave" type="button">SAVE</button>
+      <button id="fieldMenu" type="button">MENU</button>
+    </nav>
   </main>
 
-  <script src="./js/フィールド.js"></script>
+  <script src="./js/フィールド.js?v=20260911-layout1"></script>
 </body>
 </html>
