@@ -1,6 +1,6 @@
 // 家マップ。
-// 右端をタップすると次の店マップへ移動する。
+// 右端をタップすると、店がある外フィールドへ移動する。
 
-document.getElementById('toShop')?.addEventListener('click', () => {
-  location.href = './フィールド_店.html';
+document.getElementById('toShopArea')?.addEventListener('click', () => {
+  location.href = './フィールド_店エリア.html';
 });
