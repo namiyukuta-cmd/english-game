@@ -14,17 +14,17 @@ button{font:inherit}
 /* 1段目：上部 */
 #topSection{
   position:relative;
-  z-index:30;
+  z-index:40;
   padding:max(10px,env(safe-area-inset-top)) 10px 8px;
   background:#c9d9e8;
 }
 .topbar{
   display:grid;
-  grid-template-columns:46px 1fr auto;
+  grid-template-columns:46px 1fr 46px;
   gap:8px;
   align-items:center;
 }
-.back,.status,.count{
+.back,.status,.topMenuToggle{
   min-height:44px;
   border:1px solid rgba(65,59,50,.25);
   background:rgba(255,255,255,.91);
@@ -35,7 +35,35 @@ button{font:inherit}
 .status{min-width:0;border-radius:13px;padding:7px 11px}
 .status strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .status small{display:block;margin-top:2px;font-size:10px;color:#6f6a62}
-.count{border-radius:13px;padding:0 12px;display:flex;align-items:center;font-size:12px;font-weight:800;white-space:nowrap}
+.topMenuWrap{position:relative;width:46px;height:44px;z-index:60}
+.topMenuToggle{width:46px;height:44px;border-radius:13px;font-size:17px;font-weight:900;letter-spacing:1px;color:#2d2924}
+.topQuickMenu{
+  position:absolute;
+  top:0;
+  right:52px;
+  height:44px;
+  display:grid;
+  grid-template-columns:repeat(4,58px);
+  gap:4px;
+  padding:4px;
+  border:1px solid rgba(65,59,50,.28);
+  border-radius:12px;
+  background:rgba(45,41,36,.92);
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  backdrop-filter:blur(8px);
+}
+.topQuickMenu[hidden]{display:none}
+.topQuickMenu button{
+  min-width:0;
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.3px;
+}
+.topQuickMenu button:active{background:rgba(255,255,255,.25)}
 
 /* 2段目：建築マス */
 #fieldWrap{
