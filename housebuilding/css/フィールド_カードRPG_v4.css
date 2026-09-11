@@ -1,0 +1,67 @@
+/* v4: ダンジョンカードは固定。主人公・敵はカード上の駒として重なる。 */
+#fieldView{background:#171817;overflow:hidden}
+.cardRpgView{position:absolute;inset:0;padding:38px 7px 8px;display:flex;flex-direction:column;gap:5px;background:radial-gradient(circle at 50% 38%,#32332f 0%,#1c1d1b 48%,#10110f 100%)}
+.cardRpgMessage{position:absolute;z-index:90;left:50%;top:7px;transform:translateX(-50%);max-width:76%;padding:5px 10px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(12,13,12,.9);color:#eee9df;font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.turnBadge{position:absolute;z-index:90;right:8px;top:7px;padding:4px 7px;border-radius:999px;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.12);color:#e8e1d4;font-size:7px;font-weight:900}
+.cardDungeonBoard{position:relative;flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:11px;padding:4px 2px;overflow:visible}
+.floorLane{position:relative;min-height:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:4px 5px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(0,0,0,.19)}
+.floorLane::before{content:"";position:absolute;z-index:2;left:6%;right:6%;top:50%;height:1px;background:rgba(228,217,194,.12);pointer-events:none}
+.floorLabel{position:absolute;z-index:5;top:3px;left:7px;color:rgba(242,235,221,.45);font-size:6px;font-weight:900}.floorLane.reverse .floorLabel{left:auto;right:7px}
+.cardSlot{position:relative;z-index:10;min-width:0;min-height:0;height:100%;perspective:700px}
+
+/* ダンジョンカード本体。開いた後はとりあえず白地。 */
+.mapCard{position:absolute;inset:0;border-radius:8px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.30);transform-style:preserve-3d;z-index:10}
+.cardFace{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;border-radius:8px}
+.cardBack{background:repeating-linear-gradient(135deg,#282926 0 5px,#1b1c1a 5px 10px);border:1px solid #4a4b46;color:#77786f;font-size:16px;font-weight:1000}
+.cardFront{transform:rotateY(180deg);border:1px solid #c8c8c4;background:#fff;color:#242424;text-align:center;overflow:hidden}
+.dungeonWhite{position:absolute;inset:0;background:#fff}
+.dungeonWhite::after{content:"";position:absolute;left:8%;right:8%;bottom:8%;height:1px;background:#e6e6e2}
+.sceneName{position:absolute;z-index:3;left:3px;right:3px;bottom:4px;color:#666;font-size:5.6px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mapCard.revealed{animation:cardFlip .48s ease forwards}.mapCard.revealed .cardBack{transform:rotateY(180deg)}.mapCard.revealed .cardFront{transform:rotateY(360deg)}
+.mapCard.visited .cardFront{background:#f7f7f4}.mapCard.current .cardFront{box-shadow:inset 0 0 0 2px #c5ae73}
+.mapCard.eventActive .cardFront{box-shadow:inset 0 0 0 3px #c69a3c,0 0 12px rgba(229,188,91,.7)}
+.mapCard.eventUnlock{animation:eventUnlock .55s ease-out 1}
+
+/* 主人公はカードではなく、カードの上に乗る駒。 */
+.playerToken{position:absolute;z-index:48;left:50%;bottom:8%;width:44%;height:66%;transform:translateX(-50%);pointer-events:none;transition:opacity .16s ease,transform .22s ease;filter:drop-shadow(0 3px 3px rgba(0,0,0,.38))}
+.playerToken::before{content:"";position:absolute;left:50%;top:7%;width:38%;aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:#171717}
+.playerToken::after{content:"";position:absolute;left:50%;top:31%;width:50%;height:61%;border-radius:44% 44% 28% 28%;transform:translateX(-50%);background:#171717}
+.playerToken .tokenLight{position:absolute;z-index:2;left:72%;top:53%;width:6px;height:6px;border-radius:50%;background:#ffd98b;box-shadow:0 0 8px 3px rgba(255,195,84,.82)}
+.playerToken.moving{opacity:.55;transform:translateX(-50%) translateY(-5px) scale(.92)}
+.playerToken.descending{opacity:.25;transform:translateX(-50%) translateY(8px) scale(.88)}
+
+/* 敵もダンジョンカード上の駒。カード自体は動かさない。 */
+.battleMonsterToken{position:absolute;z-index:60;inset:auto;pointer-events:none;transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),width .15s ease,height .15s ease,transform .15s ease,filter .15s ease}
+.battleMonsterToken .enemyFigure{position:absolute;left:50%;bottom:8%;width:48%;height:68%;transform:translateX(-50%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.battleMonsterToken .enemyFigure::before{content:"";position:absolute;left:50%;top:5%;width:40%;aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:#4b2522}
+.battleMonsterToken .enemyFigure::after{content:"";position:absolute;left:50%;top:30%;width:58%;height:64%;border-radius:45% 45% 28% 28%;transform:translateX(-50%);background:#4b2522}
+.battleMonsterToken .enemyName{position:absolute;z-index:4;left:3px;right:3px;bottom:3px;text-align:center;color:#7d302b;font-size:5.8px;font-weight:1000;text-shadow:0 1px #fff}
+.enemyMiniHp{position:absolute;z-index:5;left:7px;right:7px;top:6px;height:4px;border-radius:4px;background:rgba(0,0,0,.26);overflow:hidden}.enemyMiniHp>i{display:block;height:100%;width:100%;background:#a54b45;transition:width .2s linear}
+.battleMonsterToken.dead{animation:monsterDie .5s ease forwards}
+.threatBadge{position:absolute;z-index:4;top:7%;left:50%;transform:translateX(-50%);padding:2px 4px;border-radius:999px;background:#8d3d37;color:#fff;font-size:5.5px;font-weight:1000}
+
+/* イベントは白地カード上に明確な印を出す。 */
+.eventBadge{position:absolute;z-index:8;left:50%;top:12%;transform:translateX(-50%);padding:2px 5px;border-radius:999px;background:#e4bd5d;color:#2b2415;font-size:5.8px;font-weight:1000;letter-spacing:.04em;box-shadow:0 0 8px rgba(226,183,79,.4);white-space:nowrap}
+.eventNeed{position:absolute;z-index:8;left:4px;right:4px;top:39%;padding:3px 2px;border-radius:5px;background:#f4efe2;border:1px solid #d5c7a7;color:#5b4c2c;font-size:5.5px;font-weight:900;line-height:1.2}
+.eventBadge.clear{background:#a8c89c;color:#173516}.eventNeed.clear{opacity:.35;text-decoration:line-through}
+
+.verticalLadder{position:absolute;z-index:18;width:16px;height:24px;transform:translateX(-50%);border-left:2px solid rgba(205,190,157,.74);border-right:2px solid rgba(205,190,157,.74);background:repeating-linear-gradient(to bottom,transparent 0 5px,rgba(205,190,157,.74) 5px 7px);pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}.verticalLadder.right{left:92.7%;top:31.5%}.verticalLadder.left{left:7.3%;top:65%}
+
+/* 持ち物欄もカード。 */
+#inventoryGrid{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.itemCard{position:relative;min-width:0;min-height:0;border:1px solid #aaa39a;border-radius:7px;background:linear-gradient(#fff,#eeeae2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 1px;box-shadow:0 2px 4px rgba(0,0,0,.08);overflow:hidden}
+.itemCard.empty{opacity:.34;background:#d9d5ce}.itemCard .slotIcon{font-size:16px}.itemCard .slotName{font-size:6.5px}.itemCard .itemCount{right:3px;bottom:2px;font-size:7px}.itemCard.used{animation:itemUsed .35s ease}
+
+/* 持ち物カードがイベントカードへ飛ぶ演出。 */
+.flyingItemCard{position:fixed;z-index:9999;border:1px solid #a99e8f;border-radius:7px;background:linear-gradient(#fff,#eee8dc);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 7px 18px rgba(0,0,0,.36);pointer-events:none;transition:left .52s cubic-bezier(.2,.75,.18,1),top .52s cubic-bezier(.2,.75,.18,1),width .52s ease,height .52s ease,transform .52s ease,opacity .25s ease}
+.flyingItemCard .flyIcon{font-size:18px;line-height:1}.flyingItemCard .flyName{margin-top:2px;font-size:7px;font-weight:1000}.flyingItemCard.landed{box-shadow:0 0 0 2px rgba(235,198,102,.75),0 6px 18px rgba(0,0,0,.3)}
+
+.cardHit{animation:cardShake .26s linear 1}.slashFx{position:absolute;z-index:95;width:58px;height:5px;border-radius:8px;background:linear-gradient(90deg,transparent,#fff6df 22%,#fff 50%,#fff0c8 78%,transparent);box-shadow:0 0 10px rgba(255,238,190,.95);transform:translate(-50%,-50%) rotate(-34deg) scaleX(.2);pointer-events:none;animation:slashFlash .28s ease-out forwards}.projectileFx{position:absolute;z-index:94;width:22px;height:2px;border-radius:3px;background:#665f55;box-shadow:-8px 0 8px rgba(255,224,157,.45);transform:translate(-50%,-50%);pointer-events:none}.projectileFx.arrow::after{content:"";position:absolute;right:-5px;top:-3px;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid #665f55}.projectileFx.left{transform:translate(-50%,-50%) rotate(180deg)}.damageFx{position:absolute;z-index:96;transform:translate(-50%,-50%);color:#7f241f;font-size:13px;font-weight:1000;text-shadow:0 1px 1px #fff;pointer-events:none;animation:damagePop .65s ease-out forwards}.cardRpgHint{text-align:center;color:rgba(242,235,221,.56);font-size:6.5px;font-weight:800;min-height:10px}
+
+@keyframes cardFlip{0%{transform:rotateY(0) scale(.94)}48%{transform:rotateY(90deg) scale(1.02)}100%{transform:rotateY(180deg) scale(1)}}
+@keyframes cardShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-5px,1px) rotate(-2deg)}40%{transform:translate(5px,-1px) rotate(2deg)}60%{transform:translate(-3px,0) rotate(-1deg)}80%{transform:translate(3px,1px) rotate(1deg)}}
+@keyframes slashFlash{0%{opacity:0;transform:translate(-50%,-50%) rotate(-34deg) scaleX(.2)}30%{opacity:1;transform:translate(-50%,-50%) rotate(-34deg) scaleX(1.15)}100%{opacity:0;transform:translate(-50%,-50%) rotate(-34deg) scaleX(1.45)}}
+@keyframes damagePop{0%{opacity:0;transform:translate(-50%,-20%) scale(.6)}25%{opacity:1;transform:translate(-50%,-70%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-160%) scale(.9)}}
+@keyframes monsterDie{0%{opacity:1;transform:rotate(0) scale(1)}100%{opacity:0;transform:translateY(12px) rotate(10deg) scale(.72);filter:grayscale(1)}}
+@keyframes eventUnlock{0%{filter:brightness(1)}45%{filter:brightness(1.35);transform:scale(1.04)}100%{filter:brightness(1);transform:scale(1)}}
+@keyframes itemUsed{0%,100%{transform:scale(1)}50%{transform:scale(.9)}}
