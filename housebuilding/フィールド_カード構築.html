@@ -7,40 +7,19 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>カード構築ダンジョン試作</title>
-  <link rel="stylesheet" href="./css/フィールド_カード構築.css?v=20260912-build1" />
+  <link rel="stylesheet" href="./css/フィールド_棒人間アクション.css?v=20260911-stick1" />
+  <link rel="stylesheet" href="./css/フィールド_カード構築_v2.css?v=20260912-build2" />
 </head>
 <body>
-  <main id="buildApp">
-    <header class="buildTop">
-      <strong>ダンジョン構築</strong>
-      <span id="deckCount">山札 10</span>
-    </header>
+  <main id="fieldApp">
+    <header id="fieldTop" aria-label="メニュー"></header>
 
-    <section class="buildMain">
-      <div class="buildMessage" id="buildMessage">山札から1枚引く</div>
-
-      <div class="mapBoard" id="mapBoard" aria-label="ダンジョンマップ">
-        <div class="mapRow" id="rowTop"></div>
-        <div class="rowConnector" aria-hidden="true">↓</div>
-        <div class="mapRow reverse" id="rowBottom"></div>
-      </div>
-
-      <section class="drawArea">
-        <button class="deckPile" id="drawCard" type="button" aria-label="カードを1枚引く">
-          <span class="deckBack">?</span>
-          <b>1枚引く</b>
-        </button>
-        <div class="drawInfo">
-          <strong id="drawTitle">未探索</strong>
-          <span id="drawText">カードを引くたびにダンジョンが出来ていく</span>
-        </div>
-      </section>
+    <section id="fieldMiddle">
+      <section id="fieldView" aria-label="カード構築マップ"></section>
+      <section id="fieldPanel" aria-label="管理エリア"></section>
     </section>
 
-    <footer class="buildBottom">
-      <button id="resetMap" type="button">最初から</button>
-      <button id="backField" type="button">元のフィールド</button>
-    </footer>
+    <footer id="fieldBottom" aria-label="探索状態"></footer>
   </main>
 
   <div class="cardViewer" id="cardViewer" hidden>
@@ -48,6 +27,6 @@
     <div class="viewerCard" id="viewerCard"></div>
   </div>
 
-  <script src="./js/フィールド_カード構築.js?v=20260912-build1"></script>
+  <script src="./js/フィールド_カード構築_v2.js?v=20260912-build2"></script>
 </body>
 </html>
