@@ -45,15 +45,15 @@ button{font:inherit}
   font-weight:900;
 }
 
-/* 真ん中：6分割の考え方。探索4/6 + 管理2/6 */
+/* 真ん中：8分割の考え方。探索5/8 + 管理3/8 */
 #fieldMiddle{
   min-height:0;
   display:grid;
-  grid-template-rows:minmax(0,4fr) minmax(0,2fr);
+  grid-template-rows:minmax(0,5fr) minmax(0,3fr);
   overflow:hidden;
 }
 
-/* 4/6：探索マップ */
+/* 5/8：探索マップ */
 #fieldView{
   position:relative;
   min-height:0;
@@ -118,7 +118,7 @@ button{font:inherit}
 .fieldEdgeLeft{left:0}
 .fieldEdge:active{background:rgba(255,255,255,.24)}
 
-/* 2/6：HP・肉 + マス目管理。縦3分割はしない */
+/* 3/8：HP・肉 + マス目管理。縦3分割はしない */
 #fieldPanel{
   min-height:0;
   display:grid;
