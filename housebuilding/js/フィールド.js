@@ -25,6 +25,7 @@ hud.innerHTML = `
 
 fieldView.innerHTML = `
   <div class="fieldLayer">
+    <button id="backToShop" class="fieldEdge fieldEdgeLeft" type="button" aria-label="店があるマップへ戻る">◀</button>
     <div class="fieldGuide">フィールド表示テスト</div>
     <div class="routeObject ladder">はしご</div>
     <div class="routeObject crate">木箱</div>
@@ -75,6 +76,11 @@ for (let i = 0; i < 12; i++) {
   slot.className = 'skillSlot';
   slot.textContent = name;
   skillList.appendChild(slot);
+});
+
+// 画面移動はブラウザ履歴を積まない。
+document.getElementById('backToShop')?.addEventListener('click', () => {
+  window.location.replace('./フィールド_店エリア_v3.html');
 });
 
 // SAVEは明示操作だけ。現段階では保存処理自体をまだ実装しない。
