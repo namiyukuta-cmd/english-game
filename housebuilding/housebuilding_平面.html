@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - 2D</title>
-  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-4section" />
+  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-topmenu1" />
 </head>
 <body>
   <main id="app">
@@ -20,7 +20,16 @@
           <strong id="status">アイテムを選んでください</strong>
           <small>2D SIDE VIEW / X・Y座標で管理</small>
         </div>
-        <div class="count" id="count">0 個</div>
+
+        <div class="topMenuWrap">
+          <div id="topQuickMenu" class="topQuickMenu" aria-label="クイックメニュー" hidden>
+            <button type="button" id="quickTop">TOP</button>
+            <button type="button" id="quickLog">LOG</button>
+            <button type="button" id="quickRoad">ROAD</button>
+            <button type="button" id="quickSave">SAVE</button>
+          </div>
+          <button class="topMenuToggle" id="topMenuToggle" type="button" aria-label="メニューを開く" aria-expanded="false">•••</button>
+        </div>
       </header>
     </section>
 
@@ -45,7 +54,7 @@
 
   </main>
 
-  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-4section"></script>
-  <script src="./js/housebuilding_2d.js?v=20260911-4section"></script>
+  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-topmenu1"></script>
+  <script src="./js/housebuilding_2d.js?v=20260911-topmenu1"></script>
 </body>
 </html>
