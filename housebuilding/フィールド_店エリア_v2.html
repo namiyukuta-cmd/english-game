@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#d7e2ea" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>House Building - 店エリア</title>
+  <link rel="stylesheet" href="./css/フィールド_マップ.css?v=20260911-shoparea-v2" />
+</head>
+<body>
+  <main id="mapApp" data-map-id="shop-area-v2">
+    <header id="mapHud">
+      <strong>店エリア</strong>
+    </header>
+
+    <section id="mapView" aria-label="店があるマップ">
+      <button
+        id="toBuildMap"
+        class="mapEdge mapEdgeLeft"
+        type="button"
+        aria-label="家建設マップへ戻る"
+      >
+        <span>‹</span>
+      </button>
+
+      <div class="mapPlaceholder">
+        <span>店があるマップ</span>
+      </div>
+
+      <button
+        id="toNextMap"
+        class="mapEdge mapEdgeRight"
+        type="button"
+        aria-label="次のマップへ移動"
+      >
+        <span>▶</span>
+      </button>
+    </section>
+  </main>
+
+  <script src="./js/フィールド_店エリア_v2.js?v=20260911-shoparea-v2"></script>
+</body>
+</html>
