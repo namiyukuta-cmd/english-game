@@ -57,6 +57,25 @@ button{font:inherit}
 .routeObject.crate{right:23%;bottom:18%;width:46px;height:38px;border-radius:5px}
 .routeObject.ladder{left:49%;top:20%;width:34px;height:94px;border-radius:4px}
 .exitMark{position:absolute;right:10px;top:46%;transform:translateY(-50%);font-size:34px;color:rgba(45,42,38,.45);font-weight:900}
+.fieldEdge{
+  position:absolute;
+  top:42%;
+  transform:translateY(-50%);
+  z-index:10;
+  width:44px;
+  height:64px;
+  border:0;
+  background:transparent;
+  color:rgba(45,42,38,.48);
+  font-size:34px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+.fieldEdgeLeft{left:2px}
+.fieldEdge:active{background:rgba(255,255,255,.18)}
 
 /* 下1/3：タブなし、全部常設 */
 #fieldPanel{
