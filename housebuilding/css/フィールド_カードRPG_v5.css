@@ -1,0 +1,21 @@
+@import url('./フィールド_カードRPG_v4.css?v=20260912-card4');
+
+/* v5: 横並び最大6枚。7枚時よりカードを一回り大きく見せる。 */
+.cardRpgView{padding:38px 4px 7px}
+.cardDungeonBoard{gap:8px;padding:2px 1px}
+.floorLane{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:3px 4px;border-radius:12px}
+.mapCard{border-radius:9px;box-shadow:0 5px 12px rgba(0,0,0,.32)}
+.cardFace{border-radius:9px}
+.cardBack{font-size:18px}
+.sceneName{left:4px;right:4px;bottom:5px;font-size:6.4px}
+.eventBadge{top:11%;padding:2px 6px;font-size:6.3px}
+.eventNeed{left:5px;right:5px;top:38%;padding:4px 2px;font-size:6px}
+.threatBadge{top:6%;padding:2px 5px;font-size:6px}
+.playerToken{width:48%;height:69%;bottom:7%}
+.playerToken .tokenLight{width:7px;height:7px}
+.battleMonsterToken .enemyFigure{width:52%;height:71%;bottom:7%}
+.battleMonsterToken .enemyName{font-size:6.3px}
+.enemyMiniHp{left:8px;right:8px;top:6px;height:5px}
+.verticalLadder.right{left:91.7%;top:31.5%}
+.verticalLadder.left{left:8.3%;top:65%}
+.cardRpgHint{font-size:7px}
