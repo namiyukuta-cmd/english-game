@@ -8,18 +8,21 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - 2D</title>
-  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-1145" />
+  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-4section" />
 </head>
 <body>
   <main id="app">
-    <header class="topbar">
-      <button class="back" id="back" aria-label="戻る">←</button>
-      <div class="status">
-        <strong id="status">アイテムを選んでください</strong>
-        <small>2D SIDE VIEW / X・Y座標で管理</small>
-      </div>
-      <div class="count" id="count">0 個</div>
-    </header>
+
+    <section id="topSection" aria-label="上部情報">
+      <header class="topbar">
+        <button class="back" id="back" aria-label="戻る">←</button>
+        <div class="status">
+          <strong id="status">アイテムを選んでください</strong>
+          <small>2D SIDE VIEW / X・Y座標で管理</small>
+        </div>
+        <div class="count" id="count">0 個</div>
+      </header>
+    </section>
 
     <section id="fieldWrap" aria-label="2D家作りフィールド">
       <div id="field"><div class="ground"></div></div>
@@ -33,9 +36,16 @@
       </div>
       <div id="inventoryGrid"></div>
     </section>
+
+    <nav id="bottomMenu" aria-label="ゲームメニュー">
+      <button class="menu-btn" type="button">ステータス</button>
+      <button class="menu-btn" type="button">スキル</button>
+      <button class="menu-btn" type="button">メニュー</button>
+    </nav>
+
   </main>
 
-  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-1145"></script>
-  <script src="./js/housebuilding_2d.js?v=20260911-1145"></script>
+  <script src="./js/housebuilding_平面_アイテム.js?v=20260911-4section"></script>
+  <script src="./js/housebuilding_2d.js?v=20260911-4section"></script>
 </body>
 </html>
