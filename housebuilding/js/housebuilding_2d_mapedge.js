@@ -299,8 +299,8 @@ function bindNavigation() {
     location.href = './housebuilding_選択.html';
   });
 
-  document.getElementById('toRightMap')?.addEventListener('click', () => {
-    location.href = './フィールド_店エリア.html';
+  document.getElementById('toShopAreaV3')?.addEventListener('click', () => {
+    location.href = './フィールド_店エリア_v3.html';
   });
 }
 
