@@ -1,0 +1,34 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#d7e2ea;color:#25231f;touch-action:none}
+button{font:inherit}
+#app{position:relative;width:100%;height:100dvh;overflow:hidden;background:linear-gradient(#c9d9e8 0 50%,#b9b2a2 50% 100%)}
+.topbar{position:absolute;z-index:20;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;pointer-events:none}
+.topbar>*{pointer-events:auto}
+.back,.status,.count{min-height:44px;border:1px solid rgba(65,59,50,.25);background:rgba(255,255,255,.91);box-shadow:0 2px 8px rgba(0,0,0,.08);backdrop-filter:blur(8px)}
+.back{width:46px;border-radius:13px;font-size:21px;font-weight:800}
+.status{min-width:0;border-radius:13px;padding:7px 11px}
+.status strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status small{display:block;margin-top:2px;font-size:10px;color:#6f6a62}
+.count{border-radius:13px;padding:0 12px;display:flex;align-items:center;font-size:12px;font-weight:800;white-space:nowrap}
+#fieldWrap{position:absolute;left:10px;right:10px;top:92px;bottom:50%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#field{--cols:16;--rows:11;position:relative;width:min(100%,760px);aspect-ratio:16/11;max-height:100%;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);background:rgba(238,231,210,.24);border-left:2px solid rgba(68,60,49,.45);border-right:2px solid rgba(68,60,49,.45);border-bottom:5px solid #655744;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.cell{position:relative;border:0;border-right:1px solid rgba(64,58,50,.14);border-bottom:1px solid rgba(64,58,50,.14);min-width:0;min-height:0;background:transparent;padding:0}
+.cell::after{content:"";position:absolute;inset:0;pointer-events:none}
+.cell.target::after{background:rgba(255,255,255,.35);outline:2px solid rgba(255,255,255,.75);outline-offset:-2px}
+.cell.occupied{background:rgba(104,83,61,.14)}
+.ground{position:absolute;left:0;right:0;bottom:0;height:12%;background:linear-gradient(#776952,#5e5242);z-index:-1}
+.placed-item{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:hidden;font-size:clamp(20px,7vw,48px);line-height:1}
+.placed-item.block-visual{background:linear-gradient(135deg,#a47c58,#8b684c);box-shadow:inset 0 0 0 1px rgba(75,51,35,.35);font-size:0}
+#inventoryWrap{position:absolute;z-index:20;left:10px;right:10px;top:52%;bottom:max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid rgba(65,59,50,.24);border-radius:18px;background:rgba(242,239,232,.94);box-shadow:0 4px 16px rgba(0,0,0,.10);backdrop-filter:blur(10px)}
+.inventoryHead{display:flex;align-items:center;gap:8px;min-height:38px}
+.inventoryHead strong{font-size:14px;white-space:nowrap}
+#selectedItemLabel{font-size:11px;color:#6f675e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right}
+#deleteTool{min-width:58px;height:38px;border:1px solid #b7ada0;border-radius:10px;background:#fff;color:#2f2a24;font-size:12px;font-weight:800}
+#deleteTool.active{background:#5f574c;color:#fff;border-color:#5f574c}
+#inventoryGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:6px;flex:1;min-height:0}
+.inventory-slot{position:relative;min-width:0;min-height:0;border:2px solid #9f968b;border-radius:8px;background:#d9d5ce;box-shadow:inset 0 0 0 2px rgba(255,255,255,.28);padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#2c2823}
+.inventory-slot.empty{background:#c9c5be}
+.inventory-slot.selected{border-color:#403a33;background:#f6f1e8;box-shadow:inset 0 0 0 2px #fff,0 0 0 2px rgba(64,58,51,.25)}
+.inventory-icon{font-size:clamp(22px,8vw,38px);line-height:1}
+.inventory-name{margin-top:3px;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.inventory-size{font-size:8px;color:#726a61}
