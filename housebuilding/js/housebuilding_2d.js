@@ -11,16 +11,19 @@ const deleteTool = document.getElementById('deleteTool');
 const topMenuToggle = document.getElementById('topMenuToggle');
 const topQuickMenu = document.getElementById('topQuickMenu');
 
-const items = Array.isArray(window.HOUSEBUILDING_2D_ITEMS)
+const allItems = Array.isArray(window.HOUSEBUILDING_2D_ITEMS)
   ? window.HOUSEBUILDING_2D_ITEMS
   : [];
+
+// 建設画面では建設アイテムだけ表示する。
+const items = allItems.filter(item => item.category === '建設' && item.unlocked !== false);
 
 const cells = [];
 const cellMap = new Map();
 const occupancy = new Map();
 const placements = new Map();
 
-let selectedItem = items[0] || null;
+let selectedItem = items.find(item => Number(item.owned || 0) > 0) || null;
 let mode = selectedItem ? 'place' : 'delete';
 let nextPlacementId = 1;
 
@@ -107,16 +110,23 @@ function renderPlacement(placement) {
 function placeSelectedItem(x, y) {
   if (!selectedItem) return;
 
+  if (Number(selectedItem.owned || 0) <= 0) {
+    status.textContent = `${selectedItem.name}は0個です`;
+    openPurchase(selectedItem);
+    return;
+  }
+
   if (!canPlace(selectedItem, x, y)) {
     status.textContent = 'そこには置けません';
     return;
   }
 
+  const placedItem = selectedItem;
   const id = `placed_${nextPlacementId++}`;
-  const footprint = getFootprint(selectedItem, x, y);
+  const footprint = getFootprint(placedItem, x, y);
   const placement = {
     id,
-    item: selectedItem,
+    item: placedItem,
     x,
     y,
     footprint,
@@ -131,6 +141,17 @@ function placeSelectedItem(x, y) {
 
   placements.set(id, placement);
   renderPlacement(placement);
+
+  placedItem.owned = Math.max(0, Number(placedItem.owned || 0) - 1);
+
+  if (placedItem.owned <= 0) {
+    selectedItem = null;
+    mode = 'place';
+    selectedItemLabel.textContent = `${placedItem.name} 0個`;
+    status.textContent = `${placedItem.name}は0個になりました`;
+  }
+
+  createInventory();
   updateCount();
 }
 
@@ -152,6 +173,10 @@ function deleteAt(x, y) {
 
   placement.element?.remove();
   placements.delete(id);
+
+  // 練習用の建築画面では、削除したアイテムは所持数へ戻す。
+  placement.item.owned = Number(placement.item.owned || 0) + 1;
+  createInventory();
   updateCount();
 }
 
@@ -171,6 +196,30 @@ function updateCount() {
   if (count) count.textContent = `${placements.size} 個`;
 }
 
+function openPurchase(item) {
+  clearTarget();
+
+  if (!item.purchasable) {
+    status.textContent = `${item.name}は購入できません`;
+    return;
+  }
+
+  const purchase = window.HOUSEBUILDING_PURCHASE;
+  if (!purchase?.open) {
+    status.textContent = '購入画面を読み込めませんでした';
+    return;
+  }
+
+  purchase.open(item, purchasedItem => {
+    selectedItem = purchasedItem;
+    mode = 'place';
+    deleteTool.classList.remove('active');
+    createInventory();
+    selectedItemLabel.textContent = `${purchasedItem.name} ${purchasedItem.owned}個`;
+    status.textContent = `${purchasedItem.name}を購入しました`;
+  });
+}
+
 function createInventory() {
   inventoryGrid.innerHTML = '';
 
@@ -188,8 +237,14 @@ function createInventory() {
       continue;
     }
 
+    const owned = Number(item.owned || 0);
     slot.dataset.itemId = item.id;
-    slot.setAttribute('aria-label', `${item.name} 縦${item.height} 横${item.width}`);
+    slot.setAttribute('aria-label', `${item.name} 縦${item.height} 横${item.width} 所持${owned}個`);
+
+    if (owned <= 0) slot.classList.add('zero-stock');
+    if (selectedItem?.id === item.id && owned > 0 && mode === 'place') {
+      slot.classList.add('selected');
+    }
 
     const icon = document.createElement('span');
     icon.className = 'inventory-icon';
@@ -203,25 +258,40 @@ function createInventory() {
     size.className = 'inventory-size';
     size.textContent = `${item.height}×${item.width}`;
 
-    slot.append(icon, name, size);
-    slot.addEventListener('click', () => selectInventoryItem(item, slot));
+    const itemCount = document.createElement('span');
+    itemCount.className = 'inventory-count';
+    itemCount.textContent = String(owned);
+
+    slot.append(icon, name, size, itemCount);
+    slot.addEventListener('click', () => {
+      if (Number(item.owned || 0) <= 0) {
+        openPurchase(item);
+      } else {
+        selectInventoryItem(item, slot);
+      }
+    });
     inventoryGrid.appendChild(slot);
   }
 
-  const firstSlot = inventoryGrid.querySelector('.inventory-slot:not(.empty)');
-  if (selectedItem && firstSlot) {
-    firstSlot.classList.add('selected');
-    selectedItemLabel.textContent = `${selectedItem.name} ${selectedItem.height}×${selectedItem.width}`;
+  if (selectedItem && Number(selectedItem.owned || 0) > 0 && mode === 'place') {
+    selectedItemLabel.textContent = `${selectedItem.name} ${selectedItem.owned}個`;
+  } else if (mode !== 'delete') {
+    selectedItemLabel.textContent = '未選択';
   }
 }
 
 function selectInventoryItem(item, slot) {
+  if (Number(item.owned || 0) <= 0) {
+    openPurchase(item);
+    return;
+  }
+
   selectedItem = item;
   mode = 'place';
   inventoryGrid.querySelectorAll('.inventory-slot').forEach(el => el.classList.remove('selected'));
   slot.classList.add('selected');
   deleteTool.classList.remove('active');
-  selectedItemLabel.textContent = `${item.name} ${item.height}×${item.width}`;
+  selectedItemLabel.textContent = `${item.name} ${item.owned}個`;
   status.textContent = `${item.name}を置くマスをタップ`;
   clearTarget();
 }
