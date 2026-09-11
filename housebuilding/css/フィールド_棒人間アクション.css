@@ -1,0 +1,78 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d9e2e7;color:#26231f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:manipulation}
+button{font:inherit}
+#fieldApp{width:100%;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;background:#d9e2e7}
+#fieldTop{min-height:48px;padding:max(7px,env(safe-area-inset-top)) 8px 6px;background:#f6f4ee;border-bottom:1px solid rgba(55,50,43,.22)}
+.topMenuRow{min-height:34px;display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:5px;align-items:center}
+.topPlace{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:900}
+.topMenuButton{min-width:52px;min-height:32px;padding:0 8px;border:1px solid #c2b9ad;border-radius:8px;background:#fff;color:#39342e;font-size:9px;font-weight:900}
+#fieldMiddle{min-height:0;display:grid;grid-template-rows:minmax(0,5fr) minmax(0,3fr);overflow:hidden}
+#fieldView{position:relative;min-height:0;overflow:hidden;background:#c9d5d8;border-bottom:1px solid rgba(55,50,43,.24)}
+.dungeonViewport{position:absolute;inset:0;overflow:hidden;background:linear-gradient(#cbd9df 0 54%,#aab693 54% 66%,#746957 66% 100%);will-change:transform}
+.dungeonViewport.shake{animation:screenShake .25s linear 1}
+.dungeonWorld{position:relative;width:100%;height:180%;min-height:180%}
+.dungeonWorld::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent 18%,transparent 82%,rgba(0,0,0,.05));pointer-events:none}
+.dungeonFloor{position:absolute;left:8%;right:8%;height:3px;background:#514a40;border-radius:3px;box-shadow:0 2px 0 rgba(255,255,255,.18)}
+.floorHint{position:absolute;top:-18px;font-size:8px;font-weight:900;color:rgba(55,49,41,.44)}
+.floorHint.right{left:4%}.floorHint.left{right:4%}
+.dungeonLadder{position:absolute;width:20px;border-left:3px solid #685f53;border-right:3px solid #685f53;background:repeating-linear-gradient(to bottom,transparent 0 10px,#685f53 10px 12px);transform:translateX(-50%)}
+.dungeonDoor{position:absolute;width:22px;height:42px;transform:translate(-50%,-100%);border:2px solid #675d50;border-radius:3px;background:#b6aa98;color:#554c40;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.dungeonDoor.open{opacity:.22;border-style:dashed;background:transparent}
+.dungeonGoal{position:absolute;transform:translate(-50%,-100%);width:38px;height:23px;border:1px solid #756b5e;border-radius:5px;background:rgba(247,244,236,.78);font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.fieldEdge{position:absolute;left:0;top:44%;transform:translateY(-50%);z-index:60;width:42px;height:72px;border:0;background:rgba(255,255,255,.08);color:rgba(45,42,38,.5);font-size:30px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0}
+.dungeonMessage{position:absolute;z-index:55;left:50%;top:8px;transform:translateX(-50%);max-width:76%;padding:4px 9px;border-radius:8px;background:rgba(247,244,238,.88);color:#4f4941;font-size:8px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+
+/* 棒人間 */
+.stick{position:absolute;z-index:20;width:26px;height:42px;transform:translate(-50%,-100%);transform-origin:50% 100%;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
+.stick .head{position:absolute;left:8px;top:0;width:11px;height:11px;border:2px solid #2f3337;border-radius:50%;background:#d8b69b}
+.stick .body{position:absolute;left:12px;top:11px;width:3px;height:17px;border-radius:3px;background:#2f3337;transform-origin:50% 0}
+.stick .arm,.stick .leg{position:absolute;width:3px;border-radius:3px;background:#2f3337;transform-origin:50% 0}
+.stick .arm{top:14px;height:14px}.stick .leg{top:27px;height:15px}
+.stick .arm.left{left:11px;transform:rotate(42deg)}.stick .arm.right{left:13px;transform:rotate(-42deg)}
+.stick .leg.left{left:11px;transform:rotate(28deg)}.stick .leg.right{left:13px;transform:rotate(-28deg)}
+.stick .weapon{position:absolute;left:14px;top:15px;width:2px;height:20px;background:#6b6258;transform-origin:50% 0;transform:rotate(-58deg);opacity:0}
+.stick.bowPose .arm.left{transform:rotate(86deg)}.stick.bowPose .arm.right{transform:rotate(-80deg)}
+.stick.bowPose .weapon{opacity:1;width:12px;height:18px;border:2px solid #6b6258;border-left:0;background:transparent;border-radius:0 50% 50% 0;transform:translate(2px,-2px) rotate(0)}
+.stick.swordPose .arm.right{transform:rotate(-110deg)}.stick.swordPose .weapon{opacity:1;height:24px;background:#5e6265;box-shadow:0 0 0 1px #e3e1dd;transform:rotate(-112deg)}
+.stick.slashPose{animation:slashBody .24s ease-out 1}.stick.slashPose .arm.right{animation:slashArm .24s ease-out 1}.stick.slashPose .weapon{opacity:1;height:25px;background:#5e6265;box-shadow:0 0 0 1px #ece9e3;animation:slashWeapon .24s ease-out 1}
+.stick.jumpPose .leg.left{transform:rotate(70deg)}.stick.jumpPose .leg.right{transform:rotate(-65deg)}.stick.jumpPose .arm.left{transform:rotate(70deg)}.stick.jumpPose .arm.right{transform:rotate(-65deg)}
+.stick.dashPose{transform:translate(-50%,-100%) skewX(-16deg) scaleX(1.08)}
+.stick.hitPose{filter:brightness(1.7) sepia(1) saturate(7) hue-rotate(320deg);transform:translate(-50%,-100%) rotate(-12deg)}
+.stick.healPose{filter:drop-shadow(0 0 12px rgba(60,185,92,.9))}
+
+.enemyStick .head{background:#8c5c53}.enemyStick .head,.enemyStick .body,.enemyStick .arm,.enemyStick .leg{border-color:#572f2d}.enemyStick .body,.enemyStick .arm,.enemyStick .leg{background:#572f2d}
+.enemyStick.telegraph{animation:enemyTelegraph .5s ease-in-out infinite alternate}.enemyStick.charge{transform:translate(-50%,-100%) skewX(-20deg) scaleX(1.15)}.enemyStick.dead{animation:enemyDeath .45s ease-out forwards}
+.enemyHp{position:absolute;left:-7px;right:-7px;top:-10px;height:4px;border-radius:6px;background:rgba(50,45,40,.22);overflow:hidden}.enemyHpFill{height:100%;width:100%;background:#7e3f3a;transition:width .16s linear}
+
+/* 残像 */
+.afterImage{position:absolute;z-index:15;width:26px;height:42px;transform:translate(-50%,-100%);opacity:.18;border-radius:50%;background:linear-gradient(90deg,transparent 10%,#60676d 48%,transparent 88%);pointer-events:none;animation:afterFade .35s ease-out forwards}
+
+/* 飛び道具 */
+.projectileArrow{position:absolute;z-index:35;width:25px;height:3px;border-radius:3px;background:#3f3931;transform:translate(-50%,-50%);box-shadow:-18px 0 7px rgba(255,247,214,.7),-35px 0 14px rgba(255,230,140,.35);pointer-events:none}
+.projectileArrow::after{content:"";position:absolute;right:-5px;top:-3px;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #3f3931}
+
+/* 斬撃波 */
+.slashWave{position:absolute;z-index:40;width:54px;height:70px;border-right:8px solid rgba(240,248,255,.96);border-radius:0 100% 100% 0;filter:drop-shadow(0 0 7px rgba(204,236,255,.95));transform:translate(-50%,-50%) scale(.3) rotate(-8deg);pointer-events:none;animation:waveGrow .36s ease-out forwards}
+.slashWave::after{content:"";position:absolute;right:-10px;top:6px;width:12px;height:58px;border-right:3px solid rgba(255,255,255,.9);border-radius:0 100% 100% 0}
+
+/* 命中・フラッシュ */
+.impactBurst{position:absolute;z-index:45;width:66px;height:66px;border-radius:50%;border:4px solid rgba(255,248,210,.98);background:radial-gradient(circle,rgba(255,255,255,1) 0 12%,rgba(255,238,164,.72) 13% 28%,rgba(255,209,93,.18) 29% 50%,transparent 51%);box-shadow:0 0 18px 8px rgba(255,248,210,.82),0 0 42px 20px rgba(255,210,78,.38);transform:translate(-50%,-50%) scale(.15);animation:impact .38s ease-out forwards;pointer-events:none}
+.screenFlash{position:absolute;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none}.screenFlash.play{animation:whiteFlash .16s ease-out 1}
+.damageFloat{position:absolute;z-index:48;transform:translate(-50%,-50%);font-size:20px;font-weight:1000;color:#8b241b;text-shadow:0 2px 0 #fff,0 0 8px rgba(255,255,255,.95);animation:damageRise .78s cubic-bezier(.15,.8,.2,1) forwards;pointer-events:none}.healFloat{color:#2f7c45}
+.groundShock{position:absolute;z-index:34;width:20px;height:8px;border:3px solid rgba(235,242,246,.9);border-top:0;border-radius:0 0 50% 50%;transform:translate(-50%,0) scaleX(.2);animation:shockSpread .32s ease-out forwards;pointer-events:none}
+
+#fieldPanel{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);gap:5px;padding:6px 8px;background:#e8e4dc}.panelStatus{min-height:28px;display:flex;align-items:center;gap:8px}.hpWrap{display:flex;align-items:center;gap:6px;flex:1;min-width:0}.hpText{font-size:10px;font-weight:900;white-space:nowrap}.hpBar{height:8px;flex:1;min-width:60px;border-radius:999px;background:#c9c5bd;overflow:hidden}.hpFill{height:100%;background:#5f6f5d;transition:width .2s linear}.foodValue{font-size:11px;font-weight:900;white-space:nowrap}.slotLine{min-height:0;display:grid;grid-template-columns:48px minmax(0,1fr);gap:5px;align-items:stretch}.slotLabel{display:flex;align-items:center;justify-content:center;border:1px solid #c4bbb0;border-radius:7px;background:#f7f4ee;color:#615a51;font-size:9px;font-weight:900;text-align:center}.slotGrid{min-width:0;min-height:0;display:grid;gap:4px}#inventoryGrid{grid-template-columns:repeat(8,minmax(0,1fr))}#abilityGrid{grid-template-columns:repeat(7,minmax(0,1fr))}.squareSlot{position:relative;min-width:0;min-height:0;border:1px solid #aca398;border-radius:6px;background:#d7d2ca;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;overflow:hidden}.squareSlot.empty{opacity:.45}.slotIcon{font-size:17px;line-height:1}.slotName{max-width:100%;margin-top:2px;font-size:7px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.itemCount{position:absolute;right:2px;bottom:1px;font-size:7px;font-weight:900}.skillSlot{background:#ded9d1}
+#fieldBottom{min-height:34px;padding:5px 8px calc(5px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f6f4ee;border-top:1px solid rgba(55,50,43,.22);color:#6a645c;font-size:9px;font-weight:800}
+
+@keyframes slashBody{0%{transform:translate(-50%,-100%) rotate(0)}45%{transform:translate(-50%,-100%) rotate(-18deg) scaleX(1.08)}100%{transform:translate(-50%,-100%) rotate(0)}}
+@keyframes slashArm{0%{transform:rotate(-110deg)}45%{transform:rotate(40deg)}100%{transform:rotate(-20deg)}}
+@keyframes slashWeapon{0%{transform:rotate(-112deg)}45%{transform:rotate(35deg)}100%{transform:rotate(-20deg)}}
+@keyframes enemyTelegraph{from{filter:drop-shadow(0 0 2px rgba(196,45,36,.2))}to{filter:drop-shadow(0 0 11px rgba(196,45,36,.9)) brightness(1.3)}}
+@keyframes enemyDeath{0%{opacity:1;transform:translate(-50%,-100%) rotate(0)}100%{opacity:.12;transform:translate(-50%,-100%) translateX(38px) rotate(82deg) scale(.72)}}
+@keyframes afterFade{from{opacity:.22;transform:translate(-50%,-100%) scale(1)}to{opacity:0;transform:translate(-50%,-100%) scale(.8)}}
+@keyframes waveGrow{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-8deg)}20%{opacity:1}100%{opacity:0;transform:translate(55%,-50%) scale(1.45) rotate(-3deg)}}
+@keyframes impact{0%{opacity:1;transform:translate(-50%,-50%) scale(.12)}55%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.85)}}
+@keyframes whiteFlash{0%{opacity:0}25%{opacity:.88}100%{opacity:0}}
+@keyframes shockSpread{0%{opacity:1;transform:translate(-50%,0) scaleX(.2)}100%{opacity:0;transform:translate(-50%,0) scaleX(4.5)}}
+@keyframes damageRise{0%{opacity:0;transform:translate(-50%,-10%) scale(.45)}18%{opacity:1;transform:translate(-50%,-55%) scale(1.6)}100%{opacity:0;transform:translate(-50%,-190%) scale(.9)}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-5px,2px)}30%{transform:translate(5px,-3px)}48%{transform:translate(-4px,-2px)}66%{transform:translate(4px,3px)}84%{transform:translate(-2px,1px)}}
