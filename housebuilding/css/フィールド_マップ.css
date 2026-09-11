@@ -1,0 +1,16 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#d7e2ea;color:#27231f;touch-action:manipulation}
+button{font:inherit}
+
+#mapApp{width:100%;height:100dvh;display:grid;grid-template-rows:auto 1fr;background:#d7e2ea}
+#mapHud{min-height:54px;padding:max(10px,env(safe-area-inset-top)) 14px 8px;display:flex;align-items:center;background:rgba(247,245,240,.95);border-bottom:1px solid rgba(62,56,48,.18)}
+#mapHud strong{font-size:15px}
+
+#mapView{position:relative;min-height:0;overflow:hidden;background:linear-gradient(#d9e7ef,#c9d8c4)}
+.mapPlaceholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(45,41,36,.58);font-size:18px;font-weight:800;pointer-events:none}
+
+.mapEdge{position:absolute;top:0;bottom:0;z-index:20;width:64px;border:0;background:linear-gradient(to right,rgba(255,255,255,.10),rgba(255,255,255,0));color:rgba(45,41,36,.45);padding:0;display:flex;align-items:center;justify-content:center}
+.mapEdge span{font-size:48px;font-weight:300;line-height:1}
+.mapEdgeLeft{left:0}
+.mapEdgeRight{right:0;transform:none;background:linear-gradient(to left,rgba(255,255,255,.10),rgba(255,255,255,0))}
+.mapEdge:active{background:rgba(255,255,255,.25)}
