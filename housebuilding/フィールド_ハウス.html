@@ -3,15 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <title>House Building - ハウス</title>
+  <meta name="theme-color" content="#d7e2ea" />
+  <title>House Building - 家</title>
+  <link rel="stylesheet" href="./css/フィールド_マップ.css?v=20260911-map1" />
 </head>
 <body>
-  <main id="houseApp">
-    <header id="houseHud"></header>
-    <section id="houseView" aria-label="家"></section>
-    <nav id="houseControls" aria-label="家の操作"></nav>
+  <main id="mapApp" data-map-id="house">
+    <header id="mapHud">
+      <strong>家</strong>
+    </header>
+
+    <section id="mapView" aria-label="家マップ">
+      <div class="mapPlaceholder">
+        <span>家マップ</span>
+      </div>
+
+      <button
+        id="toShop"
+        class="mapEdge mapEdgeRight"
+        type="button"
+        aria-label="店マップへ移動"
+      >
+        <span>›</span>
+      </button>
+    </section>
   </main>
 
-  <script src="./js/フィールド_ハウス.js"></script>
+  <script src="./js/フィールド_ハウス.js?v=20260911-map1"></script>
 </body>
 </html>
