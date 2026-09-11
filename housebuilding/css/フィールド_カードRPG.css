@@ -1,0 +1,38 @@
+/* カードRPG用フィールド。既存の管理パネルはそのまま使う。 */
+#fieldView{background:#171817;overflow:hidden}
+.cardRpgView{position:absolute;inset:0;padding:42px 8px 12px;display:flex;flex-direction:column;gap:8px;background:radial-gradient(circle at 50% 35%,#32332f 0%,#1c1d1b 50%,#111210 100%)}
+.cardRpgMessage{position:absolute;z-index:80;left:50%;top:8px;transform:translateX(-50%);max-width:78%;padding:5px 10px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(12,13,12,.88);color:#eee9df;font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardTrack{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;align-items:stretch;height:min(47vw,184px);min-height:138px;margin-top:auto;margin-bottom:auto;padding:6px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.20);overflow:visible}
+.cardSlot{position:relative;min-width:0;height:100%;perspective:600px}
+.mapCard,.playerCard,.battleMonster{position:absolute;inset:0;border-radius:8px;overflow:hidden;box-shadow:0 5px 12px rgba(0,0,0,.35);transform-style:preserve-3d}
+.playerCard{border:2px solid #d9c9a4;background:linear-gradient(#393a36,#20211f);z-index:20}
+.playerCard::before{content:"";position:absolute;left:50%;top:25%;width:42%;height:46%;transform:translateX(-50%);border-radius:45% 45% 35% 35%;background:rgba(0,0,0,.78);filter:blur(1px)}
+.playerCard::after{content:"主人公";position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#eee4cf;font-size:8px;font-weight:900}
+.playerLightDot{position:absolute;left:62%;top:48%;width:7px;height:7px;border-radius:50%;background:#ffe3a6;box-shadow:0 0 8px 3px rgba(255,196,89,.8)}
+.cardFace{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;border-radius:8px}
+.cardBack{background:repeating-linear-gradient(135deg,#282926 0 5px,#1b1c1a 5px 10px);border:1px solid #4a4b46;color:#77786f;font-size:18px;font-weight:1000}
+.cardFront{transform:rotateY(180deg);padding:4px;border:1px solid #6b665c;background:linear-gradient(#d8d1c4,#aaa294);color:#2c2924;text-align:center}
+.mapCard.revealed{animation:cardFlip .58s ease forwards}
+.mapCard.revealed .cardBack{transform:rotateY(180deg)}
+.mapCard.revealed .cardFront{transform:rotateY(360deg)}
+.mapCard.visited .cardFront{filter:saturate(.55) brightness(.72)}
+.cardIcon{font-size:22px;line-height:1}.cardName{margin-top:5px;font-size:7px;font-weight:1000;line-height:1.15}.cardSub{margin-top:3px;font-size:6px;font-weight:800;opacity:.65}
+.monsterFront{background:linear-gradient(#6e5149,#382c29);color:#f5e8dc;border-color:#9d7466}
+.monsterFront .cardIcon{filter:grayscale(1) brightness(.75)}
+.battleMonster{z-index:55;width:calc((100% - 30px)/7);height:calc(100% - 12px);inset:auto;top:6px;background:linear-gradient(#6e5149,#382c29);border:2px solid #a87a69;color:#f5e8dc;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:left .45s cubic-bezier(.2,.8,.2,1),transform .15s ease,filter .15s ease;pointer-events:none}
+.battleMonster .cardIcon{font-size:23px;filter:grayscale(1) brightness(.75)}
+.battleMonster .cardName{font-size:7px}.battleMonster .enemyMiniHp{position:absolute;left:5px;right:5px;top:5px;height:4px;border-radius:4px;background:rgba(0,0,0,.45);overflow:hidden}.battleMonster .enemyMiniHp>i{display:block;height:100%;width:100%;background:#d9b3a0;transition:width .2s linear}
+.battleMonster.dead{animation:monsterDie .55s ease forwards}
+.cardHit{animation:cardShake .26s linear 1}
+.slashFx{position:absolute;z-index:90;width:64px;height:5px;border-radius:8px;background:linear-gradient(90deg,transparent,#fff6df 22%,#fff 50%,#fff0c8 78%,transparent);box-shadow:0 0 10px rgba(255,238,190,.95);transform:translate(-50%,-50%) rotate(-34deg) scaleX(.2);pointer-events:none;animation:slashFlash .28s ease-out forwards}
+.projectileFx{position:absolute;z-index:88;width:22px;height:2px;border-radius:3px;background:#efe5cc;box-shadow:-8px 0 8px rgba(255,224,157,.65);transform:translate(-50%,-50%);pointer-events:none}
+.projectileFx.arrow::after{content:"";position:absolute;right:-5px;top:-3px;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid #efe5cc}
+.damageFx{position:absolute;z-index:92;transform:translate(-50%,-50%);color:#fff1d8;font-size:13px;font-weight:1000;text-shadow:0 2px 2px #000;pointer-events:none;animation:damagePop .65s ease-out forwards}
+.turnBadge{position:absolute;z-index:70;right:8px;top:8px;padding:4px 7px;border-radius:999px;background:rgba(0,0,0,.60);border:1px solid rgba(255,255,255,.12);color:#e8e1d4;font-size:7px;font-weight:900}
+.distanceLine{position:absolute;z-index:10;left:7.5%;right:7.5%;top:50%;height:1px;background:rgba(228,217,194,.18);pointer-events:none}
+.cardRpgHint{text-align:center;color:rgba(242,235,221,.58);font-size:7px;font-weight:800}
+@keyframes cardFlip{0%{transform:rotateY(0) scale(.94)}48%{transform:rotateY(90deg) scale(1.02)}100%{transform:rotateY(180deg) scale(1)}}
+@keyframes cardShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-5px,1px) rotate(-2deg)}40%{transform:translate(5px,-1px) rotate(2deg)}60%{transform:translate(-3px,0) rotate(-1deg)}80%{transform:translate(3px,1px) rotate(1deg)}}
+@keyframes slashFlash{0%{opacity:0;transform:translate(-50%,-50%) rotate(-34deg) scaleX(.2)}30%{opacity:1;transform:translate(-50%,-50%) rotate(-34deg) scaleX(1.15)}100%{opacity:0;transform:translate(-50%,-50%) rotate(-34deg) scaleX(1.45)}}
+@keyframes damagePop{0%{opacity:0;transform:translate(-50%,-20%) scale(.6)}25%{opacity:1;transform:translate(-50%,-70%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-160%) scale(.9)}}
+@keyframes monsterDie{0%{opacity:1;transform:rotate(0) scale(1)}100%{opacity:0;transform:translateY(12px) rotate(9deg) scale(.82);filter:grayscale(1)}}
