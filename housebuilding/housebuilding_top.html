@@ -10,62 +10,164 @@
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c8;color:#26231f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
     button{font:inherit}
-    #app{position:relative;width:100%;height:100dvh;overflow:hidden;background:#dce5e8}
-    #scene{position:absolute;inset:0}
-    #scene canvas{display:block;width:100%;height:100%;touch-action:none}
-    .topbar{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;z-index:10;display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;pointer-events:none}
-    .topbar>*{pointer-events:auto}
-    .icon-btn,.status{min-height:44px;border:1px solid rgba(50,45,38,.25);background:rgba(255,255,255,.9);color:#27231d;box-shadow:0 2px 8px rgba(0,0,0,.08);backdrop-filter:blur(8px)}
+
+    #app{
+      width:100%;
+      height:100dvh;
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) 156px auto;
+      background:#dce5e8;
+    }
+
+    /* 1段目：上部 */
+    #topSection{
+      position:relative;
+      z-index:20;
+      padding:max(10px,env(safe-area-inset-top)) 10px 8px;
+      background:#dce5e8;
+    }
+    .topbar{
+      display:grid;
+      grid-template-columns:46px 1fr auto;
+      gap:8px;
+      align-items:center;
+    }
+    .icon-btn,.status{
+      min-height:44px;
+      border:1px solid rgba(50,45,38,.25);
+      background:rgba(255,255,255,.9);
+      color:#27231d;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+      backdrop-filter:blur(8px);
+    }
     .icon-btn{width:46px;border-radius:13px;font-size:20px;font-weight:800}
     .status{border-radius:13px;padding:7px 11px;min-width:0}
     .status strong{display:block;font-size:13px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .status small{display:block;margin-top:2px;color:#6e675d;font-size:10px}
     .count{border-radius:13px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;white-space:nowrap}
-    .camera-controls{position:absolute;right:10px;top:calc(max(10px,env(safe-area-inset-top)) + 58px);z-index:10;display:grid;grid-template-columns:repeat(2,54px);gap:6px;justify-content:end}
-    .camera-controls button{height:44px;border:1px solid rgba(50,45,38,.22);border-radius:12px;background:rgba(255,255,255,.9);color:#2e2922;font-size:13px;font-weight:800;backdrop-filter:blur(8px)}
+
+    /* 2段目：建築表示 */
+    #buildSection{
+      position:relative;
+      min-height:0;
+      overflow:hidden;
+      background:#dce5e8;
+      border-top:1px solid rgba(50,45,38,.12);
+      border-bottom:1px solid rgba(50,45,38,.18);
+    }
+    #scene{position:absolute;inset:0}
+    #scene canvas{display:block;width:100%;height:100%;touch-action:none}
+    #error{position:absolute;inset:20% 18px auto;z-index:30;display:none;padding:16px;border-radius:14px;background:#fff;color:#222;border:1px solid #aaa;line-height:1.6;font-size:14px}
+
+    /* 3段目：下部 */
+    #lowerSection{
+      position:relative;
+      z-index:20;
+      display:grid;
+      grid-template-columns:124px 1fr;
+      gap:8px;
+      padding:8px 10px;
+      background:#cfc8ba;
+      min-height:0;
+    }
+    .camera-controls{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:6px;
+      align-content:start;
+    }
+    .camera-controls button{
+      min-height:44px;
+      border:1px solid rgba(50,45,38,.22);
+      border-radius:12px;
+      background:rgba(255,255,255,.9);
+      color:#2e2922;
+      font-size:13px;
+      font-weight:800;
+      backdrop-filter:blur(8px);
+    }
     .camera-controls button.icon-only{font-size:18px}
     .camera-controls button.view-active{background:#5f574c;color:#fff;border-color:#5f574c}
     .camera-controls button:disabled{opacity:.38}
-    .toolbar-wrap{position:absolute;z-index:10;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
-    .hint{pointer-events:none;width:max-content;max-width:calc(100% - 20px);margin:0 auto 7px;padding:6px 10px;border-radius:999px;background:rgba(32,29,25,.72);color:#fff;font-size:11px;text-align:center}
-    .toolbar{pointer-events:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px;border:1px solid rgba(50,45,38,.24);border-radius:18px;background:rgba(248,246,241,.92);box-shadow:0 4px 16px rgba(0,0,0,.10);backdrop-filter:blur(10px)}
-    .tool{min-width:0;min-height:54px;border:1px solid #c9c1b5;border-radius:13px;background:#fff;color:#332e27;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+    .toolbar-wrap{min-width:0;display:flex;flex-direction:column;gap:6px}
+    .hint{width:100%;padding:5px 8px;border-radius:10px;background:rgba(32,29,25,.72);color:#fff;font-size:10px;text-align:center}
+    .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;flex:1}
+    .tool{min-width:0;border:1px solid #c9c1b5;border-radius:13px;background:#fff;color:#332e27;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
     .tool span{font-size:19px;line-height:1}
     .tool.active{border-color:#5f574c;background:#5f574c;color:#fff}
-    #error{position:absolute;inset:20% 18px auto;z-index:30;display:none;padding:16px;border-radius:14px;background:#fff;color:#222;border:1px solid #aaa;line-height:1.6;font-size:14px}
+
+    /* 4段目：最下部メニュー */
+    #bottomMenu{
+      position:relative;
+      z-index:30;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      background:rgba(248,246,241,.97);
+      border-top:1px solid rgba(50,45,38,.22);
+      box-shadow:0 -3px 12px rgba(0,0,0,.08);
+    }
+    .menu-btn{
+      min-height:48px;
+      border:1px solid #c9c1b5;
+      border-radius:12px;
+      background:#fff;
+      color:#332e27;
+      font-size:12px;
+      font-weight:800;
+    }
   </style>
 </head>
 <body>
   <main id="app">
-    <div id="scene" aria-label="3D家作りフィールド"></div>
 
-    <header class="topbar">
-      <button class="icon-btn" id="backBtn" aria-label="戻る">←</button>
-      <div class="status">
-        <strong id="cellStatus">マスをタップしてください</strong>
-        <small>12 × 12 GRID / X・Y・Z座標で管理</small>
+    <!-- 1段目：マス・座標・個数など -->
+    <section id="topSection">
+      <header class="topbar">
+        <button class="icon-btn" id="backBtn" aria-label="戻る">←</button>
+        <div class="status">
+          <strong id="cellStatus">マスをタップしてください</strong>
+          <small>12 × 12 GRID / X・Y・Z座標で管理</small>
+        </div>
+        <div class="status count" id="objectCount">0 個</div>
+      </header>
+    </section>
+
+    <!-- 2段目：建築マス -->
+    <section id="buildSection" aria-label="建築マス">
+      <div id="scene" aria-label="3D家作りフィールド"></div>
+      <div id="error">3D表示を読み込めませんでした。通信状態を確認して、ページを再読み込みしてください。</div>
+    </section>
+
+    <!-- 3段目：その画面専用の下部UI -->
+    <section id="lowerSection" aria-label="建築操作">
+      <div class="camera-controls" aria-label="視点操作">
+        <button id="viewTop" class="view-active">見下ろし</button>
+        <button id="view3d">3D</button>
+        <button id="rotateLeft" class="icon-only" aria-label="左へ回転" disabled>↶</button>
+        <button id="rotateRight" class="icon-only" aria-label="右へ回転" disabled>↷</button>
       </div>
-      <div class="status count" id="objectCount">0 個</div>
-    </header>
 
-    <div class="camera-controls" aria-label="視点操作">
-      <button id="viewTop" class="view-active">見下ろし</button>
-      <button id="view3d">3D</button>
-      <button id="rotateLeft" class="icon-only" aria-label="左へ回転" disabled>↶</button>
-      <button id="rotateRight" class="icon-only" aria-label="右へ回転" disabled>↷</button>
-    </div>
+      <div class="toolbar-wrap">
+        <div class="hint">1本指で配置 / 2本指で拡大・縮小</div>
+        <nav class="toolbar" aria-label="建築ツール">
+          <button class="tool active" data-tool="block"><span>■</span>ブロック</button>
+          <button class="tool" data-tool="delete"><span>×</span>削除</button>
+        </nav>
+      </div>
+    </section>
 
-    <div class="toolbar-wrap">
-      <div class="hint">1本指で配置 / 2本指で拡大・縮小</div>
-      <nav class="toolbar" aria-label="建築ツール">
-        <button class="tool active" data-tool="block"><span>■</span>ブロック</button>
-        <button class="tool" data-tool="delete"><span>×</span>削除</button>
-      </nav>
-    </div>
+    <!-- 4段目：ゲーム共通メニュー -->
+    <nav id="bottomMenu" aria-label="ゲームメニュー">
+      <button class="menu-btn" type="button">ステータス</button>
+      <button class="menu-btn" type="button">スキル</button>
+      <button class="menu-btn" type="button">メニュー</button>
+    </nav>
 
-    <div id="error">3D表示を読み込めませんでした。通信状態を確認して、ページを再読み込みしてください。</div>
   </main>
 
-  <script type="module" src="./js/housebuilding_3d.js"></script>
+  <script type="module" src="./js/housebuilding_3d.js?v=20260911-1"></script>
 </body>
 </html>
