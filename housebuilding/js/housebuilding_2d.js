@@ -8,6 +8,8 @@ const count = document.getElementById('count');
 const inventoryGrid = document.getElementById('inventoryGrid');
 const selectedItemLabel = document.getElementById('selectedItemLabel');
 const deleteTool = document.getElementById('deleteTool');
+const topMenuToggle = document.getElementById('topMenuToggle');
+const topQuickMenu = document.getElementById('topQuickMenu');
 
 const items = Array.isArray(window.HOUSEBUILDING_2D_ITEMS)
   ? window.HOUSEBUILDING_2D_ITEMS
@@ -166,7 +168,7 @@ function actOnCell(cell) {
 }
 
 function updateCount() {
-  count.textContent = `${placements.size} 個`;
+  if (count) count.textContent = `${placements.size} 個`;
 }
 
 function createInventory() {
@@ -245,6 +247,46 @@ function bindDeleteTool() {
   });
 }
 
+function closeTopQuickMenu() {
+  if (!topQuickMenu || !topMenuToggle) return;
+  topQuickMenu.hidden = true;
+  topMenuToggle.setAttribute('aria-expanded', 'false');
+}
+
+function bindTopQuickMenu() {
+  if (!topQuickMenu || !topMenuToggle) return;
+
+  topMenuToggle.addEventListener('click', event => {
+    event.stopPropagation();
+    const willOpen = topQuickMenu.hidden;
+    topQuickMenu.hidden = !willOpen;
+    topMenuToggle.setAttribute('aria-expanded', String(willOpen));
+  });
+
+  topQuickMenu.addEventListener('click', event => event.stopPropagation());
+
+  document.getElementById('quickTop')?.addEventListener('click', () => {
+    location.href = './housebuilding_index.html';
+  });
+
+  document.getElementById('quickLog')?.addEventListener('click', () => {
+    status.textContent = 'LOG';
+    closeTopQuickMenu();
+  });
+
+  document.getElementById('quickRoad')?.addEventListener('click', () => {
+    status.textContent = 'ROAD';
+    closeTopQuickMenu();
+  });
+
+  document.getElementById('quickSave')?.addEventListener('click', () => {
+    status.textContent = 'SAVE';
+    closeTopQuickMenu();
+  });
+
+  document.addEventListener('click', closeTopQuickMenu);
+}
+
 function bindNavigation() {
   document.getElementById('back').addEventListener('click', () => {
     location.href = './housebuilding_選択.html';
@@ -255,5 +297,6 @@ createGrid();
 createInventory();
 bindGridEvents();
 bindDeleteTool();
+bindTopQuickMenu();
 bindNavigation();
 updateCount();
