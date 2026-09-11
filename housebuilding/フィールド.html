@@ -7,38 +7,26 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - フィールド</title>
-  <link rel="stylesheet" href="./css/フィールド_レイアウト.css?v=20260911-layout2" />
+  <link rel="stylesheet" href="./css/フィールド_レイアウト_v2.css?v=20260911-layout3" />
 </head>
 <body>
   <main id="fieldApp">
-    <header id="fieldHud" aria-label="状態表示"></header>
+    <!-- 上部div：メニュー -->
+    <header id="fieldTop" aria-label="メニュー"></header>
 
-    <section id="fieldView" aria-label="フィールド"></section>
+    <!-- 真ん中：6分割の考え方で、4/6探索 + 2/6管理 -->
+    <section id="fieldMiddle">
+      <!-- 4/6：探索マップ。戻るボタンもこの上に重ねる -->
+      <section id="fieldView" aria-label="探索マップ"></section>
 
-    <section id="fieldPanel" aria-label="装備・持ち物・スキル">
-      <section class="panelBox" aria-label="装備">
-        <div class="panelTitle">装備</div>
-        <div id="equipList" class="equipList"></div>
-      </section>
-
-      <section class="panelBox" aria-label="持ち物">
-        <div class="panelTitle">持ち物</div>
-        <div id="inventoryGrid"></div>
-      </section>
-
-      <section class="panelBox" aria-label="スキル">
-        <div class="panelTitle">スキル</div>
-        <div id="skillList" class="skillList"></div>
-      </section>
+      <!-- 2/6：HP・満腹・インベントリ・装備・スキル -->
+      <section id="fieldPanel" aria-label="管理エリア"></section>
     </section>
 
-    <nav id="fieldControls" aria-label="フィールドメニュー">
-      <button id="fieldLog" type="button">LOG</button>
-      <button id="fieldSave" type="button">SAVE</button>
-      <button id="fieldMenu" type="button">MENU</button>
-    </nav>
+    <!-- 下部div -->
+    <footer id="fieldBottom" aria-label="探索状態"></footer>
   </main>
 
-  <script src="./js/フィールド.js?v=20260911-layout2"></script>
+  <script src="./js/フィールド_v2.js?v=20260911-layout3"></script>
 </body>
 </html>
