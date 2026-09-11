@@ -7,16 +7,16 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - フィールド</title>
-  <link rel="stylesheet" href="./css/フィールド_レイアウト_v2.css?v=20260911-layout4" />
+  <link rel="stylesheet" href="./css/フィールド_ダンジョン試作.css?v=20260911-dungeon1" />
 </head>
 <body>
   <main id="fieldApp">
     <!-- 上部div：メニュー -->
     <header id="fieldTop" aria-label="メニュー"></header>
 
-    <!-- 真ん中：8分割の考え方で、5/8探索 + 3/8管理 -->
+    <!-- 真ん中：5/8探索 + 3/8管理 -->
     <section id="fieldMiddle">
-      <!-- 5/8：探索マップ。戻るボタンもこの上に重ねる -->
+      <!-- 5/8：JSで縦型オート探索ダンジョンを生成 -->
       <section id="fieldView" aria-label="探索マップ"></section>
 
       <!-- 3/8：HP・満腹・インベントリ・装備・スキル -->
@@ -27,6 +27,6 @@
     <footer id="fieldBottom" aria-label="探索状態"></footer>
   </main>
 
-  <script src="./js/フィールド_v2.js?v=20260911-layout4"></script>
+  <script src="./js/フィールド_ダンジョン試作.js?v=20260911-dungeon1"></script>
 </body>
 </html>
