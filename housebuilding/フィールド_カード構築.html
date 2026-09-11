@@ -10,8 +10,18 @@
   <link rel="stylesheet" href="./css/フィールド_棒人間アクション.css?v=20260911-stick1" />
   <link rel="stylesheet" href="./css/フィールド_カードRPG_v4.css?v=20260912-card4" />
   <style>
-    .floorLane{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:5px 7px}
-    .mapCard{inset:5px 4px;border-radius:7px}
+    .floorLane{
+      grid-template-columns:repeat(7,minmax(0,12%));
+      column-gap:2px;
+      justify-content:center;
+      align-items:center;
+      padding:5px 6px;
+    }
+    .cardSlot{
+      height:84%;
+      align-self:center;
+    }
+    .mapCard{inset:0;border-radius:7px}
     .cardFace{border-radius:7px}
     .sceneName{font-size:5.2px;bottom:3px}
     .eventBadge{font-size:5.2px;padding:2px 4px}
