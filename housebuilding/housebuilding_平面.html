@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>House Building - 2D</title>
-  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-stock2" />
+  <link rel="stylesheet" href="./css/housebuilding_平面.css?v=20260911-mapedge1" />
 </head>
 <body>
   <main id="app">
@@ -34,7 +34,10 @@
     </section>
 
     <section id="fieldWrap" aria-label="2D家作りフィールド">
-      <div id="field"><div class="ground"></div></div>
+      <div id="fieldLayout">
+        <div id="field"><div class="ground"></div></div>
+        <button id="toRightMap" type="button" aria-label="右のマップへ移動">▶</button>
+      </div>
     </section>
 
     <section id="inventoryWrap" aria-label="インベントリ">
@@ -83,6 +86,6 @@
 
   <script src="./js/housebuilding_平面_アイテム.js?v=20260911-stock2"></script>
   <script src="./js/housebuilding_平面_購入.js?v=20260911-stock2"></script>
-  <script src="./js/housebuilding_2d_stock.js"></script>
+  <script src="./js/housebuilding_2d_stock.js?v=20260911-mapedge1"></script>
 </body>
 </html>
