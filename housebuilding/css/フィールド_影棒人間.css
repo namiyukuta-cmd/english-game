@@ -1,0 +1,91 @@
+/* 影棒人間版。
+   既存のモーションはそのまま使い、見た目だけ黒いシルエットへ変更する。 */
+
+/* 服・装飾を消す */
+.actor .cape,
+.actor .hood,
+.actor .belt{
+  display:none!important;
+}
+
+/* 主人公・敵とも真っ黒 */
+.actor .head{
+  background:#050505!important;
+  border-color:#050505!important;
+}
+.actor .torso,
+.actor .segment{
+  background:#050505!important;
+}
+
+/* 輪郭を少しだけ締める */
+.actor{
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.24));
+}
+
+/* 通常時は武器を完全に隠す */
+.actor .sword,
+.actor .bow{
+  opacity:0!important;
+}
+
+/* swordPose は構え状態として内部的に使っていても、見た目には剣を出さない */
+.actor.swordPose .sword,
+.actor.dashPose .sword{
+  opacity:0!important;
+}
+
+/* 弓攻撃中だけ弓を表示 */
+.actor.bowPose .bow{
+  display:block!important;
+  opacity:1!important;
+  border-color:#0a0a0a!important;
+}
+.actor.bowPose .bow::after{
+  background:#222!important;
+}
+
+/* 斬撃モーションの瞬間だけ剣を表示 */
+.actor.slashPose .sword{
+  display:block!important;
+  opacity:1!important;
+  background:linear-gradient(90deg,#1a1a1a,#eeeeea,#111)!important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55),0 0 6px rgba(255,255,255,.22)!important;
+}
+.actor.slashPose .sword::after{
+  background:#080808!important;
+}
+
+/* 敵も影人間。常時武器は持たせない */
+.enemyActor .head{
+  background:#050505!important;
+  border-color:#050505!important;
+}
+.enemyActor .torso,
+.enemyActor .segment{
+  background:#050505!important;
+}
+.enemyActor .sword,
+.enemyActor .bow{
+  display:none!important;
+  opacity:0!important;
+}
+
+/* 残像も黒い影として残す */
+.actorGhost{
+  opacity:.16!important;
+  filter:none!important;
+}
+.actorGhost .head,
+.actorGhost .torso,
+.actorGhost .segment{
+  background:#050505!important;
+  border-color:#050505!important;
+}
+.actorGhost .sword,
+.actorGhost .bow,
+.actorGhost .cape,
+.actorGhost .hood,
+.actorGhost .belt{
+  display:none!important;
+}
