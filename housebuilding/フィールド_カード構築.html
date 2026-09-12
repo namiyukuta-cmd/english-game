@@ -93,23 +93,35 @@
 
     .protagonistCardSlot{
       display:block;
-      background:radial-gradient(circle at 50% 28%,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(0,0,0,.12) 100%);
+      aspect-ratio:595 / 842;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:0 5px 14px rgba(0,0,0,.24);
+    }
+
+    .protagonistArt,
+    .protagonistFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:contain;
     }
 
     .protagonistArt{
-      position:absolute;
-      inset:8px 8px 30px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:8px;
-      color:rgba(242,235,221,.72);
-      font-size:10px;
-      font-weight:900;
+      z-index:1;
+    }
+
+    .protagonistFrame{
+      z-index:2;
+      pointer-events:none;
     }
 
     .protagonistFood{
       position:absolute;
+      z-index:3;
       left:8px;
       bottom:7px;
       font-size:18px;
@@ -119,6 +131,7 @@
 
     .protagonistHp{
       position:absolute;
+      z-index:3;
       right:8px;
       bottom:6px;
       display:flex;
@@ -297,7 +310,8 @@
 
           <div class="fieldCardDock" aria-label="主人公カードと山札">
             <div class="fieldCardDockSlot protagonistCardSlot" aria-label="主人公 HP 95/100 食 74">
-              <div class="protagonistArt">主人公</div>
+              <img class="protagonistArt" src="../assets/housebuilding/adventurer_595x842.jpg" alt="" />
+              <img class="protagonistFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
               <div class="protagonistFood" aria-label="食 74">🍖</div>
               <div class="protagonistHp" aria-label="HP 95/100">
                 <span class="protagonistHpCurrent">95</span>
