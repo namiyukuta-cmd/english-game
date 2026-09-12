@@ -70,6 +70,77 @@
       background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
       color:rgba(242,235,221,.72);
     }
+
+    /* 3/8側：所持品を横一列で重ねる手札にする。扇状にはしない。 */
+    .handLine{
+      min-height:0;
+      display:grid;
+      grid-template-columns:48px minmax(0,1fr);
+      gap:5px;
+      align-items:stretch;
+    }
+    #inventoryGrid.handGrid{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      display:flex !important;
+      align-items:flex-end;
+      justify-content:flex-start;
+      gap:0 !important;
+      padding:3px 6px 2px 8px;
+      overflow:visible;
+    }
+    .handCard{
+      position:relative;
+      flex:0 0 68px;
+      height:100%;
+      min-height:0;
+      max-height:122px;
+      margin-left:-29px;
+      border:1px solid #aaa39a;
+      border-radius:8px;
+      background:linear-gradient(#fff,#eeeae2);
+      box-shadow:0 3px 7px rgba(0,0,0,.16);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding:8px 4px 5px;
+      overflow:hidden;
+      transform:none;
+      transition:transform .22s ease,box-shadow .22s ease,opacity .18s ease;
+    }
+    .handCard:first-child{margin-left:0}
+    .handCard:nth-child(1){z-index:1}
+    .handCard:nth-child(2){z-index:2}
+    .handCard:nth-child(3){z-index:3}
+    .handCard:nth-child(4){z-index:4}
+    .handCard:nth-child(5){z-index:5}
+    .handCard:nth-child(6){z-index:6}
+    .handCard:nth-child(7){z-index:7}
+    .handCard .handIcon{font-size:20px;line-height:1.05}
+    .handCard .handName{
+      width:100%;
+      margin-top:4px;
+      text-align:center;
+      font-size:7px;
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .handCard .handCount{
+      position:absolute;
+      right:5px;
+      bottom:3px;
+      font-size:8px;
+      font-weight:1000;
+    }
+    .handCard.using{
+      z-index:50;
+      transform:translateY(-34px) scale(1.08);
+      box-shadow:0 10px 20px rgba(0,0,0,.3);
+    }
   </style>
 </head>
 <body>
@@ -116,19 +187,20 @@
           <div class="hpWrap"><span class="hpText">HP 95/100</span><div class="hpBar"><div class="hpFill" style="width:95%"></div></div></div>
           <span class="foodValue">🍖 74</span>
         </div>
-        <div class="slotLine">
+
+        <div class="handLine">
           <div class="slotLabel">持ち物</div>
-          <div id="inventoryGrid" class="slotGrid">
-            <div class="itemCard"><span class="slotIcon">🌿</span><span class="slotName">薬草</span><span class="itemCount">2</span></div>
-            <div class="itemCard"><span class="slotIcon">🧴</span><span class="slotName">回復薬</span><span class="itemCount">1</span></div>
-            <div class="itemCard"><span class="slotIcon">🍞</span><span class="slotName">パン</span><span class="itemCount">2</span></div>
-            <div class="itemCard"><span class="slotIcon">🏹</span><span class="slotName">矢</span><span class="itemCount">7</span></div>
-            <div class="itemCard"><span class="slotIcon">🪢</span><span class="slotName">ロープ</span><span class="itemCount">1</span></div>
-            <div class="itemCard"><span class="slotIcon">🗝️</span><span class="slotName">鍵</span><span class="itemCount">1</span></div>
-            <div class="itemCard"><span class="slotIcon">🪓</span><span class="slotName">斧</span><span class="itemCount">1</span></div>
-            <div class="itemCard empty"></div>
+          <div id="inventoryGrid" class="handGrid" aria-label="所持品の手札">
+            <div class="handCard"><span class="handIcon">🌿</span><span class="handName">薬草</span><span class="handCount">2</span></div>
+            <div class="handCard"><span class="handIcon">🧴</span><span class="handName">回復薬</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🍞</span><span class="handName">パン</span><span class="handCount">2</span></div>
+            <div class="handCard"><span class="handIcon">🏹</span><span class="handName">矢</span><span class="handCount">7</span></div>
+            <div class="handCard"><span class="handIcon">🪢</span><span class="handName">ロープ</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🗝️</span><span class="handName">鍵</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🪓</span><span class="handName">斧</span><span class="handCount">1</span></div>
           </div>
         </div>
+
         <div class="slotLine">
           <div class="slotLabel">装備<br>スキル</div>
           <div id="abilityGrid" class="slotGrid">
