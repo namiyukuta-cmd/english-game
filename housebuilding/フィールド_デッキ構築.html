@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>House Building - フィールド</title>
+
+  <link rel="stylesheet" href="./css/フィールド_棒人間アクション.css?v=20260911-stick1" />
+
+  <style>
+    #fieldMiddle{
+      grid-template-rows:minmax(0,5.5fr) minmax(0,2.5fr);
+    }
+
+    .cardRpgView{
+      position:absolute;
+      inset:0;
+      padding:14px 0 0;
+      display:flex;
+      flex-direction:column;
+      background:radial-gradient(circle at 50% 35%,#32332f 0%,#1c1d1b 48%,#10110f 100%);
+    }
+
+    .dungeonScrollWindow{
+      flex:0 0 auto;
+      width:calc(100% - 64px);
+      height:118px;
+      margin:12px auto 0;
+      padding:5px;
+      border:1px solid rgba(255,255,255,.28);
+      border-radius:10px;
+      background:rgba(255,255,255,.018);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    .dungeonScrollWindow::-webkit-scrollbar{display:none}
+
+    .dungeonCardGrid{
+      display:grid;
+      grid-auto-flow:column;
+      grid-auto-columns:calc((100% - 16px)/5);
+      grid-template-rows:1fr;
+      gap:4px;
+      width:100%;
+      min-width:100%;
+      padding:0 0 8px;
+      background:transparent;
+    }
+
+    .dungeonCardGrid .cardSlot{
+      position:relative;
+      width:100%;
+      aspect-ratio:.64/1;
+      height:auto;
+      min-height:0;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:8px;
+      background:rgba(255,255,255,.025);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);
+    }
+
+    .fieldCardDock{
+      flex:1;
+      min-height:0;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      padding:8px 10px 4px;
+    }
+
+    .fieldCardDockSlot{
+      position:relative;
+      height:min(98%,208px);
+      aspect-ratio:.64/1;
+      border:2px solid rgba(255,255,255,.38);
+      border-radius:11px;
+      background:rgba(255,255,255,.05);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.22),0 5px 14px rgba(0,0,0,.24);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:rgba(242,235,221,.72);
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .protagonistCardSlot{
+      display:block;
+      aspect-ratio:595 / 842;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:0 5px 14px rgba(0,0,0,.24);
+    }
+
+    .protagonistArt,
+    .protagonistFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:contain;
+    }
+
+    .protagonistArt{
+      z-index:1;
+    }
+
+    .protagonistFrame{
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .protagonistFood{
+      position:absolute;
+      z-index:3;
+      left:8px;
+      bottom:7px;
+      font-size:18px;
+      line-height:1;
+      filter:grayscale(15%) brightness(.95);
+    }
+
+    .protagonistHp{
+      position:absolute;
+      z-index:3;
+      right:8px;
+      bottom:6px;
+      display:flex;
+      align-items:flex-end;
+      gap:1px;
+      color:#f3efe7;
+      text-shadow:0 1px 2px rgba(0,0,0,.45);
+      line-height:1;
+    }
+
+    .protagonistHpCurrent{
+      font-size:20px;
+      font-weight:1000;
+    }
+
+    .protagonistHpSlash,
+    .protagonistHpMax{
+      padding-bottom:1px;
+      font-size:9px;
+      font-weight:800;
+      opacity:.82;
+    }
+
+    .deckCardSlot{
+      position:relative;
+      overflow:visible;
+      perspective:800px;
+      background:transparent;
+      border:0;
+      box-shadow:none;
+    }
+
+    .deckBack,
+    .deckFront{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:2px solid rgba(255,255,255,.38);
+      border-radius:11px;
+      overflow:hidden;
+      backface-visibility:hidden;
+      transition:transform .42s ease;
+    }
+
+    .deckBack{
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
+      color:rgba(242,235,221,.76);
+      font-weight:900;
+      transform:rotateY(0deg);
+    }
+
+    .deckFront{
+      z-index:1;
+      background:#fff;
+      transform:rotateY(180deg);
+    }
+
+    .deckDungeonArt,
+    .deckDungeonFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .deckDungeonArt{
+      z-index:1;
+    }
+
+    .deckDungeonFrame{
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .deckCardSlot.is-open .deckBack{
+      transform:rotateY(-180deg);
+    }
+
+    .deckCardSlot.is-open .deckFront{
+      transform:rotateY(0deg);
+    }
+
+    .cardSlot.has-dungeon{
+      border:0;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultArt,
+    .cardSlot.has-dungeon .dungeonResultFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultArt{
+      z-index:1;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultFrame{
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .flyingDungeonCard{
+      position:fixed;
+      z-index:9999;
+      margin:0;
+      padding:0;
+      pointer-events:none;
+      overflow:hidden;
+      background:#fff;
+      transform-origin:center center;
+      transition:left .55s ease,top .55s ease,width .55s ease,height .55s ease;
+    }
+
+    .flyingDungeonCard img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .flyingDungeonCard .flyingArt{
+      z-index:1;
+    }
+
+    .flyingDungeonCard .flyingFrame{
+      z-index:2;
+    }
+
+    #fieldPanel{
+      grid-template-rows:minmax(0,1fr);
+      gap:0;
+      padding:5px 8px;
+    }
+
+    .handLine{
+      min-height:0;
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      align-items:stretch;
+    }
+
+    #inventoryGrid.handGrid{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      display:flex !important;
+      align-items:flex-end;
+      justify-content:flex-start;
+      gap:0 !important;
+      padding:3px 6px;
+      overflow:visible;
+    }
+
+    .handCard{
+      position:relative;
+      flex:0 0 74px;
+      height:100%;
+      min-height:0;
+      max-height:118px;
+      margin-left:-38px;
+      border:1px solid #aaa39a;
+      border-radius:8px;
+      background:linear-gradient(#fff,#eeeae2);
+      box-shadow:0 3px 7px rgba(0,0,0,.16);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding:7px 15px 4px 4px;
+      overflow:hidden;
+      transform:none;
+      transition:transform .22s ease,box-shadow .22s ease,opacity .18s ease;
+    }
+
+    .handCard:first-child{margin-left:0}
+    .handCard:nth-child(1){z-index:1}
+    .handCard:nth-child(2){z-index:2}
+    .handCard:nth-child(3){z-index:3}
+    .handCard:nth-child(4){z-index:4}
+    .handCard:nth-child(5){z-index:5}
+    .handCard:nth-child(6){z-index:6}
+    .handCard:nth-child(7){z-index:7}
+    .handCard:nth-child(8){z-index:8}
+    .handCard:nth-child(9){z-index:9}
+
+    .handCard .handIcon{
+      font-size:19px;
+      line-height:1.05;
+      margin-top:5px;
+    }
+
+    .handCard .handName{
+      position:absolute;
+      z-index:3;
+      top:7px;
+      right:3px;
+      bottom:7px;
+      margin:0;
+      writing-mode:vertical-rl;
+      text-orientation:upright;
+      font-size:9px;
+      font-weight:900;
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+    }
+
+    .handCard .handCount{
+      position:absolute;
+      z-index:4;
+      left:5px;
+      bottom:3px;
+      font-size:10px;
+      font-weight:1000;
+    }
+
+    .handCard .handRole{
+      position:absolute;
+      z-index:4;
+      left:3px;
+      top:3px;
+      padding:1px 3px;
+      border:1px solid #c7bda8;
+      border-radius:4px;
+      background:#eee7d8;
+      color:#665b49;
+      font-size:7px;
+      font-weight:1000;
+      line-height:1.2;
+    }
+
+    .handCard.equipmentCard{
+      border-color:#8f877b;
+      background:linear-gradient(#fffdf7,#e9e3d7);
+    }
+
+    .handCard.emptyToolCard{
+      border:1px solid #b5ada1;
+      background:linear-gradient(#f7f4ee,#e6e0d7);
+      box-shadow:0 3px 7px rgba(0,0,0,.12);
+      justify-content:center;
+      padding:0 8px;
+      color:#746d63;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .handCard.using{
+      z-index:50;
+      transform:translateY(-34px) scale(1.08);
+      box-shadow:0 10px 20px rgba(0,0,0,.3);
+    }
+  </style>
+</head>
+<body>
+  <main id="fieldApp">
+    <header id="fieldTop" aria-label="メニュー">
+      <div class="topMenuRow">
+        <strong class="topPlace">森・カード探索</strong>
+        <button class="topMenuButton" type="button">LOG</button>
+        <button class="topMenuButton" type="button">SAVE</button>
+        <button class="topMenuButton" type="button">MENU</button>
+      </div>
+    </header>
+
+    <section id="fieldMiddle">
+      <section id="fieldView" aria-label="カード構築">
+        <div class="cardRpgView">
+          <div class="dungeonScrollWindow" aria-label="ダンジョンカード一覧">
+            <div class="dungeonCardGrid">
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+            </div>
+          </div>
+
+          <div class="fieldCardDock" aria-label="主人公カードと山札">
+            <div class="fieldCardDockSlot protagonistCardSlot" aria-label="主人公 HP 95/100 食 74">
+              <img class="protagonistArt" src="../assets/housebuilding/adventurer_595x842.jpg" alt="" />
+              <img class="protagonistFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
+              <div class="protagonistFood" aria-label="食 74">🍖</div>
+              <div class="protagonistHp" aria-label="HP 95/100">
+                <span class="protagonistHpCurrent">95</span>
+                <span class="protagonistHpSlash">/</span>
+                <span class="protagonistHpMax">100</span>
+              </div>
+            </div>
+
+            <div class="fieldCardDockSlot deckCardSlot" id="dungeonDeck" aria-label="山札">
+              <div class="deckBack">山札</div>
+              <div class="deckFront">
+                <img class="deckDungeonArt" src="../assets/housebuilding/dungeon_01.PNG" alt="" />
+                <img class="deckDungeonFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="fieldPanel" aria-label="管理エリア">
+        <div class="handLine">
+          <div id="inventoryGrid" class="handGrid" aria-label="装備と道具の手札">
+            <div class="handCard equipmentCard" data-slot="melee"><span class="handRole">近接</span><span class="handIcon">🗡️</span><span class="handName">短剣</span></div>
+            <div class="handCard equipmentCard" data-slot="ranged"><span class="handRole">遠距離</span><span class="handIcon">🏹</span><span class="handName">弓</span><span class="handCount">7</span></div>
+            <div class="handCard"><span class="handIcon">🌿</span><span class="handName">薬草</span><span class="handCount">2</span></div>
+            <div class="handCard"><span class="handIcon">🧴</span><span class="handName">回復薬</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🍞</span><span class="handName">パン</span><span class="handCount">2</span></div>
+            <div class="handCard"><span class="handIcon">🪢</span><span class="handName">ロープ</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🗝️</span><span class="handName">鍵</span><span class="handCount">1</span></div>
+            <div class="handCard"><span class="handIcon">🪓</span><span class="handName">斧</span><span class="handCount">1</span></div>
+            <div class="handCard emptyToolCard" aria-label="空き道具枠">空き</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer id="fieldBottom" aria-label="探索状態">
+      <span>カード構築</span><span>矢 7</span><span>状態：正常</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const START_WAIT = 1500;
+      const OPEN_WAIT = 650;
+      const MOVE_TIME = 600;
+      const NEXT_WAIT = 700;
+      const SCROLL_WAIT = 450;
+
+      const deck = document.getElementById("dungeonDeck");
+      const scrollWindow = document.querySelector(".dungeonScrollWindow");
+      const slots = [...document.querySelectorAll(".dungeonCardGrid .cardSlot")];
+
+      const dungeonArt = "../assets/housebuilding/dungeon_01.PNG";
+      const cardFrame = "../assets/housebuilding/card_frame.PNG";
+
+      let exploring = false;
+
+      const wait = ms => new Promise(resolve => {
+        setTimeout(resolve, ms);
+      });
+
+      function getNextEmptySlot(){
+        return slots.find(slot => !slot.classList.contains("has-dungeon"));
+      }
+
+      function openDeck(){
+        deck.classList.add("is-open");
+      }
+
+      function closeDeck(){
+        deck.classList.remove("is-open");
+      }
+
+      function putDungeonCard(slot){
+        slot.classList.add("has-dungeon");
+        slot.innerHTML = `
+          <img class="dungeonResultArt" src="${dungeonArt}" alt="">
+          <img class="dungeonResultFrame" src="${cardFrame}" alt="">
+        `;
+      }
+
+      async function ensureSlotVisible(slot){
+        const slotLeft = slot.offsetLeft;
+        const slotRight = slotLeft + slot.offsetWidth;
+        const visibleLeft = scrollWindow.scrollLeft;
+        const visibleRight = visibleLeft + scrollWindow.clientWidth;
+
+        if (slotRight <= visibleRight && slotLeft >= visibleLeft){
+          return;
+        }
+
+        let nextLeft = visibleLeft;
+
+        if (slotRight > visibleRight){
+          nextLeft = slotRight - scrollWindow.clientWidth + 5;
+        } else if (slotLeft < visibleLeft){
+          nextLeft = slotLeft - 5;
+        }
+
+        scrollWindow.scrollTo({
+          left:Math.max(0,nextLeft),
+          behavior:"smooth"
+        });
+
+        await wait(SCROLL_WAIT);
+      }
+
+      async function flyDeckCardToSlot(slot){
+        await ensureSlotVisible(slot);
+
+        const deckRect = deck.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+
+        const flying = document.createElement("div");
+        flying.className = "flyingDungeonCard";
+
+        flying.style.left = `${deckRect.left}px`;
+        flying.style.top = `${deckRect.top}px`;
+        flying.style.width = `${deckRect.width}px`;
+        flying.style.height = `${deckRect.height}px`;
+
+        flying.innerHTML = `
+          <img class="flyingArt" src="${dungeonArt}" alt="">
+          <img class="flyingFrame" src="${cardFrame}" alt="">
+        `;
+
+        document.body.appendChild(flying);
+
+        /* 表のカードが山札から離れた時点で、次の山札は裏面に戻す */
+        closeDeck();
+
+        await new Promise(requestAnimationFrame);
+
+        flying.style.left = `${slotRect.left}px`;
+        flying.style.top = `${slotRect.top}px`;
+        flying.style.width = `${slotRect.width}px`;
+        flying.style.height = `${slotRect.height}px`;
+
+        await wait(MOVE_TIME);
+
+        putDungeonCard(slot);
+        flying.remove();
+      }
+
+      async function drawDungeonCard(){
+        const targetSlot = getNextEmptySlot();
+
+        if (!targetSlot){
+          return false;
+        }
+
+        openDeck();
+        await wait(OPEN_WAIT);
+        await flyDeckCardToSlot(targetSlot);
+        await wait(NEXT_WAIT);
+
+        return true;
+      }
+
+      async function startAutoExplore(){
+        if (exploring){
+          return;
+        }
+
+        exploring = true;
+        closeDeck();
+        scrollWindow.scrollLeft = 0;
+
+        await wait(START_WAIT);
+
+        while (getNextEmptySlot()){
+          const continued = await drawDungeonCard();
+
+          if (!continued){
+            break;
+          }
+        }
+
+        exploring = false;
+      }
+
+      window.addEventListener("load", () => {
+        startAutoExplore();
+      });
+    })();
+  </script>
+</body>
+</html>
