@@ -10,50 +10,116 @@
   <link rel="stylesheet" href="./css/フィールド_棒人間アクション.css?v=20260911-stick1" />
   <link rel="stylesheet" href="./css/フィールド_カードRPG_v4.css?v=20260912-card4" />
   <style>
+    .cardRpgView{
+      padding:18px 0 0;
+    }
     .cardDungeonBoard{
-      grid-template-rows:repeat(3,27%);
-      row-gap:2px;
-      align-content:center;
-      padding:10px 16px;
+      flex:1;
+      grid-template-rows:repeat(3,24%);
+      row-gap:3px;
+      align-content:start;
+      padding:6px 30px 46px;
     }
     .floorLane{
-      grid-template-columns:repeat(7,minmax(0,11.5%));
-      column-gap:1px;
+      grid-template-columns:repeat(7,minmax(0,1fr));
+      column-gap:2px;
       justify-content:center;
       align-items:stretch;
-      padding:2px 4px;
+      padding:0;
       border:0;
       border-radius:0;
       background:transparent;
     }
     .floorLane::before{display:none}
+    .floorLabel{top:1px;left:-22px}
+    .floorLane.reverse .floorLabel{left:auto;right:-22px}
     .cardSlot{
       height:100%;
       align-self:stretch;
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:7px;
+      background:rgba(255,255,255,.025);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);
     }
-    .mapCard{inset:0;border-radius:7px}
-    .cardFace{border-radius:7px}
-    .sceneName{font-size:5.2px;bottom:3px}
-    .eventBadge{font-size:5.2px;padding:2px 4px}
-    .eventNeed{font-size:5px;left:3px;right:3px;padding:2px 1px}
-    .threatBadge{font-size:5px;padding:2px 4px}
-    .verticalLadder.right{left:85%;top:34.2%}
-    .verticalLadder.left{left:15%;top:61.2%}
+    .verticalLadder.right{left:calc(100% - 20px);top:24.5%}
+    .verticalLadder.left{left:20px;top:49.5%}
+    .cardRpgHint{
+      margin-top:auto;
+      padding-bottom:3px;
+    }
   </style>
 </head>
 <body>
   <main id="fieldApp">
-    <header id="fieldTop" aria-label="メニュー"></header>
+    <header id="fieldTop" aria-label="メニュー">
+      <div class="topMenuRow">
+        <strong class="topPlace">森・カード探索</strong>
+        <button class="topMenuButton" type="button">LOG</button>
+        <button class="topMenuButton" type="button">SAVE</button>
+        <button class="topMenuButton" type="button">MENU</button>
+      </div>
+    </header>
 
     <section id="fieldMiddle">
-      <section id="fieldView" aria-label="探索マップ"></section>
-      <section id="fieldPanel" aria-label="管理エリア"></section>
+      <section id="fieldView" aria-label="カード収納マップ">
+        <a class="fieldEdge" href="./フィールド_店エリア_v3.html" aria-label="店エリアへ戻る">◀</a>
+        <div class="cardRpgView">
+          <div class="cardDungeonBoard">
+            <div class="floorLane">
+              <span class="floorLabel">上層 →</span>
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+            </div>
+            <div class="floorLane reverse">
+              <span class="floorLabel">地下1階 ←</span>
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+            </div>
+            <div class="floorLane">
+              <span class="floorLabel">地下2階 →</span>
+              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
+            </div>
+            <div class="verticalLadder right" aria-hidden="true"></div>
+            <div class="verticalLadder left" aria-hidden="true"></div>
+          </div>
+          <div class="cardRpgHint">カード収納枠 7 × 3</div>
+        </div>
+      </section>
+
+      <section id="fieldPanel" aria-label="管理エリア">
+        <div class="panelStatus">
+          <div class="hpWrap"><span class="hpText">HP 95/100</span><div class="hpBar"><div class="hpFill" style="width:95%"></div></div></div>
+          <span class="foodValue">🍖 74</span>
+        </div>
+        <div class="slotLine">
+          <div class="slotLabel">持ち物</div>
+          <div id="inventoryGrid" class="slotGrid">
+            <div class="itemCard"><span class="slotIcon">🌿</span><span class="slotName">薬草</span><span class="itemCount">2</span></div>
+            <div class="itemCard"><span class="slotIcon">🧴</span><span class="slotName">回復薬</span><span class="itemCount">1</span></div>
+            <div class="itemCard"><span class="slotIcon">🍞</span><span class="slotName">パン</span><span class="itemCount">2</span></div>
+            <div class="itemCard"><span class="slotIcon">🏹</span><span class="slotName">矢</span><span class="itemCount">7</span></div>
+            <div class="itemCard"><span class="slotIcon">🪢</span><span class="slotName">ロープ</span><span class="itemCount">1</span></div>
+            <div class="itemCard"><span class="slotIcon">🗝️</span><span class="slotName">鍵</span><span class="itemCount">1</span></div>
+            <div class="itemCard"><span class="slotIcon">🪓</span><span class="slotName">斧</span><span class="itemCount">1</span></div>
+            <div class="itemCard empty"></div>
+          </div>
+        </div>
+        <div class="slotLine">
+          <div class="slotLabel">装備<br>スキル</div>
+          <div id="abilityGrid" class="slotGrid">
+            <div class="squareSlot skillSlot"><span class="slotIcon">🗡️</span><span class="slotName">短剣</span></div>
+            <div class="squareSlot skillSlot"><span class="slotIcon">🏹</span><span class="slotName">弓</span></div>
+            <div class="squareSlot skillSlot"><span class="slotIcon">🛡️</span><span class="slotName">革鎧</span></div>
+            <div class="squareSlot skillSlot"><span class="slotIcon">＋</span><span class="slotName">応急処置</span></div>
+            <div class="squareSlot skillSlot"><span class="slotIcon">🌱</span><span class="slotName">採取</span></div>
+            <div class="squareSlot skillSlot"><span class="slotIcon">!</span><span class="slotName">危険察知</span></div>
+            <div class="squareSlot skillSlot empty"></div>
+          </div>
+        </div>
+      </section>
     </section>
 
-    <footer id="fieldBottom" aria-label="探索状態"></footer>
+    <footer id="fieldBottom" aria-label="探索状態">
+      <span>カード構築</span><span>矢 7</span><span>状態：正常</span>
+    </footer>
   </main>
-
-  <script src="./js/フィールド_カードRPG_v4.js?v=20260912-card4"></script>
-  <script src="./js/フィールド_自動回復_v1.js?v=20260912-heal1"></script>
 </body>
 </html>
