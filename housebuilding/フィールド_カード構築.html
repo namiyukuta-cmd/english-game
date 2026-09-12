@@ -38,6 +38,7 @@
       overflow-y:hidden;
       -webkit-overflow-scrolling:touch;
       scrollbar-width:none;
+      scroll-behavior:smooth;
     }
     .dungeonScrollWindow::-webkit-scrollbar{display:none}
 
@@ -59,10 +60,120 @@
       aspect-ratio:.64/1;
       height:auto;
       min-height:0;
-      border:1px solid rgba(255,255,255,.25);
+      perspective:600px;
+    }
+
+    .pathCardInner{
+      position:absolute;
+      inset:0;
+      transform-style:preserve-3d;
+      transition:transform .38s ease;
+    }
+
+    .cardSlot.revealed .pathCardInner{
+      transform:rotateY(180deg);
+    }
+
+    .pathBack,
+    .pathFront{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.3);
       border-radius:8px;
-      background:rgba(255,255,255,.025);
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);
+      backface-visibility:hidden;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);
+    }
+
+    .pathBack{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
+      color:rgba(242,235,221,.45);
+      font-size:8px;
+      font-weight:900;
+    }
+
+    .pathFront{
+      transform:rotateY(180deg);
+      background:#111;
+    }
+
+    .pathArt,
+    .pathFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .pathArt{
+      z-index:1;
+      object-fit:cover;
+      object-position:center center;
+    }
+
+    .pathFrame{
+      z-index:3;
+      object-fit:contain;
+      pointer-events:none;
+    }
+
+    .pathLabel{
+      position:absolute;
+      z-index:2;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:5px;
+      text-align:center;
+      font-size:9px;
+      font-weight:1000;
+      letter-spacing:.04em;
+      text-shadow:0 1px 2px rgba(0,0,0,.65);
+    }
+
+    .pathFront.trapCard{
+      background:radial-gradient(circle at 50% 40%,#5a4430 0%,#2b2119 52%,#15110e 100%);
+      color:#f2dfc5;
+    }
+
+    .pathFront.itemCard{
+      background:radial-gradient(circle at 50% 40%,#8a7449 0%,#493d27 55%,#211c13 100%);
+      color:#fff1b8;
+    }
+
+    .cardSlot.current::after{
+      content:"";
+      position:absolute;
+      z-index:5;
+      inset:-2px;
+      border:2px solid rgba(255,255,255,.9);
+      border-radius:9px;
+      pointer-events:none;
+    }
+
+    .cardSlot.targetMonster::after{
+      content:"";
+      position:absolute;
+      z-index:5;
+      inset:-2px;
+      border:2px solid rgba(255,190,120,.95);
+      border-radius:9px;
+      pointer-events:none;
+    }
+
+    .cardSlot.targetTrap::after{
+      content:"";
+      position:absolute;
+      z-index:5;
+      inset:-2px;
+      border:2px solid rgba(255,220,145,.95);
+      border-radius:9px;
+      pointer-events:none;
     }
 
     .fieldCardDock{
@@ -70,7 +181,7 @@
       min-height:0;
       display:flex;
       align-items:flex-end;
-      justify-content:space-between;
+      justify-content:flex-start;
       padding:8px 10px 4px;
     }
 
@@ -110,14 +221,8 @@
       object-fit:contain;
     }
 
-    .protagonistArt{
-      z-index:1;
-    }
-
-    .protagonistFrame{
-      z-index:2;
-      pointer-events:none;
-    }
+    .protagonistArt{z-index:1}
+    .protagonistFrame{z-index:2;pointer-events:none}
 
     .protagonistFood{
       position:absolute;
@@ -153,123 +258,6 @@
       font-size:9px;
       font-weight:800;
       opacity:.82;
-    }
-
-    .deckCardSlot{
-      position:relative;
-      overflow:visible;
-      perspective:800px;
-      background:transparent;
-      border:0;
-      box-shadow:none;
-    }
-
-    .deckBack,
-    .deckFront{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      border:2px solid rgba(255,255,255,.38);
-      border-radius:11px;
-      overflow:hidden;
-      backface-visibility:hidden;
-      transition:transform .42s ease;
-    }
-
-    .deckBack{
-      z-index:2;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
-      color:rgba(242,235,221,.76);
-      font-weight:900;
-      transform:rotateY(0deg);
-    }
-
-    .deckFront{
-      z-index:1;
-      background:#fff;
-      transform:rotateY(180deg);
-    }
-
-    .deckDungeonArt,
-    .deckDungeonFrame{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .deckDungeonArt{
-      z-index:1;
-    }
-
-    .deckDungeonFrame{
-      z-index:2;
-      pointer-events:none;
-    }
-
-    .deckCardSlot.is-open .deckBack{
-      transform:rotateY(-180deg);
-    }
-
-    .deckCardSlot.is-open .deckFront{
-      transform:rotateY(0deg);
-    }
-
-    .cardSlot.has-dungeon{
-      border:0;
-      overflow:hidden;
-      background:#fff;
-    }
-
-    .cardSlot.has-dungeon .dungeonResultArt,
-    .cardSlot.has-dungeon .dungeonResultFrame{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .cardSlot.has-dungeon .dungeonResultArt{
-      z-index:1;
-    }
-
-    .cardSlot.has-dungeon .dungeonResultFrame{
-      z-index:2;
-      pointer-events:none;
-    }
-
-    .flyingDungeonCard{
-      position:fixed;
-      z-index:9999;
-      margin:0;
-      padding:0;
-      pointer-events:none;
-      overflow:hidden;
-      background:#fff;
-      transform-origin:center center;
-      transition:left .55s ease,top .55s ease,width .55s ease,height .55s ease;
-    }
-
-    .flyingDungeonCard img{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .flyingDungeonCard .flyingArt{
-      z-index:1;
-    }
-
-    .flyingDungeonCard .flyingFrame{
-      z-index:2;
     }
 
     #fieldPanel{
@@ -410,17 +398,13 @@
     </header>
 
     <section id="fieldMiddle">
-      <section id="fieldView" aria-label="カード構築">
+      <section id="fieldView" aria-label="カード探索路">
         <div class="cardRpgView">
-          <div class="dungeonScrollWindow" aria-label="ダンジョンカード一覧">
-            <div class="dungeonCardGrid">
-              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
-              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
-              <div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div><div class="cardSlot"></div>
-            </div>
+          <div class="dungeonScrollWindow" aria-label="横スクロールする探索路">
+            <div class="dungeonCardGrid" id="dungeonPath"></div>
           </div>
 
-          <div class="fieldCardDock" aria-label="主人公カードと山札">
+          <div class="fieldCardDock" aria-label="主人公カード">
             <div class="fieldCardDockSlot protagonistCardSlot" aria-label="主人公 HP 95/100 食 74">
               <img class="protagonistArt" src="../assets/housebuilding/adventurer_595x842.jpg" alt="" />
               <img class="protagonistFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
@@ -429,14 +413,6 @@
                 <span class="protagonistHpCurrent">95</span>
                 <span class="protagonistHpSlash">/</span>
                 <span class="protagonistHpMax">100</span>
-              </div>
-            </div>
-
-            <div class="fieldCardDockSlot deckCardSlot" id="dungeonDeck" aria-label="山札">
-              <div class="deckBack">山札</div>
-              <div class="deckFront">
-                <img class="deckDungeonArt" src="../assets/housebuilding/dungeon_01.PNG" alt="" />
-                <img class="deckDungeonFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
               </div>
             </div>
           </div>
@@ -461,154 +437,310 @@
     </section>
 
     <footer id="fieldBottom" aria-label="探索状態">
-      <span>カード構築</span><span>矢 7</span><span>状態：正常</span>
+      <span>カード探索</span><span id="lightStatus">灯り：ランプ</span><span id="exploreStatus">状態：探索中</span>
     </footer>
   </main>
 
   <script>
     (() => {
-      const START_WAIT = 1500;
-      const OPEN_WAIT = 650;
-      const MOVE_TIME = 600;
-      const NEXT_WAIT = 700;
-      const SCROLL_WAIT = 450;
-
-      const deck = document.getElementById("dungeonDeck");
-      const scrollWindow = document.querySelector(".dungeonScrollWindow");
-      const slots = [...document.querySelectorAll(".dungeonCardGrid .cardSlot")];
+      const PATH_LENGTH = 18;
+      const STEP_WAIT = 1100;
+      const SCROLL_WAIT = 420;
+      const HAS_LAMP_AT_START = true;
 
       const dungeonArt = "../assets/housebuilding/dungeon_01.PNG";
+      const goblinArt = "../assets/housebuilding/goblin_595x842.jpg";
       const cardFrame = "../assets/housebuilding/card_frame.PNG";
 
-      let exploring = false;
+      const WEIGHTS = [
+        { type:"dungeon", weight:60 },
+        { type:"monster", weight:25 },
+        { type:"trap", weight:10 },
+        { type:"item", weight:5 }
+      ];
 
-      const wait = ms => new Promise(resolve => {
-        setTimeout(resolve, ms);
-      });
+      const pathEl = document.getElementById("dungeonPath");
+      const scrollWindow = document.querySelector(".dungeonScrollWindow");
+      const lightStatus = document.getElementById("lightStatus");
+      const exploreStatus = document.getElementById("exploreStatus");
 
-      function getNextEmptySlot(){
-        return slots.find(slot => !slot.classList.contains("has-dungeon"));
+      let hasLamp = HAS_LAMP_AT_START;
+      let currentPosition = -1;
+      let running = false;
+      let pendingObstacle = null;
+      let path = [];
+      let slots = [];
+
+      const wait = ms => new Promise(resolve => setTimeout(resolve,ms));
+
+      function visionRange(){
+        return hasLamp ? 3 : 1;
       }
 
-      function openDeck(){
-        deck.classList.add("is-open");
-      }
+      function chooseType(){
+        const total = WEIGHTS.reduce((sum,item) => sum + item.weight,0);
+        let roll = Math.random() * total;
 
-      function closeDeck(){
-        deck.classList.remove("is-open");
-      }
-
-      function putDungeonCard(slot){
-        slot.classList.add("has-dungeon");
-        slot.innerHTML = `
-          <img class="dungeonResultArt" src="${dungeonArt}" alt="">
-          <img class="dungeonResultFrame" src="${cardFrame}" alt="">
-        `;
-      }
-
-      async function ensureSlotVisible(slot){
-        const slotLeft = slot.offsetLeft;
-        const slotRight = slotLeft + slot.offsetWidth;
-        const visibleLeft = scrollWindow.scrollLeft;
-        const visibleRight = visibleLeft + scrollWindow.clientWidth;
-
-        if (slotRight <= visibleRight && slotLeft >= visibleLeft){
-          return;
-        }
-
-        let nextLeft = visibleLeft;
-
-        if (slotRight > visibleRight){
-          nextLeft = slotRight - scrollWindow.clientWidth + 5;
-        } else if (slotLeft < visibleLeft){
-          nextLeft = slotLeft - 5;
-        }
-
-        scrollWindow.scrollTo({
-          left:Math.max(0,nextLeft),
-          behavior:"smooth"
-        });
-
-        await wait(SCROLL_WAIT);
-      }
-
-      async function flyDeckCardToSlot(slot){
-        await ensureSlotVisible(slot);
-
-        const deckRect = deck.getBoundingClientRect();
-        const slotRect = slot.getBoundingClientRect();
-
-        const flying = document.createElement("div");
-        flying.className = "flyingDungeonCard";
-
-        flying.style.left = `${deckRect.left}px`;
-        flying.style.top = `${deckRect.top}px`;
-        flying.style.width = `${deckRect.width}px`;
-        flying.style.height = `${deckRect.height}px`;
-
-        flying.innerHTML = `
-          <img class="flyingArt" src="${dungeonArt}" alt="">
-          <img class="flyingFrame" src="${cardFrame}" alt="">
-        `;
-
-        document.body.appendChild(flying);
-
-        /* 表のカードが山札から離れた時点で、次の山札は裏面に戻す */
-        closeDeck();
-
-        await new Promise(requestAnimationFrame);
-
-        flying.style.left = `${slotRect.left}px`;
-        flying.style.top = `${slotRect.top}px`;
-        flying.style.width = `${slotRect.width}px`;
-        flying.style.height = `${slotRect.height}px`;
-
-        await wait(MOVE_TIME);
-
-        putDungeonCard(slot);
-        flying.remove();
-      }
-
-      async function drawDungeonCard(){
-        const targetSlot = getNextEmptySlot();
-
-        if (!targetSlot){
-          return false;
-        }
-
-        openDeck();
-        await wait(OPEN_WAIT);
-        await flyDeckCardToSlot(targetSlot);
-        await wait(NEXT_WAIT);
-
-        return true;
-      }
-
-      async function startAutoExplore(){
-        if (exploring){
-          return;
-        }
-
-        exploring = true;
-        closeDeck();
-        scrollWindow.scrollLeft = 0;
-
-        await wait(START_WAIT);
-
-        while (getNextEmptySlot()){
-          const continued = await drawDungeonCard();
-
-          if (!continued){
-            break;
+        for (const item of WEIGHTS){
+          roll -= item.weight;
+          if (roll < 0){
+            return item.type;
           }
         }
 
-        exploring = false;
+        return "dungeon";
       }
 
-      window.addEventListener("load", () => {
-        startAutoExplore();
-      });
+      function makePath(){
+        return Array.from({length:PATH_LENGTH},(_,index) => ({
+          index,
+          type:chooseType(),
+          revealed:false,
+          cleared:false
+        }));
+      }
+
+      function frontMarkup(card){
+        if (card.type === "monster"){
+          return `
+            <div class="pathFront monsterCard">
+              <img class="pathArt" src="${goblinArt}" alt="" />
+              <img class="pathFrame" src="${cardFrame}" alt="" />
+            </div>
+          `;
+        }
+
+        if (card.type === "trap"){
+          return `
+            <div class="pathFront trapCard">
+              <div class="pathLabel">TRAP</div>
+              <img class="pathFrame" src="${cardFrame}" alt="" />
+            </div>
+          `;
+        }
+
+        if (card.type === "item"){
+          return `
+            <div class="pathFront itemCard">
+              <div class="pathLabel">ITEM</div>
+              <img class="pathFrame" src="${cardFrame}" alt="" />
+            </div>
+          `;
+        }
+
+        return `
+          <div class="pathFront dungeonCard">
+            <img class="pathArt" src="${dungeonArt}" alt="" />
+            <img class="pathFrame" src="${cardFrame}" alt="" />
+          </div>
+        `;
+      }
+
+      function renderPath(){
+        pathEl.innerHTML = path.map(card => `
+          <div class="cardSlot" data-index="${card.index}" data-type="${card.type}">
+            <div class="pathCardInner">
+              <div class="pathBack" aria-label="未探索"></div>
+              ${frontMarkup(card)}
+            </div>
+          </div>
+        `).join("");
+
+        slots = [...pathEl.querySelectorAll(".cardSlot")];
+      }
+
+      function revealCard(index){
+        const card = path[index];
+        const slot = slots[index];
+        if (!card || !slot || card.revealed){
+          return;
+        }
+
+        card.revealed = true;
+        slot.classList.add("revealed");
+      }
+
+      function revealVision(){
+        const lastVisible = Math.min(PATH_LENGTH - 1,currentPosition + visionRange());
+        for (let i = currentPosition + 1; i <= lastVisible; i += 1){
+          revealCard(i);
+        }
+      }
+
+      function clearTargetMarks(){
+        slots.forEach(slot => {
+          slot.classList.remove("targetMonster","targetTrap");
+        });
+      }
+
+      function findVisibleMonster(){
+        const max = Math.min(PATH_LENGTH - 1,currentPosition + visionRange());
+        for (let i = currentPosition + 1; i <= max; i += 1){
+          if (path[i]?.type === "monster" && !path[i].cleared){
+            return {
+              type:"monster",
+              index:i,
+              distance:i - currentPosition
+            };
+          }
+        }
+        return null;
+      }
+
+      function trapImmediatelyAhead(){
+        const index = currentPosition + 1;
+        if (path[index]?.type === "trap" && !path[index].cleared){
+          return { type:"trap", index, distance:1 };
+        }
+        return null;
+      }
+
+      function markCurrent(){
+        slots.forEach(slot => slot.classList.remove("current"));
+        if (currentPosition >= 0 && slots[currentPosition]){
+          slots[currentPosition].classList.add("current");
+        }
+      }
+
+      function oneCardStep(){
+        if (!slots[0]){
+          return 0;
+        }
+        const style = getComputedStyle(pathEl);
+        const gap = parseFloat(style.columnGap || style.gap || "4") || 4;
+        return slots[0].offsetWidth + gap;
+      }
+
+      async function scrollForwardOneCard(){
+        const step = oneCardStep();
+        scrollWindow.scrollTo({
+          left:Math.max(0,(currentPosition + 1) * step),
+          behavior:"smooth"
+        });
+        await wait(SCROLL_WAIT);
+      }
+
+      function stopForObstacle(obstacle){
+        running = false;
+        pendingObstacle = obstacle;
+        clearTargetMarks();
+
+        if (obstacle.type === "monster"){
+          slots[obstacle.index]?.classList.add("targetMonster");
+          exploreStatus.textContent = `ゴブリン 距離${obstacle.distance}`;
+        } else {
+          slots[obstacle.index]?.classList.add("targetTrap");
+          exploreStatus.textContent = "トラップの前で停止";
+        }
+      }
+
+      function convertToDungeon(index){
+        const card = path[index];
+        const slot = slots[index];
+        if (!card || !slot){
+          return;
+        }
+
+        card.type = "dungeon";
+        card.cleared = true;
+        card.revealed = true;
+        slot.dataset.type = "dungeon";
+        slot.innerHTML = `
+          <div class="pathCardInner" style="transform:rotateY(180deg)">
+            <div class="pathBack"></div>
+            <div class="pathFront dungeonCard">
+              <img class="pathArt" src="${dungeonArt}" alt="" />
+              <img class="pathFrame" src="${cardFrame}" alt="" />
+            </div>
+          </div>
+        `;
+        slot.classList.add("revealed");
+        slot.classList.remove("targetMonster","targetTrap");
+      }
+
+      async function exploreLoop(){
+        if (running){
+          return;
+        }
+
+        running = true;
+        pendingObstacle = null;
+        exploreStatus.textContent = "状態：探索中";
+
+        revealVision();
+
+        while (running && currentPosition < PATH_LENGTH - 1){
+          const monster = findVisibleMonster();
+          if (monster){
+            stopForObstacle(monster);
+            return;
+          }
+
+          const trap = trapImmediatelyAhead();
+          if (trap){
+            stopForObstacle(trap);
+            return;
+          }
+
+          await wait(STEP_WAIT);
+          if (!running){
+            return;
+          }
+
+          currentPosition += 1;
+          markCurrent();
+          await scrollForwardOneCard();
+          revealVision();
+        }
+
+        running = false;
+        exploreStatus.textContent = "状態：最奥";
+      }
+
+      async function resolveObstacle(){
+        if (!pendingObstacle){
+          return;
+        }
+
+        const index = pendingObstacle.index;
+        convertToDungeon(index);
+        pendingObstacle = null;
+        clearTargetMarks();
+        revealVision();
+        await exploreLoop();
+      }
+
+      function setLamp(value){
+        hasLamp = Boolean(value);
+        lightStatus.textContent = hasLamp ? "灯り：ランプ" : "灯り：なし";
+        revealVision();
+      }
+
+      function start(){
+        path = makePath();
+        currentPosition = -1;
+        pendingObstacle = null;
+        scrollWindow.scrollLeft = 0;
+        renderPath();
+        setLamp(HAS_LAMP_AT_START);
+        revealVision();
+        exploreLoop();
+      }
+
+      window.HOUSEBUILDING_CARD_PATH = {
+        resume:exploreLoop,
+        resolveObstacle,
+        setLamp,
+        getState:() => ({
+          hasLamp,
+          currentPosition,
+          vision:visionRange(),
+          pendingObstacle,
+          path:path.map(card => ({...card}))
+        })
+      };
+
+      window.addEventListener("load",start);
     })();
   </script>
 </body>
