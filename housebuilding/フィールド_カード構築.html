@@ -28,7 +28,7 @@
       flex:0 0 auto;
       width:calc(100% - 64px);
       height:118px;
-      margin:4px auto 0;
+      margin:12px auto 0;
       padding:5px;
       border:1px solid rgba(255,255,255,.28);
       border-radius:10px;
@@ -67,11 +67,12 @@
       display:flex;
       align-items:flex-end;
       justify-content:space-between;
-      padding:8px 14px 6px;
+      padding:8px 10px 4px;
     }
 
     .fieldCardDockSlot{
-      height:min(96%,198px);
+      position:relative;
+      height:min(98%,208px);
       aspect-ratio:.64/1;
       border:2px solid rgba(255,255,255,.38);
       border-radius:11px;
@@ -80,9 +81,61 @@
       display:flex;
       align-items:center;
       justify-content:center;
+      overflow:hidden;
       color:rgba(242,235,221,.72);
       font-size:10px;
       font-weight:900;
+    }
+
+    .protagonistCardSlot{
+      display:block;
+      background:radial-gradient(circle at 50% 28%,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(0,0,0,.12) 100%);
+    }
+
+    .protagonistArt{
+      position:absolute;
+      inset:8px 8px 30px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
+      color:rgba(242,235,221,.72);
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .protagonistFood{
+      position:absolute;
+      left:8px;
+      bottom:7px;
+      font-size:18px;
+      line-height:1;
+      filter:grayscale(15%) brightness(.95);
+    }
+
+    .protagonistHp{
+      position:absolute;
+      right:8px;
+      bottom:6px;
+      display:flex;
+      align-items:flex-end;
+      gap:1px;
+      color:#f3efe7;
+      text-shadow:0 1px 2px rgba(0,0,0,.45);
+      line-height:1;
+    }
+
+    .protagonistHpCurrent{
+      font-size:20px;
+      font-weight:1000;
+    }
+
+    .protagonistHpSlash,
+    .protagonistHpMax{
+      padding-bottom:1px;
+      font-size:9px;
+      font-weight:800;
+      opacity:.82;
     }
 
     .deckCardSlot{
@@ -91,12 +144,10 @@
     }
 
     #fieldPanel{
-      grid-template-rows:auto minmax(0,1fr);
-      gap:3px;
+      grid-template-rows:minmax(0,1fr);
+      gap:0;
       padding:5px 8px;
     }
-
-    .panelStatus{min-height:25px}
 
     .handLine{
       min-height:0;
@@ -241,21 +292,21 @@
           </div>
 
           <div class="fieldCardDock" aria-label="主人公カードと山札">
-            <div class="fieldCardDockSlot protagonistCardSlot">主人公</div>
+            <div class="fieldCardDockSlot protagonistCardSlot" aria-label="主人公 HP 95/100 食 74">
+              <div class="protagonistArt">主人公</div>
+              <div class="protagonistFood" aria-label="食 74">🍖</div>
+              <div class="protagonistHp" aria-label="HP 95/100">
+                <span class="protagonistHpCurrent">95</span>
+                <span class="protagonistHpSlash">/</span>
+                <span class="protagonistHpMax">100</span>
+              </div>
+            </div>
             <div class="fieldCardDockSlot deckCardSlot">山札</div>
           </div>
         </div>
       </section>
 
       <section id="fieldPanel" aria-label="管理エリア">
-        <div class="panelStatus">
-          <div class="hpWrap">
-            <span class="hpText">HP 95/100</span>
-            <div class="hpBar"><div class="hpFill" style="width:95%"></div></div>
-          </div>
-          <span class="foodValue">🍖 74</span>
-        </div>
-
         <div class="handLine">
           <div id="inventoryGrid" class="handGrid" aria-label="装備と道具の手札">
             <div class="handCard equipmentCard" data-slot="melee"><span class="handRole">近接</span><span class="handIcon">🗡️</span><span class="handName">短剣</span></div>
