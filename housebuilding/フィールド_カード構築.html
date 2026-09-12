@@ -156,32 +156,120 @@
     }
 
     .deckCardSlot{
-      display:block;
-      aspect-ratio:595 / 842;
-      border:0;
-      border-radius:0;
+      position:relative;
+      overflow:visible;
+      perspective:800px;
       background:transparent;
-      box-shadow:0 5px 14px rgba(0,0,0,.24);
+      border:0;
+      box-shadow:none;
     }
 
-    .deckCardArt,
-    .deckCardFrame{
+    .deckBack,
+    .deckFront{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
-      display:block;
+      border:2px solid rgba(255,255,255,.38);
+      border-radius:11px;
+      overflow:hidden;
+      backface-visibility:hidden;
+      transition:transform .42s ease;
     }
 
-    .deckCardArt{
+    .deckBack{
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
+      color:rgba(242,235,221,.76);
+      font-weight:900;
+      transform:rotateY(0deg);
+    }
+
+    .deckFront{
       z-index:1;
+      background:#fff;
+      transform:rotateY(180deg);
+    }
+
+    .deckDungeonArt,
+    .deckDungeonFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
       object-fit:cover;
     }
 
-    .deckCardFrame{
+    .deckDungeonArt{
+      z-index:1;
+    }
+
+    .deckDungeonFrame{
       z-index:2;
-      object-fit:contain;
       pointer-events:none;
+    }
+
+    .deckCardSlot.is-open .deckBack{
+      transform:rotateY(-180deg);
+    }
+
+    .deckCardSlot.is-open .deckFront{
+      transform:rotateY(0deg);
+    }
+
+    .cardSlot.has-dungeon{
+      border:0;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultArt,
+    .cardSlot.has-dungeon .dungeonResultFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultArt{
+      z-index:1;
+    }
+
+    .cardSlot.has-dungeon .dungeonResultFrame{
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .flyingDungeonCard{
+      position:fixed;
+      z-index:9999;
+      margin:0;
+      padding:0;
+      pointer-events:none;
+      overflow:hidden;
+      background:#fff;
+      transform-origin:center center;
+      transition:left .55s ease,top .55s ease,width .55s ease,height .55s ease;
+    }
+
+    .flyingDungeonCard img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .flyingDungeonCard .flyingArt{
+      z-index:1;
+    }
+
+    .flyingDungeonCard .flyingFrame{
+      z-index:2;
     }
 
     #fieldPanel{
@@ -343,9 +431,13 @@
                 <span class="protagonistHpMax">100</span>
               </div>
             </div>
-            <div class="fieldCardDockSlot deckCardSlot" aria-label="山札 ダンジョンカード">
-              <img class="deckCardArt" src="../assets/housebuilding/dungeon_01.PNG" alt="" />
-              <img class="deckCardFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
+
+            <div class="fieldCardDockSlot deckCardSlot" id="dungeonDeck" aria-label="山札">
+              <div class="deckBack">山札</div>
+              <div class="deckFront">
+                <img class="deckDungeonArt" src="../assets/housebuilding/dungeon_01.PNG" alt="" />
+                <img class="deckDungeonFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
+              </div>
             </div>
           </div>
         </div>
@@ -372,5 +464,119 @@
       <span>カード構築</span><span>矢 7</span><span>状態：正常</span>
     </footer>
   </main>
+
+  <script>
+    (() => {
+      const START_WAIT = 1500;
+      const OPEN_WAIT = 650;
+      const MOVE_TIME = 600;
+      const NEXT_WAIT = 700;
+
+      const deck = document.getElementById("dungeonDeck");
+      const slots = [...document.querySelectorAll(".dungeonCardGrid .cardSlot")];
+
+      const dungeonArt = "../assets/housebuilding/dungeon_01.PNG";
+      const cardFrame = "../assets/housebuilding/card_frame.PNG";
+
+      let exploring = false;
+
+      const wait = ms => new Promise(resolve => {
+        setTimeout(resolve, ms);
+      });
+
+      function getNextEmptySlot(){
+        return slots.find(slot => !slot.classList.contains("has-dungeon"));
+      }
+
+      function openDeck(){
+        deck.classList.add("is-open");
+      }
+
+      function closeDeck(){
+        deck.classList.remove("is-open");
+      }
+
+      function putDungeonCard(slot){
+        slot.classList.add("has-dungeon");
+        slot.innerHTML = `
+          <img class="dungeonResultArt" src="${dungeonArt}" alt="">
+          <img class="dungeonResultFrame" src="${cardFrame}" alt="">
+        `;
+      }
+
+      async function flyDeckCardToSlot(slot){
+        const deckRect = deck.getBoundingClientRect();
+        const slotRect = slot.getBoundingClientRect();
+
+        const flying = document.createElement("div");
+        flying.className = "flyingDungeonCard";
+
+        flying.style.left = `${deckRect.left}px`;
+        flying.style.top = `${deckRect.top}px`;
+        flying.style.width = `${deckRect.width}px`;
+        flying.style.height = `${deckRect.height}px`;
+
+        flying.innerHTML = `
+          <img class="flyingArt" src="${dungeonArt}" alt="">
+          <img class="flyingFrame" src="${cardFrame}" alt="">
+        `;
+
+        document.body.appendChild(flying);
+
+        await new Promise(requestAnimationFrame);
+
+        flying.style.left = `${slotRect.left}px`;
+        flying.style.top = `${slotRect.top}px`;
+        flying.style.width = `${slotRect.width}px`;
+        flying.style.height = `${slotRect.height}px`;
+
+        await wait(MOVE_TIME);
+
+        putDungeonCard(slot);
+        flying.remove();
+      }
+
+      async function drawDungeonCard(){
+        const targetSlot = getNextEmptySlot();
+
+        if (!targetSlot){
+          return false;
+        }
+
+        openDeck();
+        await wait(OPEN_WAIT);
+        await flyDeckCardToSlot(targetSlot);
+        closeDeck();
+        await wait(NEXT_WAIT);
+
+        return true;
+      }
+
+      async function startAutoExplore(){
+        if (exploring){
+          return;
+        }
+
+        exploring = true;
+        closeDeck();
+
+        await wait(START_WAIT);
+
+        while (getNextEmptySlot()){
+          const continued = await drawDungeonCard();
+
+          if (!continued){
+            break;
+          }
+        }
+
+        exploring = false;
+      }
+
+      window.addEventListener("load", () => {
+        startAutoExplore();
+      });
+    })();
+  </script>
 </body>
 </html>
