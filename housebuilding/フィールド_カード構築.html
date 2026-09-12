@@ -71,8 +71,9 @@
       color:rgba(242,235,221,.72);
     }
 
-    /* 3/8側：所持品を横一列で重ねる手札にする。扇状にはしない。 */
+    /* 3/8側：装備2枚＋道具を、横一列で重なる手札として表示。 */
     .handLine{
+      flex:1;
       min-height:0;
       display:grid;
       grid-template-columns:48px minmax(0,1fr);
@@ -87,16 +88,16 @@
       align-items:flex-end;
       justify-content:flex-start;
       gap:0 !important;
-      padding:3px 6px 2px 8px;
+      padding:5px 6px 5px 8px;
       overflow:visible;
     }
     .handCard{
       position:relative;
-      flex:0 0 68px;
+      flex:0 0 72px;
       height:100%;
       min-height:0;
-      max-height:122px;
-      margin-left:-29px;
+      max-height:132px;
+      margin-left:-31px;
       border:1px solid #aaa39a;
       border-radius:8px;
       background:linear-gradient(#fff,#eeeae2);
@@ -105,7 +106,7 @@
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-      padding:8px 4px 5px;
+      padding:9px 4px 5px;
       overflow:hidden;
       transform:none;
       transition:transform .22s ease,box-shadow .22s ease,opacity .18s ease;
@@ -118,7 +119,9 @@
     .handCard:nth-child(5){z-index:5}
     .handCard:nth-child(6){z-index:6}
     .handCard:nth-child(7){z-index:7}
-    .handCard .handIcon{font-size:20px;line-height:1.05}
+    .handCard:nth-child(8){z-index:8}
+    .handCard:nth-child(9){z-index:9}
+    .handCard .handIcon{font-size:21px;line-height:1.05}
     .handCard .handName{
       width:100%;
       margin-top:4px;
@@ -135,6 +138,23 @@
       bottom:3px;
       font-size:8px;
       font-weight:1000;
+    }
+    .handCard .handRole{
+      position:absolute;
+      left:4px;
+      top:4px;
+      padding:1px 3px;
+      border:1px solid #c7bda8;
+      border-radius:4px;
+      background:#eee7d8;
+      color:#665b49;
+      font-size:5.5px;
+      font-weight:1000;
+      line-height:1.2;
+    }
+    .handCard.equipmentCard{
+      border-color:#8f877b;
+      background:linear-gradient(#fffdf7,#e9e3d7);
     }
     .handCard.using{
       z-index:50;
@@ -189,28 +209,16 @@
         </div>
 
         <div class="handLine">
-          <div class="slotLabel">持ち物</div>
-          <div id="inventoryGrid" class="handGrid" aria-label="所持品の手札">
+          <div class="slotLabel">手札</div>
+          <div id="inventoryGrid" class="handGrid" aria-label="装備と道具の手札">
+            <div class="handCard equipmentCard" data-slot="melee"><span class="handRole">近接</span><span class="handIcon">🗡️</span><span class="handName">短剣</span></div>
+            <div class="handCard equipmentCard" data-slot="ranged"><span class="handRole">遠距離</span><span class="handIcon">🏹</span><span class="handName">弓</span><span class="handCount">7</span></div>
             <div class="handCard"><span class="handIcon">🌿</span><span class="handName">薬草</span><span class="handCount">2</span></div>
             <div class="handCard"><span class="handIcon">🧴</span><span class="handName">回復薬</span><span class="handCount">1</span></div>
             <div class="handCard"><span class="handIcon">🍞</span><span class="handName">パン</span><span class="handCount">2</span></div>
-            <div class="handCard"><span class="handIcon">🏹</span><span class="handName">矢</span><span class="handCount">7</span></div>
             <div class="handCard"><span class="handIcon">🪢</span><span class="handName">ロープ</span><span class="handCount">1</span></div>
             <div class="handCard"><span class="handIcon">🗝️</span><span class="handName">鍵</span><span class="handCount">1</span></div>
             <div class="handCard"><span class="handIcon">🪓</span><span class="handName">斧</span><span class="handCount">1</span></div>
-          </div>
-        </div>
-
-        <div class="slotLine">
-          <div class="slotLabel">装備<br>スキル</div>
-          <div id="abilityGrid" class="slotGrid">
-            <div class="squareSlot skillSlot"><span class="slotIcon">🗡️</span><span class="slotName">短剣</span></div>
-            <div class="squareSlot skillSlot"><span class="slotIcon">🏹</span><span class="slotName">弓</span></div>
-            <div class="squareSlot skillSlot"><span class="slotIcon">🛡️</span><span class="slotName">革鎧</span></div>
-            <div class="squareSlot skillSlot"><span class="slotIcon">＋</span><span class="slotName">応急処置</span></div>
-            <div class="squareSlot skillSlot"><span class="slotIcon">🌱</span><span class="slotName">採取</span></div>
-            <div class="squareSlot skillSlot"><span class="slotIcon">!</span><span class="slotName">危険察知</span></div>
-            <div class="squareSlot skillSlot empty"></div>
           </div>
         </div>
       </section>
