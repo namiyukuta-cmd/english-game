@@ -96,8 +96,7 @@
     .handLine{
       min-height:0;
       display:grid;
-      grid-template-columns:42px minmax(0,1fr);
-      gap:4px;
+      grid-template-columns:minmax(0,1fr);
       align-items:stretch;
     }
 
@@ -119,7 +118,7 @@
       height:100%;
       min-height:0;
       max-height:118px;
-      margin-left:-43px;
+      margin-left:-47px;
       border:1px solid #aaa39a;
       border-radius:8px;
       background:linear-gradient(#fff,#eeeae2);
@@ -144,6 +143,9 @@
     .handCard:nth-child(7){z-index:7}
     .handCard:nth-child(8){z-index:8}
     .handCard:nth-child(9){z-index:9}
+    .handCard:nth-child(10){z-index:10}
+    .handCard:nth-child(11){z-index:11}
+    .handCard:nth-child(12){z-index:12}
 
     .handCard .handIcon{
       font-size:19px;
@@ -196,6 +198,12 @@
       background:linear-gradient(#fffdf7,#e9e3d7);
     }
 
+    .handCard.emptyToolCard{
+      border-style:dashed;
+      background:rgba(255,255,255,.28);
+      box-shadow:none;
+    }
+
     .handCard.using{
       z-index:50;
       transform:translateY(-34px) scale(1.08);
@@ -242,7 +250,6 @@
         </div>
 
         <div class="handLine">
-          <div class="slotLabel">手札</div>
           <div id="inventoryGrid" class="handGrid" aria-label="装備と道具の手札">
             <div class="handCard equipmentCard" data-slot="melee"><span class="handRole">近接</span><span class="handIcon">🗡️</span><span class="handName">短剣</span></div>
             <div class="handCard equipmentCard" data-slot="ranged"><span class="handRole">遠距離</span><span class="handIcon">🏹</span><span class="handName">弓</span><span class="handCount">7</span></div>
@@ -252,6 +259,10 @@
             <div class="handCard"><span class="handIcon">🪢</span><span class="handName">ロープ</span><span class="handCount">1</span></div>
             <div class="handCard"><span class="handIcon">🗝️</span><span class="handName">鍵</span><span class="handCount">1</span></div>
             <div class="handCard"><span class="handIcon">🪓</span><span class="handName">斧</span><span class="handCount">1</span></div>
+            <div class="handCard emptyToolCard" aria-label="空き道具枠"></div>
+            <div class="handCard emptyToolCard" aria-label="空き道具枠"></div>
+            <div class="handCard emptyToolCard" aria-label="空き道具枠"></div>
+            <div class="handCard emptyToolCard" aria-label="空き道具枠"></div>
           </div>
         </div>
       </section>
