@@ -34,8 +34,8 @@
       border-radius:10px;
       background:rgba(255,255,255,.018);
       box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);
-      overflow-x:hidden;
-      overflow-y:auto;
+      overflow-x:auto;
+      overflow-y:hidden;
       -webkit-overflow-scrolling:touch;
       scrollbar-width:none;
     }
@@ -43,8 +43,12 @@
 
     .dungeonCardGrid{
       display:grid;
-      grid-template-columns:repeat(6,minmax(0,1fr));
+      grid-auto-flow:column;
+      grid-auto-columns:calc((100% - 16px)/5);
+      grid-template-rows:1fr;
       gap:4px;
+      width:100%;
+      min-width:100%;
       padding:0 0 8px;
       background:transparent;
     }
