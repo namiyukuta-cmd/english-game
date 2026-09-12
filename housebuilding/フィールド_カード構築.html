@@ -156,8 +156,32 @@
     }
 
     .deckCardSlot{
-      background:repeating-linear-gradient(135deg,#282926 0 7px,#1c1d1b 7px 14px);
-      color:rgba(242,235,221,.76);
+      display:block;
+      aspect-ratio:595 / 842;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:0 5px 14px rgba(0,0,0,.24);
+    }
+
+    .deckCardArt,
+    .deckCardFrame{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .deckCardArt{
+      z-index:1;
+      object-fit:cover;
+    }
+
+    .deckCardFrame{
+      z-index:2;
+      object-fit:contain;
+      pointer-events:none;
     }
 
     #fieldPanel{
@@ -319,7 +343,10 @@
                 <span class="protagonistHpMax">100</span>
               </div>
             </div>
-            <div class="fieldCardDockSlot deckCardSlot">山札</div>
+            <div class="fieldCardDockSlot deckCardSlot" aria-label="山札 ダンジョンカード">
+              <img class="deckCardArt" src="../assets/housebuilding/dungeon_01.PNG" alt="" />
+              <img class="deckCardFrame" src="../assets/housebuilding/card_frame.PNG" alt="" />
+            </div>
           </div>
         </div>
       </section>
