@@ -11,14 +11,14 @@
   <link rel="stylesheet" href="./css/フィールド_カードRPG_v4.css?v=20260912-card4" />
   <style>
     #fieldMiddle{
-      grid-template-rows:minmax(0,6.5fr) minmax(0,1.5fr);
+      grid-template-rows:minmax(0,6fr) minmax(0,2fr);
     }
 
     .cardRpgView{
       padding:16px 0 0;
     }
     .cardDungeonBoard{
-      flex:0 0 47%;
+      flex:0 0 52%;
       grid-template-rows:repeat(3,minmax(0,1fr));
       row-gap:2px;
       align-content:start;
@@ -54,10 +54,10 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:10px 26px 12px;
+      padding:9px 28px 11px;
     }
     .fieldCardDockSlot{
-      height:min(92%,196px);
+      height:min(90%,174px);
       aspect-ratio:.64/1;
       border:2px solid rgba(255,255,255,.38);
       border-radius:11px;
@@ -75,14 +75,14 @@
       color:rgba(242,235,221,.76);
     }
 
-    /* 下側はHP＋手札だけ。約1.5/8に圧縮。 */
+    /* 下側はHP＋手札だけ。約2/8。 */
     #fieldPanel{
       grid-template-rows:auto minmax(0,1fr);
-      gap:2px;
-      padding:4px 8px;
+      gap:3px;
+      padding:5px 8px;
     }
     .panelStatus{
-      min-height:24px;
+      min-height:25px;
     }
     .handLine{
       min-height:0;
@@ -99,7 +99,7 @@
       align-items:flex-end;
       justify-content:flex-start;
       gap:0 !important;
-      padding:2px 6px 2px 6px;
+      padding:3px 6px 3px 6px;
       overflow:visible;
     }
     .handCard{
@@ -107,8 +107,8 @@
       flex:0 0 74px;
       height:100%;
       min-height:0;
-      max-height:104px;
-      margin-left:-51px;
+      max-height:118px;
+      margin-left:-43px;
       border:1px solid #aaa39a;
       border-radius:8px;
       background:linear-gradient(#fff,#eeeae2);
