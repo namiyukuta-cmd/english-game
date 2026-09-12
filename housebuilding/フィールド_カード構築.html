@@ -471,8 +471,10 @@
       const OPEN_WAIT = 650;
       const MOVE_TIME = 600;
       const NEXT_WAIT = 700;
+      const SCROLL_WAIT = 450;
 
       const deck = document.getElementById("dungeonDeck");
+      const scrollWindow = document.querySelector(".dungeonScrollWindow");
       const slots = [...document.querySelectorAll(".dungeonCardGrid .cardSlot")];
 
       const dungeonArt = "../assets/housebuilding/dungeon_01.PNG";
@@ -504,7 +506,35 @@
         `;
       }
 
+      async function ensureSlotVisible(slot){
+        const slotLeft = slot.offsetLeft;
+        const slotRight = slotLeft + slot.offsetWidth;
+        const visibleLeft = scrollWindow.scrollLeft;
+        const visibleRight = visibleLeft + scrollWindow.clientWidth;
+
+        if (slotRight <= visibleRight && slotLeft >= visibleLeft){
+          return;
+        }
+
+        let nextLeft = visibleLeft;
+
+        if (slotRight > visibleRight){
+          nextLeft = slotRight - scrollWindow.clientWidth + 5;
+        } else if (slotLeft < visibleLeft){
+          nextLeft = slotLeft - 5;
+        }
+
+        scrollWindow.scrollTo({
+          left:Math.max(0,nextLeft),
+          behavior:"smooth"
+        });
+
+        await wait(SCROLL_WAIT);
+      }
+
       async function flyDeckCardToSlot(slot){
+        await ensureSlotVisible(slot);
+
         const deckRect = deck.getBoundingClientRect();
         const slotRect = slot.getBoundingClientRect();
 
@@ -522,6 +552,9 @@
         `;
 
         document.body.appendChild(flying);
+
+        /* 表のカードが山札から離れた時点で、次の山札は裏面に戻す */
+        closeDeck();
 
         await new Promise(requestAnimationFrame);
 
@@ -546,7 +579,6 @@
         openDeck();
         await wait(OPEN_WAIT);
         await flyDeckCardToSlot(targetSlot);
-        closeDeck();
         await wait(NEXT_WAIT);
 
         return true;
@@ -559,6 +591,7 @@
 
         exploring = true;
         closeDeck();
+        scrollWindow.scrollLeft = 0;
 
         await wait(START_WAIT);
 
