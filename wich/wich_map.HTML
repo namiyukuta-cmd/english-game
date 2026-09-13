@@ -65,25 +65,43 @@
       border: 1px solid #343840;
       border-radius: 10px;
       display: grid;
-      place-items: center;
-      padding: 12px;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      padding: 10px;
       background: #171a20;
+      overflow: hidden;
     }
 
     .explore-grid {
-      width: 100%;
+      width: min(92%, 430px);
+      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       grid-template-rows: repeat(2, auto);
-      gap: 6px;
+      gap: 5px;
+      align-self: start;
     }
 
-    .explore-slot {
+    .explore-slot,
+    .deck-slot {
       min-width: 0;
       aspect-ratio: 2 / 3;
       border: 1px dashed #555b66;
       border-radius: 7px;
       background: #20242c;
+    }
+
+    .lower-area {
+      min-height: 0;
+      position: relative;
+      border-top: 1px solid #2d3138;
+    }
+
+    .deck-slot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: clamp(58px, 15vw, 76px);
     }
   </style>
 </head>
@@ -107,6 +125,10 @@
           <div class="explore-slot" data-slot="8"></div>
           <div class="explore-slot" data-slot="9"></div>
           <div class="explore-slot" data-slot="10"></div>
+        </div>
+
+        <div class="lower-area" aria-label="カード操作エリア">
+          <div class="deck-slot" aria-label="山札置き場"></div>
         </div>
       </section>
     </main>
