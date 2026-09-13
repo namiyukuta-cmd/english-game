@@ -30,6 +30,10 @@
       grid-template-rows: auto 1fr;
     }
 
+    .app.impact {
+      animation: screenImpact .42s ease-in-out 2;
+    }
+
     header {
       min-height: 52px;
       padding: env(safe-area-inset-top) 12px 0;
@@ -150,27 +154,115 @@
     }
 
     .battle .card-front {
-      background: #3a1f22;
-      border-color: #86555a;
-      color: #f3d7d9;
+      background:
+        radial-gradient(circle at center, rgba(137, 47, 54, .42), transparent 48%),
+        linear-gradient(145deg, #4b1d22, #241014 72%);
+      border-color: #a25d63;
+      color: #ffe8e9;
+      text-shadow: 0 2px 10px rgba(255, 80, 90, .45);
     }
 
     .card.shake {
-      animation: shake .72s ease-in-out 2;
+      animation: shake .52s ease-in-out 3;
       z-index: 5;
     }
 
     .card.battle-pop .card-inner {
-      transform: rotateY(180deg) translateY(-10px) scale(1.14);
-      filter: drop-shadow(0 12px 16px rgba(0,0,0,.45));
+      transform: rotateY(180deg) translateY(-12px) scale(1.2);
+      filter: drop-shadow(0 14px 20px rgba(0,0,0,.55));
+    }
+
+    .card.battle-launch {
+      position: fixed;
+      z-index: 100;
+      margin: 0;
+      aspect-ratio: auto;
+      transition:
+        left .72s cubic-bezier(.12,.82,.18,1),
+        top .72s cubic-bezier(.12,.82,.18,1),
+        width .72s cubic-bezier(.12,.82,.18,1),
+        height .72s cubic-bezier(.12,.82,.18,1),
+        transform .72s cubic-bezier(.12,.82,.18,1),
+        filter .72s ease;
+      filter: drop-shadow(0 0 18px rgba(255, 72, 86, .5));
+    }
+
+    .card.battle-launch.fullscreen {
+      left: -3vw !important;
+      top: -3dvh !important;
+      width: 106vw !important;
+      height: 106dvh !important;
+      transform: rotate(360deg) scale(1.02);
+      filter: drop-shadow(0 0 42px rgba(255, 72, 86, .75));
+    }
+
+    .card.battle-launch .card-front {
+      transition: font-size .72s ease, letter-spacing .72s ease, border-radius .72s ease;
+    }
+
+    .card.battle-launch.fullscreen .card-front {
+      font-size: clamp(54px, 17vw, 112px);
+      letter-spacing: .16em;
+      border-radius: 0;
+    }
+
+    .battle-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at center, rgba(255, 90, 100, .34), transparent 52%),
+        rgba(85, 0, 8, .2);
+    }
+
+    .battle-flash.active {
+      animation: battleFlash .16s steps(2, end) 5;
+    }
+
+    .battle-lines {
+      position: fixed;
+      inset: -20%;
+      z-index: 95;
+      pointer-events: none;
+      opacity: 0;
+      background: repeating-conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255,255,255,.22) 0deg 1deg,
+        transparent 1deg 11deg
+      );
+      transform: scale(.2) rotate(0deg);
+    }
+
+    .battle-lines.active {
+      animation: burstLines .72s cubic-bezier(.1,.8,.2,1) forwards;
     }
 
     @keyframes shake {
       0%,100% { transform: translateX(0) rotate(0); }
-      20% { transform: translateX(-5px) rotate(-2deg); }
-      40% { transform: translateX(5px) rotate(2deg); }
-      60% { transform: translateX(-4px) rotate(-1.5deg); }
-      80% { transform: translateX(4px) rotate(1.5deg); }
+      20% { transform: translateX(-7px) rotate(-3deg); }
+      40% { transform: translateX(7px) rotate(3deg); }
+      60% { transform: translateX(-6px) rotate(-2deg); }
+      80% { transform: translateX(6px) rotate(2deg); }
+    }
+
+    @keyframes screenImpact {
+      0%,100% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 3px); }
+      50% { transform: translate(5px, -4px); }
+      75% { transform: translate(-3px, -2px); }
+    }
+
+    @keyframes battleFlash {
+      0%,100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes burstLines {
+      0% { opacity: 0; transform: scale(.18) rotate(0deg); }
+      22% { opacity: .8; }
+      100% { opacity: 0; transform: scale(1.25) rotate(18deg); }
     }
 
     .pawn-area {
@@ -220,7 +312,7 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <div id="app" class="app">
     <header>
       <h1>夜の見回り</h1>
       <button id="backToTop" type="button">戻る</button>
@@ -233,7 +325,7 @@
             <div class="explore-row" data-row="4">
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-              <div id="battleCard" class="card battle center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">バトル</div></div></div>
+              <div id="battleCard" class="card battle center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">BATTLE</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
             </div>
@@ -271,14 +363,19 @@
     </main>
   </div>
 
+  <div id="battleFlash" class="battle-flash" aria-hidden="true"></div>
+  <div id="battleLines" class="battle-lines" aria-hidden="true"></div>
   <div id="pawn" aria-hidden="true">♟</div>
 
   <script>
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const app = document.getElementById('app');
     const exploreWindow = document.getElementById('exploreWindow');
     const pawn = document.getElementById('pawn');
     const pawnHome = document.getElementById('pawnHome');
     const battleCard = document.getElementById('battleCard');
+    const battleFlash = document.getElementById('battleFlash');
+    const battleLines = document.getElementById('battleLines');
     const row1 = document.querySelector('[data-row="1"]');
     const row2 = document.querySelector('[data-row="2"]');
     const row3 = document.querySelector('[data-row="3"]');
@@ -321,6 +418,35 @@
       await wait(850);
     }
 
+    async function launchBattleCard() {
+      battleCard.classList.add('shake');
+      await wait(1550);
+      battleCard.classList.remove('shake');
+
+      battleFlash.classList.add('active');
+      app.classList.add('impact');
+      battleCard.classList.add('open', 'battle-pop');
+      await wait(620);
+      battleCard.classList.remove('battle-pop');
+
+      const rect = battleCard.getBoundingClientRect();
+      battleCard.style.left = `${rect.left}px`;
+      battleCard.style.top = `${rect.top}px`;
+      battleCard.style.width = `${rect.width}px`;
+      battleCard.style.height = `${rect.height}px`;
+      document.body.appendChild(battleCard);
+      battleCard.classList.add('battle-launch');
+
+      await wait(40);
+      battleLines.classList.add('active');
+      battleCard.classList.add('fullscreen');
+      await wait(780);
+
+      battleFlash.classList.remove('active');
+      app.classList.remove('impact');
+      await wait(900);
+    }
+
     async function runPatrol() {
       await wait(150);
       exploreWindow.scrollTop = exploreWindow.scrollHeight;
@@ -349,12 +475,7 @@
       await revealCards([lastCards[0], lastCards[1], lastCards[3], lastCards[4]]);
       await wait(700);
 
-      battleCard.classList.add('shake');
-      await wait(1450);
-      battleCard.classList.remove('shake');
-      battleCard.classList.add('open', 'battle-pop');
-      await wait(1100);
-      battleCard.classList.remove('battle-pop');
+      await launchBattleCard();
     }
 
     exploreWindow.addEventListener('scroll', () => {
@@ -362,7 +483,9 @@
     }, { passive: true });
 
     window.addEventListener('resize', () => {
-      placePawn(pawnTarget || pawnHome);
+      if (!battleCard.classList.contains('battle-launch')) {
+        placePawn(pawnTarget || pawnHome);
+      }
     });
 
     runPatrol();
