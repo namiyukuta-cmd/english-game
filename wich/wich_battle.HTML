@@ -149,10 +149,63 @@
       animation: enemyHit .28s ease;
     }
 
+    .enemy-slot.burning {
+      animation: enemyBurn .72s ease both;
+      border-color: #ff9448;
+      box-shadow:
+        0 0 18px rgba(255, 97, 32, .9),
+        0 0 42px rgba(255, 45, 0, .55),
+        inset 0 0 24px rgba(255, 84, 0, .28);
+    }
+
+    .enemy-slot.burning::before,
+    .enemy-slot.burning::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      width: 72%;
+      height: 82%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      border-radius: 50% 50% 35% 35%;
+      filter: blur(4px);
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(255,255,180,.95) 0 18%, transparent 19%),
+        radial-gradient(ellipse at 32% 72%, rgba(255,190,40,.95) 0 24%, transparent 25%),
+        radial-gradient(ellipse at 68% 68%, rgba(255,95,15,.92) 0 27%, transparent 28%),
+        radial-gradient(ellipse at 50% 42%, rgba(255,45,0,.75) 0 32%, transparent 33%);
+      mix-blend-mode: screen;
+      animation: flameRise .7s ease-out both;
+    }
+
+    .enemy-slot.burning::after {
+      width: 52%;
+      height: 66%;
+      left: 42%;
+      opacity: .8;
+      animation-delay: .08s;
+    }
+
     @keyframes enemyHit {
       0%,100% { transform: translateX(0); }
       35% { transform: translateX(-7px); }
       70% { transform: translateX(7px); }
+    }
+
+    @keyframes enemyBurn {
+      0% { transform: scale(1); filter: brightness(1); }
+      18% { transform: scale(1.08); filter: brightness(1.7); }
+      42% { transform: translateX(-5px) rotate(-2deg) scale(1.03); }
+      62% { transform: translateX(5px) rotate(2deg) scale(1.03); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    @keyframes flameRise {
+      0% { opacity: 0; transform: translate(-50%, 25%) scale(.45); }
+      22% { opacity: 1; }
+      70% { opacity: .95; }
+      100% { opacity: 0; transform: translate(-50%, -42%) scale(1.22); }
     }
 
     .player-area {
@@ -260,9 +313,15 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.4);
     }
 
-    .hand-card.used {
-      opacity: .36;
+    .hand-card.active[data-element="fire"] {
+      border-color: #ff8a3d;
+      box-shadow:
+        0 0 12px rgba(255, 132, 54, .95),
+        0 0 28px rgba(255, 55, 0, .55);
+      animation: fireCardPulse .46s ease-in-out infinite alternate;
     }
+
+    .hand-card.used { opacity: .36; }
 
     .result-value {
       min-height: 14px;
@@ -270,12 +329,17 @@
       font-weight: 800;
     }
 
+    @keyframes fireCardPulse {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.55); }
+    }
+
     .battle-message {
       position: fixed;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      z-index: 30;
+      z-index: 40;
       min-width: 170px;
       padding: 12px 18px;
       border: 1px solid #75525b;
@@ -289,6 +353,109 @@
     }
 
     .battle-message.show { opacity: 1; }
+
+    .fx-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .fire-flash {
+      position: fixed;
+      inset: 0;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 220, 120, .34), transparent 26%),
+        rgba(255, 58, 0, .16);
+      animation: fireFlash .48s ease-out both;
+    }
+
+    .fire-stream {
+      position: fixed;
+      height: 34px;
+      transform-origin: 0 50%;
+      border-radius: 999px;
+      opacity: 0;
+      overflow: visible;
+      background:
+        radial-gradient(ellipse at 90% 50%, rgba(255,255,225,.98) 0 8%, rgba(255,217,72,.96) 9% 18%, transparent 19%),
+        linear-gradient(90deg, rgba(255,210,70,.08), rgba(255,177,40,.95) 28%, rgba(255,72,7,.96) 68%, rgba(255,20,0,.18));
+      box-shadow:
+        0 0 12px rgba(255, 220, 95, .95),
+        0 0 28px rgba(255, 95, 20, .92),
+        0 0 52px rgba(255, 35, 0, .62);
+      animation: fireStream .62s cubic-bezier(.1,.76,.2,1) both;
+    }
+
+    .fire-stream::before,
+    .fire-stream::after {
+      content: "";
+      position: absolute;
+      left: 4%;
+      right: 3%;
+      top: 50%;
+      height: 70px;
+      transform: translateY(-50%);
+      background:
+        radial-gradient(ellipse at 15% 55%, rgba(255, 226, 100, .75) 0 7%, transparent 8%),
+        radial-gradient(ellipse at 38% 38%, rgba(255, 117, 25, .72) 0 10%, transparent 11%),
+        radial-gradient(ellipse at 61% 62%, rgba(255, 56, 8, .74) 0 11%, transparent 12%),
+        radial-gradient(ellipse at 84% 35%, rgba(255, 172, 40, .76) 0 9%, transparent 10%);
+      filter: blur(5px);
+      animation: flameWave .23s ease-in-out infinite alternate;
+    }
+
+    .fire-stream::after {
+      transform: translateY(-50%) scaleY(-1);
+      opacity: .72;
+      animation-delay: .08s;
+    }
+
+    .ember {
+      position: fixed;
+      width: var(--size);
+      height: var(--size);
+      margin-left: calc(var(--size) / -2);
+      margin-top: calc(var(--size) / -2);
+      border-radius: 50% 50% 45% 55%;
+      background: radial-gradient(circle, #fff7b0 0 18%, #ffb12f 20% 50%, #ff3d00 52% 76%, transparent 78%);
+      box-shadow: 0 0 9px rgba(255, 85, 10, .9);
+      opacity: 0;
+      animation: emberFly var(--duration) ease-out var(--delay) both;
+    }
+
+    @keyframes fireFlash {
+      0% { opacity: 0; }
+      18% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes fireStream {
+      0% { opacity: 0; transform: rotate(var(--angle)) scaleX(.02) scaleY(.35); }
+      12% { opacity: 1; }
+      42% { transform: rotate(var(--angle)) scaleX(1) scaleY(1.16); }
+      72% { opacity: 1; transform: rotate(var(--angle)) scaleX(1.02) scaleY(.82); }
+      100% { opacity: 0; transform: rotate(var(--angle)) scaleX(1.05) scaleY(.25); }
+    }
+
+    @keyframes flameWave {
+      from { opacity: .45; filter: blur(6px); }
+      to { opacity: 1; filter: blur(3px); }
+    }
+
+    @keyframes emberFly {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(.45) rotate(0deg);
+      }
+      15% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(.08) rotate(var(--spin));
+      }
+    }
   </style>
 </head>
 <body>
@@ -330,7 +497,7 @@
       </section>
 
       <section id="handArea" class="battle-section hand-area" aria-label="手札エリア">
-        <div class="hand-card" data-base="3">
+        <div class="hand-card" data-base="3" data-element="fire">
           <div class="card-name">火花</div>
           <div class="base-value">3</div>
           <div class="result-value"></div>
@@ -345,7 +512,7 @@
           <div class="base-value">4</div>
           <div class="result-value"></div>
         </div>
-        <div class="hand-card" data-base="1">
+        <div class="hand-card" data-base="1" data-element="fire">
           <div class="card-name">呪火</div>
           <div class="base-value">1</div>
           <div class="result-value"></div>
@@ -359,6 +526,7 @@
     </main>
   </div>
 
+  <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
   <div id="battleMessage" class="battle-message"></div>
 
   <script>
@@ -370,6 +538,7 @@
     const enemyCard = document.getElementById('enemyCard');
     const enemyHpText = document.getElementById('enemyHp');
     const battleMessage = document.getElementById('battleMessage');
+    const fxLayer = document.getElementById('fxLayer');
     const handCards = [...document.querySelectorAll('.hand-card')];
     let enemyHp = 40;
 
@@ -398,6 +567,58 @@
       enemyCard.classList.add('hit');
     }
 
+    async function playFireEffect(sourceCard) {
+      const sourceRect = sourceCard.getBoundingClientRect();
+      const targetRect = enemyCard.getBoundingClientRect();
+      const sx = sourceRect.left + sourceRect.width / 2;
+      const sy = sourceRect.top + sourceRect.height / 2;
+      const tx = targetRect.left + targetRect.width / 2;
+      const ty = targetRect.top + targetRect.height / 2;
+      const dx = tx - sx;
+      const dy = ty - sy;
+      const distance = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+      const flash = document.createElement('div');
+      flash.className = 'fire-flash';
+      fxLayer.appendChild(flash);
+
+      const stream = document.createElement('div');
+      stream.className = 'fire-stream';
+      stream.style.left = `${sx}px`;
+      stream.style.top = `${sy - 17}px`;
+      stream.style.width = `${distance}px`;
+      stream.style.setProperty('--angle', `${angle}deg`);
+      fxLayer.appendChild(stream);
+
+      for (let i = 0; i < 28; i += 1) {
+        const ember = document.createElement('i');
+        ember.className = 'ember';
+        const progress = Math.random();
+        const px = sx + dx * progress + (Math.random() - .5) * 18;
+        const py = sy + dy * progress + (Math.random() - .5) * 18;
+        ember.style.left = `${px}px`;
+        ember.style.top = `${py}px`;
+        ember.style.setProperty('--size', `${4 + Math.random() * 9}px`);
+        ember.style.setProperty('--dx', `${(Math.random() - .5) * 80}px`);
+        ember.style.setProperty('--dy', `${-35 - Math.random() * 95}px`);
+        ember.style.setProperty('--spin', `${(Math.random() - .5) * 420}deg`);
+        ember.style.setProperty('--duration', `${.42 + Math.random() * .48}s`);
+        ember.style.setProperty('--delay', `${Math.random() * .18}s`);
+        fxLayer.appendChild(ember);
+      }
+
+      enemyCard.classList.remove('burning');
+      void enemyCard.offsetWidth;
+      enemyCard.classList.add('burning');
+
+      await wait(760);
+      stream.remove();
+      flash.remove();
+      fxLayer.querySelectorAll('.ember').forEach(el => el.remove());
+      enemyCard.classList.remove('burning');
+    }
+
     async function runAutoBattleDemo() {
       await wait(700);
 
@@ -412,9 +633,13 @@
         const total = base + roll;
         card.querySelector('.result-value').textContent = `${base}+${roll}=${total}`;
 
-        await wait(260);
+        await wait(180);
+        if (card.dataset.element === 'fire') {
+          await playFireEffect(card);
+        }
+
         hitEnemy(total);
-        await wait(520);
+        await wait(420);
 
         card.classList.remove('active');
         card.classList.add('used');
