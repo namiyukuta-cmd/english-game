@@ -128,6 +128,32 @@
       color: #a98a92;
     }
 
+    .enemy-hp-meter {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid #6b4549;
+      border-radius: 999px;
+      background: #160e10;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,.75);
+    }
+
+    .enemy-hp-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6f2027, #c24b4b 55%, #ef7a62);
+      box-shadow: 0 0 8px rgba(231,83,62,.45);
+      transition: width .08s linear;
+    }
+
+    .enemy-hp-meter.flash {
+      animation: meterFlash .42s ease;
+    }
+
     .enemy-slot.hit { animation: enemyHit .28s ease; }
     .enemy-slot.hp-flash { animation: hpFlash .5s ease; }
 
@@ -190,6 +216,12 @@
       0%,100% { filter: brightness(1); }
       30% { filter: brightness(2.1); }
       60% { filter: brightness(1.35); }
+    }
+
+    @keyframes meterFlash {
+      0%,100% { filter: brightness(1); }
+      35% { filter: brightness(2.2); }
+      65% { filter: brightness(1.45); }
     }
 
     @keyframes enemyBurn {
@@ -392,7 +424,6 @@
       font-weight: 950;
       text-align: center;
       text-shadow: 0 2px 5px rgba(0,0,0,.85);
-      transition: transform .18s ease;
     }
 
     .focus-total.bump { animation: totalBump .35s ease; }
@@ -567,6 +598,9 @@
           <div id="enemyCard" class="enemy-slot" data-enemy-slot="2">
             <div class="enemy-name">敵</div>
             <div id="enemyHp" class="hp">HP 40</div>
+            <div id="enemyHpMeter" class="enemy-hp-meter" aria-label="敵の体力メーター">
+              <div id="enemyHpFill" class="enemy-hp-fill"></div>
+            </div>
           </div>
           <div class="enemy-slot" data-enemy-slot="3">敵</div>
         </div>
@@ -632,12 +666,15 @@
     const diceNumber = document.getElementById('diceNumber');
     const enemyCard = document.getElementById('enemyCard');
     const enemyHpText = document.getElementById('enemyHp');
+    const enemyHpMeter = document.getElementById('enemyHpMeter');
+    const enemyHpFill = document.getElementById('enemyHpFill');
     const fxLayer = document.getElementById('fxLayer');
     const attackFocus = document.getElementById('attackFocus');
     const focusIcon = document.getElementById('focusIcon');
     const focusTotal = document.getElementById('focusTotal');
     const handCards = [...document.querySelectorAll('.hand-card')];
-    let enemyHp = 40;
+    const enemyMaxHp = 40;
+    let enemyHp = enemyMaxHp;
 
     document.getElementById('backToMap').addEventListener('click', () => {
       location.href = './wich_map.HTML';
@@ -646,6 +683,11 @@
     function centerOf(element) {
       const r = element.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+
+    function updateEnemyHpDisplay(hp) {
+      enemyHpText.textContent = `HP ${hp}`;
+      enemyHpFill.style.width = `${Math.max(0, Math.min(100, hp / enemyMaxHp * 100))}%`;
     }
 
     async function flyToken(text, source, target, options = {}) {
@@ -789,23 +831,27 @@
       enemyCard.appendChild(pop);
 
       enemyCard.classList.remove('hp-flash');
+      enemyHpMeter.classList.remove('flash');
       void enemyCard.offsetWidth;
       enemyCard.classList.add('hp-flash');
+      enemyHpMeter.classList.add('flash');
 
       const diff = oldHp - newHp;
       const stepDelay = Math.max(22, Math.min(55, Math.floor(380 / Math.max(1, diff))));
       for (let hp = oldHp - 1; hp >= newHp; hp -= 1) {
-        enemyHpText.textContent = `HP ${hp}`;
+        updateEnemyHpDisplay(hp);
         await wait(stepDelay);
       }
 
       enemyHp = newHp;
+      updateEnemyHpDisplay(enemyHp);
       enemyCard.classList.remove('hit');
       void enemyCard.offsetWidth;
       enemyCard.classList.add('hit');
       await wait(430);
       pop.remove();
       enemyCard.classList.remove('hp-flash');
+      enemyHpMeter.classList.remove('flash');
     }
 
     async function runAutoBattleDemo() {
@@ -838,6 +884,7 @@
       attackFocus.classList.remove('show', 'buffed');
     }
 
+    updateEnemyHpDisplay(enemyHp);
     runAutoBattleDemo();
   </script>
 </body>
