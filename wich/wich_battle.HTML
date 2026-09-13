@@ -126,6 +126,7 @@
     .enemy-slot,
     .player-card,
     .hand-card {
+      position: relative;
       place-items: center;
       align-content: center;
       gap: 5px;
@@ -304,7 +305,7 @@
       max-width: 82px;
       border-color: #66515a;
       background: #291d22;
-      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease, filter .22s ease;
     }
 
     .hand-card.active {
@@ -321,6 +322,16 @@
       animation: fireCardPulse .46s ease-in-out infinite alternate;
     }
 
+    .hand-card.support-active {
+      transform: translateY(-13px) scale(1.08);
+      border-color: #ffc45a;
+      box-shadow:
+        0 0 14px rgba(255, 203, 91, .95),
+        0 0 32px rgba(255, 87, 8, .7);
+      filter: brightness(1.45);
+      animation: supportPulse .34s ease-in-out 3 alternate;
+    }
+
     .hand-card.used { opacity: .36; }
 
     .result-value {
@@ -334,12 +345,17 @@
       to { filter: brightness(1.55); }
     }
 
+    @keyframes supportPulse {
+      from { transform: translateY(-10px) scale(1.04); }
+      to { transform: translateY(-15px) scale(1.12); }
+    }
+
     .battle-message {
       position: fixed;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      z-index: 40;
+      z-index: 60;
       min-width: 170px;
       padding: 12px 18px;
       border: 1px solid #75525b;
@@ -357,9 +373,165 @@
     .fx-layer {
       position: fixed;
       inset: 0;
-      z-index: 35;
+      z-index: 45;
       overflow: hidden;
       pointer-events: none;
+    }
+
+    .attack-focus {
+      position: fixed;
+      left: 50%;
+      top: 49%;
+      z-index: 42;
+      width: 150px;
+      height: 150px;
+      transform: translate(-50%, -50%) scale(.35);
+      opacity: 0;
+      pointer-events: none;
+      display: grid;
+      place-items: center;
+      transition: opacity .22s ease, transform .32s cubic-bezier(.18,.8,.22,1);
+    }
+
+    .attack-focus.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .focus-glow {
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      opacity: .88;
+      filter: blur(8px);
+      background: radial-gradient(circle, rgba(255,227,119,.55), rgba(255,91,18,.24) 48%, transparent 72%);
+      animation: focusGlow .56s ease-in-out infinite alternate;
+    }
+
+    .focus-icon {
+      position: relative;
+      z-index: 2;
+      font-size: 76px;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px rgba(255,234,145,.95)) drop-shadow(0 0 22px rgba(255,73,7,.8));
+    }
+
+    .focus-base,
+    .focus-support,
+    .focus-dice,
+    .focus-total {
+      position: absolute;
+      z-index: 4;
+      min-width: 38px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      text-align: center;
+      font-weight: 900;
+      text-shadow: 0 2px 5px rgba(0,0,0,.85);
+    }
+
+    .focus-base {
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      color: #fff3da;
+      background: rgba(74,34,26,.78);
+      border: 1px solid rgba(255,176,92,.75);
+      font-size: 14px;
+    }
+
+    .focus-support {
+      left: 17px;
+      top: 20px;
+      color: #ffe494;
+      background: rgba(98,49,10,.86);
+      border: 1px solid #ffbd4a;
+      opacity: 0;
+      transform: scale(.3) rotate(-14deg);
+    }
+
+    .focus-dice {
+      right: 12px;
+      top: 49px;
+      color: #fff5c8;
+      background: rgba(61,53,27,.92);
+      border: 1px solid #e8d38c;
+      font-size: 18px;
+      opacity: 0;
+      transform: scale(.3) rotate(12deg);
+    }
+
+    .focus-support.pop,
+    .focus-dice.pop {
+      animation: modifierPop .42s cubic-bezier(.15,.88,.2,1.25) both;
+    }
+
+    .focus-total {
+      left: 50%;
+      top: -4px;
+      transform: translateX(-50%);
+      color: #fff;
+      background: rgba(34,18,18,.78);
+      border: 1px solid rgba(255,122,64,.56);
+      font-size: 13px;
+    }
+
+    .attack-focus.charge {
+      animation: focusCharge .38s ease-in-out 2 alternate;
+    }
+
+    @keyframes focusGlow {
+      from { transform: scale(.88); opacity: .58; }
+      to { transform: scale(1.16); opacity: 1; }
+    }
+
+    @keyframes modifierPop {
+      0% { opacity: 0; transform: scale(.2) rotate(-18deg); }
+      65% { opacity: 1; transform: scale(1.28) rotate(5deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes focusCharge {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.55); transform: translate(-50%, -50%) scale(1.12); }
+    }
+
+    .fly-token {
+      position: fixed;
+      left: var(--sx);
+      top: var(--sy);
+      z-index: 55;
+      transform: translate(-50%, -50%) scale(.55);
+      opacity: 0;
+      font-weight: 950;
+      font-size: var(--font-size, 30px);
+      color: var(--token-color, #fff);
+      text-shadow:
+        0 2px 4px rgba(0,0,0,.9),
+        0 0 12px var(--token-glow, rgba(255,255,255,.65));
+      animation: flyToken .58s cubic-bezier(.12,.78,.2,1) both;
+    }
+
+    @keyframes flyToken {
+      0% {
+        left: var(--sx);
+        top: var(--sy);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.45) rotate(-8deg);
+      }
+      18% { opacity: 1; }
+      78% {
+        left: var(--tx);
+        top: var(--ty);
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.18) rotate(4deg);
+      }
+      100% {
+        left: var(--tx);
+        top: var(--ty);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.72);
+      }
     }
 
     .fire-flash {
@@ -497,33 +669,42 @@
       </section>
 
       <section id="handArea" class="battle-section hand-area" aria-label="手札エリア">
-        <div class="hand-card" data-base="3" data-element="fire">
+        <div class="hand-card" data-role="attack" data-base="3" data-element="fire" data-icon="🔥">
           <div class="card-name">火花</div>
           <div class="base-value">3</div>
           <div class="result-value"></div>
         </div>
-        <div class="hand-card" data-base="2">
-          <div class="card-name">風刃</div>
-          <div class="base-value">2</div>
+        <div class="hand-card" data-role="support" data-support="fire" data-bonus="2">
+          <div class="card-name">火種</div>
+          <div class="base-value">火 +2</div>
           <div class="result-value"></div>
         </div>
-        <div class="hand-card" data-base="4">
+        <div class="hand-card" data-role="attack" data-base="4" data-element="ice" data-icon="❄️">
           <div class="card-name">氷針</div>
           <div class="base-value">4</div>
           <div class="result-value"></div>
         </div>
-        <div class="hand-card" data-base="1" data-element="fire">
+        <div class="hand-card" data-role="attack" data-base="1" data-element="fire" data-icon="🔥">
           <div class="card-name">呪火</div>
           <div class="base-value">1</div>
           <div class="result-value"></div>
         </div>
-        <div class="hand-card" data-base="5">
+        <div class="hand-card" data-role="attack" data-base="5" data-element="lightning" data-icon="⚡">
           <div class="card-name">雷光</div>
           <div class="base-value">5</div>
           <div class="result-value"></div>
         </div>
       </section>
     </main>
+  </div>
+
+  <div id="attackFocus" class="attack-focus" aria-hidden="true">
+    <div class="focus-glow"></div>
+    <div id="focusIcon" class="focus-icon">🔥</div>
+    <div id="focusBase" class="focus-base">3</div>
+    <div id="focusSupport" class="focus-support">+2</div>
+    <div id="focusDice" class="focus-dice">+1</div>
+    <div id="focusTotal" class="focus-total">3</div>
   </div>
 
   <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
@@ -539,12 +720,41 @@
     const enemyHpText = document.getElementById('enemyHp');
     const battleMessage = document.getElementById('battleMessage');
     const fxLayer = document.getElementById('fxLayer');
+    const attackFocus = document.getElementById('attackFocus');
+    const focusIcon = document.getElementById('focusIcon');
+    const focusBase = document.getElementById('focusBase');
+    const focusSupport = document.getElementById('focusSupport');
+    const focusDice = document.getElementById('focusDice');
+    const focusTotal = document.getElementById('focusTotal');
     const handCards = [...document.querySelectorAll('.hand-card')];
     let enemyHp = 40;
 
     document.getElementById('backToMap').addEventListener('click', () => {
       location.href = './wich_map.HTML';
     });
+
+    function centerOf(element) {
+      const r = element.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+
+    async function flyToken(text, source, target, options = {}) {
+      const s = centerOf(source);
+      const t = centerOf(target);
+      const token = document.createElement('div');
+      token.className = 'fly-token';
+      token.textContent = text;
+      token.style.setProperty('--sx', `${s.x}px`);
+      token.style.setProperty('--sy', `${s.y}px`);
+      token.style.setProperty('--tx', `${t.x}px`);
+      token.style.setProperty('--ty', `${t.y}px`);
+      token.style.setProperty('--font-size', options.fontSize || '32px');
+      token.style.setProperty('--token-color', options.color || '#fff');
+      token.style.setProperty('--token-glow', options.glow || 'rgba(255,255,255,.7)');
+      fxLayer.appendChild(token);
+      await wait(610);
+      token.remove();
+    }
 
     async function revealDice() {
       diceCard.classList.remove('open');
@@ -555,7 +765,7 @@
       diceNumber.textContent = `+${roll}`;
 
       diceCard.classList.add('open');
-      await wait(650);
+      await wait(620);
       return roll;
     }
 
@@ -567,8 +777,82 @@
       enemyCard.classList.add('hit');
     }
 
-    async function playFireEffect(sourceCard) {
-      const sourceRect = sourceCard.getBoundingClientRect();
+    async function showAttackInCenter(card) {
+      const icon = card.dataset.icon || '✦';
+      const base = Number(card.dataset.base || 0);
+
+      focusIcon.textContent = icon;
+      focusBase.textContent = String(base);
+      focusTotal.textContent = String(base);
+      focusSupport.classList.remove('pop');
+      focusDice.classList.remove('pop');
+      focusSupport.style.opacity = '0';
+      focusDice.style.opacity = '0';
+
+      await flyToken(icon, card, attackFocus, {
+        fontSize: '56px',
+        color: '#fff0c2',
+        glow: 'rgba(255,94,15,.95)'
+      });
+
+      attackFocus.classList.add('show');
+      await wait(380);
+      return base;
+    }
+
+    async function applySupport(supportCard, currentTotal) {
+      const bonus = Number(supportCard.dataset.bonus || 0);
+      supportCard.classList.add('support-active');
+      await wait(260);
+
+      await flyToken(`+${bonus}`, supportCard, attackFocus, {
+        fontSize: '30px',
+        color: '#ffe493',
+        glow: 'rgba(255,137,24,.95)'
+      });
+
+      focusSupport.textContent = `+${bonus}`;
+      focusSupport.style.opacity = '';
+      focusSupport.classList.remove('pop');
+      void focusSupport.offsetWidth;
+      focusSupport.classList.add('pop');
+
+      const next = currentTotal + bonus;
+      focusTotal.textContent = String(next);
+      attackFocus.classList.remove('charge');
+      void attackFocus.offsetWidth;
+      attackFocus.classList.add('charge');
+      await wait(430);
+      supportCard.classList.remove('support-active');
+      return next;
+    }
+
+    async function applyDice(currentTotal) {
+      const roll = await revealDice();
+
+      await flyToken(`+${roll}`, diceCard, attackFocus, {
+        fontSize: '34px',
+        color: '#fff7cc',
+        glow: 'rgba(255,230,126,.9)'
+      });
+
+      focusDice.textContent = `+${roll}`;
+      focusDice.style.opacity = '';
+      focusDice.classList.remove('pop');
+      void focusDice.offsetWidth;
+      focusDice.classList.add('pop');
+
+      const next = currentTotal + roll;
+      focusTotal.textContent = String(next);
+      attackFocus.classList.remove('charge');
+      void attackFocus.offsetWidth;
+      attackFocus.classList.add('charge');
+      await wait(500);
+      return { roll, total: next };
+    }
+
+    async function playFireEffect(sourceElement) {
+      const sourceRect = sourceElement.getBoundingClientRect();
       const targetRect = enemyCard.getBoundingClientRect();
       const sx = sourceRect.left + sourceRect.width / 2;
       const sy = sourceRect.top + sourceRect.height / 2;
@@ -622,30 +906,44 @@
     async function runAutoBattleDemo() {
       await wait(700);
 
-      for (const card of handCards) {
-        if (enemyHp <= 0) break;
+      const attackCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'fire');
+      if (!attackCard) return;
 
-        card.classList.add('active');
-        await wait(420);
+      attackCard.classList.add('active');
+      await wait(420);
 
-        const roll = await revealDice();
-        const base = Number(card.dataset.base);
-        const total = base + roll;
-        card.querySelector('.result-value').textContent = `${base}+${roll}=${total}`;
+      let total = await showAttackInCenter(attackCard);
+      const base = total;
 
-        await wait(180);
-        if (card.dataset.element === 'fire') {
-          await playFireEffect(card);
-        }
+      const supportCard = handCards.find(card =>
+        card.dataset.role === 'support' && card.dataset.support === attackCard.dataset.element
+      );
 
-        hitEnemy(total);
-        await wait(420);
-
-        card.classList.remove('active');
-        card.classList.add('used');
-        diceCard.classList.remove('open');
-        await wait(320);
+      let supportBonus = 0;
+      if (supportCard) {
+        supportBonus = Number(supportCard.dataset.bonus || 0);
+        total = await applySupport(supportCard, total);
       }
+
+      const diceResult = await applyDice(total);
+      total = diceResult.total;
+
+      attackCard.querySelector('.result-value').textContent = supportBonus
+        ? `${base}+${supportBonus}+${diceResult.roll}=${total}`
+        : `${base}+${diceResult.roll}=${total}`;
+
+      await wait(220);
+      if (attackCard.dataset.element === 'fire') {
+        await playFireEffect(attackFocus);
+      }
+
+      hitEnemy(total);
+      await wait(430);
+
+      attackCard.classList.remove('active');
+      attackCard.classList.add('used');
+      diceCard.classList.remove('open');
+      attackFocus.classList.remove('show', 'charge');
 
       battleMessage.textContent = enemyHp <= 0 ? '勝利' : '1ターン終了';
       battleMessage.classList.add('show');
