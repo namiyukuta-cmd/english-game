@@ -32,7 +32,7 @@
 
     header {
       min-height: 52px;
-      padding: env(safe-area-inset-top) 14px 0;
+      padding: env(safe-area-inset-top) 12px 0;
       border-bottom: 1px solid #343840;
       display: flex;
       align-items: center;
@@ -59,52 +59,163 @@
 
     main {
       min-height: 0;
-      padding: 14px;
+      padding: 8px;
     }
 
     .map {
       width: 100%;
       height: 100%;
-      border: 1px solid #343840;
-      border-radius: 10px;
+      min-height: 0;
       display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
-      padding: 10px;
-      background: #171a20;
+      grid-template-rows: minmax(0, 1fr) 74px;
+      gap: 8px;
       overflow: hidden;
     }
 
+    .explore-window {
+      min-height: 0;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      border: 1px solid #343840;
+      border-radius: 10px;
+      background: #171a20;
+    }
+
+    .explore-window::-webkit-scrollbar { display: none; }
+
     .explore-grid {
-      width: min(92%, 430px);
-      margin: 0 auto;
+      width: 100%;
+      padding: 10px 6px 28px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .explore-row {
+      min-height: 132px;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      grid-template-rows: repeat(2, auto);
+      align-items: center;
       gap: 5px;
-      align-self: start;
+      scroll-margin-top: 10px;
     }
 
-    .explore-slot,
-    .deck-slot {
+    .card {
       min-width: 0;
       aspect-ratio: 2 / 3;
-      border: 1px dashed #555b66;
-      border-radius: 7px;
-      background: #20242c;
-    }
-
-    .lower-area {
-      min-height: 0;
+      perspective: 700px;
       position: relative;
-      border-top: 1px solid #2d3138;
     }
 
-    .deck-slot {
+    .card-inner {
       position: absolute;
-      right: 0;
-      bottom: 0;
-      width: clamp(58px, 15vw, 76px);
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform .58s cubic-bezier(.2,.72,.2,1);
+    }
+
+    .card.open .card-inner { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border: 1px solid #555b66;
+      border-radius: 8px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .card-back {
+      background:
+        linear-gradient(135deg, transparent 46%, #3a404b 47%, #3a404b 53%, transparent 54%),
+        linear-gradient(45deg, transparent 46%, #3a404b 47%, #3a404b 53%, transparent 54%),
+        #20242c;
+      background-size: 16px 16px;
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      background: #253126;
+      border-color: #52624f;
+      color: #dbe2d3;
+      font-size: clamp(12px, 3.4vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .battle .card-front {
+      background: #3a1f22;
+      border-color: #86555a;
+      color: #f3d7d9;
+    }
+
+    .card.shake {
+      animation: shake .72s ease-in-out 2;
+      z-index: 5;
+    }
+
+    .card.battle-pop .card-inner {
+      transform: rotateY(180deg) translateY(-10px) scale(1.14);
+      filter: drop-shadow(0 12px 16px rgba(0,0,0,.45));
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0) rotate(0); }
+      20% { transform: translateX(-5px) rotate(-2deg); }
+      40% { transform: translateX(5px) rotate(2deg); }
+      60% { transform: translateX(-4px) rotate(-1.5deg); }
+      80% { transform: translateX(4px) rotate(1.5deg); }
+    }
+
+    .pawn-area {
+      position: relative;
+      min-height: 0;
+      border: 1px solid #343840;
+      border-radius: 10px;
+      background: #171a20;
+    }
+
+    .pawn-home {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      transform: translate(-50%, -50%);
+      border: 1px dashed #555b66;
+      border-radius: 50%;
+    }
+
+    #pawn {
+      position: fixed;
+      z-index: 20;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #8d826f;
+      border-radius: 50%;
+      background: #d8d0c0;
+      color: #242018;
+      font-size: 22px;
+      line-height: 1;
+      pointer-events: none;
+      transition: left .62s cubic-bezier(.18,.8,.24,1), top .62s cubic-bezier(.18,.8,.24,1);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 5px 12px rgba(0,0,0,.35);
+    }
+
+    #pawn.hop { animation: hop .62s ease; }
+
+    @keyframes hop {
+      0%,100% { margin-top: 0; }
+      45% { margin-top: -18px; }
     }
   </style>
 </head>
@@ -117,30 +228,127 @@
 
     <main>
       <section class="map" aria-label="夜の見回りマップ">
-        <div class="explore-grid" aria-label="探索カード置き場">
-          <div class="explore-slot" data-slot="1"></div>
-          <div class="explore-slot" data-slot="2"></div>
-          <div class="explore-slot" data-slot="3"></div>
-          <div class="explore-slot" data-slot="4"></div>
-          <div class="explore-slot" data-slot="5"></div>
-          <div class="explore-slot" data-slot="6"></div>
-          <div class="explore-slot" data-slot="7"></div>
-          <div class="explore-slot" data-slot="8"></div>
-          <div class="explore-slot" data-slot="9"></div>
-          <div class="explore-slot" data-slot="10"></div>
+        <div id="exploreWindow" class="explore-window" aria-label="探索カード置き場">
+          <div class="explore-grid">
+            <div class="explore-row" data-row="1">
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+            </div>
+
+            <div class="explore-row" data-row="2">
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+            </div>
+
+            <div class="explore-row" data-row="3">
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+            </div>
+
+            <div class="explore-row" data-row="4">
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div id="battleCard" class="card battle center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">バトル</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+            </div>
+          </div>
         </div>
 
-        <div class="lower-area" aria-label="カード操作エリア">
-          <div class="deck-slot" aria-label="山札置き場"></div>
+        <div class="pawn-area" aria-label="主人公ポーン置き場">
+          <div id="pawnHome" class="pawn-home"></div>
         </div>
       </section>
     </main>
   </div>
 
+  <div id="pawn" aria-hidden="true">♟</div>
+
   <script>
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const exploreWindow = document.getElementById('exploreWindow');
+    const pawn = document.getElementById('pawn');
+    const pawnHome = document.getElementById('pawnHome');
+    const rows = [...document.querySelectorAll('.explore-row')];
+    const battleCard = document.getElementById('battleCard');
+
     document.getElementById('backToTop').addEventListener('click', () => {
       location.href = './wich_top.HTML';
     });
+
+    function centerOf(element) {
+      const r = element.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+
+    function placePawn(element, hop = false) {
+      const p = centerOf(element);
+      pawn.style.left = `${p.x}px`;
+      pawn.style.top = `${p.y}px`;
+      if (hop) {
+        pawn.classList.remove('hop');
+        void pawn.offsetWidth;
+        pawn.classList.add('hop');
+      }
+    }
+
+    async function scrollToRow(row) {
+      const top = row.offsetTop - 8;
+      exploreWindow.scrollTo({ top, behavior: 'smooth' });
+      await wait(700);
+    }
+
+    async function revealCards(cards) {
+      cards.forEach((card, index) => {
+        setTimeout(() => card.classList.add('open'), index * 90);
+      });
+      await wait(850);
+    }
+
+    async function runPatrol() {
+      await wait(250);
+      placePawn(pawnHome);
+      await wait(700);
+
+      for (let i = 0; i < 3; i++) {
+        const row = rows[i];
+        await scrollToRow(row);
+        await revealCards([...row.querySelectorAll('.card')]);
+        placePawn(row.querySelector('.center'), true);
+        await wait(850);
+      }
+
+      const lastRow = rows[3];
+      await scrollToRow(lastRow);
+
+      const lastCards = [...lastRow.querySelectorAll('.card')];
+      await revealCards([lastCards[0], lastCards[1], lastCards[3], lastCards[4]]);
+      placePawn(lastRow.querySelector('.center'), true);
+      await wait(700);
+
+      battleCard.classList.add('shake');
+      await wait(1450);
+      battleCard.classList.remove('shake');
+      battleCard.classList.add('open', 'battle-pop');
+      await wait(1100);
+      battleCard.classList.remove('battle-pop');
+    }
+
+    window.addEventListener('resize', () => {
+      const activeCenter = rows.findLast?.(row => row.querySelector('.center.open'))?.querySelector('.center');
+      placePawn(activeCenter || pawnHome);
+    });
+
+    runPatrol();
   </script>
 </body>
 </html>
