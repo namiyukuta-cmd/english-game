@@ -128,7 +128,7 @@
       color: #a98a92;
     }
 
-    .enemy-hp-meter {
+    .hp-meter {
       position: absolute;
       left: 8px;
       right: 8px;
@@ -141,7 +141,7 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,.75);
     }
 
-    .enemy-hp-fill {
+    .hp-fill {
       width: 100%;
       height: 100%;
       border-radius: inherit;
@@ -150,12 +150,18 @@
       transition: width .08s linear;
     }
 
-    .enemy-hp-meter.flash {
-      animation: meterFlash .42s ease;
+    .player-hp-fill {
+      background: linear-gradient(90deg, #355c50, #4c947d 58%, #7bc9a7);
+      box-shadow: 0 0 8px rgba(94,193,156,.38);
     }
 
-    .enemy-slot.hit { animation: enemyHit .28s ease; }
-    .enemy-slot.hp-flash { animation: hpFlash .5s ease; }
+    .hp-meter.flash { animation: meterFlash .42s ease; }
+
+    .enemy-slot.hit,
+    .player-card.hit { animation: cardHit .3s ease; }
+
+    .enemy-slot.hp-flash,
+    .player-card.hp-flash { animation: hpFlash .5s ease; }
 
     .enemy-slot.burning {
       animation: enemyBurn .72s ease both;
@@ -192,11 +198,17 @@
       animation-delay: .08s;
     }
 
+    .enemy-slot.enemy-charge {
+      border-color: #bd7184;
+      box-shadow: 0 0 16px rgba(190,75,107,.72), 0 0 34px rgba(92,27,52,.72);
+      animation: enemyCharge .28s ease-in-out 3 alternate;
+    }
+
     .damage-pop {
       position: absolute;
       left: 50%;
       top: 49%;
-      z-index: 8;
+      z-index: 70;
       transform: translate(-50%, -50%);
       color: #ffddd2;
       font-size: 30px;
@@ -206,10 +218,15 @@
       animation: damagePop .75s cubic-bezier(.13,.78,.2,1) both;
     }
 
-    @keyframes enemyHit {
+    .player-card .damage-pop {
+      color: #ffe5ed;
+      text-shadow: 0 2px 4px #000, 0 0 14px rgba(188,67,111,.95);
+    }
+
+    @keyframes cardHit {
       0%,100% { transform: translateX(0); }
-      35% { transform: translateX(-7px); }
-      70% { transform: translateX(7px); }
+      30% { transform: translateX(-8px) rotate(-1.5deg); }
+      65% { transform: translateX(8px) rotate(1.5deg); }
     }
 
     @keyframes hpFlash {
@@ -237,6 +254,11 @@
       22% { opacity: 1; }
       70% { opacity: .95; }
       100% { opacity: 0; transform: translate(-50%,-42%) scale(1.22); }
+    }
+
+    @keyframes enemyCharge {
+      from { transform: scale(1); filter: brightness(1); }
+      to { transform: scale(1.08); filter: brightness(1.55); }
     }
 
     @keyframes damagePop {
@@ -499,12 +521,21 @@
       100% { left: var(--tx); top: var(--ty); opacity: 0; transform: translate(-50%,-50%) scale(.72); }
     }
 
-    .fire-flash {
+    .fire-flash,
+    .enemy-flash {
       position: fixed;
       inset: 0;
       opacity: 0;
+    }
+
+    .fire-flash {
       background: radial-gradient(circle at 50% 38%, rgba(255,220,120,.34), transparent 26%), rgba(255,58,0,.16);
-      animation: fireFlash .48s ease-out both;
+      animation: flashOut .48s ease-out both;
+    }
+
+    .enemy-flash {
+      background: radial-gradient(circle at 30% 55%, rgba(255,180,204,.2), transparent 24%), rgba(91,10,43,.14);
+      animation: flashOut .42s ease-out both;
     }
 
     .fire-stream {
@@ -558,7 +589,21 @@
       animation: emberFly var(--duration) ease-out var(--delay) both;
     }
 
-    @keyframes fireFlash {
+    .slash {
+      position: fixed;
+      left: var(--sx);
+      top: var(--sy);
+      width: 16px;
+      height: 118px;
+      border-radius: 999px;
+      transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(.15);
+      opacity: 0;
+      background: linear-gradient(180deg, transparent, #f8d6e2 18%, #c85b83 48%, #53182e 78%, transparent);
+      box-shadow: 0 0 9px rgba(231,127,161,.9), 0 0 24px rgba(150,47,82,.72);
+      animation: slashFly .48s cubic-bezier(.16,.78,.23,1) both;
+    }
+
+    @keyframes flashOut {
       0% { opacity: 0; }
       18% { opacity: 1; }
       100% { opacity: 0; }
@@ -582,6 +627,28 @@
       15% { opacity: 1; }
       100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(.08) rotate(var(--spin)); }
     }
+
+    @keyframes slashFly {
+      0% {
+        left: var(--sx);
+        top: var(--sy);
+        opacity: 0;
+        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(.15) scaleX(.65);
+      }
+      20% { opacity: 1; }
+      75% {
+        left: var(--tx);
+        top: var(--ty);
+        opacity: 1;
+        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.05) scaleX(1);
+      }
+      100% {
+        left: var(--tx);
+        top: var(--ty);
+        opacity: 0;
+        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.25) scaleX(.7);
+      }
+    }
   </style>
 </head>
 <body>
@@ -598,8 +665,8 @@
           <div id="enemyCard" class="enemy-slot" data-enemy-slot="2">
             <div class="enemy-name">敵</div>
             <div id="enemyHp" class="hp">HP 40</div>
-            <div id="enemyHpMeter" class="enemy-hp-meter" aria-label="敵の体力メーター">
-              <div id="enemyHpFill" class="enemy-hp-fill"></div>
+            <div id="enemyHpMeter" class="hp-meter" aria-label="敵の体力メーター">
+              <div id="enemyHpFill" class="hp-fill"></div>
             </div>
           </div>
           <div class="enemy-slot" data-enemy-slot="3">敵</div>
@@ -607,9 +674,12 @@
       </section>
 
       <section class="battle-section player-area" aria-label="主人公とサイコロカードエリア">
-        <div class="player-card" aria-label="主人公カード">
+        <div id="playerCard" class="player-card" aria-label="主人公カード">
           <div class="card-name">主人公</div>
-          <div class="hp">HP 20</div>
+          <div id="playerHp" class="hp">HP 20</div>
+          <div id="playerHpMeter" class="hp-meter" aria-label="主人公の体力メーター">
+            <div id="playerHpFill" class="hp-fill player-hp-fill"></div>
+          </div>
         </div>
 
         <div class="dice-zone" aria-label="サイコロカードエリア">
@@ -661,20 +731,31 @@
   <script>
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     const diceFaces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
     const diceCard = document.getElementById('diceCard');
     const diceSymbol = document.getElementById('diceSymbol');
     const diceNumber = document.getElementById('diceNumber');
+
     const enemyCard = document.getElementById('enemyCard');
     const enemyHpText = document.getElementById('enemyHp');
     const enemyHpMeter = document.getElementById('enemyHpMeter');
     const enemyHpFill = document.getElementById('enemyHpFill');
+
+    const playerCard = document.getElementById('playerCard');
+    const playerHpText = document.getElementById('playerHp');
+    const playerHpMeter = document.getElementById('playerHpMeter');
+    const playerHpFill = document.getElementById('playerHpFill');
+
     const fxLayer = document.getElementById('fxLayer');
     const attackFocus = document.getElementById('attackFocus');
     const focusIcon = document.getElementById('focusIcon');
     const focusTotal = document.getElementById('focusTotal');
     const handCards = [...document.querySelectorAll('.hand-card')];
+
     const enemyMaxHp = 40;
+    const playerMaxHp = 20;
     let enemyHp = enemyMaxHp;
+    let playerHp = playerMaxHp;
 
     document.getElementById('backToMap').addEventListener('click', () => {
       location.href = './wich_map.HTML';
@@ -688,6 +769,11 @@
     function updateEnemyHpDisplay(hp) {
       enemyHpText.textContent = `HP ${hp}`;
       enemyHpFill.style.width = `${Math.max(0, Math.min(100, hp / enemyMaxHp * 100))}%`;
+    }
+
+    function updatePlayerHpDisplay(hp) {
+      playerHpText.textContent = `HP ${hp}`;
+      playerHpFill.style.width = `${Math.max(0, Math.min(100, hp / playerMaxHp * 100))}%`;
     }
 
     async function flyToken(text, source, target, options = {}) {
@@ -821,37 +907,91 @@
       enemyCard.classList.remove('burning');
     }
 
-    async function damageEnemy(damage) {
-      const oldHp = enemyHp;
-      const newHp = Math.max(0, oldHp - damage);
-
+    async function damageTarget({ card, meter, fillUpdate, oldHp, newHp, damage }) {
       const pop = document.createElement('div');
       pop.className = 'damage-pop';
       pop.textContent = `-${damage}`;
-      enemyCard.appendChild(pop);
+      card.appendChild(pop);
 
-      enemyCard.classList.remove('hp-flash');
-      enemyHpMeter.classList.remove('flash');
-      void enemyCard.offsetWidth;
-      enemyCard.classList.add('hp-flash');
-      enemyHpMeter.classList.add('flash');
+      card.classList.remove('hp-flash');
+      meter.classList.remove('flash');
+      void card.offsetWidth;
+      card.classList.add('hp-flash');
+      meter.classList.add('flash');
 
       const diff = oldHp - newHp;
       const stepDelay = Math.max(22, Math.min(55, Math.floor(380 / Math.max(1, diff))));
       for (let hp = oldHp - 1; hp >= newHp; hp -= 1) {
-        updateEnemyHpDisplay(hp);
+        fillUpdate(hp);
         await wait(stepDelay);
       }
 
-      enemyHp = newHp;
-      updateEnemyHpDisplay(enemyHp);
-      enemyCard.classList.remove('hit');
-      void enemyCard.offsetWidth;
-      enemyCard.classList.add('hit');
+      card.classList.remove('hit');
+      void card.offsetWidth;
+      card.classList.add('hit');
       await wait(430);
       pop.remove();
-      enemyCard.classList.remove('hp-flash');
-      enemyHpMeter.classList.remove('flash');
+      card.classList.remove('hp-flash');
+      meter.classList.remove('flash');
+    }
+
+    async function damageEnemy(damage) {
+      const oldHp = enemyHp;
+      const newHp = Math.max(0, oldHp - damage);
+      await damageTarget({
+        card: enemyCard,
+        meter: enemyHpMeter,
+        fillUpdate: updateEnemyHpDisplay,
+        oldHp,
+        newHp,
+        damage
+      });
+      enemyHp = newHp;
+      updateEnemyHpDisplay(enemyHp);
+    }
+
+    async function playEnemyAttack(damage) {
+      await wait(420);
+      enemyCard.classList.add('enemy-charge');
+      await wait(650);
+      enemyCard.classList.remove('enemy-charge');
+
+      const flash = document.createElement('div');
+      flash.className = 'enemy-flash';
+      fxLayer.appendChild(flash);
+
+      const s = centerOf(enemyCard);
+      const t = centerOf(playerCard);
+      const offsets = [-22, 0, 22];
+
+      for (let i = 0; i < offsets.length; i += 1) {
+        const slash = document.createElement('div');
+        slash.className = 'slash';
+        slash.style.setProperty('--sx', `${s.x + offsets[i]}px`);
+        slash.style.setProperty('--sy', `${s.y + offsets[i] * .35}px`);
+        slash.style.setProperty('--tx', `${t.x + offsets[i] * .65}px`);
+        slash.style.setProperty('--ty', `${t.y + offsets[i] * .25}px`);
+        slash.style.setProperty('--rot', `${-34 + i * 13}deg`);
+        slash.style.animationDelay = `${i * .055}s`;
+        fxLayer.appendChild(slash);
+      }
+
+      await wait(520);
+      flash.remove();
+      fxLayer.querySelectorAll('.slash').forEach(el => el.remove());
+
+      const oldHp = playerHp;
+      const newHp = Math.max(0, oldHp - damage);
+      await damageTarget({
+        card: playerCard,
+        meter: playerHpMeter,
+        fillUpdate: updatePlayerHpDisplay,
+        oldHp,
+        newHp,
+        damage
+      });
+      playerHp = newHp;
+      updatePlayerHpDisplay(playerHp);
     }
 
     async function runAutoBattleDemo() {
@@ -864,15 +1004,12 @@
       await wait(360);
 
       let total = await showAttackInCenter(attackCard);
-
       const supportCard = handCards.find(card =>
         card.dataset.role === 'support' && card.dataset.support === attackCard.dataset.element
       );
 
       if (supportCard) total = await applySupport(supportCard, total);
-
-      const diceResult = await applyDice(total);
-      total = diceResult.total;
+      total = (await applyDice(total)).total;
 
       await wait(220);
       await playFireEffect(attackFocus);
@@ -882,9 +1019,14 @@
       attackCard.classList.add('used');
       diceCard.classList.remove('open');
       attackFocus.classList.remove('show', 'buffed');
+
+      if (enemyHp > 0) {
+        await playEnemyAttack(4);
+      }
     }
 
     updateEnemyHpDisplay(enemyHp);
+    updatePlayerHpDisplay(playerHp);
     runAutoBattleDemo();
   </script>
 </body>
