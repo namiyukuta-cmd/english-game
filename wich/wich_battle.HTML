@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#171014" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Wich - Battle</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #171014;
+      color: #f2e8e8;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body { min-height: 100dvh; }
+
+    .app {
+      width: 100%;
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      min-height: 52px;
+      padding: env(safe-area-inset-top) 12px 0;
+      border-bottom: 1px solid #563a40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #21161a;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    header button {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid #6c4d54;
+      border-radius: 7px;
+      background: #2d1f24;
+      color: #f2e8e8;
+      font-size: 14px;
+    }
+
+    main {
+      min-height: 0;
+      padding: 10px;
+    }
+
+    .battle-field {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border: 1px solid #563a40;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, rgba(121,54,65,.16), transparent 54%),
+        #1e1418;
+    }
+
+    .battle-title {
+      margin: 0;
+      font-size: clamp(34px, 11vw, 64px);
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>バトル</h1>
+      <button id="backToMap" type="button">戻る</button>
+    </header>
+
+    <main>
+      <section class="battle-field" aria-label="バトル画面">
+        <h2 class="battle-title">BATTLE</h2>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('backToMap').addEventListener('click', () => {
+      location.href = './wich_map.HTML';
+    });
+  </script>
+</body>
+</html>
