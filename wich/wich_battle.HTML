@@ -61,22 +61,20 @@
       min-height: 0;
       padding: 8px;
       display: grid;
-      grid-template-rows: minmax(0, 1fr) minmax(150px, 32%);
+      grid-template-rows: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
-    .battle-area,
-    .hand-area {
+    .battle-section {
       min-height: 0;
       border: 1px solid #563a40;
       border-radius: 10px;
       background: #1e1418;
+      overflow: hidden;
     }
 
-    .battle-area {
-      display: grid;
-      place-items: center;
-      padding: 14px 10px;
+    .enemy-area {
+      padding: 8px;
       background:
         radial-gradient(circle at center, rgba(121,54,65,.16), transparent 54%),
         #1e1418;
@@ -89,57 +87,97 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
     }
 
-    .enemy-slot {
+    .enemy-slot,
+    .player-card,
+    .dice-card,
+    .hand-card {
       min-width: 0;
+      aspect-ratio: 2 / 3;
       border: 1px dashed #6c4d54;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #26191e;
       display: grid;
       place-items: center;
       color: #9e7c84;
-      font-size: 13px;
+      font-size: 12px;
+      text-align: center;
     }
 
-    .enemy-row.count-1 .enemy-slot {
-      display: none;
-    }
+    .enemy-row.count-1 .enemy-slot { display: none; }
 
     .enemy-row.count-1 .enemy-slot:nth-child(2) {
       display: grid;
-      width: min(58%, 220px);
-      height: min(78%, 300px);
+      height: 94%;
+      max-height: 190px;
     }
 
     .enemy-row.count-2 .enemy-slot {
       display: grid;
-      width: min(44%, 180px);
-      height: min(72%, 260px);
+      height: 88%;
+      max-height: 180px;
     }
 
-    .enemy-row.count-2 .enemy-slot:nth-child(2) {
-      display: none;
-    }
+    .enemy-row.count-2 .enemy-slot:nth-child(2) { display: none; }
 
     .enemy-row.count-3 .enemy-slot {
       display: grid;
       flex: 1 1 0;
-      max-width: 150px;
-      height: min(66%, 230px);
+      max-width: 118px;
+      height: 82%;
+      max-height: 170px;
     }
 
-    .hand-area {
-      display: grid;
-      place-items: center;
+    .player-area {
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       background: #21161a;
     }
 
-    .area-label {
-      color: #9e7c84;
-      font-size: 14px;
-      letter-spacing: .08em;
+    .player-card {
+      height: 92%;
+      max-height: 185px;
+      border-color: #725d66;
+      background: #291d22;
+    }
+
+    .dice-zone {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .dice-card {
+      height: 72%;
+      max-height: 145px;
+      border-color: #766d59;
+      background: #29251d;
+      color: #c7bfa9;
+    }
+
+    .hand-area {
+      padding: 8px 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: #21161a;
+    }
+
+    .hand-card {
+      flex: 1 1 0;
+      max-width: 92px;
+      height: 88%;
+      aspect-ratio: auto;
+      border-color: #66515a;
+      background: #291d22;
     }
   </style>
 </head>
@@ -151,16 +189,27 @@
     </header>
 
     <main>
-      <section class="battle-area" aria-label="戦闘エリア">
-        <div id="enemyRow" class="enemy-row count-1" aria-label="敵エリア">
+      <section class="battle-section enemy-area" aria-label="敵カードエリア">
+        <div id="enemyRow" class="enemy-row count-1">
           <div class="enemy-slot" data-enemy-slot="1">敵</div>
           <div class="enemy-slot" data-enemy-slot="2">敵</div>
           <div class="enemy-slot" data-enemy-slot="3">敵</div>
         </div>
       </section>
 
-      <section class="hand-area" aria-label="手札エリア">
-        <span class="area-label">手札</span>
+      <section class="battle-section player-area" aria-label="主人公とサイコロカードエリア">
+        <div class="player-card" aria-label="主人公カード">主人公</div>
+        <div id="diceZone" class="dice-zone" aria-label="サイコロカードエリア">
+          <div class="dice-card" data-dice-card="1">サイコロ</div>
+        </div>
+      </section>
+
+      <section class="battle-section hand-area" aria-label="手札エリア">
+        <div class="hand-card" data-hand-slot="1">手札</div>
+        <div class="hand-card" data-hand-slot="2">手札</div>
+        <div class="hand-card" data-hand-slot="3">手札</div>
+        <div class="hand-card" data-hand-slot="4">手札</div>
+        <div class="hand-card" data-hand-slot="5">手札</div>
       </section>
     </main>
   </div>
