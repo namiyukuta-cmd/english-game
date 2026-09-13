@@ -58,9 +58,9 @@
 
     main {
       min-height: 0;
-      position: relative;
       display: grid;
-      place-items: center;
+      grid-template-rows: 1fr auto;
+      gap: 14px;
       padding: 20px;
     }
 
@@ -75,6 +75,20 @@
       text-align: center;
       background: #1d1914;
       color: #bdb4a6;
+      justify-self: center;
+      align-self: center;
+    }
+
+    .patrol-button {
+      width: min(100%, 520px);
+      min-height: 56px;
+      justify-self: center;
+      border: 1px solid #6b6256;
+      border-radius: 10px;
+      background: #2a241c;
+      color: #f2ede5;
+      font-size: 17px;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -89,12 +103,18 @@
       <section class="placeholder" aria-label="ゲーム画面">
         ゲーム画面
       </section>
+
+      <button id="nightPatrol" class="patrol-button" type="button">夜の見回り</button>
     </main>
   </div>
 
   <script>
     document.getElementById('backToIndex').addEventListener('click', () => {
       location.href = './wich_index.html';
+    });
+
+    document.getElementById('nightPatrol').addEventListener('click', () => {
+      location.href = './wich_map.HTML';
     });
   </script>
 </body>
