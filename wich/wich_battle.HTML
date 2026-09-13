@@ -97,13 +97,10 @@
       flex: 0 0 auto;
       min-width: 0;
       aspect-ratio: 2 / 3;
-      border: 1px dashed #6c4d54;
+      border: 1px solid #6c4d54;
       border-radius: 8px;
       background: #26191e;
-      display: grid;
-      place-items: center;
-      color: #9e7c84;
-      font-size: 12px;
+      color: #d8bcc3;
       text-align: center;
     }
 
@@ -126,6 +123,38 @@
       width: min(25vw, 98px);
     }
 
+    .enemy-slot,
+    .player-card,
+    .hand-card {
+      place-items: center;
+      align-content: center;
+      gap: 5px;
+      padding: 7px;
+    }
+
+    .enemy-name,
+    .card-name {
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .hp,
+    .base-value,
+    .result-value {
+      font-size: 11px;
+      color: #a98a92;
+    }
+
+    .enemy-slot.hit {
+      animation: enemyHit .28s ease;
+    }
+
+    @keyframes enemyHit {
+      0%,100% { transform: translateX(0); }
+      35% { transform: translateX(-7px); }
+      70% { transform: translateX(7px); }
+    }
+
     .player-area {
       padding: 8px;
       display: flex;
@@ -136,6 +165,7 @@
     }
 
     .player-card {
+      display: grid;
       width: min(30vw, 120px);
       border-color: #725d66;
       background: #291d22;
@@ -151,10 +181,59 @@
     }
 
     .dice-card {
+      position: relative;
       width: min(22vw, 84px);
       border-color: #766d59;
+      background: transparent;
+      perspective: 700px;
+    }
+
+    .dice-inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform .45s cubic-bezier(.2,.72,.2,1);
+    }
+
+    .dice-card.open .dice-inner {
+      transform: rotateY(180deg);
+    }
+
+    .dice-face {
+      position: absolute;
+      inset: 0;
+      border: 1px solid #766d59;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .dice-back {
       background: #29251d;
-      color: #c7bfa9;
+      color: #8f866e;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .dice-front {
+      transform: rotateY(180deg);
+      background: #342f24;
+      color: #efe5c7;
+      grid-template-rows: 1fr auto;
+      padding: 8px 4px;
+    }
+
+    .dice-symbol {
+      align-self: end;
+      font-size: clamp(34px, 11vw, 50px);
+      line-height: 1;
+    }
+
+    .dice-number {
+      font-size: 12px;
+      font-weight: 800;
     }
 
     .hand-area {
@@ -167,11 +246,49 @@
     }
 
     .hand-card {
+      display: grid;
       width: calc((100% - 20px) / 5);
       max-width: 82px;
       border-color: #66515a;
       background: #291d22;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease;
     }
+
+    .hand-card.active {
+      transform: translateY(-10px) scale(1.04);
+      border-color: #c28a98;
+      box-shadow: 0 8px 20px rgba(0,0,0,.4);
+    }
+
+    .hand-card.used {
+      opacity: .36;
+    }
+
+    .result-value {
+      min-height: 14px;
+      color: #e5c8cf;
+      font-weight: 800;
+    }
+
+    .battle-message {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 30;
+      min-width: 170px;
+      padding: 12px 18px;
+      border: 1px solid #75525b;
+      border-radius: 8px;
+      background: rgba(30, 20, 24, .94);
+      text-align: center;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .battle-message.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -185,32 +302,131 @@
       <section class="battle-section enemy-area" aria-label="敵カードエリア">
         <div id="enemyRow" class="enemy-row count-1">
           <div class="enemy-slot" data-enemy-slot="1">敵</div>
-          <div class="enemy-slot" data-enemy-slot="2">敵</div>
+          <div id="enemyCard" class="enemy-slot" data-enemy-slot="2">
+            <div class="enemy-name">敵</div>
+            <div id="enemyHp" class="hp">HP 40</div>
+          </div>
           <div class="enemy-slot" data-enemy-slot="3">敵</div>
         </div>
       </section>
 
       <section class="battle-section player-area" aria-label="主人公とサイコロカードエリア">
-        <div class="player-card" aria-label="主人公カード">主人公</div>
+        <div class="player-card" aria-label="主人公カード">
+          <div class="card-name">主人公</div>
+          <div class="hp">HP 20</div>
+        </div>
+
         <div id="diceZone" class="dice-zone" aria-label="サイコロカードエリア">
-          <div class="dice-card" data-dice-card="1">サイコロ</div>
+          <div id="diceCard" class="dice-card" data-dice-card="1">
+            <div class="dice-inner">
+              <div class="dice-face dice-back">?</div>
+              <div class="dice-face dice-front">
+                <div id="diceSymbol" class="dice-symbol">⚀</div>
+                <div id="diceNumber" class="dice-number">+1</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="battle-section hand-area" aria-label="手札エリア">
-        <div class="hand-card" data-hand-slot="1">手札</div>
-        <div class="hand-card" data-hand-slot="2">手札</div>
-        <div class="hand-card" data-hand-slot="3">手札</div>
-        <div class="hand-card" data-hand-slot="4">手札</div>
-        <div class="hand-card" data-hand-slot="5">手札</div>
+      <section id="handArea" class="battle-section hand-area" aria-label="手札エリア">
+        <div class="hand-card" data-base="3">
+          <div class="card-name">火花</div>
+          <div class="base-value">3</div>
+          <div class="result-value"></div>
+        </div>
+        <div class="hand-card" data-base="2">
+          <div class="card-name">風刃</div>
+          <div class="base-value">2</div>
+          <div class="result-value"></div>
+        </div>
+        <div class="hand-card" data-base="4">
+          <div class="card-name">氷針</div>
+          <div class="base-value">4</div>
+          <div class="result-value"></div>
+        </div>
+        <div class="hand-card" data-base="1">
+          <div class="card-name">呪火</div>
+          <div class="base-value">1</div>
+          <div class="result-value"></div>
+        </div>
+        <div class="hand-card" data-base="5">
+          <div class="card-name">雷光</div>
+          <div class="base-value">5</div>
+          <div class="result-value"></div>
+        </div>
       </section>
     </main>
   </div>
 
+  <div id="battleMessage" class="battle-message"></div>
+
   <script>
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    const diceCard = document.getElementById('diceCard');
+    const diceSymbol = document.getElementById('diceSymbol');
+    const diceNumber = document.getElementById('diceNumber');
+    const enemyCard = document.getElementById('enemyCard');
+    const enemyHpText = document.getElementById('enemyHp');
+    const battleMessage = document.getElementById('battleMessage');
+    const handCards = [...document.querySelectorAll('.hand-card')];
+    let enemyHp = 40;
+
     document.getElementById('backToMap').addEventListener('click', () => {
       location.href = './wich_map.HTML';
     });
+
+    async function revealDice() {
+      diceCard.classList.remove('open');
+      await wait(220);
+
+      const roll = Math.floor(Math.random() * 6) + 1;
+      diceSymbol.textContent = diceFaces[roll - 1];
+      diceNumber.textContent = `+${roll}`;
+
+      diceCard.classList.add('open');
+      await wait(650);
+      return roll;
+    }
+
+    function hitEnemy(damage) {
+      enemyHp = Math.max(0, enemyHp - damage);
+      enemyHpText.textContent = `HP ${enemyHp}`;
+      enemyCard.classList.remove('hit');
+      void enemyCard.offsetWidth;
+      enemyCard.classList.add('hit');
+    }
+
+    async function runAutoBattleDemo() {
+      await wait(700);
+
+      for (const card of handCards) {
+        if (enemyHp <= 0) break;
+
+        card.classList.add('active');
+        await wait(420);
+
+        const roll = await revealDice();
+        const base = Number(card.dataset.base);
+        const total = base + roll;
+        card.querySelector('.result-value').textContent = `${base}+${roll}=${total}`;
+
+        await wait(260);
+        hitEnemy(total);
+        await wait(520);
+
+        card.classList.remove('active');
+        card.classList.add('used');
+        diceCard.classList.remove('open');
+        await wait(320);
+      }
+
+      battleMessage.textContent = enemyHp <= 0 ? '勝利' : '1ターン終了';
+      battleMessage.classList.add('show');
+    }
+
+    runAutoBattleDemo();
   </script>
 </body>
 </html>
