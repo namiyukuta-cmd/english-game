@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#16130f" />
+  <title>Wich - Game</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #16130f;
+      color: #eee9df;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100dvh;
+    }
+
+    .app {
+      width: 100%;
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      min-height: 52px;
+      padding: env(safe-area-inset-top) 14px 0;
+      border-bottom: 1px solid #3f382f;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1d1914;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .06em;
+    }
+
+    header button {
+      border: 1px solid #5d5448;
+      border-radius: 7px;
+      background: #272219;
+      color: #eee9df;
+      min-height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    main {
+      min-height: 0;
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .placeholder {
+      width: min(100%, 520px);
+      min-height: 220px;
+      border: 1px solid #3f382f;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      background: #1d1914;
+      color: #bdb4a6;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>魔女</h1>
+      <button id="backToIndex" type="button">メニュー</button>
+    </header>
+
+    <main>
+      <section class="placeholder" aria-label="ゲーム画面">
+        ゲーム画面
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('backToIndex').addEventListener('click', () => {
+      location.href = './wich_index.html';
+    });
+  </script>
+</body>
+</html>
