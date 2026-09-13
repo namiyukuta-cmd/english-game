@@ -89,7 +89,7 @@
 
     .explore-grid {
       width: 100%;
-      padding: 10px 6px 28px;
+      padding: 28px 6px 10px;
       display: grid;
       gap: 24px;
     }
@@ -230,7 +230,15 @@
       <section class="map" aria-label="夜の見回りマップ">
         <div id="exploreWindow" class="explore-window" aria-label="探索カード置き場">
           <div class="explore-grid">
-            <div class="explore-row" data-row="1">
+            <div class="explore-row" data-row="4">
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div id="battleCard" class="card battle center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">バトル</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
+            </div>
+
+            <div class="explore-row" data-row="3">
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
@@ -246,18 +254,10 @@
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
             </div>
 
-            <div class="explore-row" data-row="3">
+            <div class="explore-row" data-row="1">
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-            </div>
-
-            <div class="explore-row" data-row="4">
-              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-              <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
-              <div id="battleCard" class="card battle center"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">バトル</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
               <div class="card forest"><div class="card-inner"><div class="card-face card-back"></div><div class="card-face card-front">森</div></div></div>
             </div>
@@ -278,8 +278,12 @@
     const exploreWindow = document.getElementById('exploreWindow');
     const pawn = document.getElementById('pawn');
     const pawnHome = document.getElementById('pawnHome');
-    const rows = [...document.querySelectorAll('.explore-row')];
     const battleCard = document.getElementById('battleCard');
+    const row1 = document.querySelector('[data-row="1"]');
+    const row2 = document.querySelector('[data-row="2"]');
+    const row3 = document.querySelector('[data-row="3"]');
+    const row4 = document.querySelector('[data-row="4"]');
+    let pawnTarget = pawnHome;
 
     document.getElementById('backToTop').addEventListener('click', () => {
       location.href = './wich_top.HTML';
@@ -291,6 +295,7 @@
     }
 
     function placePawn(element, hop = false) {
+      pawnTarget = element;
       const p = centerOf(element);
       pawn.style.left = `${p.x}px`;
       pawn.style.top = `${p.y}px`;
@@ -301,10 +306,12 @@
       }
     }
 
-    async function scrollToRow(row) {
-      const top = row.offsetTop - 8;
-      exploreWindow.scrollTo({ top, behavior: 'smooth' });
+    async function scrollToRow(row, behavior = 'smooth') {
+      const maxTop = exploreWindow.scrollHeight - exploreWindow.clientHeight;
+      const wanted = row.offsetTop - Math.max(8, (exploreWindow.clientHeight - row.offsetHeight) / 2);
+      exploreWindow.scrollTo({ top: Math.max(0, Math.min(maxTop, wanted)), behavior });
       await wait(700);
+      if (pawnTarget !== pawnHome) placePawn(pawnTarget);
     }
 
     async function revealCards(cards) {
@@ -315,24 +322,31 @@
     }
 
     async function runPatrol() {
-      await wait(250);
+      await wait(150);
+      exploreWindow.scrollTop = exploreWindow.scrollHeight;
       placePawn(pawnHome);
-      await wait(700);
+      await wait(600);
 
-      for (let i = 0; i < 3; i++) {
-        const row = rows[i];
-        await scrollToRow(row);
-        await revealCards([...row.querySelectorAll('.card')]);
-        placePawn(row.querySelector('.center'), true);
-        await wait(850);
-      }
+      await scrollToRow(row1, 'auto');
+      await revealCards([...row1.querySelectorAll('.card')]);
+      placePawn(row1.querySelector('.center'), true);
+      await wait(850);
 
-      const lastRow = rows[3];
-      await scrollToRow(lastRow);
+      await scrollToRow(row2);
+      await revealCards([...row2.querySelectorAll('.card')]);
+      placePawn(row2.querySelector('.center'), true);
+      await wait(850);
 
-      const lastCards = [...lastRow.querySelectorAll('.card')];
+      await scrollToRow(row3);
+      await revealCards([...row3.querySelectorAll('.card')]);
+      placePawn(row3.querySelector('.center'), true);
+      await wait(850);
+
+      await scrollToRow(row4);
+      placePawn(row3.querySelector('.center'));
+
+      const lastCards = [...row4.querySelectorAll('.card')];
       await revealCards([lastCards[0], lastCards[1], lastCards[3], lastCards[4]]);
-      placePawn(lastRow.querySelector('.center'), true);
       await wait(700);
 
       battleCard.classList.add('shake');
@@ -343,9 +357,12 @@
       battleCard.classList.remove('battle-pop');
     }
 
+    exploreWindow.addEventListener('scroll', () => {
+      if (pawnTarget !== pawnHome) placePawn(pawnTarget);
+    }, { passive: true });
+
     window.addEventListener('resize', () => {
-      const activeCenter = rows.findLast?.(row => row.querySelector('.center.open'))?.querySelector('.center');
-      placePawn(activeCenter || pawnHome);
+      placePawn(pawnTarget || pawnHome);
     });
 
     runPatrol();
