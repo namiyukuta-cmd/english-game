@@ -66,9 +66,24 @@
       border-radius: 10px;
       display: grid;
       place-items: center;
+      padding: 12px;
       background: #171a20;
-      color: #aeb4bf;
-      text-align: center;
+    }
+
+    .explore-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-rows: repeat(2, auto);
+      gap: 6px;
+    }
+
+    .explore-slot {
+      min-width: 0;
+      aspect-ratio: 2 / 3;
+      border: 1px dashed #555b66;
+      border-radius: 7px;
+      background: #20242c;
     }
   </style>
 </head>
@@ -81,7 +96,18 @@
 
     <main>
       <section class="map" aria-label="夜の見回りマップ">
-        夜の見回りマップ
+        <div class="explore-grid" aria-label="探索カード置き場">
+          <div class="explore-slot" data-slot="1"></div>
+          <div class="explore-slot" data-slot="2"></div>
+          <div class="explore-slot" data-slot="3"></div>
+          <div class="explore-slot" data-slot="4"></div>
+          <div class="explore-slot" data-slot="5"></div>
+          <div class="explore-slot" data-slot="6"></div>
+          <div class="explore-slot" data-slot="7"></div>
+          <div class="explore-slot" data-slot="8"></div>
+          <div class="explore-slot" data-slot="9"></div>
+          <div class="explore-slot" data-slot="10"></div>
+        </div>
       </section>
     </main>
   </div>
