@@ -94,6 +94,7 @@
     .player-card,
     .dice-card,
     .hand-card {
+      flex: 0 0 auto;
       min-width: 0;
       aspect-ratio: 2 / 3;
       border: 1px dashed #6c4d54;
@@ -110,24 +111,19 @@
 
     .enemy-row.count-1 .enemy-slot:nth-child(2) {
       display: grid;
-      height: 94%;
-      max-height: 190px;
+      width: min(30vw, 120px);
     }
 
     .enemy-row.count-2 .enemy-slot {
       display: grid;
-      height: 88%;
-      max-height: 180px;
+      width: min(27vw, 108px);
     }
 
     .enemy-row.count-2 .enemy-slot:nth-child(2) { display: none; }
 
     .enemy-row.count-3 .enemy-slot {
       display: grid;
-      flex: 1 1 0;
-      max-width: 118px;
-      height: 82%;
-      max-height: 170px;
+      width: min(25vw, 98px);
     }
 
     .player-area {
@@ -140,13 +136,13 @@
     }
 
     .player-card {
-      height: 92%;
-      max-height: 185px;
+      width: min(30vw, 120px);
       border-color: #725d66;
       background: #291d22;
     }
 
     .dice-zone {
+      min-width: 0;
       height: 100%;
       display: flex;
       align-items: center;
@@ -155,8 +151,7 @@
     }
 
     .dice-card {
-      height: 72%;
-      max-height: 145px;
+      width: min(22vw, 84px);
       border-color: #766d59;
       background: #29251d;
       color: #c7bfa9;
@@ -172,10 +167,8 @@
     }
 
     .hand-card {
-      flex: 1 1 0;
-      max-width: 92px;
-      height: 88%;
-      aspect-ratio: auto;
+      width: calc((100% - 20px) / 5);
+      max-width: 82px;
       border-color: #66515a;
       background: #291d22;
     }
