@@ -10,7 +10,6 @@
   <title>Wich - Battle</title>
   <style>
     * { box-sizing: border-box; }
-
     html, body {
       margin: 0;
       width: 100%;
@@ -20,16 +19,13 @@
       color: #f2e8e8;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
     body { min-height: 100dvh; }
-
     .app {
       width: 100%;
       height: 100dvh;
       display: grid;
       grid-template-rows: auto 1fr;
     }
-
     header {
       min-height: 52px;
       padding: env(safe-area-inset-top) 12px 0;
@@ -39,14 +35,12 @@
       justify-content: space-between;
       background: #21161a;
     }
-
     header h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 800;
       letter-spacing: .08em;
     }
-
     header button {
       min-height: 36px;
       padding: 0 12px;
@@ -56,7 +50,6 @@
       color: #f2e8e8;
       font-size: 14px;
     }
-
     main {
       min-height: 0;
       padding: 8px;
@@ -64,7 +57,6 @@
       grid-template-rows: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
-
     .battle-section {
       min-height: 0;
       border: 1px solid #563a40;
@@ -72,12 +64,10 @@
       overflow: hidden;
       background: #1e1418;
     }
-
     .enemy-area {
       padding: 8px;
       background: radial-gradient(circle at center, rgba(121,54,65,.16), transparent 54%), #1e1418;
     }
-
     .enemy-row {
       width: 100%;
       height: 100%;
@@ -86,7 +76,6 @@
       justify-content: center;
       gap: 7px;
     }
-
     .enemy-slot,
     .player-card,
     .dice-card,
@@ -99,13 +88,11 @@
       color: #d8bcc3;
       text-align: center;
     }
-
     .enemy-row.count-1 .enemy-slot { display: none; }
     .enemy-row.count-1 .enemy-slot:nth-child(2) { display: grid; width: min(30vw, 120px); }
     .enemy-row.count-2 .enemy-slot { display: grid; width: min(27vw, 108px); }
     .enemy-row.count-2 .enemy-slot:nth-child(2) { display: none; }
     .enemy-row.count-3 .enemy-slot { display: grid; width: min(25vw, 98px); }
-
     .enemy-slot,
     .player-card,
     .hand-card {
@@ -115,19 +102,16 @@
       gap: 5px;
       padding: 7px;
     }
-
     .enemy-name,
     .card-name {
       font-size: 12px;
       font-weight: 800;
     }
-
     .hp,
     .base-value {
       font-size: 11px;
       color: #a98a92;
     }
-
     .hp-meter {
       position: absolute;
       left: 8px;
@@ -140,7 +124,6 @@
       background: #160e10;
       box-shadow: inset 0 1px 3px rgba(0,0,0,.75);
     }
-
     .hp-fill {
       width: 100%;
       height: 100%;
@@ -149,17 +132,13 @@
       box-shadow: 0 0 8px rgba(231,83,62,.45);
       transition: width .08s linear;
     }
-
     .player-hp-fill {
       background: linear-gradient(90deg, #355c50, #4c947d 58%, #7bc9a7);
       box-shadow: 0 0 8px rgba(94,193,156,.38);
     }
-
     .hp-meter.flash { animation: meterFlash .42s ease; }
-
     .enemy-slot.hit,
     .player-card.hit { animation: cardHit .3s ease; }
-
     .enemy-slot.hp-flash,
     .player-card.hp-flash { animation: hpFlash .5s ease; }
 
@@ -168,7 +147,6 @@
       border-color: #ff9448;
       box-shadow: 0 0 18px rgba(255,97,32,.9), 0 0 42px rgba(255,45,0,.55), inset 0 0 24px rgba(255,84,0,.28);
     }
-
     .enemy-slot.burning::before,
     .enemy-slot.burning::after {
       content: "";
@@ -189,7 +167,6 @@
       mix-blend-mode: screen;
       animation: flameRise .7s ease-out both;
     }
-
     .enemy-slot.burning::after {
       width: 52%;
       height: 66%;
@@ -197,13 +174,16 @@
       opacity: .8;
       animation-delay: .08s;
     }
-
+    .enemy-slot.frozen {
+      border-color: #bfefff;
+      box-shadow: 0 0 18px rgba(145,226,255,.85), 0 0 38px rgba(59,163,223,.5), inset 0 0 25px rgba(181,238,255,.18);
+      animation: frozenHit .7s ease both;
+    }
     .enemy-slot.enemy-charge {
       border-color: #bd7184;
       box-shadow: 0 0 16px rgba(190,75,107,.72), 0 0 34px rgba(92,27,52,.72);
       animation: enemyCharge .28s ease-in-out 3 alternate;
     }
-
     .damage-pop {
       position: absolute;
       left: 50%;
@@ -217,7 +197,6 @@
       pointer-events: none;
       animation: damagePop .75s cubic-bezier(.13,.78,.2,1) both;
     }
-
     .player-card .damage-pop {
       color: #ffe5ed;
       text-shadow: 0 2px 4px #000, 0 0 14px rgba(188,67,111,.95);
@@ -228,19 +207,16 @@
       30% { transform: translateX(-8px) rotate(-1.5deg); }
       65% { transform: translateX(8px) rotate(1.5deg); }
     }
-
     @keyframes hpFlash {
       0%,100% { filter: brightness(1); }
       30% { filter: brightness(2.1); }
       60% { filter: brightness(1.35); }
     }
-
     @keyframes meterFlash {
       0%,100% { filter: brightness(1); }
       35% { filter: brightness(2.2); }
       65% { filter: brightness(1.45); }
     }
-
     @keyframes enemyBurn {
       0% { transform: scale(1); filter: brightness(1); }
       18% { transform: scale(1.08); filter: brightness(1.7); }
@@ -248,19 +224,23 @@
       62% { transform: translateX(5px) rotate(2deg) scale(1.03); }
       100% { transform: scale(1); filter: brightness(1); }
     }
-
+    @keyframes frozenHit {
+      0% { transform: scale(1); filter: brightness(1); }
+      22% { transform: scale(1.07); filter: brightness(1.75); }
+      45% { transform: translateX(-4px) scale(1.03); }
+      70% { transform: translateX(4px) scale(1.03); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
     @keyframes flameRise {
       0% { opacity: 0; transform: translate(-50%,25%) scale(.45); }
       22% { opacity: 1; }
       70% { opacity: .95; }
       100% { opacity: 0; transform: translate(-50%,-42%) scale(1.22); }
     }
-
     @keyframes enemyCharge {
       from { transform: scale(1); filter: brightness(1); }
       to { transform: scale(1.08); filter: brightness(1.55); }
     }
-
     @keyframes damagePop {
       0% { opacity: 0; transform: translate(-50%,-20%) scale(.45); }
       28% { opacity: 1; transform: translate(-50%,-50%) scale(1.22); }
@@ -276,14 +256,12 @@
       gap: 12px;
       background: #21161a;
     }
-
     .player-card {
       display: grid;
       width: min(30vw, 120px);
       border-color: #725d66;
       background: #291d22;
     }
-
     .dice-zone {
       min-width: 0;
       height: 100%;
@@ -291,7 +269,6 @@
       align-items: center;
       justify-content: flex-end;
     }
-
     .dice-card {
       position: relative;
       width: min(22vw, 84px);
@@ -299,16 +276,13 @@
       background: transparent;
       perspective: 700px;
     }
-
     .dice-inner {
       position: absolute;
       inset: 0;
       transform-style: preserve-3d;
       transition: transform .45s cubic-bezier(.2,.72,.2,1);
     }
-
     .dice-card.open .dice-inner { transform: rotateY(180deg); }
-
     .dice-face {
       position: absolute;
       inset: 0;
@@ -319,14 +293,12 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
-
     .dice-back {
       background: #29251d;
       color: #8f866e;
       font-size: 22px;
       font-weight: 900;
     }
-
     .dice-front {
       transform: rotateY(180deg);
       background: #342f24;
@@ -334,13 +306,11 @@
       grid-template-rows: 1fr auto;
       padding: 8px 4px;
     }
-
     .dice-symbol {
       align-self: end;
       font-size: clamp(34px, 11vw, 50px);
       line-height: 1;
     }
-
     .dice-number {
       font-size: 12px;
       font-weight: 800;
@@ -354,7 +324,6 @@
       gap: 5px;
       background: #21161a;
     }
-
     .hand-card {
       display: grid;
       width: calc((100% - 20px) / 5);
@@ -363,14 +332,19 @@
       background: #291d22;
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease, filter .22s ease;
     }
-
     .hand-card.active {
       transform: translateY(-10px) scale(1.04);
+    }
+    .hand-card.active[data-element="fire"] {
       border-color: #ff8a3d;
       box-shadow: 0 0 12px rgba(255,132,54,.95), 0 0 28px rgba(255,55,0,.55);
       animation: fireCardPulse .46s ease-in-out infinite alternate;
     }
-
+    .hand-card.active[data-element="ice"] {
+      border-color: #a9e9ff;
+      box-shadow: 0 0 12px rgba(166,231,255,.95), 0 0 28px rgba(65,163,220,.55);
+      animation: iceCardPulse .46s ease-in-out infinite alternate;
+    }
     .hand-card.support-active {
       transform: translateY(-13px) scale(1.08);
       border-color: #ffc45a;
@@ -378,14 +352,15 @@
       filter: brightness(1.45);
       animation: supportPulse .34s ease-in-out 3 alternate;
     }
-
     .hand-card.used { opacity: .36; }
-
     @keyframes fireCardPulse {
       from { filter: brightness(1); }
       to { filter: brightness(1.55); }
     }
-
+    @keyframes iceCardPulse {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.65); }
+    }
     @keyframes supportPulse {
       from { transform: translateY(-10px) scale(1.04); }
       to { transform: translateY(-15px) scale(1.12); }
@@ -405,12 +380,10 @@
       place-items: center;
       transition: opacity .2s ease, transform .3s cubic-bezier(.18,.8,.22,1);
     }
-
     .attack-focus.show {
       opacity: 1;
       transform: translate(-50%,-50%) scale(1);
     }
-
     .focus-glow {
       position: absolute;
       inset: 12px;
@@ -420,7 +393,6 @@
       background: radial-gradient(circle, rgba(255,227,119,.55), rgba(255,91,18,.24) 48%, transparent 72%);
       animation: focusGlow .56s ease-in-out infinite alternate;
     }
-
     .focus-icon {
       position: relative;
       z-index: 2;
@@ -429,7 +401,6 @@
       filter: drop-shadow(0 0 8px rgba(255,234,145,.95)) drop-shadow(0 0 22px rgba(255,73,7,.8));
       transition: filter .25s ease, transform .25s ease;
     }
-
     .focus-total {
       position: absolute;
       left: 50%;
@@ -447,14 +418,11 @@
       text-align: center;
       text-shadow: 0 2px 5px rgba(0,0,0,.85);
     }
-
     .focus-total.bump { animation: totalBump .35s ease; }
-
     .attack-focus.buffed .focus-icon {
       filter: drop-shadow(0 0 10px rgba(255,245,160,1)) drop-shadow(0 0 28px rgba(255,84,0,1));
       animation: buffedFire .34s ease-in-out infinite alternate;
     }
-
     .attack-focus.buffed::before,
     .attack-focus.buffed::after {
       content: "✦";
@@ -465,27 +433,29 @@
       text-shadow: 0 0 10px rgba(255,87,0,.95);
       animation: orbitSpark 1s linear infinite;
     }
-
-    .attack-focus.buffed::after {
-      animation-delay: -.5s;
-      font-size: 13px;
+    .attack-focus.buffed::after { animation-delay: -.5s; font-size: 13px; }
+    .attack-focus.ice-focus .focus-glow {
+      background: radial-gradient(circle, rgba(231,250,255,.68), rgba(88,190,235,.28) 48%, transparent 72%);
     }
-
+    .attack-focus.ice-focus .focus-icon {
+      filter: drop-shadow(0 0 8px rgba(228,250,255,1)) drop-shadow(0 0 22px rgba(74,179,231,.95));
+    }
+    .attack-focus.ice-focus .focus-total {
+      border-color: rgba(152,227,255,.78);
+      background: rgba(20,37,48,.86);
+    }
     @keyframes focusGlow {
       from { transform: scale(.88); opacity: .58; }
       to { transform: scale(1.16); opacity: 1; }
     }
-
     @keyframes totalBump {
       0%,100% { transform: translateX(-50%) scale(1); }
       45% { transform: translateX(-50%) scale(1.35); }
     }
-
     @keyframes buffedFire {
       from { transform: scale(1); }
       to { transform: scale(1.12); }
     }
-
     @keyframes orbitSpark {
       from { transform: rotate(0deg) translateX(52px) rotate(0deg); opacity: .55; }
       50% { opacity: 1; }
@@ -499,7 +469,6 @@
       overflow: hidden;
       pointer-events: none;
     }
-
     .fly-token {
       position: fixed;
       left: var(--sx);
@@ -513,7 +482,6 @@
       text-shadow: 0 2px 4px rgba(0,0,0,.9), 0 0 12px var(--token-glow, rgba(255,255,255,.65));
       animation: flyToken .58s cubic-bezier(.12,.78,.2,1) both;
     }
-
     @keyframes flyToken {
       0% { left: var(--sx); top: var(--sy); opacity: 0; transform: translate(-50%,-50%) scale(.45); }
       18% { opacity: 1; }
@@ -522,22 +490,24 @@
     }
 
     .fire-flash,
+    .ice-flash,
     .enemy-flash {
       position: fixed;
       inset: 0;
       opacity: 0;
     }
-
     .fire-flash {
       background: radial-gradient(circle at 50% 38%, rgba(255,220,120,.34), transparent 26%), rgba(255,58,0,.16);
       animation: flashOut .48s ease-out both;
     }
-
+    .ice-flash {
+      background: radial-gradient(circle at 50% 38%, rgba(231,250,255,.4), transparent 28%), rgba(76,175,226,.16);
+      animation: flashOut .5s ease-out both;
+    }
     .enemy-flash {
       background: radial-gradient(circle at 30% 55%, rgba(255,180,204,.2), transparent 24%), rgba(91,10,43,.14);
       animation: flashOut .42s ease-out both;
     }
-
     .fire-stream {
       position: fixed;
       height: 34px;
@@ -551,15 +521,11 @@
       box-shadow: 0 0 12px rgba(255,220,95,.95), 0 0 28px rgba(255,95,20,.92), 0 0 52px rgba(255,35,0,.62);
       animation: fireStream .62s cubic-bezier(.1,.76,.2,1) both;
     }
-
     .fire-stream::before,
     .fire-stream::after {
       content: "";
       position: absolute;
-      left: 4%;
-      right: 3%;
-      top: 50%;
-      height: 70px;
+      left: 4%; right: 3%; top: 50%; height: 70px;
       transform: translateY(-50%);
       background:
         radial-gradient(ellipse at 15% 55%, rgba(255,226,100,.75) 0 7%, transparent 8%),
@@ -569,13 +535,11 @@
       filter: blur(5px);
       animation: flameWave .23s ease-in-out infinite alternate;
     }
-
     .fire-stream::after {
       transform: translateY(-50%) scaleY(-1);
       opacity: .72;
       animation-delay: .08s;
     }
-
     .ember {
       position: fixed;
       width: var(--size);
@@ -588,7 +552,31 @@
       opacity: 0;
       animation: emberFly var(--duration) ease-out var(--delay) both;
     }
-
+    .ice-shard {
+      position: fixed;
+      left: var(--sx);
+      top: var(--sy);
+      width: var(--w);
+      height: var(--h);
+      opacity: 0;
+      clip-path: polygon(50% 0, 100% 78%, 56% 100%, 0 78%);
+      background: linear-gradient(180deg, #f4fdff 0 18%, #a8e7ff 35%, #5db9e8 72%, #2f79a8 100%);
+      box-shadow: 0 0 10px rgba(183,238,255,.95), 0 0 22px rgba(75,168,220,.7);
+      transform: translate(-50%,-50%) rotate(var(--rot)) scale(.25);
+      animation: iceShardFly .58s cubic-bezier(.12,.8,.2,1) var(--delay) both;
+    }
+    .ice-spark {
+      position: fixed;
+      left: var(--x);
+      top: var(--y);
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: #e9fbff;
+      box-shadow: 0 0 9px rgba(158,229,255,.95);
+      opacity: 0;
+      animation: iceSpark .6s ease-out var(--delay) both;
+    }
     .slash {
       position: fixed;
       left: var(--sx);
@@ -608,7 +596,6 @@
       18% { opacity: 1; }
       100% { opacity: 0; }
     }
-
     @keyframes fireStream {
       0% { opacity: 0; transform: rotate(var(--angle)) scaleX(.02) scaleY(.35); }
       12% { opacity: 1; }
@@ -616,38 +603,31 @@
       72% { opacity: 1; transform: rotate(var(--angle)) scaleX(1.02) scaleY(.82); }
       100% { opacity: 0; transform: rotate(var(--angle)) scaleX(1.05) scaleY(.25); }
     }
-
     @keyframes flameWave {
       from { opacity: .45; filter: blur(6px); }
       to { opacity: 1; filter: blur(3px); }
     }
-
     @keyframes emberFly {
       0% { opacity: 0; transform: translate(0,0) scale(.45); }
       15% { opacity: 1; }
       100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(.08) rotate(var(--spin)); }
     }
-
+    @keyframes iceShardFly {
+      0% { left: var(--sx); top: var(--sy); opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scale(.2); }
+      16% { opacity: 1; }
+      78% { left: var(--tx); top: var(--ty); opacity: 1; transform: translate(-50%,-50%) rotate(var(--rot)) scale(1.05); }
+      100% { left: var(--tx); top: var(--ty); opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scale(.5); }
+    }
+    @keyframes iceSpark {
+      0% { opacity: 0; transform: translate(-50%,-50%) scale(.2); }
+      25% { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.05); }
+    }
     @keyframes slashFly {
-      0% {
-        left: var(--sx);
-        top: var(--sy);
-        opacity: 0;
-        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(.15) scaleX(.65);
-      }
+      0% { left: var(--sx); top: var(--sy); opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(.15) scaleX(.65); }
       20% { opacity: 1; }
-      75% {
-        left: var(--tx);
-        top: var(--ty);
-        opacity: 1;
-        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.05) scaleX(1);
-      }
-      100% {
-        left: var(--tx);
-        top: var(--ty);
-        opacity: 0;
-        transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.25) scaleX(.7);
-      }
+      75% { left: var(--tx); top: var(--ty); opacity: 1; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.05) scaleX(1); }
+      100% { left: var(--tx); top: var(--ty); opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(1.25) scaleX(.7); }
     }
   </style>
 </head>
@@ -765,17 +745,14 @@
       const r = element.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     }
-
     function updateEnemyHpDisplay(hp) {
       enemyHpText.textContent = `HP ${hp}`;
       enemyHpFill.style.width = `${Math.max(0, Math.min(100, hp / enemyMaxHp * 100))}%`;
     }
-
     function updatePlayerHpDisplay(hp) {
       playerHpText.textContent = `HP ${hp}`;
       playerHpFill.style.width = `${Math.max(0, Math.min(100, hp / playerMaxHp * 100))}%`;
     }
-
     async function flyToken(text, source, target, options = {}) {
       const s = centerOf(source);
       const t = centerOf(target);
@@ -793,14 +770,12 @@
       await wait(610);
       token.remove();
     }
-
     function setTotal(value) {
       focusTotal.textContent = String(value);
       focusTotal.classList.remove('bump');
       void focusTotal.offsetWidth;
       focusTotal.classList.add('bump');
     }
-
     async function revealDice() {
       diceCard.classList.remove('open');
       await wait(220);
@@ -811,23 +786,23 @@
       await wait(620);
       return roll;
     }
-
     async function showAttackInCenter(card) {
       const icon = card.dataset.icon || '✦';
       const base = Number(card.dataset.base || 0);
+      const element = card.dataset.element || '';
       focusIcon.textContent = icon;
       focusTotal.textContent = String(base);
-      attackFocus.classList.remove('buffed');
+      attackFocus.classList.remove('buffed', 'ice-focus');
+      if (element === 'ice') attackFocus.classList.add('ice-focus');
       await flyToken(icon, card, attackFocus, {
         fontSize: '58px',
-        color: '#fff0c2',
-        glow: 'rgba(255,94,15,.95)'
+        color: element === 'ice' ? '#eefcff' : '#fff0c2',
+        glow: element === 'ice' ? 'rgba(117,211,255,.95)' : 'rgba(255,94,15,.95)'
       });
       attackFocus.classList.add('show');
       await wait(330);
       return base;
     }
-
     async function applySupport(supportCard, currentTotal) {
       const bonus = Number(supportCard.dataset.bonus || 0);
       supportCard.classList.add('support-active');
@@ -844,7 +819,6 @@
       supportCard.classList.remove('support-active');
       return next;
     }
-
     async function applyDice(currentTotal) {
       const roll = await revealDice();
       await flyToken(`+${roll}`, diceCard, attackFocus, {
@@ -873,7 +847,6 @@
       const flash = document.createElement('div');
       flash.className = 'fire-flash';
       fxLayer.appendChild(flash);
-
       const stream = document.createElement('div');
       stream.className = 'fire-stream';
       stream.style.left = `${sx}px`;
@@ -907,25 +880,65 @@
       enemyCard.classList.remove('burning');
     }
 
+    async function playIceEffect(sourceElement) {
+      const s = centerOf(sourceElement);
+      const t = centerOf(enemyCard);
+      const flash = document.createElement('div');
+      flash.className = 'ice-flash';
+      fxLayer.appendChild(flash);
+
+      for (let i = 0; i < 7; i += 1) {
+        const shard = document.createElement('div');
+        shard.className = 'ice-shard';
+        const spread = (i - 3) * 14;
+        shard.style.setProperty('--sx', `${s.x + spread * .25}px`);
+        shard.style.setProperty('--sy', `${s.y + spread * .15}px`);
+        shard.style.setProperty('--tx', `${t.x + spread}px`);
+        shard.style.setProperty('--ty', `${t.y + (Math.random() - .5) * 40}px`);
+        shard.style.setProperty('--w', `${9 + Math.random() * 7}px`);
+        shard.style.setProperty('--h', `${42 + Math.random() * 26}px`);
+        shard.style.setProperty('--rot', `${-15 + spread * .35}deg`);
+        shard.style.setProperty('--delay', `${i * .045}s`);
+        fxLayer.appendChild(shard);
+      }
+
+      for (let i = 0; i < 22; i += 1) {
+        const spark = document.createElement('i');
+        spark.className = 'ice-spark';
+        spark.style.setProperty('--x', `${t.x + (Math.random() - .5) * 36}px`);
+        spark.style.setProperty('--y', `${t.y + (Math.random() - .5) * 48}px`);
+        spark.style.setProperty('--size', `${3 + Math.random() * 6}px`);
+        spark.style.setProperty('--dx', `${(Math.random() - .5) * 80}px`);
+        spark.style.setProperty('--dy', `${(Math.random() - .5) * 90}px`);
+        spark.style.setProperty('--delay', `${.26 + Math.random() * .18}s`);
+        fxLayer.appendChild(spark);
+      }
+
+      enemyCard.classList.remove('frozen');
+      void enemyCard.offsetWidth;
+      enemyCard.classList.add('frozen');
+      await wait(760);
+      flash.remove();
+      fxLayer.querySelectorAll('.ice-shard,.ice-spark').forEach(el => el.remove());
+      enemyCard.classList.remove('frozen');
+    }
+
     async function damageTarget({ card, meter, fillUpdate, oldHp, newHp, damage }) {
       const pop = document.createElement('div');
       pop.className = 'damage-pop';
       pop.textContent = `-${damage}`;
       card.appendChild(pop);
-
       card.classList.remove('hp-flash');
       meter.classList.remove('flash');
       void card.offsetWidth;
       card.classList.add('hp-flash');
       meter.classList.add('flash');
-
       const diff = oldHp - newHp;
       const stepDelay = Math.max(22, Math.min(55, Math.floor(380 / Math.max(1, diff))));
       for (let hp = oldHp - 1; hp >= newHp; hp -= 1) {
         fillUpdate(hp);
         await wait(stepDelay);
       }
-
       card.classList.remove('hit');
       void card.offsetWidth;
       card.classList.add('hit');
@@ -934,22 +947,13 @@
       card.classList.remove('hp-flash');
       meter.classList.remove('flash');
     }
-
     async function damageEnemy(damage) {
       const oldHp = enemyHp;
       const newHp = Math.max(0, oldHp - damage);
-      await damageTarget({
-        card: enemyCard,
-        meter: enemyHpMeter,
-        fillUpdate: updateEnemyHpDisplay,
-        oldHp,
-        newHp,
-        damage
-      });
+      await damageTarget({ card: enemyCard, meter: enemyHpMeter, fillUpdate: updateEnemyHpDisplay, oldHp, newHp, damage });
       enemyHp = newHp;
       updateEnemyHpDisplay(enemyHp);
     }
-
     async function playEnemyAttack(damage) {
       await wait(420);
       enemyCard.classList.add('enemy-charge');
@@ -959,11 +963,9 @@
       const flash = document.createElement('div');
       flash.className = 'enemy-flash';
       fxLayer.appendChild(flash);
-
       const s = centerOf(enemyCard);
       const t = centerOf(playerCard);
       const offsets = [-22, 0, 22];
-
       for (let i = 0; i < offsets.length; i += 1) {
         const slash = document.createElement('div');
         slash.className = 'slash';
@@ -975,54 +977,57 @@
         slash.style.animationDelay = `${i * .055}s`;
         fxLayer.appendChild(slash);
       }
-
       await wait(520);
       flash.remove();
       fxLayer.querySelectorAll('.slash').forEach(el => el.remove());
 
       const oldHp = playerHp;
       const newHp = Math.max(0, oldHp - damage);
-      await damageTarget({
-        card: playerCard,
-        meter: playerHpMeter,
-        fillUpdate: updatePlayerHpDisplay,
-        oldHp,
-        newHp,
-        damage
-      });
+      await damageTarget({ card: playerCard, meter: playerHpMeter, fillUpdate: updatePlayerHpDisplay, oldHp, newHp, damage });
       playerHp = newHp;
       updatePlayerHpDisplay(playerHp);
+    }
+
+    async function playPlayerCard(card) {
+      if (!card || enemyHp <= 0 || playerHp <= 0) return;
+      card.classList.add('active');
+      await wait(360);
+      let total = await showAttackInCenter(card);
+
+      const supportCard = handCards.find(support =>
+        !support.classList.contains('used') &&
+        support.dataset.role === 'support' &&
+        support.dataset.support === card.dataset.element
+      );
+      if (supportCard) total = await applySupport(supportCard, total);
+
+      total = (await applyDice(total)).total;
+      await wait(220);
+
+      if (card.dataset.element === 'fire') await playFireEffect(attackFocus);
+      if (card.dataset.element === 'ice') await playIceEffect(attackFocus);
+      await damageEnemy(total);
+
+      card.classList.remove('active');
+      card.classList.add('used');
+      diceCard.classList.remove('open');
+      attackFocus.classList.remove('show', 'buffed', 'ice-focus');
+      await wait(260);
     }
 
     async function runAutoBattleDemo() {
       await wait(700);
 
-      const attackCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'fire');
-      if (!attackCard) return;
+      const fireCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'fire');
+      await playPlayerCard(fireCard);
+      if (enemyHp > 0 && playerHp > 0) await playEnemyAttack(4);
 
-      attackCard.classList.add('active');
-      await wait(360);
-
-      let total = await showAttackInCenter(attackCard);
-      const supportCard = handCards.find(card =>
-        card.dataset.role === 'support' && card.dataset.support === attackCard.dataset.element
-      );
-
-      if (supportCard) total = await applySupport(supportCard, total);
-      total = (await applyDice(total)).total;
-
-      await wait(220);
-      await playFireEffect(attackFocus);
-      await damageEnemy(total);
-
-      attackCard.classList.remove('active');
-      attackCard.classList.add('used');
-      diceCard.classList.remove('open');
-      attackFocus.classList.remove('show', 'buffed');
-
-      if (enemyHp > 0) {
-        await playEnemyAttack(4);
+      if (enemyHp > 0 && playerHp > 0) {
+        const iceCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'ice');
+        await playPlayerCard(iceCard);
       }
+
+      if (enemyHp > 0 && playerHp > 0) await playEnemyAttack(4);
     }
 
     updateEnemyHpDisplay(enemyHp);
