@@ -179,6 +179,15 @@
       box-shadow: 0 0 18px rgba(145,226,255,.85), 0 0 38px rgba(59,163,223,.5), inset 0 0 25px rgba(181,238,255,.18);
       animation: frozenHit .7s ease both;
     }
+    .enemy-slot.electrified {
+      border-color: #dcd8ff;
+      box-shadow:
+        0 0 18px rgba(225,233,255,.95),
+        0 0 42px rgba(106,145,255,.72),
+        0 0 68px rgba(151,89,255,.38),
+        inset 0 0 25px rgba(183,205,255,.24);
+      animation: electricJitter .52s steps(2, end) 3;
+    }
     .enemy-slot.enemy-charge {
       border-color: #bd7184;
       box-shadow: 0 0 16px rgba(190,75,107,.72), 0 0 34px rgba(92,27,52,.72);
@@ -230,6 +239,14 @@
       45% { transform: translateX(-4px) scale(1.03); }
       70% { transform: translateX(4px) scale(1.03); }
       100% { transform: scale(1); filter: brightness(1); }
+    }
+    @keyframes electricJitter {
+      0%,100% { transform: translate(0,0) scale(1); filter: brightness(1); }
+      18% { transform: translate(-4px,2px) scale(1.04); filter: brightness(2.2); }
+      34% { transform: translate(5px,-2px) scale(1.02); }
+      50% { transform: translate(-3px,-3px) scale(1.05); filter: brightness(1.55); }
+      68% { transform: translate(4px,3px) scale(1.02); }
+      84% { transform: translate(-2px,1px) scale(1.03); }
     }
     @keyframes flameRise {
       0% { opacity: 0; transform: translate(-50%,25%) scale(.45); }
@@ -332,9 +349,7 @@
       background: #291d22;
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease, filter .22s ease;
     }
-    .hand-card.active {
-      transform: translateY(-10px) scale(1.04);
-    }
+    .hand-card.active { transform: translateY(-10px) scale(1.04); }
     .hand-card.active[data-element="fire"] {
       border-color: #ff8a3d;
       box-shadow: 0 0 12px rgba(255,132,54,.95), 0 0 28px rgba(255,55,0,.55);
@@ -345,6 +360,11 @@
       box-shadow: 0 0 12px rgba(166,231,255,.95), 0 0 28px rgba(65,163,220,.55);
       animation: iceCardPulse .46s ease-in-out infinite alternate;
     }
+    .hand-card.active[data-element="lightning"] {
+      border-color: #d9dcff;
+      box-shadow: 0 0 12px rgba(222,231,255,.98), 0 0 30px rgba(112,128,255,.72), 0 0 42px rgba(151,80,255,.38);
+      animation: lightningCardPulse .18s steps(2,end) infinite alternate;
+    }
     .hand-card.support-active {
       transform: translateY(-13px) scale(1.08);
       border-color: #ffc45a;
@@ -353,13 +373,11 @@
       animation: supportPulse .34s ease-in-out 3 alternate;
     }
     .hand-card.used { opacity: .36; }
-    @keyframes fireCardPulse {
-      from { filter: brightness(1); }
-      to { filter: brightness(1.55); }
-    }
-    @keyframes iceCardPulse {
-      from { filter: brightness(1); }
-      to { filter: brightness(1.65); }
+    @keyframes fireCardPulse { from { filter: brightness(1); } to { filter: brightness(1.55); } }
+    @keyframes iceCardPulse { from { filter: brightness(1); } to { filter: brightness(1.65); } }
+    @keyframes lightningCardPulse {
+      from { filter: brightness(1.05); transform: translateY(-10px) scale(1.04); }
+      to { filter: brightness(1.95); transform: translateY(-12px) scale(1.08); }
     }
     @keyframes supportPulse {
       from { transform: translateY(-10px) scale(1.04); }
@@ -380,10 +398,7 @@
       place-items: center;
       transition: opacity .2s ease, transform .3s cubic-bezier(.18,.8,.22,1);
     }
-    .attack-focus.show {
-      opacity: 1;
-      transform: translate(-50%,-50%) scale(1);
-    }
+    .attack-focus.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
     .focus-glow {
       position: absolute;
       inset: 12px;
@@ -444,17 +459,24 @@
       border-color: rgba(152,227,255,.78);
       background: rgba(20,37,48,.86);
     }
-    @keyframes focusGlow {
-      from { transform: scale(.88); opacity: .58; }
-      to { transform: scale(1.16); opacity: 1; }
+    .attack-focus.lightning-focus .focus-glow {
+      background: radial-gradient(circle, rgba(245,248,255,.86), rgba(110,146,255,.36) 42%, rgba(153,82,255,.16) 62%, transparent 76%);
+      animation-duration: .16s;
     }
-    @keyframes totalBump {
-      0%,100% { transform: translateX(-50%) scale(1); }
-      45% { transform: translateX(-50%) scale(1.35); }
+    .attack-focus.lightning-focus .focus-icon {
+      filter: drop-shadow(0 0 8px rgba(255,255,255,1)) drop-shadow(0 0 23px rgba(105,150,255,1)) drop-shadow(0 0 36px rgba(155,86,255,.82));
+      animation: lightningFocusJitter .16s steps(2,end) infinite;
     }
-    @keyframes buffedFire {
-      from { transform: scale(1); }
-      to { transform: scale(1.12); }
+    .attack-focus.lightning-focus .focus-total {
+      border-color: rgba(199,209,255,.92);
+      background: rgba(28,30,65,.9);
+    }
+    @keyframes focusGlow { from { transform: scale(.88); opacity: .58; } to { transform: scale(1.16); opacity: 1; } }
+    @keyframes totalBump { 0%,100% { transform: translateX(-50%) scale(1); } 45% { transform: translateX(-50%) scale(1.35); } }
+    @keyframes buffedFire { from { transform: scale(1); } to { transform: scale(1.12); } }
+    @keyframes lightningFocusJitter {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(2px,-2px) scale(1.08); }
     }
     @keyframes orbitSpark {
       from { transform: rotate(0deg) translateX(52px) rotate(0deg); opacity: .55; }
@@ -491,6 +513,7 @@
 
     .fire-flash,
     .ice-flash,
+    .lightning-flash,
     .enemy-flash {
       position: fixed;
       inset: 0;
@@ -503,6 +526,12 @@
     .ice-flash {
       background: radial-gradient(circle at 50% 38%, rgba(231,250,255,.4), transparent 28%), rgba(76,175,226,.16);
       animation: flashOut .5s ease-out both;
+    }
+    .lightning-flash {
+      z-index: 75;
+      background: rgba(238,245,255,.92);
+      mix-blend-mode: screen;
+      animation: lightningFlash .48s steps(2,end) both;
     }
     .enemy-flash {
       background: radial-gradient(circle at 30% 55%, rgba(255,180,204,.2), transparent 24%), rgba(91,10,43,.14);
@@ -535,11 +564,7 @@
       filter: blur(5px);
       animation: flameWave .23s ease-in-out infinite alternate;
     }
-    .fire-stream::after {
-      transform: translateY(-50%) scaleY(-1);
-      opacity: .72;
-      animation-delay: .08s;
-    }
+    .fire-stream::after { transform: translateY(-50%) scaleY(-1); opacity: .72; animation-delay: .08s; }
     .ember {
       position: fixed;
       width: var(--size);
@@ -577,6 +602,34 @@
       opacity: 0;
       animation: iceSpark .6s ease-out var(--delay) both;
     }
+    .lightning-bolt {
+      position: fixed;
+      top: -8px;
+      left: var(--x);
+      width: var(--w);
+      height: var(--h);
+      transform: translateX(-50%) rotate(var(--rot));
+      transform-origin: 50% 0;
+      opacity: 0;
+      clip-path: polygon(45% 0, 72% 0, 58% 24%, 82% 24%, 43% 57%, 66% 57%, 22% 100%, 37% 65%, 16% 65%, 48% 34%, 28% 34%);
+      background: linear-gradient(180deg, #ffffff 0 28%, #c9dcff 50%, #7ea4ff 75%, #b37bff 100%);
+      box-shadow: 0 0 10px rgba(255,255,255,1), 0 0 28px rgba(93,143,255,.95), 0 0 48px rgba(154,82,255,.72);
+      filter: drop-shadow(0 0 8px rgba(255,255,255,.9));
+      animation: boltStrike .46s steps(2,end) var(--delay) both;
+    }
+    .electric-arc {
+      position: fixed;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: 4px;
+      border-radius: 999px;
+      opacity: 0;
+      background: #e9f0ff;
+      box-shadow: 0 0 7px rgba(255,255,255,.95), 0 0 14px rgba(87,138,255,.9), 0 0 22px rgba(161,91,255,.62);
+      transform: translate(-50%,-50%) rotate(var(--rot));
+      animation: electricArc .44s steps(2,end) var(--delay) both;
+    }
     .slash {
       position: fixed;
       left: var(--sx);
@@ -591,9 +644,13 @@
       animation: slashFly .48s cubic-bezier(.16,.78,.23,1) both;
     }
 
-    @keyframes flashOut {
+    @keyframes flashOut { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes lightningFlash {
       0% { opacity: 0; }
-      18% { opacity: 1; }
+      12% { opacity: .98; }
+      24% { opacity: .08; }
+      38% { opacity: .72; }
+      52% { opacity: .08; }
       100% { opacity: 0; }
     }
     @keyframes fireStream {
@@ -603,10 +660,7 @@
       72% { opacity: 1; transform: rotate(var(--angle)) scaleX(1.02) scaleY(.82); }
       100% { opacity: 0; transform: rotate(var(--angle)) scaleX(1.05) scaleY(.25); }
     }
-    @keyframes flameWave {
-      from { opacity: .45; filter: blur(6px); }
-      to { opacity: 1; filter: blur(3px); }
-    }
+    @keyframes flameWave { from { opacity: .45; filter: blur(6px); } to { opacity: 1; filter: blur(3px); } }
     @keyframes emberFly {
       0% { opacity: 0; transform: translate(0,0) scale(.45); }
       15% { opacity: 1; }
@@ -622,6 +676,20 @@
       0% { opacity: 0; transform: translate(-50%,-50%) scale(.2); }
       25% { opacity: 1; }
       100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.05); }
+    }
+    @keyframes boltStrike {
+      0% { opacity: 0; filter: brightness(.7); }
+      12% { opacity: 1; filter: brightness(2.2); }
+      28% { opacity: .2; }
+      42% { opacity: 1; filter: brightness(1.9); }
+      62% { opacity: .72; }
+      100% { opacity: 0; }
+    }
+    @keyframes electricArc {
+      0% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scaleX(.1); }
+      20% { opacity: 1; }
+      55% { opacity: .9; transform: translate(-50%,-50%) rotate(var(--rot)) scaleX(1); }
+      100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scaleX(.45); }
     }
     @keyframes slashFly {
       0% { left: var(--sx); top: var(--sy); opacity: 0; transform: translate(-50%,-50%) rotate(var(--rot)) scaleY(.15) scaleX(.65); }
@@ -705,7 +773,6 @@
     <div id="focusIcon" class="focus-icon">🔥</div>
     <div id="focusTotal" class="focus-total">3</div>
   </div>
-
   <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
 
   <script>
@@ -715,17 +782,14 @@
     const diceCard = document.getElementById('diceCard');
     const diceSymbol = document.getElementById('diceSymbol');
     const diceNumber = document.getElementById('diceNumber');
-
     const enemyCard = document.getElementById('enemyCard');
     const enemyHpText = document.getElementById('enemyHp');
     const enemyHpMeter = document.getElementById('enemyHpMeter');
     const enemyHpFill = document.getElementById('enemyHpFill');
-
     const playerCard = document.getElementById('playerCard');
     const playerHpText = document.getElementById('playerHp');
     const playerHpMeter = document.getElementById('playerHpMeter');
     const playerHpFill = document.getElementById('playerHpFill');
-
     const fxLayer = document.getElementById('fxLayer');
     const attackFocus = document.getElementById('attackFocus');
     const focusIcon = document.getElementById('focusIcon');
@@ -792,13 +856,13 @@
       const element = card.dataset.element || '';
       focusIcon.textContent = icon;
       focusTotal.textContent = String(base);
-      attackFocus.classList.remove('buffed', 'ice-focus');
+      attackFocus.classList.remove('buffed', 'ice-focus', 'lightning-focus');
       if (element === 'ice') attackFocus.classList.add('ice-focus');
-      await flyToken(icon, card, attackFocus, {
-        fontSize: '58px',
-        color: element === 'ice' ? '#eefcff' : '#fff0c2',
-        glow: element === 'ice' ? 'rgba(117,211,255,.95)' : 'rgba(255,94,15,.95)'
-      });
+      if (element === 'lightning') attackFocus.classList.add('lightning-focus');
+
+      const tokenColor = element === 'ice' ? '#eefcff' : element === 'lightning' ? '#f7f8ff' : '#fff0c2';
+      const tokenGlow = element === 'ice' ? 'rgba(117,211,255,.95)' : element === 'lightning' ? 'rgba(121,151,255,1)' : 'rgba(255,94,15,.95)';
+      await flyToken(icon, card, attackFocus, { fontSize: '58px', color: tokenColor, glow: tokenGlow });
       attackFocus.classList.add('show');
       await wait(330);
       return base;
@@ -923,6 +987,46 @@
       enemyCard.classList.remove('frozen');
     }
 
+    async function playLightningEffect() {
+      const t = centerOf(enemyCard);
+      await wait(170);
+
+      const flash = document.createElement('div');
+      flash.className = 'lightning-flash';
+      fxLayer.appendChild(flash);
+
+      for (let i = 0; i < 3; i += 1) {
+        const bolt = document.createElement('div');
+        bolt.className = 'lightning-bolt';
+        bolt.style.setProperty('--x', `${t.x + (i - 1) * 17}px`);
+        bolt.style.setProperty('--w', `${50 + i * 8}px`);
+        bolt.style.setProperty('--h', `${Math.max(150, t.y + 42)}px`);
+        bolt.style.setProperty('--rot', `${(i - 1) * 4}deg`);
+        bolt.style.setProperty('--delay', `${i * .055}s`);
+        fxLayer.appendChild(bolt);
+      }
+
+      for (let i = 0; i < 16; i += 1) {
+        const arc = document.createElement('div');
+        arc.className = 'electric-arc';
+        arc.style.setProperty('--x', `${t.x + (Math.random() - .5) * 100}px`);
+        arc.style.setProperty('--y', `${t.y + (Math.random() - .5) * 130}px`);
+        arc.style.setProperty('--w', `${22 + Math.random() * 60}px`);
+        arc.style.setProperty('--rot', `${Math.random() * 180 - 90}deg`);
+        arc.style.setProperty('--delay', `${.08 + Math.random() * .28}s`);
+        fxLayer.appendChild(arc);
+      }
+
+      enemyCard.classList.remove('electrified');
+      void enemyCard.offsetWidth;
+      enemyCard.classList.add('electrified');
+      await wait(720);
+
+      flash.remove();
+      fxLayer.querySelectorAll('.lightning-bolt,.electric-arc').forEach(el => el.remove());
+      enemyCard.classList.remove('electrified');
+    }
+
     async function damageTarget({ card, meter, fillUpdate, oldHp, newHp, damage }) {
       const pop = document.createElement('div');
       pop.className = 'damage-pop';
@@ -1006,12 +1110,13 @@
 
       if (card.dataset.element === 'fire') await playFireEffect(attackFocus);
       if (card.dataset.element === 'ice') await playIceEffect(attackFocus);
+      if (card.dataset.element === 'lightning') await playLightningEffect();
       await damageEnemy(total);
 
       card.classList.remove('active');
       card.classList.add('used');
       diceCard.classList.remove('open');
-      attackFocus.classList.remove('show', 'buffed', 'ice-focus');
+      attackFocus.classList.remove('show', 'buffed', 'ice-focus', 'lightning-focus');
       await wait(260);
     }
 
@@ -1026,7 +1131,12 @@
         const iceCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'ice');
         await playPlayerCard(iceCard);
       }
+      if (enemyHp > 0 && playerHp > 0) await playEnemyAttack(4);
 
+      if (enemyHp > 0 && playerHp > 0) {
+        const lightningCard = handCards.find(card => card.dataset.role === 'attack' && card.dataset.element === 'lightning');
+        await playPlayerCard(lightningCard);
+      }
       if (enemyHp > 0 && playerHp > 0) await playEnemyAttack(4);
     }
 
