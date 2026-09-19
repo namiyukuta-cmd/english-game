@@ -148,8 +148,22 @@
   function saveWorking(){try{localStorage.setItem(WORK_KEY,JSON.stringify(pixels))}catch(e){}}
   function updateProjectLabel(){projectLabel.textContent=currentSaveId?'ドット絵セーブ'+currentSaveId:'新しいドット絵'}
 
-  function loadInitial(){
-    const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),art=q.get('art'),artName=q.get('name');
+  async function loadInitial(){
+    const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),art=q.get('art'),artName=q.get('name'),ai=q.get('ai');
+    if(ai==='1'){
+      try{
+        const res=await fetch('pixel8-ai.json?t='+Date.now(),{cache:'no-store'});
+        const data=await res.json();
+        const incoming=data&&data.pixels;
+        if(validPixels(incoming)){
+          pixels=incoming.map(r=>r.slice());
+          currentSaveId=null;
+          saveWorking();
+          projectLabel.textContent=data.name?('AI：'+data.name):'AIドット絵';
+          return;
+        }
+      }catch(e){}
+    }
     const incomingArt=decodeArtParam(art);
     if(incomingArt){
       pixels=incomingArt.map(r=>r.slice());
@@ -223,7 +237,7 @@
   document.getElementById('savePngBtn').addEventListener('click',()=>{download(makeCanvas(20).toDataURL('image/png'),(currentSaveId?'pixel_'+currentSaveId:'pixel_8x8')+'.png');note('PNGを保存しました')});
   document.getElementById('saveJsonBtn').addEventListener('click',()=>{const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});const data={width:SIZE,height:SIZE,pixels,coordinates};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_8x8')+'.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')});
 
-  loadInitial();render();updateTool();updateDrawMode();updateZoom(false);
+  loadInitial().then(()=>{render();updateTool();updateDrawMode();updateZoom(false)});
 })();
 </script>
 </body>
