@@ -84,12 +84,11 @@
   <section class="panel">
     <p class="title">3. 切り抜く</p>
     <div class="row">
-      <button id="autoCropBtn" class="btn primary" type="button" disabled>アイテムをタップで切り抜く</button>
-      <button id="cropModeBtn" class="btn" type="button" disabled>四角で手動切り抜き</button>
+      <button id="cropModeBtn" class="btn primary" type="button" disabled>切り抜き枠を出す</button>
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <p class="note">自動：ボタンを押して欲しいアイテムを1回タップ。単色背景からアイテムの範囲を自動で囲みます。手動：画像上をドラッグ。</p>
+    <p class="note">枠の中を指で動かすと移動。四隅の□を動かすと大きさを変えられます。</p>
   </section>
 
   <section class="panel">
@@ -148,7 +147,6 @@
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
-  const autoCropBtn=document.getElementById('autoCropBtn');
   const cropModeBtn=document.getElementById('cropModeBtn');
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
@@ -160,10 +158,9 @@
   let syncing=false;
   let processed=false;
   let cropMode=false;
-  let autoCropMode=false;
   let bgPickMode=false;
-  let cropStart=null;
   let cropRect=null;
+  let cropDrag=null;
   let suppressCanvasClick=false;
 
   function note(t){status.textContent=t}
@@ -179,27 +176,34 @@
     processed=false;
   }
   function updateCropButtons(){
-    autoCropBtn.classList.toggle('active',autoCropMode);
-    cropModeBtn.classList.toggle('active',cropMode);
+    cropModeBtn.classList.toggle('active',!!cropRect);
     bgPickBtn.classList.toggle('active',bgPickMode);
-    autoCropBtn.textContent=autoCropMode?'切り抜くアイテムをタップ':'アイテムをタップで切り抜く';
-    cropModeBtn.textContent=cropMode?'手動範囲を選択中':'四角で手動切り抜き';
+    cropModeBtn.textContent=cropRect?'切り抜き枠を調整中':'切り抜き枠を出す';
     bgPickBtn.textContent=bgPickMode?'背景をタップしてください':'背景色を選ぶ';
     cropClearBtn.disabled=!img||!cropRect;
     cropInfo.textContent=cropRect?(cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y):'画像全体';
   }
-  function drawCropOverlay(tempRect=null){
+  function drawCropOverlay(){
     const ctx=cropOverlay.getContext('2d');
     ctx.clearRect(0,0,cropOverlay.width,cropOverlay.height);
-    const r=tempRect||cropRect;
+    const r=cropRect;
     if(!r)return;
     ctx.save();
-    ctx.fillStyle='rgba(0,0,0,.32)';
+    ctx.fillStyle='rgba(0,0,0,.38)';
     ctx.fillRect(0,0,cropOverlay.width,cropOverlay.height);
     ctx.clearRect(r.x,r.y,r.w,r.h);
+    const lw=Math.max(3,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/260));
     ctx.strokeStyle='rgba(255,255,255,.98)';
-    ctx.lineWidth=Math.max(2,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/350));
-    ctx.strokeRect(r.x+.5,r.y+.5,Math.max(0,r.w-1),Math.max(0,r.h-1));
+    ctx.lineWidth=lw;
+    ctx.strokeRect(r.x,r.y,r.w,r.h);
+    const hs=Math.max(18,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/28));
+    ctx.fillStyle='#fff';
+    ctx.strokeStyle='rgba(40,40,40,.85)';
+    ctx.lineWidth=Math.max(2,lw/2);
+    for(const [x,y] of [[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]]){
+      ctx.fillRect(x-hs/2,y-hs/2,hs,hs);
+      ctx.strokeRect(x-hs/2,y-hs/2,hs,hs);
+    }
     ctx.restore();
   }
   function overlayPoint(e){
@@ -224,7 +228,7 @@
       sourceCanvas.height=image.naturalHeight;
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
-      cropRect=null;cropStart=null;cropMode=false;autoCropMode=false;bgPickMode=false;
+      cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
       drawCropOverlay();
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
@@ -235,7 +239,6 @@
       outH.value=image.naturalHeight;
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
-      autoCropBtn.disabled=false;
       cropModeBtn.disabled=false;
       saveBtn.disabled=true;
       processed=false;
@@ -283,11 +286,13 @@
 
   function setCropRect(r,label='切り抜き範囲を設定しました'){
     if(!r||r.w<2||r.h<2)return;
+    const x=Math.max(0,Math.round(r.x));
+    const y=Math.max(0,Math.round(r.y));
     cropRect={
-      x:Math.max(0,Math.round(r.x)),
-      y:Math.max(0,Math.round(r.y)),
-      w:Math.max(1,Math.min(sourceCanvas.width-Math.max(0,Math.round(r.x)),Math.round(r.w))),
-      h:Math.max(1,Math.min(sourceCanvas.height-Math.max(0,Math.round(r.y)),Math.round(r.h)))
+      x,
+      y,
+      w:Math.max(2,Math.min(sourceCanvas.width-x,Math.round(r.w))),
+      h:Math.max(2,Math.min(sourceCanvas.height-y,Math.round(r.h)))
     };
     ratio=cropRect.w/cropRect.h||1;
     if(keepRatio.checked){
@@ -297,90 +302,33 @@
     drawCropOverlay();updateCropButtons();note(label);
   }
 
-  function autoCropAt(pnt){
-    if(!img)return;
-    const data=transparentSource();
-    const d=data.data,w=data.width,h=data.height;
-    const fg=new Uint8Array(w*h);
-    for(let n=0;n<w*h;n++) if(d[n*4+3]>0) fg[n]=1;
-
-    let sx=Math.max(0,Math.min(w-1,Math.round(pnt.x)));
-    let sy=Math.max(0,Math.min(h-1,Math.round(pnt.y)));
-    let startN=sy*w+sx;
-
-    if(!fg[startN]){
-      const maxR=Math.max(12,Math.round(Math.min(w,h)*0.08));
-      let found=-1,best=Infinity;
-      for(let r=1;r<=maxR&&found<0;r++){
-        const x0=Math.max(0,sx-r),x1=Math.min(w-1,sx+r),y0=Math.max(0,sy-r),y1=Math.min(h-1,sy+r);
-        for(let x=x0;x<=x1;x++){
-          for(const y of [y0,y1]){
-            const n=y*w+x;if(fg[n]){const dd=(x-sx)*(x-sx)+(y-sy)*(y-sy);if(dd<best){best=dd;found=n}}
-          }
-        }
-        for(let y=y0+1;y<y1;y++){
-          for(const x of [x0,x1]){
-            const n=y*w+x;if(fg[n]){const dd=(x-sx)*(x-sx)+(y-sy)*(y-sy);if(dd<best){best=dd;found=n}}
-          }
-        }
-      }
-      if(found<0){note('アイテムの上をタップしてください');return}
-      startN=found;
-    }
-
-    const seen=new Uint8Array(w*h);
-    const q=new Int32Array(w*h);
-    let head=0,tail=0;
-    q[tail++]=startN;seen[startN]=1;
-    let minX=w,minY=h,maxX=0,maxY=0,count=0;
-    while(head<tail){
-      const n=q[head++],x=n%w,y=(n/w)|0;
-      count++;if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;
-      for(let yy=Math.max(0,y-1);yy<=Math.min(h-1,y+1);yy++){
-        for(let xx=Math.max(0,x-1);xx<=Math.min(w-1,x+1);xx++){
-          const nn=yy*w+xx;
-          if(!seen[nn]&&fg[nn]){seen[nn]=1;q[tail++]=nn}
-        }
-      }
-    }
-    if(count<8){note('アイテムをうまく見つけられませんでした');return}
-
-    const pad=Math.max(4,Math.round(Math.max(maxX-minX+1,maxY-minY+1)*0.08));
-    setCropRect({
-      x:Math.max(0,minX-pad),
-      y:Math.max(0,minY-pad),
-      w:Math.min(w-1,maxX+pad)-Math.max(0,minX-pad)+1,
-      h:Math.min(h-1,maxY+pad)-Math.max(0,minY-pad)+1
-    },'アイテムを自動で囲みました');
-    autoCropMode=false;updateCropButtons();
-  }
-
   bgPickBtn.addEventListener('click',()=>{
     if(!img)return;
     bgPickMode=!bgPickMode;
-    autoCropMode=false;cropMode=false;cropStart=null;
+    cropMode=false;cropDrag=null;
     updateCropButtons();drawCropOverlay();
     note(bgPickMode?'消したい背景を画像上で1回タップしてください':'背景色選択を終了しました');
   });
 
-  autoCropBtn.addEventListener('click',()=>{
-    if(!img)return;
-    autoCropMode=!autoCropMode;
-    cropMode=false;bgPickMode=false;cropStart=null;
-    updateCropButtons();drawCropOverlay();
-    note(autoCropMode?'切り抜きたいアイテムを1回タップしてください':'自動切り抜きを終了しました');
-  });
-
   cropModeBtn.addEventListener('click',()=>{
     if(!img)return;
-    cropMode=!cropMode;
-    autoCropMode=false;bgPickMode=false;cropStart=null;
-    updateCropButtons();drawCropOverlay();
-    note(cropMode?'残したい範囲をドラッグしてください':'手動切り抜きを終了しました');
+    bgPickMode=false;
+    if(!cropRect){
+      const mx=Math.round(sourceCanvas.width*0.12);
+      const my=Math.round(sourceCanvas.height*0.12);
+      setCropRect({
+        x:mx,y:my,
+        w:sourceCanvas.width-mx*2,
+        h:sourceCanvas.height-my*2
+      },'白い枠を動かして切り抜き範囲を合わせてください');
+    }else{
+      note('白い枠を動かして切り抜き範囲を合わせてください');
+    }
+    updateCropButtons();
   });
 
   cropClearBtn.addEventListener('click',()=>{
-    cropRect=null;cropStart=null;cropMode=false;autoCropMode=false;bgPickMode=false;
+    cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
     ratio=img?(img.naturalWidth/img.naturalHeight||1):1;
     drawCropOverlay();updateCropButtons();
     processed=false;saveBtn.disabled=true;
@@ -389,46 +337,84 @@
 
   cropOverlay.addEventListener('click',e=>{
     if(!img||suppressCanvasClick)return;
-    const pnt=overlayPoint(e);
     if(bgPickMode){
+      const pnt=overlayPoint(e);
       const x=Math.max(0,Math.min(sourceCanvas.width-1,pnt.x));
       const y=Math.max(0,Math.min(sourceCanvas.height-1,pnt.y));
       const p=sctx.getImageData(x,y,1,1).data;
       setBg(p[0],p[1],p[2]);
       bgPickMode=false;updateCropButtons();
       note('背景色を選びました');
-      return;
-    }
-    if(autoCropMode){
-      autoCropAt(pnt);
     }
   });
 
+  function cropHit(p){
+    if(!cropRect)return null;
+    const r=cropRect;
+    const scale=cropOverlay.width/Math.max(1,cropOverlay.getBoundingClientRect().width);
+    const hit=34*scale;
+    const corners=[
+      ['nw',r.x,r.y],['ne',r.x+r.w,r.y],
+      ['sw',r.x,r.y+r.h],['se',r.x+r.w,r.y+r.h]
+    ];
+    for(const [name,x,y] of corners){
+      if(Math.hypot(p.x-x,p.y-y)<=hit)return name;
+    }
+    if(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)return 'move';
+    return null;
+  }
+
   cropOverlay.addEventListener('pointerdown',e=>{
-    if(!img||!cropMode)return;
+    if(!img||!cropRect||bgPickMode)return;
+    const p=overlayPoint(e);
+    const hit=cropHit(p);
+    if(!hit)return;
     e.preventDefault();
     suppressCanvasClick=true;
     cropOverlay.setPointerCapture?.(e.pointerId);
-    cropStart=overlayPoint(e);
+    cropDrag={type:hit,start:p,orig:{...cropRect}};
   });
+
   cropOverlay.addEventListener('pointermove',e=>{
-    if(!cropStart||!cropMode)return;
+    if(!cropDrag||!cropRect)return;
     e.preventDefault();
-    drawCropOverlay(normalizeRect(cropStart,overlayPoint(e)));
+    const p=overlayPoint(e);
+    const o=cropDrag.orig, dx=p.x-cropDrag.start.x, dy=p.y-cropDrag.start.y;
+    const minSize=Math.max(16,Math.round(Math.min(sourceCanvas.width,sourceCanvas.height)*0.04));
+    let x=o.x,y=o.y,w=o.w,h=o.h;
+
+    if(cropDrag.type==='move'){
+      x=Math.max(0,Math.min(sourceCanvas.width-w,o.x+dx));
+      y=Math.max(0,Math.min(sourceCanvas.height-h,o.y+dy));
+    }else{
+      let left=o.x,top=o.y,right=o.x+o.w,bottom=o.y+o.h;
+      if(cropDrag.type.includes('w'))left=Math.max(0,Math.min(right-minSize,o.x+dx));
+      if(cropDrag.type.includes('e'))right=Math.min(sourceCanvas.width,Math.max(left+minSize,o.x+o.w+dx));
+      if(cropDrag.type.includes('n'))top=Math.max(0,Math.min(bottom-minSize,o.y+dy));
+      if(cropDrag.type.includes('s'))bottom=Math.min(sourceCanvas.height,Math.max(top+minSize,o.y+o.h+dy));
+      x=left;y=top;w=right-left;h=bottom-top;
+    }
+    cropRect={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+    processed=false;saveBtn.disabled=true;
+    drawCropOverlay();updateCropButtons();
   });
-  function finishCrop(e){
-    if(!cropStart||!cropMode)return;
+
+  function finishCropBox(e){
+    if(!cropDrag)return;
     e.preventDefault();
-    const r=normalizeRect(cropStart,overlayPoint(e));
-    cropStart=null;
-    if(r.w>=2&&r.h>=2)setCropRect(r);
-    cropMode=false;updateCropButtons();drawCropOverlay();
-    setTimeout(()=>{suppressCanvasClick=false},350);
+    cropDrag=null;
+    ratio=cropRect.w/cropRect.h||1;
+    if(keepRatio.checked){
+      syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
+    }
+    updateCropButtons();drawCropOverlay();
+    note('切り抜き範囲を設定しました');
+    setTimeout(()=>{suppressCanvasClick=false},300);
   }
-  cropOverlay.addEventListener('pointerup',finishCrop);
+  cropOverlay.addEventListener('pointerup',finishCropBox);
   cropOverlay.addEventListener('pointercancel',()=>{
-    cropStart=null;drawCropOverlay();
-    setTimeout(()=>{suppressCanvasClick=false},350);
+    cropDrag=null;drawCropOverlay();
+    setTimeout(()=>{suppressCanvasClick=false},300);
   });
   tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
 
