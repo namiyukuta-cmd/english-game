@@ -36,7 +36,7 @@
 
 <script>
 (() => {
-  const KEY='englishGamePixelSavesV1';
+  const KEY='englishGamePixelSaves8V1';
   const list=document.getElementById('saveList');
   function readData(){
     try{
@@ -48,9 +48,9 @@
   function drawPreview(canvas,pixels){
     const ctx=canvas.getContext('2d');
     ctx.clearRect(0,0,72,72);
-    const s=3;
+    const s=9;
     if(!Array.isArray(pixels))return;
-    for(let y=0;y<24;y++)for(let x=0;x<24;x++){
+    for(let y=0;y<8;y++)for(let x=0;x<8;x++){
       const c=pixels[y]&&pixels[y][x];
       if(c){ctx.fillStyle=c;ctx.fillRect(x*s,y*s,s,s);}
     }
