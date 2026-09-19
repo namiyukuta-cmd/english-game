@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ホットケーキキャッチ</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:#fff8ea;color:#3b2a20;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;touch-action:manipulation}
+  body{display:flex;justify-content:center;padding:12px}
+  .wrap{width:min(100%,430px)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .score{font-weight:800;font-size:18px}
+  .sub{font-size:13px;color:#765f50}
+  button{font:inherit}
+  #reset{border:1px solid #cbb8a4;background:#fff;border-radius:10px;padding:9px 13px;min-height:44px;color:#3b2a20}
+  .gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:linear-gradient(#fffdf8 0%,#fff7e8 72%,#efe1ca 72%,#efe1ca 100%);touch-action:none}
+  canvas{display:block;width:100%;height:100%}
+  .msg{min-height:24px;text-align:center;font-weight:700;margin:8px 0 4px}
+  .help{text-align:center;font-size:13px;color:#765f50;margin-bottom:8px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .move{min-height:54px;border:1px solid #cbb8a4;background:#fff;border-radius:14px;font-size:24px;font-weight:800;color:#3b2a20}
+  .move:active,#reset:active{transform:translateY(1px)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="score">成功 <span id="score">0</span>枚　失敗 <span id="miss">0</span>回</div>
+      <div class="sub">落ちてくるホットケーキを皿で受け止める</div>
+    </div>
+    <button id="reset" type="button">やり直す</button>
+  </div>
+
+  <div id="gamebox" class="gamebox" aria-label="ホットケーキを皿で受け止めるゲーム">
+    <canvas id="game" width="360" height="600"></canvas>
+  </div>
+
+  <div id="msg" class="msg" aria-live="polite">皿を動かしてください</div>
+  <div class="help">画面を左右になぞる / 下のボタンで皿を移動</div>
+
+  <div class="controls">
+    <button id="left" class="move" type="button" aria-label="皿を左へ">←</button>
+    <button id="right" class="move" type="button" aria-label="皿を右へ">→</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const box = document.getElementById('gamebox');
+  const scoreEl = document.getElementById('score');
+  const missEl = document.getElementById('miss');
+  const msg = document.getElementById('msg');
+  const resetBtn = document.getElementById('reset');
+  const leftBtn = document.getElementById('left');
+  const rightBtn = document.getElementById('right');
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  let plateX = W / 2;
+  const plateY = 535;
+  const plateW = 128;
+  const plateH = 26;
+
+  let cake = null;
+  let score = 0;
+  let misses = 0;
+  let stack = [];
+  let speed = 2.7;
+  let last = performance.now();
+  let pausedUntil = 0;
+  let pointerDown = false;
+  let leftHeld = false;
+  let rightHeld = false;
+
+  function resetCake() {
+    const margin = 46;
+    cake = {
+      x: margin + Math.random() * (W - margin * 2),
+      y: -30,
+      w: 78,
+      h: 24,
+      vy: speed
+    };
+  }
+
+  function restart() {
+    score = 0;
+    misses = 0;
+    speed = 2.7;
+    plateX = W / 2;
+    stack = [];
+    pausedUntil = 0;
+    scoreEl.textContent = '0';
+    missEl.textContent = '0';
+    msg.textContent = '皿を動かしてください';
+    resetCake();
+  }
+
+  function stackTopY() {
+    return plateY - 10 - stack.length * 11;
+  }
+
+  function drawPancake(x, y, w, h, localTilt = 0) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(localTilt);
+    ctx.fillStyle = '#b87333';
+    ctx.strokeStyle = '#70401f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 2, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#e9b760';
+    ctx.beginPath();
+    ctx.ellipse(0, -3, w/2 - 4, h/2 - 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#f4d58d';
+    ctx.beginPath();
+    ctx.ellipse(-12, -7, 16, 4, -0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#f0cf58';
+    ctx.fillRect(-7, -10, 14, 9);
+    ctx.restore();
+  }
+
+  function drawPlate() {
+    ctx.save();
+    ctx.translate(plateX, plateY);
+
+    ctx.fillStyle = '#d8e8ef';
+    ctx.strokeStyle = '#657d8a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 5, plateW/2, plateH/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#f8fcff';
+    ctx.beginPath();
+    ctx.ellipse(0, 1, plateW/2 - 10, plateH/2 - 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    for (let i = 0; i < stack.length; i++) {
+      const s = stack[i];
+      drawPancake(s.offsetX, -10 - i * 11, 76, 23, s.tilt);
+    }
+    ctx.restore();
+  }
+
+  function drawBackground() {
+    ctx.clearRect(0,0,W,H);
+
+    ctx.fillStyle = '#fffdf8';
+    ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle = '#fff5df';
+    ctx.fillRect(0,0,W,95);
+
+    ctx.fillStyle = '#9f7d61';
+    ctx.font = '700 18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('HOTCAKE CATCH', W/2, 42);
+
+    ctx.fillStyle = '#eadcc7';
+    ctx.fillRect(0,455,W,145);
+
+    ctx.strokeStyle = '#d4c0a8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0,455);
+    ctx.lineTo(W,455);
+    ctx.stroke();
+  }
+
+  function catchCake() {
+    const relative = cake.x - plateX;
+    const safe = plateW/2 - cake.w/2 + 20;
+    if (Math.abs(relative) <= safe) {
+      const clampedOffset = Math.max(-24, Math.min(24, relative * 0.42));
+      stack.push({
+        offsetX: clampedOffset,
+        tilt: clampedOffset * 0.0025
+      });
+      score++;
+      scoreEl.textContent = String(score);
+      msg.textContent = Math.abs(relative) < 9 ? 'ど真ん中！' : '乗った！';
+
+      if (score % 5 === 0) speed += 0.35;
+      if (stack.length >= 12) {
+        msg.textContent = '12枚成功！ お皿を空にして続行';
+        stack = [];
+      }
+    } else {
+      misses++;
+      missEl.textContent = String(misses);
+      msg.textContent = '落ちた！';
+    }
+    pausedUntil = performance.now() + 380;
+    resetCake();
+  }
+
+  function update(dt, now) {
+    const moveSpeed = 0.30 * dt;
+    if (leftHeld) plateX -= moveSpeed;
+    if (rightHeld) plateX += moveSpeed;
+    plateX = Math.max(plateW/2, Math.min(W - plateW/2, plateX));
+
+    if (now < pausedUntil) return;
+
+    cake.y += cake.vy * (dt / 16.67);
+
+    const targetY = stackTopY();
+    if (cake.y + cake.h/2 >= targetY) {
+      catchCake();
+    }
+  }
+
+  function render() {
+    drawBackground();
+    drawPlate();
+    if (cake) drawPancake(cake.x, cake.y, cake.w, cake.h, 0);
+  }
+
+  function loop(now) {
+    const dt = Math.min(34, now - last);
+    last = now;
+    update(dt, now);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function pointerToPlate(e) {
+    const r = canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (W / r.width);
+    plateX = Math.max(plateW/2, Math.min(W - plateW/2, x));
+  }
+
+  box.addEventListener('pointerdown', e => {
+    pointerDown = true;
+    box.setPointerCapture?.(e.pointerId);
+    pointerToPlate(e);
+  });
+
+  box.addEventListener('pointermove', e => {
+    if (pointerDown) pointerToPlate(e);
+  });
+
+  box.addEventListener('pointerup', e => {
+    pointerDown = false;
+    box.releasePointerCapture?.(e.pointerId);
+  });
+
+  box.addEventListener('pointercancel', () => {
+    pointerDown = false;
+  });
+
+  function bindHold(btn, side) {
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      if (side === 'left') leftHeld = true;
+      else rightHeld = true;
+      btn.setPointerCapture?.(e.pointerId);
+    });
+    const stop = () => {
+      if (side === 'left') leftHeld = false;
+      else rightHeld = false;
+    };
+    btn.addEventListener('pointerup', stop);
+    btn.addEventListener('pointercancel', stop);
+    btn.addEventListener('lostpointercapture', stop);
+  }
+
+  bindHold(leftBtn, 'left');
+  bindHold(rightBtn, 'right');
+  resetBtn.addEventListener('click', restart);
+
+  restart();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
