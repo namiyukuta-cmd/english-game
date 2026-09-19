@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#fff7fb">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>画像透過・サイズ変更</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--muted:#7d6e75;--accent:#d97898}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    .wrap{max-width:760px;margin:0 auto;padding:12px 12px 32px}
+    .top{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-bottom:12px}
+    .top h1{margin:0;text-align:center;font-size:20px}
+    .back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:21px;font-weight:900;text-decoration:none}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+    .title{font-size:14px;font-weight:800;margin:0 0 8px}
+    .note{font-size:12px;line-height:1.6;color:var(--muted);margin:6px 0 0}
+    .drop{min-height:92px;border:2px dashed #cfbec6;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;background:#fff;outline:none}
+    .drop:focus{border-color:var(--accent)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .filelabel,.btn{min-height:42px;border:1px solid #cdbfc6;border-radius:10px;background:#fff;color:var(--ink);font-weight:800;padding:9px 12px;display:inline-flex;align-items:center;justify-content:center}
+    .filelabel input{display:none}
+    .btn.primary{background:#3e3037;color:#fff;border-color:#3e3037}
+    .btn.save{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn:disabled{opacity:.45}
+    .canvasbox{position:relative;border:1px solid var(--line);border-radius:12px;overflow:auto;padding:8px;background-color:#fff;background-image:linear-gradient(45deg,#e8e8e8 25%,transparent 25%),linear-gradient(-45deg,#e8e8e8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e8e8e8 75%),linear-gradient(-45deg,transparent 75%,#e8e8e8 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
+    canvas{display:block;max-width:100%;height:auto;margin:0 auto;image-rendering:auto}
+    #sourceCanvas{cursor:crosshair}
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    label.field{display:grid;gap:5px;font-size:12px;font-weight:700}
+    input[type=number],select{width:100%;min-height:42px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:8px;font:inherit}
+    input[type=range]{width:100%}
+    .check{display:flex;align-items:center;gap:8px;font-size:13px}
+    .colorline{display:flex;align-items:center;gap:10px}
+    .chip{width:34px;height:34px;border-radius:8px;border:2px solid #4b3e44;background:#fff}
+    .status{min-height:18px;margin-top:7px;text-align:center;color:var(--muted);font-size:12px}
+    @media(min-width:600px){.fields{grid-template-columns:repeat(4,1fr)}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <a class="back" href="story-menu.html" aria-label="戻る">←</a>
+    <h1>画像透過・サイズ変更</h1>
+    <span></span>
+  </header>
+
+  <section class="panel">
+    <p class="title">1. AI画像を貼り付ける</p>
+    <div id="pasteArea" class="drop" contenteditable="true" inputmode="none">ここをタップして「ペースト」<br>または画像ファイルを選ぶ</div>
+    <div class="row" style="margin-top:8px">
+      <label class="filelabel">画像を選ぶ<input id="fileInput" type="file" accept="image/*"></label>
+      <button id="clipboardBtn" class="btn" type="button">クリップボードから貼付</button>
+    </div>
+    <p class="note">コピーした画像をそのまま貼り付けできます。ドラッグ＆ドロップにも対応。</p>
+  </section>
+
+  <section class="panel">
+    <p class="title">2. 背景を透明にする</p>
+    <div class="canvasbox"><canvas id="sourceCanvas"></canvas></div>
+    <div class="colorline" style="margin-top:10px">
+      <div id="bgChip" class="chip"></div>
+      <div><strong id="bgText">背景色：未選択</strong><div class="note" style="margin:0">画像をタップすると、その色を背景色にします。</div></div>
+    </div>
+    <label class="field" style="margin-top:10px">
+      色の許容範囲 <span id="tolText">35</span>
+      <input id="tolerance" type="range" min="0" max="150" value="35">
+    </label>
+    <label class="check"><input id="allSimilar" type="checkbox">画像内の同じ色も全部透明にする</label>
+    <p class="note">OFFでは、画像の外周につながっている背景だけを透明にします。</p>
+  </section>
+
+  <section class="panel">
+    <p class="title">3. PNGサイズ</p>
+    <div class="fields">
+      <label class="field">幅(px)<input id="outW" type="number" min="1" max="8192" value="512"></label>
+      <label class="field">高さ(px)<input id="outH" type="number" min="1" max="8192" value="512"></label>
+      <label class="field">配置
+        <select id="fitMode">
+          <option value="contain">全体を収める</option>
+          <option value="cover">いっぱいに切り抜く</option>
+          <option value="stretch">縦横を合わせる</option>
+        </select>
+      </label>
+      <label class="field">余白(px)<input id="padding" type="number" min="0" max="1000" value="0"></label>
+    </div>
+    <div class="row" style="margin-top:9px">
+      <label class="check"><input id="keepRatio" type="checkbox" checked>縦横比を維持</label>
+      <label class="check"><input id="pixelMode" type="checkbox">ドット絵（ぼかさない）</label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
+      <button id="saveBtn" class="btn save" type="button" disabled>背景透過PNGを保存</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="title">完成プレビュー</p>
+    <div class="canvasbox"><canvas id="outputCanvas"></canvas></div>
+    <div id="status" class="status"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const pasteArea=document.getElementById('pasteArea');
+  const fileInput=document.getElementById('fileInput');
+  const clipboardBtn=document.getElementById('clipboardBtn');
+  const sourceCanvas=document.getElementById('sourceCanvas');
+  const outputCanvas=document.getElementById('outputCanvas');
+  const sctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
+  const octx=outputCanvas.getContext('2d');
+  const bgChip=document.getElementById('bgChip');
+  const bgText=document.getElementById('bgText');
+  const tolerance=document.getElementById('tolerance');
+  const tolText=document.getElementById('tolText');
+  const allSimilar=document.getElementById('allSimilar');
+  const outW=document.getElementById('outW');
+  const outH=document.getElementById('outH');
+  const keepRatio=document.getElementById('keepRatio');
+  const fitMode=document.getElementById('fitMode');
+  const padding=document.getElementById('padding');
+  const pixelMode=document.getElementById('pixelMode');
+  const processBtn=document.getElementById('processBtn');
+  const saveBtn=document.getElementById('saveBtn');
+  const status=document.getElementById('status');
+
+  let img=null;
+  let bg=null;
+  let ratio=1;
+  let syncing=false;
+  let processed=false;
+
+  function note(t){status.textContent=t}
+  function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
+  function colorDistance(d,i,c){
+    const dr=d[i]-c[0],dg=d[i+1]-c[1],db=d[i+2]-c[2];
+    return Math.sqrt(dr*dr+dg*dg+db*db);
+  }
+  function setBg(r,g,b){
+    bg=[r,g,b];
+    bgChip.style.background='rgb('+r+','+g+','+b+')';
+    bgText.textContent='背景色：rgb('+r+', '+g+', '+b+')';
+    processed=false;
+  }
+  function loadBlob(blob){
+    if(!blob || !blob.type || !blob.type.startsWith('image/'))return;
+    const url=URL.createObjectURL(blob);
+    const image=new Image();
+    image.onload=()=>{
+      img=image;
+      ratio=image.naturalWidth/image.naturalHeight || 1;
+      sourceCanvas.width=image.naturalWidth;
+      sourceCanvas.height=image.naturalHeight;
+      sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
+      sctx.drawImage(image,0,0);
+      const p=sctx.getImageData(0,0,1,1).data;
+      setBg(p[0],p[1],p[2]);
+      outW.value=image.naturalWidth;
+      outH.value=image.naturalHeight;
+      processBtn.disabled=false;
+      saveBtn.disabled=true;
+      processed=false;
+      pasteArea.innerHTML='画像を読み込みました';
+      note(image.naturalWidth+'×'+image.naturalHeight+' を読み込みました');
+      URL.revokeObjectURL(url);
+    };
+    image.onerror=()=>{URL.revokeObjectURL(url);note('画像を読み込めませんでした')};
+    image.src=url;
+  }
+  function findImageItem(items){
+    for(const item of items||[]){
+      if(item.type&&item.type.startsWith('image/')){
+        const f=item.getAsFile ? item.getAsFile() : item;
+        if(f)return f;
+      }
+    }
+    return null;
+  }
+  pasteArea.addEventListener('paste',e=>{
+    const f=findImageItem(e.clipboardData&&e.clipboardData.items);
+    if(f){e.preventDefault();loadBlob(f)}
+  });
+  pasteArea.addEventListener('dragover',e=>{e.preventDefault()});
+  pasteArea.addEventListener('drop',e=>{
+    e.preventDefault();
+    const f=[...(e.dataTransfer&&e.dataTransfer.files||[])].find(x=>x.type.startsWith('image/'));
+    if(f)loadBlob(f);
+  });
+  fileInput.addEventListener('change',()=>{if(fileInput.files[0])loadBlob(fileInput.files[0])});
+
+  clipboardBtn.addEventListener('click',async()=>{
+    try{
+      if(!navigator.clipboard||!navigator.clipboard.read)throw new Error();
+      const items=await navigator.clipboard.read();
+      for(const item of items){
+        const type=item.types.find(t=>t.startsWith('image/'));
+        if(type){loadBlob(await item.getType(type));return}
+      }
+      note('クリップボードに画像がありません');
+    }catch(e){
+      note('この端末ではボタン貼付が使えません。上の枠をタップして「ペースト」を使ってください');
+    }
+  });
+
+  sourceCanvas.addEventListener('click',e=>{
+    if(!img)return;
+    const r=sourceCanvas.getBoundingClientRect();
+    const x=Math.max(0,Math.min(sourceCanvas.width-1,Math.floor((e.clientX-r.left)*sourceCanvas.width/r.width)));
+    const y=Math.max(0,Math.min(sourceCanvas.height-1,Math.floor((e.clientY-r.top)*sourceCanvas.height/r.height)));
+    const p=sctx.getImageData(x,y,1,1).data;
+    setBg(p[0],p[1],p[2]);
+    note('背景色を選びました');
+  });
+  tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
+
+  outW.addEventListener('input',()=>{
+    if(syncing||!keepRatio.checked)return;
+    syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
+  });
+  outH.addEventListener('input',()=>{
+    if(syncing||!keepRatio.checked)return;
+    syncing=true;outW.value=Math.max(1,Math.round(clampSize(outH.value)*ratio));syncing=false;
+  });
+
+  function transparentSource(){
+    const w=sourceCanvas.width,h=sourceCanvas.height;
+    const data=sctx.getImageData(0,0,w,h);
+    const d=data.data,t=Number(tolerance.value);
+    const target=bg||[d[0],d[1],d[2]];
+
+    if(allSimilar.checked){
+      for(let i=0;i<d.length;i+=4)if(d[i+3]&&colorDistance(d,i,target)<=t)d[i+3]=0;
+      return data;
+    }
+
+    const seen=new Uint8Array(w*h);
+    const q=new Int32Array(w*h);
+    let head=0,tail=0;
+    function push(x,y){
+      const n=y*w+x;
+      if(seen[n])return;
+      const i=n*4;
+      if(d[i+3]===0||colorDistance(d,i,target)<=t){seen[n]=1;q[tail++]=n}
+    }
+    for(let x=0;x<w;x++){push(x,0);if(h>1)push(x,h-1)}
+    for(let y=1;y<h-1;y++){push(0,y);if(w>1)push(w-1,y)}
+    while(head<tail){
+      const n=q[head++],x=n%w,y=(n/w)|0,i=n*4;
+      d[i+3]=0;
+      if(x>0)push(x-1,y);if(x<w-1)push(x+1,y);if(y>0)push(x,y-1);if(y<h-1)push(x,y+1);
+    }
+    return data;
+  }
+
+  function process(){
+    if(!img)return;
+    const W=clampSize(outW.value),H=clampSize(outH.value),pad=Math.max(0,Number(padding.value)||0);
+    outW.value=W;outH.value=H;
+    outputCanvas.width=W;outputCanvas.height=H;
+    octx.clearRect(0,0,W,H);
+    octx.imageSmoothingEnabled=!pixelMode.checked;
+
+    const clean=document.createElement('canvas');
+    clean.width=sourceCanvas.width;clean.height=sourceCanvas.height;
+    clean.getContext('2d').putImageData(transparentSource(),0,0);
+
+    const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
+    let dx=pad,dy=pad,dw=iw,dh=ih;
+    const mode=fitMode.value;
+    if(mode!=='stretch'){
+      const scale=mode==='cover'?Math.max(iw/clean.width,ih/clean.height):Math.min(iw/clean.width,ih/clean.height);
+      dw=clean.width*scale;dh=clean.height*scale;
+      dx=(W-dw)/2;dy=(H-dh)/2;
+    }
+    octx.drawImage(clean,dx,dy,dw,dh);
+    processed=true;
+    saveBtn.disabled=false;
+    note('完成：'+W+'×'+H+' PNG（背景透過）');
+  }
+
+  processBtn.addEventListener('click',process);
+  saveBtn.addEventListener('click',()=>{
+    if(!processed)process();
+    outputCanvas.toBlob(blob=>{
+      if(!blob){note('PNGを作れませんでした');return}
+      const a=document.createElement('a');
+      const url=URL.createObjectURL(blob);
+      a.href=url;a.download='transparent_'+outputCanvas.width+'x'+outputCanvas.height+'.png';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    },'image/png');
+  });
+})();
+</script>
+</body>
+</html>
