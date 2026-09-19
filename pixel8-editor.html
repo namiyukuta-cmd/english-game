@@ -84,7 +84,6 @@
       <button id="gameSaveBtn" class="action save" type="button">セーブ</button>
       <button id="undoBtn" class="action" type="button">1つ戻る</button>
       <button id="clearBtn" class="action" type="button">全消去</button>
-      <button id="aiMeatBtn" class="action" type="button">AI：肉を描く</button>
       <button id="savePngBtn" class="action primary" type="button">PNG保存</button>
       <button id="saveJsonBtn" class="action" type="button">座標保存</button>
       <button id="saveListBtn" class="action" type="button">セーブ一覧</button>
@@ -216,7 +215,6 @@
   document.getElementById('gameSaveBtn').addEventListener('click',saveGame);
   document.getElementById('undoBtn').addEventListener('click',()=>{if(!undoHistory.length){note('戻せる操作がありません');return}pixels=undoHistory.pop();render();saveWorking()});
   document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());pixels=blankPixels();render();saveWorking()});
-  document.getElementById('aiMeatBtn').addEventListener('click',()=>{undoHistory.push(clone());pixels=PRESETS.meat.map(r=>r.slice());currentSaveId=null;saveWorking();projectLabel.textContent='AI：肉';render();note('8×8に肉を描きました')});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href='pixel8-start.html'});
   document.getElementById('saveListBtn').addEventListener('click',()=>{location.href='pixel8-saves.html'});
   document.getElementById('zoomInBtn').addEventListener('click',()=>{if(zoomIndex<ZOOMS.length-1){zoomIndex++;updateZoom()}else note('これ以上拡大できません')});
