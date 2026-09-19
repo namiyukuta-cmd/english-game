@@ -28,6 +28,10 @@
     .canvasbox{position:relative;border:1px solid var(--line);border-radius:12px;overflow:auto;padding:8px;background-color:#fff;background-image:linear-gradient(45deg,#e8e8e8 25%,transparent 25%),linear-gradient(-45deg,#e8e8e8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e8e8e8 75%),linear-gradient(-45deg,transparent 75%,#e8e8e8 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
     canvas{display:block;max-width:100%;height:auto;margin:0 auto;image-rendering:auto}
     #sourceCanvas{cursor:crosshair}
+    .source-stage{position:relative;display:inline-block;max-width:100%;line-height:0}
+    #cropOverlay{position:absolute;inset:0;width:100%;height:100%;margin:0;touch-action:none;cursor:crosshair}
+    .btn.active{background:#3e3037;color:#fff;border-color:#3e3037}
+    .crop-info{font-size:12px;font-weight:700;color:var(--muted)}
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     label.field{display:grid;gap:5px;font-size:12px;font-weight:700}
     input[type=number],select{width:100%;min-height:42px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:8px;font:inherit}
@@ -59,7 +63,7 @@
 
   <section class="panel">
     <p class="title">2. 背景を透明にする</p>
-    <div class="canvasbox"><canvas id="sourceCanvas"></canvas></div>
+    <div class="canvasbox"><div class="source-stage"><canvas id="sourceCanvas"></canvas><canvas id="cropOverlay"></canvas></div></div>
     <div class="colorline" style="margin-top:10px">
       <div id="bgChip" class="chip"></div>
       <div><strong id="bgText">背景色：未選択</strong><div class="note" style="margin:0">画像をタップすると、その色を背景色にします。</div></div>
@@ -74,7 +78,17 @@
   </section>
 
   <section class="panel">
-    <p class="title">3. PNGサイズ</p>
+    <p class="title">3. 切り抜く</p>
+    <div class="row">
+      <button id="cropModeBtn" class="btn" type="button" disabled>範囲を指で囲む</button>
+      <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
+      <span id="cropInfo" class="crop-info">画像全体</span>
+    </div>
+    <p class="note">「範囲を指で囲む」を押して、残したい部分を画像上でドラッグします。</p>
+  </section>
+
+  <section class="panel">
+    <p class="title">4. PNGサイズ</p>
     <div class="fields">
       <label class="field">幅(px)<input id="outW" type="number" min="1" max="8192" value="512"></label>
       <label class="field">高さ(px)<input id="outH" type="number" min="1" max="8192" value="512"></label>
@@ -110,6 +124,7 @@
   const fileInput=document.getElementById('fileInput');
   const clipboardBtn=document.getElementById('clipboardBtn');
   const sourceCanvas=document.getElementById('sourceCanvas');
+  const cropOverlay=document.getElementById('cropOverlay');
   const outputCanvas=document.getElementById('outputCanvas');
   const sctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
   const octx=outputCanvas.getContext('2d');
@@ -127,6 +142,9 @@
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
+  const cropModeBtn=document.getElementById('cropModeBtn');
+  const cropClearBtn=document.getElementById('cropClearBtn');
+  const cropInfo=document.getElementById('cropInfo');
   const status=document.getElementById('status');
 
   let img=null;
@@ -134,6 +152,9 @@
   let ratio=1;
   let syncing=false;
   let processed=false;
+  let cropMode=false;
+  let cropStart=null;
+  let cropRect=null;
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
@@ -147,6 +168,37 @@
     bgText.textContent='背景色：rgb('+r+', '+g+', '+b+')';
     processed=false;
   }
+  function updateCropButtons(){
+    cropModeBtn.classList.toggle('active',cropMode);
+    cropModeBtn.textContent=cropMode?'切り抜き範囲を選択中':'範囲を指で囲む';
+    cropClearBtn.disabled=!img||!cropRect;
+    cropInfo.textContent=cropRect?(cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y):'画像全体';
+  }
+  function drawCropOverlay(tempRect=null){
+    const ctx=cropOverlay.getContext('2d');
+    ctx.clearRect(0,0,cropOverlay.width,cropOverlay.height);
+    const r=tempRect||cropRect;
+    if(!r)return;
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.32)';
+    ctx.fillRect(0,0,cropOverlay.width,cropOverlay.height);
+    ctx.clearRect(r.x,r.y,r.w,r.h);
+    ctx.strokeStyle='rgba(255,255,255,.98)';
+    ctx.lineWidth=Math.max(2,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/350));
+    ctx.strokeRect(r.x+.5,r.y+.5,Math.max(0,r.w-1),Math.max(0,r.h-1));
+    ctx.restore();
+  }
+  function overlayPoint(e){
+    const r=cropOverlay.getBoundingClientRect();
+    return {
+      x:Math.max(0,Math.min(cropOverlay.width,Math.round((e.clientX-r.left)*cropOverlay.width/r.width))),
+      y:Math.max(0,Math.min(cropOverlay.height,Math.round((e.clientY-r.top)*cropOverlay.height/r.height)))
+    };
+  }
+  function normalizeRect(a,b){
+    const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y);
+    return {x,y,w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)};
+  }
   function loadBlob(blob){
     if(!blob || !blob.type || !blob.type.startsWith('image/'))return;
     const url=URL.createObjectURL(blob);
@@ -156,6 +208,11 @@
       ratio=image.naturalWidth/image.naturalHeight || 1;
       sourceCanvas.width=image.naturalWidth;
       sourceCanvas.height=image.naturalHeight;
+      cropOverlay.width=image.naturalWidth;
+      cropOverlay.height=image.naturalHeight;
+      cropRect=null;cropStart=null;cropMode=false;
+      drawCropOverlay();
+      updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
       sctx.drawImage(image,0,0);
       const p=sctx.getImageData(0,0,1,1).data;
@@ -163,6 +220,7 @@
       outW.value=image.naturalWidth;
       outH.value=image.naturalHeight;
       processBtn.disabled=false;
+      cropModeBtn.disabled=false;
       saveBtn.disabled=true;
       processed=false;
       pasteArea.innerHTML='画像を読み込みました';
@@ -207,15 +265,58 @@
     }
   });
 
-  sourceCanvas.addEventListener('click',e=>{
-    if(!img)return;
-    const r=sourceCanvas.getBoundingClientRect();
-    const x=Math.max(0,Math.min(sourceCanvas.width-1,Math.floor((e.clientX-r.left)*sourceCanvas.width/r.width)));
-    const y=Math.max(0,Math.min(sourceCanvas.height-1,Math.floor((e.clientY-r.top)*sourceCanvas.height/r.height)));
+  cropOverlay.addEventListener('click',e=>{
+    if(!img||cropMode)return;
+    const pnt=overlayPoint(e);
+    const x=Math.max(0,Math.min(sourceCanvas.width-1,pnt.x));
+    const y=Math.max(0,Math.min(sourceCanvas.height-1,pnt.y));
     const p=sctx.getImageData(x,y,1,1).data;
     setBg(p[0],p[1],p[2]);
     note('背景色を選びました');
   });
+  cropModeBtn.addEventListener('click',()=>{
+    if(!img)return;
+    cropMode=!cropMode;
+    cropStart=null;
+    updateCropButtons();
+    drawCropOverlay();
+    note(cropMode?'残したい範囲をドラッグしてください':'切り抜き選択を終了しました');
+  });
+  cropClearBtn.addEventListener('click',()=>{
+    cropRect=null;cropStart=null;cropMode=false;
+    ratio=img?(img.naturalWidth/img.naturalHeight||1):1;
+    drawCropOverlay();updateCropButtons();
+    processed=false;saveBtn.disabled=true;
+    note('切り抜きを解除しました');
+  });
+  cropOverlay.addEventListener('pointerdown',e=>{
+    if(!img||!cropMode)return;
+    e.preventDefault();
+    cropOverlay.setPointerCapture?.(e.pointerId);
+    cropStart=overlayPoint(e);
+  });
+  cropOverlay.addEventListener('pointermove',e=>{
+    if(!cropStart||!cropMode)return;
+    e.preventDefault();
+    drawCropOverlay(normalizeRect(cropStart,overlayPoint(e)));
+  });
+  function finishCrop(e){
+    if(!cropStart||!cropMode)return;
+    const r=normalizeRect(cropStart,overlayPoint(e));
+    cropStart=null;
+    if(r.w<2||r.h<2){drawCropOverlay();return}
+    cropRect={x:r.x,y:r.y,w:r.w,h:r.h};
+    ratio=cropRect.w/cropRect.h||1;
+    if(keepRatio.checked){
+      syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
+    }
+    cropMode=false;
+    processed=false;saveBtn.disabled=true;
+    updateCropButtons();drawCropOverlay();
+    note('切り抜き範囲を設定しました');
+  }
+  cropOverlay.addEventListener('pointerup',finishCrop);
+  cropOverlay.addEventListener('pointercancel',()=>{cropStart=null;drawCropOverlay()});
   tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
 
   outW.addEventListener('input',()=>{
@@ -281,9 +382,14 @@
     octx.clearRect(0,0,W,H);
     octx.imageSmoothingEnabled=!pixelMode.checked;
 
+    const cleanFull=document.createElement('canvas');
+    cleanFull.width=sourceCanvas.width;cleanFull.height=sourceCanvas.height;
+    cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
+
+    const cr=cropRect||{x:0,y:0,w:sourceCanvas.width,h:sourceCanvas.height};
     const clean=document.createElement('canvas');
-    clean.width=sourceCanvas.width;clean.height=sourceCanvas.height;
-    clean.getContext('2d').putImageData(transparentSource(),0,0);
+    clean.width=Math.max(1,cr.w);clean.height=Math.max(1,cr.h);
+    clean.getContext('2d').drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,0,0,clean.width,clean.height);
 
     const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
     let dx=pad,dy=pad,dw=iw,dh=ih;
