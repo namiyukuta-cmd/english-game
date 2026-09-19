@@ -132,18 +132,14 @@
   let currentSaveId=null;
 
   function blankPixels(){return Array.from({length:SIZE},()=>Array(SIZE).fill(null))}
-  const PRESETS={
-    meat:[
-      [null,null,"#7E2929","#7E2929",null,null,null,null],
-      [null,"#7E2929","#C93F3F","#C93F3F","#7E2929",null,null,null],
-      ["#7E2929","#C93F3F","#F06A60","#C93F3F","#C93F3F","#7E2929",null,null],
-      ["#7E2929","#C93F3F","#C93F3F","#F7E0C2","#F7E0C2","#C93F3F","#7E2929",null],
-      [null,"#7E2929","#C93F3F","#F7E0C2","#D09A73","#C93F3F","#7E2929",null],
-      [null,null,"#7E2929","#C93F3F","#C93F3F","#7E2929","#F7E0C2","#F7E0C2"],
-      [null,null,null,"#7E2929","#7E2929",null,"#D09A73","#F7E0C2"],
-      [null,null,null,null,null,null,null,null]
-    ]
-  };
+  function decodeArtParam(value){
+    if(!value)return null;
+    try{
+      const json=decodeURIComponent(escape(atob(value.replace(/-/g,'+').replace(/_/g,'/'))));
+      const data=JSON.parse(json);
+      return validPixels(data)?data:null;
+    }catch(e){return null}
+  }
   function validPixels(p){return Array.isArray(p)&&p.length===SIZE&&p.every(r=>Array.isArray(r)&&r.length===SIZE)}
   function clone(){return pixels.map(r=>r.slice())}
   function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1800)}
@@ -153,12 +149,13 @@
   function updateProjectLabel(){projectLabel.textContent=currentSaveId?'ドット絵セーブ'+currentSaveId:'新しいドット絵'}
 
   function loadInitial(){
-    const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),preset=q.get('preset');
-    if(preset&&PRESETS[preset]){
-      pixels=PRESETS[preset].map(r=>r.slice());
+    const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),art=q.get('art'),artName=q.get('name');
+    const incomingArt=decodeArtParam(art);
+    if(incomingArt){
+      pixels=incomingArt.map(r=>r.slice());
       currentSaveId=null;
       saveWorking();
-      projectLabel.textContent=preset==='meat'?'AI：肉':'AIプリセット';
+      projectLabel.textContent=artName?('AI：'+artName):'AIドット絵';
       return;
     }
     if(requested){
