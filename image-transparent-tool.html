@@ -68,8 +68,9 @@
       色の許容範囲 <span id="tolText">35</span>
       <input id="tolerance" type="range" min="0" max="150" value="35">
     </label>
+    <label class="check"><input id="protectLines" type="checkbox" checked>線画の内側を保護する</label>
     <label class="check"><input id="allSimilar" type="checkbox">画像内の同じ色も全部透明にする</label>
-    <p class="note">OFFでは、画像の外周につながっている背景だけを透明にします。</p>
+    <p class="note">「線画の内側を保護する」をONにすると、顔や服の白い部分へ透明化が漏れにくくなります。</p>
   </section>
 
   <section class="panel">
@@ -117,6 +118,7 @@
   const tolerance=document.getElementById('tolerance');
   const tolText=document.getElementById('tolText');
   const allSimilar=document.getElementById('allSimilar');
+  const protectLines=document.getElementById('protectLines');
   const outW=document.getElementById('outW');
   const outH=document.getElementById('outH');
   const keepRatio=document.getElementById('keepRatio');
@@ -237,11 +239,27 @@
     }
 
     const seen=new Uint8Array(w*h);
+    const barrier=new Uint8Array(w*h);
+
+    if(protectLines.checked){
+      const radius=Math.max(1,Math.round(Math.min(w,h)/500));
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+        const n=y*w+x,i=n*4;
+        if(d[i+3]!==0 && colorDistance(d,i,target)>t){
+          for(let yy=Math.max(0,y-radius);yy<=Math.min(h-1,y+radius);yy++){
+            for(let xx=Math.max(0,x-radius);xx<=Math.min(w-1,x+radius);xx++){
+              barrier[yy*w+xx]=1;
+            }
+          }
+        }
+      }
+    }
+
     const q=new Int32Array(w*h);
     let head=0,tail=0;
     function push(x,y){
       const n=y*w+x;
-      if(seen[n])return;
+      if(seen[n]||barrier[n])return;
       const i=n*4;
       if(d[i+3]===0||colorDistance(d,i,target)<=t){seen[n]=1;q[tail++]=n}
     }
