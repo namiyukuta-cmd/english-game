@@ -94,6 +94,13 @@
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
     <p class="note">通常は「人物・物を自動検出」でOK。複数ある場合は全員・全アイテムを自動で分けます。手動調整は必要な時だけ使います。</p>
     <div id="detectedInfo" class="crop-info" style="margin-top:8px"></div>
+    <div class="row" id="nameTools" style="margin-top:8px;display:none">
+      <label class="field" style="min-width:180px;flex:1">一括名前
+        <input id="batchBaseName" type="text" value="image" placeholder="例：npc">
+      </label>
+      <button id="applySequentialNames" class="btn" type="button">連番を自動入力</button>
+      <button id="applyNpc8Preset" class="btn" type="button" style="display:none">8人NPC名を自動入力</button>
+    </div>
     <div id="detectedNames" style="display:grid;gap:6px;margin-top:8px"></div>
   </section>
 
@@ -171,6 +178,10 @@
   const cropInfo=document.getElementById('cropInfo');
   const detectedInfo=document.getElementById('detectedInfo');
   const detectedNames=document.getElementById('detectedNames');
+  const nameTools=document.getElementById('nameTools');
+  const batchBaseName=document.getElementById('batchBaseName');
+  const applySequentialNames=document.getElementById('applySequentialNames');
+  const applyNpc8Preset=document.getElementById('applyNpc8Preset');
   const batchSaveBtn=document.getElementById('batchSaveBtn');
   const status=document.getElementById('status');
 
@@ -256,6 +267,8 @@
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;detectedRects=[];
       detectedInfo.textContent='';
       detectedNames.replaceChildren();
+      nameTools.style.display='none';
+      applyNpc8Preset.style.display='none';
       drawCropOverlay();
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
@@ -454,16 +467,28 @@
     if(!detectedRects.length){
       detectedInfo.textContent='自動検出できませんでした。必要な時だけ手動切り抜きを使ってください。';
       detectedNames.replaceChildren();
+      nameTools.style.display='none';
+      applyNpc8Preset.style.display='none';
       batchSaveBtn.disabled=true;
       drawCropOverlay();
       return;
     }
     detectedInfo.textContent=detectedRects.length+'個を自動検出しました。黄色枠は保存範囲です。';
     detectedNames.replaceChildren();
-    const base=(fileName.value||'image')
-      .trim()
-      .replace(/[\\/:*?"<>|]+/g,'_')
-      .replace(/\.png$/i,'') || 'image';
+    nameTools.style.display='flex';
+    batchBaseName.value='image';
+
+    const npc8Names=[
+      'npc_man_01',
+      'npc_woman_01',
+      'npc_oldman_01',
+      'npc_traveler_01',
+      'npc_child_01',
+      'npc_guard_01',
+      'npc_porter_01',
+      'npc_beggar_01'
+    ];
+
     detectedRects.forEach((r,i)=>{
       const row=document.createElement('label');
       row.className='detected-name-row';
@@ -471,12 +496,14 @@
       no.textContent=String(i+1);
       const input=document.createElement('input');
       input.type='text';
-      input.value=base+'_'+String(i+1).padStart(2,'0');
+      input.value='image_'+String(i+1).padStart(2,'0');
       input.dataset.detectedName=String(i);
       input.setAttribute('aria-label',(i+1)+'番の保存名');
       row.append(no,input);
       detectedNames.appendChild(row);
     });
+
+    applyNpc8Preset.style.display=detectedRects.length===8?'inline-flex':'none';
     batchSaveBtn.disabled=false;
     cropRect=null;
     drawDetectedOverlay();
@@ -513,6 +540,36 @@
     ctx.drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,dx,dy,dw,dh);
     return out;
   }
+
+  function setDetectedNames(names){
+    [...detectedNames.querySelectorAll('[data-detected-name]')].forEach((input,i)=>{
+      if(names[i])input.value=names[i];
+    });
+  }
+
+  applySequentialNames.addEventListener('click',()=>{
+    const base=(batchBaseName.value||'image')
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g,'_')
+      .replace(/\.png$/i,'') || 'image';
+    const names=detectedRects.map((_,i)=>base+'_'+String(i+1).padStart(2,'0'));
+    setDetectedNames(names);
+    note('連番の保存名を自動入力しました');
+  });
+
+  applyNpc8Preset.addEventListener('click',()=>{
+    setDetectedNames([
+      'npc_man_01',
+      'npc_woman_01',
+      'npc_oldman_01',
+      'npc_traveler_01',
+      'npc_child_01',
+      'npc_guard_01',
+      'npc_porter_01',
+      'npc_beggar_01'
+    ]);
+    note('8人分のNPC名を自動入力しました');
+  });
 
   batchSaveBtn.addEventListener('click',async()=>{
     if(!img||!detectedRects.length)return;
