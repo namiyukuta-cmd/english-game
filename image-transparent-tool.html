@@ -88,16 +88,14 @@
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <label class="check" style="margin-top:8px"><input id="sameScaleMode" type="checkbox" disabled>同じ縮尺モード（切り抜き枠の大きさを固定）</label>
-    <p class="note">人物を同じ縮尺で切り出す時は、1人目で枠の大きさを決めてから「同じ縮尺モード」をON。以後は枠を移動するだけで、人物の身長差を保ったまま保存できます。</p>
-    <p class="note">通常時は、枠の中を指で動かすと移動。四隅の□を動かすと大きさを変えられます。</p>
+    <p class="note">1枚だけ切り抜く時に使います。複数人物の影絵では使いません。</p>
   </section>
 
   <section class="panel">
-    <p class="title">影絵をまとめて切り出す</p>
-    <p class="note">横一列に並んだ黒い影絵なら、切り抜き枠を動かさなくて大丈夫です。人物を自動で分け、全員同じ縮尺・512×768・下揃え・背景透過にして、1つのZIPで保存します。</p>
+    <p class="title">複数人物の影絵を自動分割</p>
+    <p class="note">横一列の影絵専用です。人物ごとに別々の外接範囲を自動検出し、背の高い人も切らず、隣の人物も入れず、全員に同じ倍率を使って身長差を保ちます。</p>
     <div class="row" style="margin-top:10px">
-      <button id="batchSilhouetteBtn" class="btn save" type="button" disabled>影絵を全部まとめてZIP保存</button>
+      <button id="batchSilhouetteBtn" class="btn save" type="button" disabled>人物を自動分割してZIP保存</button>
     </div>
     <div id="batchStatus" class="status"></div>
   </section>
@@ -171,7 +169,6 @@
   const cropModeBtn=document.getElementById('cropModeBtn');
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
-  const sameScaleMode=document.getElementById('sameScaleMode');
   const batchSilhouetteBtn=document.getElementById('batchSilhouetteBtn');
   const batchStatus=document.getElementById('batchStatus');
   const status=document.getElementById('status');
@@ -205,9 +202,8 @@
     cropModeBtn.textContent=cropRect?'切り抜き枠を調整中':'切り抜き枠を出す';
     bgPickBtn.textContent=bgPickMode?'背景をタップしてください':'背景色を選ぶ';
     cropClearBtn.disabled=!img||!cropRect;
-    sameScaleMode.disabled=!img||!cropRect;
     cropInfo.textContent=cropRect
-      ? (cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y+(sameScaleMode.checked?' / 縮尺固定':''))
+      ? (cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y)
       : '画像全体';
   }
   function drawCropOverlay(){
@@ -223,15 +219,13 @@
     ctx.strokeStyle='rgba(255,255,255,.98)';
     ctx.lineWidth=lw;
     ctx.strokeRect(r.x,r.y,r.w,r.h);
-    if(!sameScaleMode.checked){
-      const hs=Math.max(18,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/28));
-      ctx.fillStyle='#fff';
-      ctx.strokeStyle='rgba(40,40,40,.85)';
-      ctx.lineWidth=Math.max(2,lw/2);
-      for(const [x,y] of [[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]]){
-        ctx.fillRect(x-hs/2,y-hs/2,hs,hs);
-        ctx.strokeRect(x-hs/2,y-hs/2,hs,hs);
-      }
+    const hs=Math.max(18,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/28));
+    ctx.fillStyle='#fff';
+    ctx.strokeStyle='rgba(40,40,40,.85)';
+    ctx.lineWidth=Math.max(2,lw/2);
+    for(const [x,y] of [[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]]){
+      ctx.fillRect(x-hs/2,y-hs/2,hs,hs);
+      ctx.strokeRect(x-hs/2,y-hs/2,hs,hs);
     }
     ctx.restore();
   }
@@ -261,7 +255,6 @@
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
-      sameScaleMode.checked=false;
       fitMode.disabled=false;
       drawCropOverlay();
       updateCropButtons();
@@ -364,28 +357,11 @@
 
   cropClearBtn.addEventListener('click',()=>{
     cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
-    sameScaleMode.checked=false;
     fitMode.disabled=false;
     ratio=img?(img.naturalWidth/img.naturalHeight||1):1;
     drawCropOverlay();updateCropButtons();
     processed=false;saveBtn.disabled=true;
     note('切り抜きを解除しました');
-  });
-
-  sameScaleMode.addEventListener('change',()=>{
-    if(!cropRect){
-      sameScaleMode.checked=false;
-      return;
-    }
-    fitMode.value='contain';
-    fitMode.disabled=sameScaleMode.checked;
-    processed=false;
-    saveBtn.disabled=true;
-    drawCropOverlay();
-    updateCropButtons();
-    note(sameScaleMode.checked
-      ? '同じ縮尺モード：枠サイズを固定しました。次の人物は枠を移動するだけです'
-      : '同じ縮尺モードを解除しました');
   });
 
   cropOverlay.addEventListener('click',e=>{
@@ -406,14 +382,12 @@
     const r=cropRect;
     const scale=cropOverlay.width/Math.max(1,cropOverlay.getBoundingClientRect().width);
     const hit=34*scale;
-    if(!sameScaleMode.checked){
-      const corners=[
-        ['nw',r.x,r.y],['ne',r.x+r.w,r.y],
-        ['sw',r.x,r.y+r.h],['se',r.x+r.w,r.y+r.h]
-      ];
-      for(const [name,x,y] of corners){
-        if(Math.hypot(p.x-x,p.y-y)<=hit)return name;
-      }
+    const corners=[
+      ['nw',r.x,r.y],['ne',r.x+r.w,r.y],
+      ['sw',r.x,r.y+r.h],['se',r.x+r.w,r.y+r.h]
+    ];
+    for(const [name,x,y] of corners){
+      if(Math.hypot(p.x-x,p.y-y)<=hit)return name;
     }
     if(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)return 'move';
     return null;
@@ -745,55 +719,28 @@
 
     const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
 
-    if(sameScaleMode.checked){
-      // 固定した切り抜き枠そのものを基準に縮尺を決める。
-      // 人物の透明余白を切り詰めて拡大しないので、人物同士の身長差が保たれる。
-      const scale=Math.min(iw/clean.width,ih/clean.height);
-      const fullW=clean.width*scale;
-      const fullH=clean.height*scale;
-      let dx=(W-fullW)/2;
-      let dy=(H-fullH)/2;
+    let sx=0,sy=0,sw=clean.width,sh=clean.height;
 
-      if(hasVisible){
-        const visibleCenterX=((minX+maxX+1)/2)*scale;
-        dx=W/2-visibleCenterX;
-
-        if(verticalAlign.value==='bottom'){
-          dy=H-pad-(maxY+1)*scale;
-        }else if(verticalAlign.value==='top'){
-          dy=pad-minY*scale;
-        }else{
-          const visibleCenterY=((minY+maxY+1)/2)*scale;
-          dy=H/2-visibleCenterY;
-        }
-      }
-
-      octx.drawImage(clean,dx,dy,fullW,fullH);
-    }else{
-      let sx=0,sy=0,sw=clean.width,sh=clean.height;
-
-      // 通常モードの下揃えは、見えている絵だけを使ってキャンバス内へ最大表示する。
-      if(verticalAlign.value==='bottom'&&hasVisible){
-        sx=minX;sy=minY;sw=maxX-minX+1;sh=maxY-minY+1;
-      }
-
-      let dx=pad,dy=pad,dw=iw,dh=ih;
-      const mode=fitMode.value;
-      if(mode!=='stretch'){
-        const scale=mode==='cover'?Math.max(iw/sw,ih/sh):Math.min(iw/sw,ih/sh);
-        dw=sw*scale;dh=sh*scale;
-        dx=(W-dw)/2;
-
-        if(verticalAlign.value==='bottom'){
-          dy=H-pad-dh;
-        }else if(verticalAlign.value==='top'){
-          dy=pad;
-        }else{
-          dy=(H-dh)/2;
-        }
-      }
-      octx.drawImage(clean,sx,sy,sw,sh,dx,dy,dw,dh);
+    if(verticalAlign.value==='bottom'&&hasVisible){
+      sx=minX;sy=minY;sw=maxX-minX+1;sh=maxY-minY+1;
     }
+
+    let dx=pad,dy=pad,dw=iw,dh=ih;
+    const mode=fitMode.value;
+    if(mode!=='stretch'){
+      const scale=mode==='cover'?Math.max(iw/sw,ih/sh):Math.min(iw/sw,ih/sh);
+      dw=sw*scale;dh=sh*scale;
+      dx=(W-dw)/2;
+
+      if(verticalAlign.value==='bottom'){
+        dy=H-pad-dh;
+      }else if(verticalAlign.value==='top'){
+        dy=pad;
+      }else{
+        dy=(H-dh)/2;
+      }
+    }
+    octx.drawImage(clean,sx,sy,sw,sh,dx,dy,dw,dh);
     processed=true;
     saveBtn.disabled=false;
     note('完成：'+W+'×'+H+' PNG（背景透過）');
