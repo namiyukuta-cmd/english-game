@@ -103,6 +103,13 @@
           <option value="stretch">縦横を合わせる</option>
         </select>
       </label>
+      <label class="field">縦位置
+        <select id="verticalAlign">
+          <option value="center">中央</option>
+          <option value="bottom">下揃え</option>
+          <option value="top">上揃え</option>
+        </select>
+      </label>
       <label class="field">余白(px)<input id="padding" type="number" min="0" max="1000" value="0"></label>
     </div>
     <div class="row" style="margin-top:9px">
@@ -143,6 +150,7 @@
   const outH=document.getElementById('outH');
   const keepRatio=document.getElementById('keepRatio');
   const fitMode=document.getElementById('fitMode');
+  const verticalAlign=document.getElementById('verticalAlign');
   const padding=document.getElementById('padding');
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
@@ -496,7 +504,15 @@
     if(mode!=='stretch'){
       const scale=mode==='cover'?Math.max(iw/clean.width,ih/clean.height):Math.min(iw/clean.width,ih/clean.height);
       dw=clean.width*scale;dh=clean.height*scale;
-      dx=(W-dw)/2;dy=(H-dh)/2;
+      dx=(W-dw)/2;
+
+      if(verticalAlign.value==='bottom'){
+        dy=H-pad-dh;
+      }else if(verticalAlign.value==='top'){
+        dy=pad;
+      }else{
+        dy=(H-dh)/2;
+      }
     }
     octx.drawImage(clean,dx,dy,dw,dh);
     processed=true;
