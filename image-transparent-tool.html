@@ -498,12 +498,34 @@
     clean.width=Math.max(1,cr.w);clean.height=Math.max(1,cr.h);
     clean.getContext('2d').drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,0,0,clean.width,clean.height);
 
+    let sx=0,sy=0,sw=clean.width,sh=clean.height;
+
+    // 下揃えでは透明な余白を無視し、実際に見えている絵の足元を基準にする
+    if(verticalAlign.value==='bottom'){
+      const cctx=clean.getContext('2d',{willReadFrequently:true});
+      const pixels=cctx.getImageData(0,0,clean.width,clean.height).data;
+      let minX=clean.width,minY=clean.height,maxX=-1,maxY=-1;
+      for(let y=0;y<clean.height;y++){
+        for(let x=0;x<clean.width;x++){
+          if(pixels[(y*clean.width+x)*4+3]>0){
+            if(x<minX)minX=x;
+            if(y<minY)minY=y;
+            if(x>maxX)maxX=x;
+            if(y>maxY)maxY=y;
+          }
+        }
+      }
+      if(maxX>=minX&&maxY>=minY){
+        sx=minX;sy=minY;sw=maxX-minX+1;sh=maxY-minY+1;
+      }
+    }
+
     const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
     let dx=pad,dy=pad,dw=iw,dh=ih;
     const mode=fitMode.value;
     if(mode!=='stretch'){
-      const scale=mode==='cover'?Math.max(iw/clean.width,ih/clean.height):Math.min(iw/clean.width,ih/clean.height);
-      dw=clean.width*scale;dh=clean.height*scale;
+      const scale=mode==='cover'?Math.max(iw/sw,ih/sh):Math.min(iw/sw,ih/sh);
+      dw=sw*scale;dh=sh*scale;
       dx=(W-dw)/2;
 
       if(verticalAlign.value==='bottom'){
@@ -514,7 +536,7 @@
         dy=(H-dh)/2;
       }
     }
-    octx.drawImage(clean,dx,dy,dw,dh);
+    octx.drawImage(clean,sx,sy,sw,sh,dx,dy,dw,dh);
     processed=true;
     saveBtn.disabled=false;
     note('完成：'+W+'×'+H+' PNG（背景透過）');
