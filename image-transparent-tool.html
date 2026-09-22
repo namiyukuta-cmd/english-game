@@ -123,7 +123,7 @@
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
       <button id="saveBtn" class="btn save" type="button" disabled>この1枚を保存</button>
-      <button id="batchSaveBtn" class="btn save" type="button" disabled>自動検出をZIPで一括保存</button>
+      <button id="batchSaveBtn" class="btn save" type="button" disabled>自動検出を個別PNGで全部保存</button>
     </div>
   </section>
 
@@ -466,47 +466,6 @@
     });
   }
 
-  function crc32(bytes){
-    let c=0xffffffff;
-    for(let i=0;i<bytes.length;i++){
-      c^=bytes[i];
-      for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);
-    }
-    return (c^0xffffffff)>>>0;
-  }
-
-  function u16(n){return [n&255,(n>>>8)&255]}
-  function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
-
-  function makeZip(files){
-    const enc=new TextEncoder();
-    const localParts=[],centralParts=[];
-    let offset=0;
-    for(const file of files){
-      const name=enc.encode(file.name);
-      const data=file.bytes;
-      const crc=crc32(data);
-      const local=new Uint8Array([
-        ...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
-        ...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name
-      ]);
-      localParts.push(local,data);
-      const central=new Uint8Array([
-        ...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
-        ...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),
-        ...u16(0),...u16(0),...u32(0),...u32(offset),...name
-      ]);
-      centralParts.push(central);
-      offset+=local.length+data.length;
-    }
-    const centralSize=centralParts.reduce((s,a)=>s+a.length,0);
-    const end=new Uint8Array([
-      ...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),
-      ...u32(centralSize),...u32(offset),...u16(0)
-    ]);
-    return new Blob([...localParts,...centralParts,end],{type:'application/zip'});
-  }
-
   function renderRectToCanvas(cleanFull,cr){
     const W=clampSize(outW.value),H=clampSize(outH.value);
     const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),Number(padding.value)||0));
@@ -533,25 +492,33 @@
   batchSaveBtn.addEventListener('click',async()=>{
     if(!img||!detectedRects.length)return;
     batchSaveBtn.disabled=true;
-    note('ZIPを作成中…');
+    note('個別PNGを作成中…');
     try{
       const cleanFull=getCleanCanvas();
       const base=(fileName.value||'image').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'image';
-      const files=[];
+
       for(let i=0;i<detectedRects.length;i++){
         const canvas=renderRectToCanvas(cleanFull,detectedRects[i]);
-        const bytes=await canvasToPngBytes(canvas);
-        files.push({name:base+'_'+String(i+1).padStart(2,'0')+'.png',bytes});
+        await new Promise((resolve,reject)=>{
+          canvas.toBlob(blob=>{
+            if(!blob){reject(new Error('PNG作成失敗'));return}
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download=base+'_'+String(i+1).padStart(2,'0')+'.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(()=>URL.revokeObjectURL(url),1500);
+            resolve();
+          },'image/png');
+        });
+        // iPhone/Safariでも連打扱いになりにくいよう少し間隔を空ける
+        await new Promise(r=>setTimeout(r,220));
       }
-      const zip=makeZip(files);
-      const url=URL.createObjectURL(zip);
-      const a=document.createElement('a');
-      a.href=url;a.download=base+'_parts.zip';
-      document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1500);
-      note(detectedRects.length+'個をZIPで保存しました');
+      note(detectedRects.length+'個を個別PNGで保存しました');
     }catch(e){
-      note('一括保存に失敗しました');
+      note('個別PNG保存に失敗しました');
     }finally{
       batchSaveBtn.disabled=false;
     }
