@@ -33,6 +33,9 @@
     #cropOverlay{position:absolute;inset:0;width:100%;height:100%;margin:0;touch-action:none;cursor:crosshair}
     .btn.active{background:#3e3037;color:#fff;border-color:#3e3037}
     .crop-info{font-size:12px;font-weight:700;color:var(--muted)}
+    .detected-name-row{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:center}
+    .detected-name-row span{font-size:12px;font-weight:800;text-align:center}
+    .detected-name-row input{width:100%;min-height:38px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:7px;font:inherit}
     .fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     label.field{display:grid;gap:5px;font-size:12px;font-weight:700}
     input[type=number],select{width:100%;min-height:42px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:8px;font:inherit}
@@ -91,6 +94,7 @@
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
     <p class="note">通常は「人物・物を自動検出」でOK。複数ある場合は全員・全アイテムを自動で分けます。手動調整は必要な時だけ使います。</p>
     <div id="detectedInfo" class="crop-info" style="margin-top:8px"></div>
+    <div id="detectedNames" style="display:grid;gap:6px;margin-top:8px"></div>
   </section>
 
   <section class="panel">
@@ -123,7 +127,7 @@
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
       <button id="saveBtn" class="btn save" type="button" disabled>この1枚を保存</button>
-      <button id="batchSaveBtn" class="btn save" type="button" disabled>自動検出を個別PNGで全部保存</button>
+      <button id="batchSaveBtn" class="btn save" type="button" disabled>名前を付けて個別PNGで全部保存</button>
     </div>
   </section>
 
@@ -166,6 +170,7 @@
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
   const detectedInfo=document.getElementById('detectedInfo');
+  const detectedNames=document.getElementById('detectedNames');
   const batchSaveBtn=document.getElementById('batchSaveBtn');
   const status=document.getElementById('status');
 
@@ -249,6 +254,8 @@
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;detectedRects=[];
+      detectedInfo.textContent='';
+      detectedNames.replaceChildren();
       drawCropOverlay();
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
@@ -447,11 +454,30 @@
     detectedRects=detectObjects(cleanFull);
     if(!detectedRects.length){
       detectedInfo.textContent='自動検出できませんでした。必要な時だけ手動切り抜きを使ってください。';
+      detectedNames.replaceChildren();
       batchSaveBtn.disabled=true;
       drawCropOverlay();
       return;
     }
     detectedInfo.textContent=detectedRects.length+'個を自動検出しました。黄色枠は保存範囲です。';
+    detectedNames.replaceChildren();
+    const base=(fileName.value||'image')
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g,'_')
+      .replace(/\.png$/i,'') || 'image';
+    detectedRects.forEach((r,i)=>{
+      const row=document.createElement('label');
+      row.className='detected-name-row';
+      const no=document.createElement('span');
+      no.textContent=String(i+1);
+      const input=document.createElement('input');
+      input.type='text';
+      input.value=base+'_'+String(i+1).padStart(2,'0');
+      input.dataset.detectedName=String(i);
+      input.setAttribute('aria-label',(i+1)+'番の保存名');
+      row.append(no,input);
+      detectedNames.appendChild(row);
+    });
     batchSaveBtn.disabled=false;
     cropRect=null;
     drawDetectedOverlay();
@@ -505,7 +531,10 @@
             const url=URL.createObjectURL(blob);
             const a=document.createElement('a');
             a.href=url;
-            a.download=base+'_'+String(i+1).padStart(2,'0')+'.png';
+            const nameInput=detectedNames.querySelector('[data-detected-name="'+i+'"]');
+            const rawName=(nameInput&&nameInput.value?nameInput.value:base+'_'+String(i+1).padStart(2,'0'));
+            const safeName=rawName.trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||('image_'+String(i+1).padStart(2,'0'));
+            a.download=safeName+'.png';
             document.body.appendChild(a);
             a.click();
             a.remove();
