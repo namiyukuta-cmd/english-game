@@ -130,11 +130,11 @@
       <label class="check"><input id="keepRatio" type="checkbox">出力サイズの幅・高さを連動</label>
       <label class="check"><input id="pixelMode" type="checkbox">ドット絵（ぼかさない）</label>
     </div>
-    <p class="note">切り抜き枠は、その枠のままPNGへ配置します。人物や物だけを勝手に再拡大しません。</p>
+    <p class="note">切り抜き枠は、その枠のままPNGへ配置します。人物や物だけを勝手に再拡大しません。iPhoneでは「個別PNGをまとめて保存」→共有シートの「ファイルに保存」で、別々のPNGを1回で保存できます。</p>
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
       <button id="saveBtn" class="btn save" type="button" disabled>この1枚を保存</button>
-      <button id="batchSaveBtn" class="btn save" type="button" disabled>名前を付けて個別PNGで全部保存</button>
+      <button id="batchSaveBtn" class="btn save" type="button" disabled>個別PNGをまとめて保存</button>
     </div>
   </section>
 
@@ -509,14 +509,6 @@
     drawDetectedOverlay();
   });
 
-  function canvasToPngBytes(canvas){
-    return new Promise((resolve,reject)=>{
-      canvas.toBlob(async blob=>{
-        if(!blob)return reject(new Error('PNG作成失敗'));
-        resolve(new Uint8Array(await blob.arrayBuffer()));
-      },'image/png');
-    });
-  }
 
   function renderRectToCanvas(cleanFull,cr){
     const W=clampSize(outW.value),H=clampSize(outH.value);
@@ -574,36 +566,73 @@
   batchSaveBtn.addEventListener('click',async()=>{
     if(!img||!detectedRects.length)return;
     batchSaveBtn.disabled=true;
-    note('個別PNGを作成中…');
+    note('個別PNGを準備中…');
+
     try{
       const cleanFull=getCleanCanvas();
-      const base=(fileName.value||'image').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'image';
+      const base=(fileName.value||'image')
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g,'_')
+        .replace(/\.png$/i,'') || 'image';
 
+      const files=[];
       for(let i=0;i<detectedRects.length;i++){
         const canvas=renderRectToCanvas(cleanFull,detectedRects[i]);
-        await new Promise((resolve,reject)=>{
-          canvas.toBlob(blob=>{
-            if(!blob){reject(new Error('PNG作成失敗'));return}
-            const url=URL.createObjectURL(blob);
-            const a=document.createElement('a');
-            a.href=url;
-            const nameInput=detectedNames.querySelector('[data-detected-name="'+i+'"]');
-            const rawName=(nameInput&&nameInput.value?nameInput.value:base+'_'+String(i+1).padStart(2,'0'));
-            const safeName=rawName.trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||('image_'+String(i+1).padStart(2,'0'));
-            a.download=safeName+'.png';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(()=>URL.revokeObjectURL(url),1500);
-            resolve();
-          },'image/png');
+        const blob=await new Promise((resolve,reject)=>{
+          canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG作成失敗')),'image/png');
         });
-        // iPhone/Safariでも連打扱いになりにくいよう少し間隔を空ける
-        await new Promise(r=>setTimeout(r,220));
+
+        const nameInput=detectedNames.querySelector('[data-detected-name="'+i+'"]');
+        const rawName=(nameInput&&nameInput.value
+          ? nameInput.value
+          : base+'_'+String(i+1).padStart(2,'0'));
+        const safeName=rawName
+          .trim()
+          .replace(/[\\/:*?"<>|]+/g,'_')
+          .replace(/\.png$/i,'') || ('image_'+String(i+1).padStart(2,'0'));
+
+        files.push(new File([blob],safeName+'.png',{type:'image/png'}));
       }
-      note(detectedRects.length+'個を個別PNGで保存しました');
+
+      // iPhone/Safariでは、複数の自動ダウンロードは1枚しか保存されないことがある。
+      // そのため、全PNGを1回の共有シートにまとめて渡し、
+      // 「ファイルに保存」で別々のPNGとして一括保存する。
+      if(navigator.share && (!navigator.canShare || navigator.canShare({files}))){
+        await navigator.share({
+          files,
+          title:'背景透過PNG'
+        });
+        note(files.length+'枚の個別PNGを共有しました');
+        return;
+      }
+
+      // 共有APIが使えない端末では、黙って失敗させず保存リンクを並べる。
+      let fallback=document.getElementById('batchFallback');
+      if(!fallback){
+        fallback=document.createElement('div');
+        fallback.id='batchFallback';
+        fallback.className='row';
+        fallback.style.marginTop='8px';
+        batchSaveBtn.parentElement.after(fallback);
+      }
+      fallback.replaceChildren();
+      for(const file of files){
+        const url=URL.createObjectURL(file);
+        const a=document.createElement('a');
+        a.className='btn';
+        a.href=url;
+        a.download=file.name;
+        a.textContent=file.name;
+        a.addEventListener('click',()=>setTimeout(()=>URL.revokeObjectURL(url),2000),{once:true});
+        fallback.appendChild(a);
+      }
+      note('この端末は複数ファイル共有に非対応です。下のPNGを保存してください');
     }catch(e){
-      note('個別PNG保存に失敗しました');
+      if(e && e.name==='AbortError'){
+        note('保存をキャンセルしました');
+      }else{
+        note('個別PNGの保存準備に失敗しました');
+      }
     }finally{
       batchSaveBtn.disabled=false;
     }
