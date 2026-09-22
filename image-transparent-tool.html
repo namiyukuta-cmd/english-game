@@ -111,6 +111,7 @@
         </select>
       </label>
       <label class="field">余白(px)<input id="padding" type="number" min="0" max="1000" value="0"></label>
+      <label class="field">保存名<input id="fileName" type="text" value="image" placeholder="例：house_poor"></label>
     </div>
     <div class="row" style="margin-top:9px">
       <label class="check"><input id="keepRatio" type="checkbox" checked>縦横比を維持</label>
@@ -152,6 +153,7 @@
   const fitMode=document.getElementById('fitMode');
   const verticalAlign=document.getElementById('verticalAlign');
   const padding=document.getElementById('padding');
+  const fileName=document.getElementById('fileName');
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
@@ -227,6 +229,9 @@
   }
   function loadBlob(blob){
     if(!blob || !blob.type || !blob.type.startsWith('image/'))return;
+    if(blob.name){
+      fileName.value=blob.name.replace(/\.[^.]+$/,'') || 'image';
+    }
     const url=URL.createObjectURL(blob);
     const image=new Image();
     image.onload=()=>{
@@ -549,7 +554,11 @@
       if(!blob){note('PNGを作れませんでした');return}
       const a=document.createElement('a');
       const url=URL.createObjectURL(blob);
-      a.href=url;a.download='transparent_'+outputCanvas.width+'x'+outputCanvas.height+'.png';
+      const base=(fileName.value||'image')
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g,'_')
+        .replace(/\.png$/i,'') || 'image';
+      a.href=url;a.download=base+'.png';
       document.body.appendChild(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),1000);
     },'image/png');
