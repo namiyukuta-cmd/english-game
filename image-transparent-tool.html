@@ -88,20 +88,14 @@
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <p class="note">枠の中を指で動かすと移動。四隅の□を動かすと大きさを変えられます。</p>
+    <p class="note">枠の中をドラッグで移動、四隅でサイズ変更。枠の外からドラッグすると新しい切り抜き範囲を作れます。</p>
   </section>
 
   <section class="panel">
     <p class="title">4. PNGサイズ</p>
     <div class="fields">
       <label class="field">幅(px)<input id="outW" type="number" min="1" max="8192" value="512"></label>
-      <label class="field">高さ(px)<input id="outH" type="number" min="1" max="8192" value="512"></label>
-      <label class="field">サイズ基準
-        <select id="scaleMode">
-          <option value="relative" selected>元画像の相対サイズを維持</option>
-          <option value="crop">選択範囲を最大化</option>
-        </select>
-      </label>
+      <label class="field">高さ(px)<input id="outH" type="number" min="1" max="8192" value="768"></label>
       <label class="field">配置
         <select id="fitMode">
           <option value="contain">全体を収める</option>
@@ -120,10 +114,10 @@
       <label class="field">保存名<input id="fileName" type="text" value="image" placeholder="例：house_poor"></label>
     </div>
     <div class="row" style="margin-top:9px">
-      <label class="check"><input id="keepRatio" type="checkbox" checked>出力サイズの縦横比を連動</label>
+      <label class="check"><input id="keepRatio" type="checkbox">出力サイズの幅・高さを連動</label>
       <label class="check"><input id="pixelMode" type="checkbox">ドット絵（ぼかさない）</label>
     </div>
-    <p class="note">「元画像の相対サイズを維持」は、同じ元画像から複数の人物・アイテムを切り出す時に、子どもだけ巨大化するようなサイズ揃えをしません。</p>
+    <p class="note">切り抜き枠は、その枠のままPNGへ配置します。人物や物だけを勝手に再拡大しません。</p>
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
       <button id="saveBtn" class="btn save" type="button" disabled>背景透過PNGを保存</button>
@@ -157,7 +151,6 @@
   const outW=document.getElementById('outW');
   const outH=document.getElementById('outH');
   const keepRatio=document.getElementById('keepRatio');
-  const scaleMode=document.getElementById('scaleMode');
   const fitMode=document.getElementById('fitMode');
   const verticalAlign=document.getElementById('verticalAlign');
   const padding=document.getElementById('padding');
@@ -172,7 +165,7 @@
 
   let img=null;
   let bg=null;
-  let ratio=1;
+  let outputRatio=512/768;
   let syncing=false;
   let processed=false;
   let cropMode=false;
@@ -244,7 +237,6 @@
     const image=new Image();
     image.onload=()=>{
       img=image;
-      ratio=image.naturalWidth/image.naturalHeight || 1;
       sourceCanvas.width=image.naturalWidth;
       sourceCanvas.height=image.naturalHeight;
       cropOverlay.width=image.naturalWidth;
@@ -256,8 +248,6 @@
       sctx.drawImage(image,0,0);
       const p=sctx.getImageData(0,0,1,1).data;
       setBg(p[0],p[1],p[2]);
-      outW.value=image.naturalWidth;
-      outH.value=image.naturalHeight;
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
@@ -315,10 +305,6 @@
       w:Math.max(2,Math.min(sourceCanvas.width-x,Math.round(r.w))),
       h:Math.max(2,Math.min(sourceCanvas.height-y,Math.round(r.h)))
     };
-    ratio=cropRect.w/cropRect.h||1;
-    if(keepRatio.checked){
-      syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
-    }
     processed=false;saveBtn.disabled=true;
     drawCropOverlay();updateCropButtons();note(label);
   }
@@ -350,7 +336,6 @@
 
   cropClearBtn.addEventListener('click',()=>{
     cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
-    ratio=img?(img.naturalWidth/img.naturalHeight||1):1;
     drawCropOverlay();updateCropButtons();
     processed=false;saveBtn.disabled=true;
     note('切り抜きを解除しました');
@@ -389,10 +374,16 @@
     if(!img||!cropRect||bgPickMode)return;
     const p=overlayPoint(e);
     const hit=cropHit(p);
-    if(!hit)return;
     e.preventDefault();
     suppressCanvasClick=true;
     cropOverlay.setPointerCapture?.(e.pointerId);
+    if(!hit){
+      cropDrag={type:'new',start:p,orig:null};
+      cropRect={x:p.x,y:p.y,w:2,h:2};
+      drawCropOverlay();
+      updateCropButtons();
+      return;
+    }
     cropDrag={type:hit,start:p,orig:{...cropRect}};
   });
 
@@ -400,8 +391,21 @@
     if(!cropDrag||!cropRect)return;
     e.preventDefault();
     const p=overlayPoint(e);
-    const o=cropDrag.orig, dx=p.x-cropDrag.start.x, dy=p.y-cropDrag.start.y;
-    const minSize=Math.max(16,Math.round(Math.min(sourceCanvas.width,sourceCanvas.height)*0.04));
+    const dx=p.x-cropDrag.start.x, dy=p.y-cropDrag.start.y;
+    const minSize=Math.max(8,Math.round(Math.min(sourceCanvas.width,sourceCanvas.height)*0.015));
+
+    if(cropDrag.type==='new'){
+      const x=Math.min(cropDrag.start.x,p.x);
+      const y=Math.min(cropDrag.start.y,p.y);
+      const w=Math.max(2,Math.abs(p.x-cropDrag.start.x));
+      const h=Math.max(2,Math.abs(p.y-cropDrag.start.y));
+      cropRect={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+      processed=false;saveBtn.disabled=true;
+      drawCropOverlay();updateCropButtons();
+      return;
+    }
+
+    const o=cropDrag.orig;
     let x=o.x,y=o.y,w=o.w,h=o.h;
 
     if(cropDrag.type==='move'){
@@ -424,10 +428,6 @@
     if(!cropDrag)return;
     e.preventDefault();
     cropDrag=null;
-    ratio=cropRect.w/cropRect.h||1;
-    if(keepRatio.checked){
-      syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
-    }
     updateCropButtons();drawCropOverlay();
     note('切り抜き範囲を設定しました');
     setTimeout(()=>{suppressCanvasClick=false},300);
@@ -439,13 +439,22 @@
   });
   tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
 
+  keepRatio.addEventListener('change',()=>{
+    if(keepRatio.checked){
+      outputRatio=clampSize(outW.value)/clampSize(outH.value);
+    }
+  });
   outW.addEventListener('input',()=>{
     if(syncing||!keepRatio.checked)return;
-    syncing=true;outH.value=Math.max(1,Math.round(clampSize(outW.value)/ratio));syncing=false;
+    syncing=true;
+    outH.value=Math.max(1,Math.round(clampSize(outW.value)/outputRatio));
+    syncing=false;
   });
   outH.addEventListener('input',()=>{
     if(syncing||!keepRatio.checked)return;
-    syncing=true;outW.value=Math.max(1,Math.round(clampSize(outH.value)*ratio));syncing=false;
+    syncing=true;
+    outW.value=Math.max(1,Math.round(clampSize(outH.value)*outputRatio));
+    syncing=false;
   });
 
   function transparentSource(){
@@ -495,139 +504,55 @@
   }
 
 
-  function visibleBounds(canvas){
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    const p=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-    let minX=canvas.width,minY=canvas.height,maxX=-1,maxY=-1;
-    for(let y=0;y<canvas.height;y++){
-      for(let x=0;x<canvas.width;x++){
-        if(p[(y*canvas.width+x)*4+3]>8){
-          if(x<minX)minX=x;
-          if(y<minY)minY=y;
-          if(x>maxX)maxX=x;
-          if(y>maxY)maxY=y;
-        }
-      }
-    }
-    return maxX>=minX&&maxY>=minY
-      ? {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1}
-      : null;
-  }
-
-  function largestSeparatedObject(cleanFull){
-    // 同じ元画像に横並びで置かれた人物・アイテムを列方向の空白で分離し、
-    // 最大の1体を共通倍率の基準にする。細かなノイズは無視する。
-    const w=cleanFull.width,h=cleanFull.height;
-    const ctx=cleanFull.getContext('2d',{willReadFrequently:true});
-    const p=ctx.getImageData(0,0,w,h).data;
-    const has=new Uint8Array(w);
-    for(let y=0;y<h;y++){
-      let i=(y*w)*4+3;
-      for(let x=0;x<w;x++,i+=4){
-        if(p[i]>8)has[x]=1;
-      }
-    }
-
-    // 画像幅の0.8%以下の空白は、腕・荷物などの内部隙間として埋める。
-    const maxGap=Math.max(2,Math.round(w*0.008));
-    let last=-1;
-    for(let x=0;x<w;x++){
-      if(!has[x])continue;
-      if(last>=0 && x-last-1<=maxGap){
-        for(let k=last+1;k<x;k++)has[k]=1;
-      }
-      last=x;
-    }
-
-    const boxes=[];
-    let x=0;
-    while(x<w){
-      while(x<w&&!has[x])x++;
-      if(x>=w)break;
-      const start=x;
-      while(x<w&&has[x])x++;
-      const end=x-1;
-      let minY=h,maxY=-1,pxCount=0;
-      for(let yy=0;yy<h;yy++){
-        let idx=(yy*w+start)*4+3;
-        for(let xx=start;xx<=end;xx++,idx+=4){
-          if(p[idx]>8){
-            pxCount++;
-            if(yy<minY)minY=yy;
-            if(yy>maxY)maxY=yy;
-          }
-        }
-      }
-      if(maxY>=minY && pxCount>Math.max(20,w*h*0.00002)){
-        boxes.push({x:start,y:minY,w:end-start+1,h:maxY-minY+1});
-      }
-    }
-    if(!boxes.length)return visibleBounds(cleanFull);
-    return boxes.reduce((best,b)=>{
-      if(!best)return b;
-      const bestScore=Math.max(best.w,best.h);
-      const score=Math.max(b.w,b.h);
-      return score>bestScore?b:best;
-    },null);
-  }
-
   function process(){
     if(!img)return;
-    const W=clampSize(outW.value),H=clampSize(outH.value),pad=Math.max(0,Number(padding.value)||0);
-    outW.value=W;outH.value=H;
-    outputCanvas.width=W;outputCanvas.height=H;
+
+    const W=clampSize(outW.value);
+    const H=clampSize(outH.value);
+    const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),Number(padding.value)||0));
+    outW.value=W;
+    outH.value=H;
+
+    outputCanvas.width=W;
+    outputCanvas.height=H;
     octx.clearRect(0,0,W,H);
     octx.imageSmoothingEnabled=!pixelMode.checked;
 
     const cleanFull=document.createElement('canvas');
-    cleanFull.width=sourceCanvas.width;cleanFull.height=sourceCanvas.height;
+    cleanFull.width=sourceCanvas.width;
+    cleanFull.height=sourceCanvas.height;
     cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
 
     const cr=cropRect||{x:0,y:0,w:sourceCanvas.width,h:sourceCanvas.height};
-    const clean=document.createElement('canvas');
-    clean.width=Math.max(1,cr.w);clean.height=Math.max(1,cr.h);
-    clean.getContext('2d').drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,0,0,clean.width,clean.height);
+    const sw=Math.max(1,cr.w);
+    const sh=Math.max(1,cr.h);
+    const iw=Math.max(1,W-pad*2);
+    const ih=Math.max(1,H-pad*2);
 
-    const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
-    let sx=0,sy=0,sw=clean.width,sh=clean.height;
-    let dx=pad,dy=pad,dw=iw,dh=ih;
+    let dw=iw,dh=ih;
+    const mode=fitMode.value;
 
-    if(scaleMode.value==='relative'){
-      // 選択した人物だけを「毎回最大化」せず、
-      // 元画像中で最大の人物・アイテムに合わせた共通倍率を使う。
-      const selected=visibleBounds(clean);
-      const basis=largestSeparatedObject(cleanFull);
-      if(selected&&basis){
-        sx=selected.x;sy=selected.y;sw=selected.w;sh=selected.h;
-        const commonScale=Math.min(iw/basis.w,ih/basis.h);
-        dw=sw*commonScale;
-        dh=sh*commonScale;
-        dx=(W-dw)/2;
-        if(verticalAlign.value==='bottom'){
-          dy=H-pad-dh;
-        }else if(verticalAlign.value==='top'){
-          dy=pad;
-        }else{
-          dy=(H-dh)/2;
-        }
-      }
-    }else{
-      // 通常モード：手で決めた切り抜き枠を出力へ収める。
-      const mode=fitMode.value;
-      if(mode!=='stretch'){
-        const scale=mode==='cover'?Math.max(iw/sw,ih/sh):Math.min(iw/sw,ih/sh);
-        dw=sw*scale;dh=sh*scale;
-        dx=(W-dw)/2;
-        if(verticalAlign.value==='bottom'){
-          dy=H-pad-dh;
-        }else if(verticalAlign.value==='top'){
-          dy=pad;
-        }else{
-          dy=(H-dh)/2;
-        }
-      }
+    if(mode!=='stretch'){
+      const scale=mode==='cover'
+        ? Math.max(iw/sw,ih/sh)
+        : Math.min(iw/sw,ih/sh);
+      dw=sw*scale;
+      dh=sh*scale;
     }
-    octx.drawImage(clean,sx,sy,sw,sh,dx,dy,dw,dh);
+
+    let dx=(W-dw)/2;
+    let dy=(H-dh)/2;
+    if(verticalAlign.value==='top')dy=pad;
+    if(verticalAlign.value==='bottom')dy=H-pad-dh;
+
+    // 重要：選択した切り抜き枠を、そのまま出力へ描く。
+    // 透明化後の人物境界を再計算して、勝手に拡大・縮小しない。
+    octx.drawImage(
+      cleanFull,
+      cr.x,cr.y,cr.w,cr.h,
+      dx,dy,dw,dh
+    );
+
     processed=true;
     saveBtn.disabled=false;
     note('完成：'+W+'×'+H+' PNG（背景透過）');
