@@ -88,16 +88,7 @@
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <p class="note">1枚だけ切り抜く時に使います。複数人物の影絵では使いません。</p>
-  </section>
-
-  <section class="panel">
-    <p class="title">複数人物の影絵を自動分割</p>
-    <p class="note">横一列の影絵専用です。人物ごとに別々の外接範囲を自動検出し、背の高い人も切らず、隣の人物も入れず、全員に同じ倍率を使って身長差を保ちます。</p>
-    <div class="row" style="margin-top:10px">
-      <button id="batchSilhouetteBtn" class="btn save" type="button" disabled>人物を自動分割してZIP保存</button>
-    </div>
-    <div id="batchStatus" class="status"></div>
+    <p class="note">枠の中を指で動かすと移動。四隅の□を動かすと大きさを変えられます。</p>
   </section>
 
   <section class="panel">
@@ -169,8 +160,6 @@
   const cropModeBtn=document.getElementById('cropModeBtn');
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
-  const batchSilhouetteBtn=document.getElementById('batchSilhouetteBtn');
-  const batchStatus=document.getElementById('batchStatus');
   const status=document.getElementById('status');
 
   let img=null;
@@ -202,9 +191,7 @@
     cropModeBtn.textContent=cropRect?'切り抜き枠を調整中':'切り抜き枠を出す';
     bgPickBtn.textContent=bgPickMode?'背景をタップしてください':'背景色を選ぶ';
     cropClearBtn.disabled=!img||!cropRect;
-    cropInfo.textContent=cropRect
-      ? (cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y)
-      : '画像全体';
+    cropInfo.textContent=cropRect?(cropRect.w+'×'+cropRect.h+' / x:'+cropRect.x+' y:'+cropRect.y):'画像全体';
   }
   function drawCropOverlay(){
     const ctx=cropOverlay.getContext('2d');
@@ -255,7 +242,6 @@
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
-      fitMode.disabled=false;
       drawCropOverlay();
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
@@ -267,7 +253,6 @@
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
-      batchSilhouetteBtn.disabled=false;
       saveBtn.disabled=true;
       processed=false;
       pasteArea.innerHTML='画像を読み込みました';
@@ -357,7 +342,6 @@
 
   cropClearBtn.addEventListener('click',()=>{
     cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
-    fitMode.disabled=false;
     ratio=img?(img.naturalWidth/img.naturalHeight||1):1;
     drawCropOverlay();updateCropButtons();
     processed=false;saveBtn.disabled=true;
@@ -502,189 +486,6 @@
     return data;
   }
 
-
-  function concatBytes(parts){
-    const total=parts.reduce((n,p)=>n+p.length,0);
-    const out=new Uint8Array(total);
-    let offset=0;
-    for(const p of parts){out.set(p,offset);offset+=p.length}
-    return out;
-  }
-
-  function le16(n){
-    return new Uint8Array([n&255,(n>>>8)&255]);
-  }
-
-  function le32(n){
-    return new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
-  }
-
-  const crcTable=(()=>{
-    const table=new Uint32Array(256);
-    for(let n=0;n<256;n++){
-      let c=n;
-      for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);
-      table[n]=c>>>0;
-    }
-    return table;
-  })();
-
-  function crc32(bytes){
-    let c=0xffffffff;
-    for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);
-    return (c^0xffffffff)>>>0;
-  }
-
-  async function makeZip(files){
-    const enc=new TextEncoder();
-    const locals=[];
-    const centrals=[];
-    let offset=0;
-
-    for(const file of files){
-      const name=enc.encode(file.name);
-      const data=new Uint8Array(await file.blob.arrayBuffer());
-      const crc=crc32(data);
-      const localHeader=concatBytes([
-        le32(0x04034b50),le16(20),le16(0),le16(0),le16(0),le16(0),
-        le32(crc),le32(data.length),le32(data.length),
-        le16(name.length),le16(0),name,data
-      ]);
-      locals.push(localHeader);
-
-      const central=concatBytes([
-        le32(0x02014b50),le16(20),le16(20),le16(0),le16(0),le16(0),le16(0),
-        le32(crc),le32(data.length),le32(data.length),
-        le16(name.length),le16(0),le16(0),le16(0),le16(0),le32(0),
-        le32(offset),name
-      ]);
-      centrals.push(central);
-      offset+=localHeader.length;
-    }
-
-    const centralBytes=concatBytes(centrals);
-    const end=concatBytes([
-      le32(0x06054b50),le16(0),le16(0),
-      le16(files.length),le16(files.length),
-      le32(centralBytes.length),le32(offset),le16(0)
-    ]);
-
-    return new Blob([...locals,centralBytes,end],{type:'application/zip'});
-  }
-
-  function canvasToBlob(canvas){
-    return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
-  }
-
-  function detectSilhouetteBounds(cleanFull){
-    const w=cleanFull.width,h=cleanFull.height;
-    const d=cleanFull.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data;
-    const active=new Uint8Array(w);
-
-    for(let x=0;x<w;x++){
-      let count=0;
-      for(let y=0;y<h;y++){
-        if(d[(y*w+x)*4+3]>24){
-          count++;
-          if(count>=3){active[x]=1;break}
-        }
-      }
-    }
-
-    const raw=[];
-    let start=-1;
-    for(let x=0;x<=w;x++){
-      const on=x<w&&active[x];
-      if(on&&start<0)start=x;
-      if(!on&&start>=0){raw.push([start,x]);start=-1}
-    }
-
-    const mergeGap=Math.max(6,Math.round(w*0.006));
-    const groups=[];
-    for(const g of raw){
-      const prev=groups[groups.length-1];
-      if(prev&&g[0]-prev[1]<=mergeGap)prev[1]=g[1];
-      else groups.push(g.slice());
-    }
-
-    const minWidth=Math.max(8,Math.round(w*0.015));
-    const bounds=[];
-    for(const [gx0,gx1] of groups){
-      if(gx1-gx0<minWidth)continue;
-      let minX=w,minY=h,maxX=-1,maxY=-1;
-      for(let y=0;y<h;y++){
-        for(let x=gx0;x<gx1;x++){
-          if(d[(y*w+x)*4+3]>24){
-            if(x<minX)minX=x;if(x>maxX)maxX=x;
-            if(y<minY)minY=y;if(y>maxY)maxY=y;
-          }
-        }
-      }
-      if(maxX>=minX&&maxY>=minY)bounds.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1});
-    }
-    return bounds;
-  }
-
-  async function saveSilhouettesBatch(){
-    if(!img)return;
-    batchSilhouetteBtn.disabled=true;
-    batchStatus.textContent='人物を自動で探しています…';
-
-    try{
-      const cleanFull=document.createElement('canvas');
-      cleanFull.width=sourceCanvas.width;
-      cleanFull.height=sourceCanvas.height;
-      cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
-
-      const bounds=detectSilhouetteBounds(cleanFull);
-      if(bounds.length<2)throw new Error('人物を分けて認識できませんでした。白い背景を選んでからもう一度押してください。');
-
-      const W=512,H=768,margin=24;
-      const maxW=Math.max(...bounds.map(b=>b.w));
-      const maxH=Math.max(...bounds.map(b=>b.h));
-      const scale=Math.min((W-margin*2)/maxW,(H-margin*2)/maxH);
-
-      const files=[];
-      for(let i=0;i<bounds.length;i++){
-        const b=bounds[i];
-        const out=document.createElement('canvas');
-        out.width=W;out.height=H;
-        const ctx=out.getContext('2d');
-        ctx.clearRect(0,0,W,H);
-        ctx.imageSmoothingEnabled=true;
-
-        const dw=b.w*scale;
-        const dh=b.h*scale;
-        const dx=(W-dw)/2;
-        const dy=H-margin-dh;
-
-        ctx.drawImage(cleanFull,b.x,b.y,b.w,b.h,dx,dy,dw,dh);
-        const blob=await canvasToBlob(out);
-        if(!blob)throw new Error('PNGの作成に失敗しました。');
-        files.push({name:'silhouette_'+String(i+1).padStart(2,'0')+'.png',blob});
-      }
-
-      batchStatus.textContent=bounds.length+'人を作成中…';
-      const zip=await makeZip(files);
-      const url=URL.createObjectURL(zip);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download='silhouettes_'+String(bounds.length).padStart(2,'0')+'.zip';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1500);
-
-      batchStatus.textContent=bounds.length+'人を同じ縮尺・512×768・下揃えで保存しました';
-    }catch(e){
-      batchStatus.textContent=e&&e.message?e.message:'一括保存に失敗しました';
-    }finally{
-      batchSilhouetteBtn.disabled=false;
-    }
-  }
-
-  batchSilhouetteBtn.addEventListener('click',saveSilhouettesBatch);
-
   function process(){
     if(!img)return;
     const W=clampSize(outW.value),H=clampSize(outH.value),pad=Math.max(0,Number(padding.value)||0);
@@ -702,29 +503,29 @@
     clean.width=Math.max(1,cr.w);clean.height=Math.max(1,cr.h);
     clean.getContext('2d').drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,0,0,clean.width,clean.height);
 
-    const cctx=clean.getContext('2d',{willReadFrequently:true});
-    const pixels=cctx.getImageData(0,0,clean.width,clean.height).data;
-    let minX=clean.width,minY=clean.height,maxX=-1,maxY=-1;
-    for(let y=0;y<clean.height;y++){
-      for(let x=0;x<clean.width;x++){
-        if(pixels[(y*clean.width+x)*4+3]>0){
-          if(x<minX)minX=x;
-          if(y<minY)minY=y;
-          if(x>maxX)maxX=x;
-          if(y>maxY)maxY=y;
-        }
-      }
-    }
-    const hasVisible=maxX>=minX&&maxY>=minY;
-
-    const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
-
     let sx=0,sy=0,sw=clean.width,sh=clean.height;
 
-    if(verticalAlign.value==='bottom'&&hasVisible){
-      sx=minX;sy=minY;sw=maxX-minX+1;sh=maxY-minY+1;
+    // 下揃えでは透明な余白を無視し、実際に見えている絵の足元を基準にする
+    if(verticalAlign.value==='bottom'){
+      const cctx=clean.getContext('2d',{willReadFrequently:true});
+      const pixels=cctx.getImageData(0,0,clean.width,clean.height).data;
+      let minX=clean.width,minY=clean.height,maxX=-1,maxY=-1;
+      for(let y=0;y<clean.height;y++){
+        for(let x=0;x<clean.width;x++){
+          if(pixels[(y*clean.width+x)*4+3]>0){
+            if(x<minX)minX=x;
+            if(y<minY)minY=y;
+            if(x>maxX)maxX=x;
+            if(y>maxY)maxY=y;
+          }
+        }
+      }
+      if(maxX>=minX&&maxY>=minY){
+        sx=minX;sy=minY;sw=maxX-minX+1;sh=maxY-minY+1;
+      }
     }
 
+    const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
     let dx=pad,dy=pad,dw=iw,dh=ih;
     const mode=fitMode.value;
     if(mode!=='stretch'){
