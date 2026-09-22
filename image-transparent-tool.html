@@ -324,38 +324,69 @@
     const w=cleanFull.width,h=cleanFull.height;
     const ctx=cleanFull.getContext('2d',{willReadFrequently:true});
     const p=ctx.getImageData(0,0,w,h).data;
-    const mask=new Uint8Array(w*h);
-    for(let i=0,n=0;i<p.length;i+=4,n++){
-      mask[n]=p[i+3]>12?1:0;
+
+    // まず列ごとの透明/不透明で分割する。
+    // 横に複数並んだ人物・アイテムは、互いの隙間を境界として別々に検出する。
+    const col=new Uint8Array(w);
+    for(let y=0;y<h;y++){
+      let i=(y*w)*4+3;
+      for(let x=0;x<w;x++,i+=4){
+        if(p[i]>12) col[x]=1;
+      }
     }
 
-    // 小さな切れ目を埋める。人の腕・杖・荷物などが別部品になりにくくする。
-    const closeX=Math.max(2,Math.round(w*0.004));
-    const closeY=Math.max(2,Math.round(h*0.004));
-    const dilated=new Uint8Array(mask);
-    for(let y=0;y<h;y++){
-      let last=-9999;
-      for(let x=0;x<w;x++){
-        if(mask[y*w+x]){
-          if(x-last-1>0 && x-last-1<=closeX){
-            for(let xx=last+1;xx<x;xx++)dilated[y*w+xx]=1;
-          }
-          last=x;
-        }
-      }
-    }
-    const merged=new Uint8Array(dilated);
+    // 服や腕の中のごく小さい隙間だけ埋める。人物同士の隙間は埋めない。
+    const tinyGap=Math.max(1,Math.round(w*0.002));
+    let last=-1;
     for(let x=0;x<w;x++){
-      let last=-9999;
-      for(let y=0;y<h;y++){
-        if(dilated[y*w+x]){
-          if(y-last-1>0 && y-last-1<=closeY){
-            for(let yy=last+1;yy<y;yy++)merged[yy*w+x]=1;
+      if(!col[x]) continue;
+      if(last>=0 && x-last-1>0 && x-last-1<=tinyGap){
+        for(let k=last+1;k<x;k++) col[k]=1;
+      }
+      last=x;
+    }
+
+    const segments=[];
+    let x=0;
+    while(x<w){
+      while(x<w&&!col[x])x++;
+      if(x>=w)break;
+      const x1=x;
+      while(x<w&&col[x])x++;
+      const x2=x-1;
+
+      let minY=h,maxY=-1,pixels=0;
+      for(let yy=0;yy<h;yy++){
+        let idx=(yy*w+x1)*4+3;
+        for(let xx=x1;xx<=x2;xx++,idx+=4){
+          if(p[idx]>12){
+            pixels++;
+            if(yy<minY)minY=yy;
+            if(yy>maxY)maxY=yy;
           }
-          last=y;
         }
       }
+      if(maxY>=minY && pixels>Math.max(20,w*h*0.00002)){
+        segments.push({x:x1,y:minY,w:x2-x1+1,h:maxY-minY+1,count:pixels});
+      }
     }
+
+    // 横並び画像なら、この分割をそのまま採用する。
+    if(segments.length>=2){
+      const marginX=Math.max(4,Math.round(w*0.006));
+      const marginY=Math.max(6,Math.round(h*0.012));
+      return segments.map(r=>{
+        const rx=Math.max(0,r.x-marginX);
+        const ry=Math.max(0,r.y-marginY);
+        const rx2=Math.min(w,r.x+r.w+marginX);
+        const ry2=Math.min(h,r.y+r.h+marginY);
+        return {x:rx,y:ry,w:rx2-rx,h:ry2-ry};
+      });
+    }
+
+    // 横の隙間が無い画像だけ、連結成分で補助検出する。
+    const mask=new Uint8Array(w*h);
+    for(let i=0,n=0;i<p.length;i+=4,n++) mask[n]=p[i+3]>12?1:0;
 
     const seen=new Uint8Array(w*h);
     const qx=new Int32Array(w*h);
@@ -363,70 +394,38 @@
     const comps=[];
     const minPixels=Math.max(30,Math.round(w*h*0.00008));
 
-    for(let y=0;y<h;y++){
-      for(let x=0;x<w;x++){
-        const n=y*w+x;
-        if(!merged[n]||seen[n])continue;
+    for(let yy=0;yy<h;yy++){
+      for(let xx=0;xx<w;xx++){
+        const n=yy*w+xx;
+        if(!mask[n]||seen[n])continue;
         let head=0,tail=0,count=0;
-        let minX=x,maxX=x,minY=y,maxY=y;
-        seen[n]=1;qx[tail]=x;qy[tail]=y;tail++;
+        let minX=xx,maxX=xx,minY=yy,maxY=yy;
+        seen[n]=1;qx[tail]=xx;qy[tail]=yy;tail++;
         while(head<tail){
           const cx=qx[head],cy=qy[head];head++;count++;
           if(cx<minX)minX=cx;if(cx>maxX)maxX=cx;
           if(cy<minY)minY=cy;if(cy>maxY)maxY=cy;
-          for(let yy=Math.max(0,cy-1);yy<=Math.min(h-1,cy+1);yy++){
-            for(let xx=Math.max(0,cx-1);xx<=Math.min(w-1,cx+1);xx++){
-              const nn=yy*w+xx;
-              if(!seen[nn]&&merged[nn]){
-                seen[nn]=1;qx[tail]=xx;qy[tail]=yy;tail++;
+          for(let ny=Math.max(0,cy-1);ny<=Math.min(h-1,cy+1);ny++){
+            for(let nx=Math.max(0,cx-1);nx<=Math.min(w-1,cx+1);nx++){
+              const nn=ny*w+nx;
+              if(!seen[nn]&&mask[nn]){
+                seen[nn]=1;qx[tail]=nx;qy[tail]=ny;tail++;
               }
             }
           }
         }
-        if(count>=minPixels){
-          comps.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,count});
-        }
+        if(count>=minPixels) comps.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,count});
       }
     }
 
-    // 近い部品を同一人物・同一アイテムとしてまとめる。
-    const gapX=Math.max(8,Math.round(w*0.015));
-    const gapY=Math.max(8,Math.round(h*0.02));
-    let changed=true;
-    while(changed){
-      changed=false;
-      outer: for(let i=0;i<comps.length;i++){
-        for(let j=i+1;j<comps.length;j++){
-          const a=comps[i],b=comps[j];
-          const ax2=a.x+a.w, ay2=a.y+a.h, bx2=b.x+b.w, by2=b.y+b.h;
-          const dx=Math.max(0,Math.max(a.x,b.x)-Math.min(ax2,bx2));
-          const dy=Math.max(0,Math.max(a.y,b.y)-Math.min(ay2,by2));
-          const xOverlap=Math.min(ax2,bx2)-Math.max(a.x,b.x);
-          const yOverlap=Math.min(ay2,by2)-Math.max(a.y,b.y);
-          if((dx<=gapX && yOverlap>0) || (dy<=gapY && xOverlap>0) || (dx<=gapX && dy<=gapY)){
-            const nx=Math.min(a.x,b.x), ny=Math.min(a.y,b.y);
-            const nx2=Math.max(ax2,bx2), ny2=Math.max(ay2,by2);
-            comps[i]={x:nx,y:ny,w:nx2-nx,h:ny2-ny,count:a.count+b.count};
-            comps.splice(j,1);
-            changed=true;
-            break outer;
-          }
-        }
-      }
-    }
-
-    // 余白を足して、頭・足・装飾が境界ギリギリで欠けないようにする。
-    const margin=Math.max(6,Math.round(Math.min(w,h)*0.015));
-    const rects=comps.map(r=>{
-      const x=Math.max(0,r.x-margin);
-      const y=Math.max(0,r.y-margin);
-      const x2=Math.min(w,r.x+r.w+margin);
-      const y2=Math.min(h,r.y+r.h+margin);
-      return {x,y,w:x2-x,h:y2-y};
-    }).filter(r=>r.w>8&&r.h>8);
-
-    rects.sort((a,b)=>a.x-b.x || a.y-b.y);
-    return rects;
+    const margin=Math.max(6,Math.round(Math.min(w,h)*0.012));
+    return comps.map(r=>{
+      const rx=Math.max(0,r.x-margin);
+      const ry=Math.max(0,r.y-margin);
+      const rx2=Math.min(w,r.x+r.w+margin);
+      const ry2=Math.min(h,r.y+r.h+margin);
+      return {x:rx,y:ry,w:rx2-rx,h:ry2-ry};
+    }).filter(r=>r.w>8&&r.h>8).sort((a,b)=>a.x-b.x||a.y-b.y);
   }
 
   function drawDetectedOverlay(){
