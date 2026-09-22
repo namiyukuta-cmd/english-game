@@ -84,11 +84,13 @@
   <section class="panel">
     <p class="title">3. 切り抜く</p>
     <div class="row">
-      <button id="cropModeBtn" class="btn primary" type="button" disabled>切り抜き枠を出す</button>
+      <button id="autoDetectBtn" class="btn primary" type="button" disabled>人物・物を自動検出</button>
+      <button id="cropModeBtn" class="btn" type="button" disabled>手動で切り抜く</button>
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <p class="note">枠の中をドラッグで移動、四隅でサイズ変更。枠の外からドラッグすると新しい切り抜き範囲を作れます。</p>
+    <p class="note">通常は「人物・物を自動検出」でOK。複数ある場合は全員・全アイテムを自動で分けます。手動調整は必要な時だけ使います。</p>
+    <div id="detectedInfo" class="crop-info" style="margin-top:8px"></div>
   </section>
 
   <section class="panel">
@@ -120,7 +122,8 @@
     <p class="note">切り抜き枠は、その枠のままPNGへ配置します。人物や物だけを勝手に再拡大しません。</p>
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
-      <button id="saveBtn" class="btn save" type="button" disabled>背景透過PNGを保存</button>
+      <button id="saveBtn" class="btn save" type="button" disabled>この1枚を保存</button>
+      <button id="batchSaveBtn" class="btn save" type="button" disabled>自動検出をZIPで一括保存</button>
     </div>
   </section>
 
@@ -158,9 +161,12 @@
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
+  const autoDetectBtn=document.getElementById('autoDetectBtn');
   const cropModeBtn=document.getElementById('cropModeBtn');
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
+  const detectedInfo=document.getElementById('detectedInfo');
+  const batchSaveBtn=document.getElementById('batchSaveBtn');
   const status=document.getElementById('status');
 
   let img=null;
@@ -173,6 +179,7 @@
   let cropRect=null;
   let cropDrag=null;
   let suppressCanvasClick=false;
+  let detectedRects=[];
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
@@ -241,7 +248,7 @@
       sourceCanvas.height=image.naturalHeight;
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
-      cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
+      cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;detectedRects=[];
       drawCropOverlay();
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
@@ -251,6 +258,8 @@
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
+      autoDetectBtn.disabled=false;
+      batchSaveBtn.disabled=true;
       saveBtn.disabled=true;
       processed=false;
       pasteArea.innerHTML='画像を読み込みました';
@@ -292,6 +301,259 @@
       note('クリップボードに画像がありません');
     }catch(e){
       note('この端末ではボタン貼付が使えません。上の枠をタップして「ペースト」を使ってください');
+    }
+  });
+
+
+  function getCleanCanvas(){
+    const cleanFull=document.createElement('canvas');
+    cleanFull.width=sourceCanvas.width;
+    cleanFull.height=sourceCanvas.height;
+    cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
+    return cleanFull;
+  }
+
+  function detectObjects(cleanFull){
+    const w=cleanFull.width,h=cleanFull.height;
+    const ctx=cleanFull.getContext('2d',{willReadFrequently:true});
+    const p=ctx.getImageData(0,0,w,h).data;
+    const mask=new Uint8Array(w*h);
+    for(let i=0,n=0;i<p.length;i+=4,n++){
+      mask[n]=p[i+3]>12?1:0;
+    }
+
+    // 小さな切れ目を埋める。人の腕・杖・荷物などが別部品になりにくくする。
+    const closeX=Math.max(2,Math.round(w*0.004));
+    const closeY=Math.max(2,Math.round(h*0.004));
+    const dilated=new Uint8Array(mask);
+    for(let y=0;y<h;y++){
+      let last=-9999;
+      for(let x=0;x<w;x++){
+        if(mask[y*w+x]){
+          if(x-last-1>0 && x-last-1<=closeX){
+            for(let xx=last+1;xx<x;xx++)dilated[y*w+xx]=1;
+          }
+          last=x;
+        }
+      }
+    }
+    const merged=new Uint8Array(dilated);
+    for(let x=0;x<w;x++){
+      let last=-9999;
+      for(let y=0;y<h;y++){
+        if(dilated[y*w+x]){
+          if(y-last-1>0 && y-last-1<=closeY){
+            for(let yy=last+1;yy<y;yy++)merged[yy*w+x]=1;
+          }
+          last=y;
+        }
+      }
+    }
+
+    const seen=new Uint8Array(w*h);
+    const qx=new Int32Array(w*h);
+    const qy=new Int32Array(w*h);
+    const comps=[];
+    const minPixels=Math.max(30,Math.round(w*h*0.00008));
+
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const n=y*w+x;
+        if(!merged[n]||seen[n])continue;
+        let head=0,tail=0,count=0;
+        let minX=x,maxX=x,minY=y,maxY=y;
+        seen[n]=1;qx[tail]=x;qy[tail]=y;tail++;
+        while(head<tail){
+          const cx=qx[head],cy=qy[head];head++;count++;
+          if(cx<minX)minX=cx;if(cx>maxX)maxX=cx;
+          if(cy<minY)minY=cy;if(cy>maxY)maxY=cy;
+          for(let yy=Math.max(0,cy-1);yy<=Math.min(h-1,cy+1);yy++){
+            for(let xx=Math.max(0,cx-1);xx<=Math.min(w-1,cx+1);xx++){
+              const nn=yy*w+xx;
+              if(!seen[nn]&&merged[nn]){
+                seen[nn]=1;qx[tail]=xx;qy[tail]=yy;tail++;
+              }
+            }
+          }
+        }
+        if(count>=minPixels){
+          comps.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,count});
+        }
+      }
+    }
+
+    // 近い部品を同一人物・同一アイテムとしてまとめる。
+    const gapX=Math.max(8,Math.round(w*0.015));
+    const gapY=Math.max(8,Math.round(h*0.02));
+    let changed=true;
+    while(changed){
+      changed=false;
+      outer: for(let i=0;i<comps.length;i++){
+        for(let j=i+1;j<comps.length;j++){
+          const a=comps[i],b=comps[j];
+          const ax2=a.x+a.w, ay2=a.y+a.h, bx2=b.x+b.w, by2=b.y+b.h;
+          const dx=Math.max(0,Math.max(a.x,b.x)-Math.min(ax2,bx2));
+          const dy=Math.max(0,Math.max(a.y,b.y)-Math.min(ay2,by2));
+          const xOverlap=Math.min(ax2,bx2)-Math.max(a.x,b.x);
+          const yOverlap=Math.min(ay2,by2)-Math.max(a.y,b.y);
+          if((dx<=gapX && yOverlap>0) || (dy<=gapY && xOverlap>0) || (dx<=gapX && dy<=gapY)){
+            const nx=Math.min(a.x,b.x), ny=Math.min(a.y,b.y);
+            const nx2=Math.max(ax2,bx2), ny2=Math.max(ay2,by2);
+            comps[i]={x:nx,y:ny,w:nx2-nx,h:ny2-ny,count:a.count+b.count};
+            comps.splice(j,1);
+            changed=true;
+            break outer;
+          }
+        }
+      }
+    }
+
+    // 余白を足して、頭・足・装飾が境界ギリギリで欠けないようにする。
+    const margin=Math.max(6,Math.round(Math.min(w,h)*0.015));
+    const rects=comps.map(r=>{
+      const x=Math.max(0,r.x-margin);
+      const y=Math.max(0,r.y-margin);
+      const x2=Math.min(w,r.x+r.w+margin);
+      const y2=Math.min(h,r.y+r.h+margin);
+      return {x,y,w:x2-x,h:y2-y};
+    }).filter(r=>r.w>8&&r.h>8);
+
+    rects.sort((a,b)=>a.x-b.x || a.y-b.y);
+    return rects;
+  }
+
+  function drawDetectedOverlay(){
+    const ctx=cropOverlay.getContext('2d');
+    drawCropOverlay();
+    if(!detectedRects.length)return;
+    ctx.save();
+    ctx.lineWidth=Math.max(3,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/260));
+    ctx.strokeStyle='rgba(255,210,0,.98)';
+    ctx.fillStyle='rgba(255,210,0,.12)';
+    ctx.font=Math.max(18,Math.round(Math.min(cropOverlay.width,cropOverlay.height)/24))+'px sans-serif';
+    detectedRects.forEach((r,i)=>{
+      ctx.fillRect(r.x,r.y,r.w,r.h);
+      ctx.strokeRect(r.x,r.y,r.w,r.h);
+      ctx.fillStyle='rgba(255,210,0,.98)';
+      ctx.fillText(String(i+1),r.x+6,r.y+24);
+      ctx.fillStyle='rgba(255,210,0,.12)';
+    });
+    ctx.restore();
+  }
+
+  autoDetectBtn.addEventListener('click',()=>{
+    if(!img)return;
+    const cleanFull=getCleanCanvas();
+    detectedRects=detectObjects(cleanFull);
+    if(!detectedRects.length){
+      detectedInfo.textContent='自動検出できませんでした。必要な時だけ手動切り抜きを使ってください。';
+      batchSaveBtn.disabled=true;
+      drawCropOverlay();
+      return;
+    }
+    detectedInfo.textContent=detectedRects.length+'個を自動検出しました。黄色枠は保存範囲です。';
+    batchSaveBtn.disabled=false;
+    cropRect=null;
+    drawDetectedOverlay();
+  });
+
+  function canvasToPngBytes(canvas){
+    return new Promise((resolve,reject)=>{
+      canvas.toBlob(async blob=>{
+        if(!blob)return reject(new Error('PNG作成失敗'));
+        resolve(new Uint8Array(await blob.arrayBuffer()));
+      },'image/png');
+    });
+  }
+
+  function crc32(bytes){
+    let c=0xffffffff;
+    for(let i=0;i<bytes.length;i++){
+      c^=bytes[i];
+      for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);
+    }
+    return (c^0xffffffff)>>>0;
+  }
+
+  function u16(n){return [n&255,(n>>>8)&255]}
+  function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+
+  function makeZip(files){
+    const enc=new TextEncoder();
+    const localParts=[],centralParts=[];
+    let offset=0;
+    for(const file of files){
+      const name=enc.encode(file.name);
+      const data=file.bytes;
+      const crc=crc32(data);
+      const local=new Uint8Array([
+        ...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
+        ...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name
+      ]);
+      localParts.push(local,data);
+      const central=new Uint8Array([
+        ...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),
+        ...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),
+        ...u16(0),...u16(0),...u32(0),...u32(offset),...name
+      ]);
+      centralParts.push(central);
+      offset+=local.length+data.length;
+    }
+    const centralSize=centralParts.reduce((s,a)=>s+a.length,0);
+    const end=new Uint8Array([
+      ...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),
+      ...u32(centralSize),...u32(offset),...u16(0)
+    ]);
+    return new Blob([...localParts,...centralParts,end],{type:'application/zip'});
+  }
+
+  function renderRectToCanvas(cleanFull,cr){
+    const W=clampSize(outW.value),H=clampSize(outH.value);
+    const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),Number(padding.value)||0));
+    const out=document.createElement('canvas');
+    out.width=W;out.height=H;
+    const ctx=out.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    ctx.imageSmoothingEnabled=!pixelMode.checked;
+    const iw=Math.max(1,W-pad*2),ih=Math.max(1,H-pad*2);
+    let dw=iw,dh=ih;
+    const mode=fitMode.value;
+    if(mode!=='stretch'){
+      const scale=mode==='cover'?Math.max(iw/cr.w,ih/cr.h):Math.min(iw/cr.w,ih/cr.h);
+      dw=cr.w*scale;dh=cr.h*scale;
+    }
+    const dx=(W-dw)/2;
+    let dy=(H-dh)/2;
+    if(verticalAlign.value==='top')dy=pad;
+    if(verticalAlign.value==='bottom')dy=H-pad-dh;
+    ctx.drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,dx,dy,dw,dh);
+    return out;
+  }
+
+  batchSaveBtn.addEventListener('click',async()=>{
+    if(!img||!detectedRects.length)return;
+    batchSaveBtn.disabled=true;
+    note('ZIPを作成中…');
+    try{
+      const cleanFull=getCleanCanvas();
+      const base=(fileName.value||'image').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'image';
+      const files=[];
+      for(let i=0;i<detectedRects.length;i++){
+        const canvas=renderRectToCanvas(cleanFull,detectedRects[i]);
+        const bytes=await canvasToPngBytes(canvas);
+        files.push({name:base+'_'+String(i+1).padStart(2,'0')+'.png',bytes});
+      }
+      const zip=makeZip(files);
+      const url=URL.createObjectURL(zip);
+      const a=document.createElement('a');
+      a.href=url;a.download=base+'_parts.zip';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+      note(detectedRects.length+'個をZIPで保存しました');
+    }catch(e){
+      note('一括保存に失敗しました');
+    }finally{
+      batchSaveBtn.disabled=false;
     }
   });
 
