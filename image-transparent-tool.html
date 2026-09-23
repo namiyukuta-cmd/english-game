@@ -79,9 +79,11 @@
       色の許容範囲 <span id="tolText">35</span>
       <input id="tolerance" type="range" min="0" max="150" value="35">
     </label>
+    <label class="check"><input id="connectedOnly" name="removeMode" type="radio" checked>背景につながっている部分だけ透明にする（おすすめ）</label>
+    <label class="check"><input id="allSimilar" name="removeMode" type="radio">画像内の同じ色も全部透明にする</label>
     <label class="check"><input id="protectLines" type="checkbox" checked>線画の内側を保護する</label>
-    <label class="check"><input id="allSimilar" type="checkbox">画像内の同じ色も全部透明にする</label>
-    <p class="note">「線画の内側を保護する」をONにすると、顔や服の白い部分へ透明化が漏れにくくなります。</p>
+    <label class="check"><input id="decontaminate" type="checkbox" checked>線のふちに残る背景色を除去する</label>
+    <p class="note">通常は上の「おすすめ」のままでOKです。「線のふちに残る背景色を除去する」をONにすると、黒線や白い部分の縁に残った水色・緑色などの背景色を自動で取り除きます。</p>
   </section>
 
   <section class="panel">
@@ -160,8 +162,10 @@
   const bgPickBtn=document.getElementById('bgPickBtn');
   const tolerance=document.getElementById('tolerance');
   const tolText=document.getElementById('tolText');
+  const connectedOnly=document.getElementById('connectedOnly');
   const allSimilar=document.getElementById('allSimilar');
   const protectLines=document.getElementById('protectLines');
+  const decontaminate=document.getElementById('decontaminate');
   const outW=document.getElementById('outW');
   const outH=document.getElementById('outH');
   const keepRatio=document.getElementById('keepRatio');
@@ -781,6 +785,10 @@
     setTimeout(()=>{suppressCanvasClick=false},300);
   });
   tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
+  connectedOnly.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
+  allSimilar.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
+  protectLines.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
+  decontaminate.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
 
   keepRatio.addEventListener('change',()=>{
     if(keepRatio.checked){
@@ -800,6 +808,94 @@
     syncing=false;
   });
 
+  function removeEdgeSpill(data,w,h,target){
+    const d=data.data;
+    const size=w*h;
+    const transparent=new Uint8Array(size);
+    const near=new Uint8Array(size);
+
+    for(let n=0;n<size;n++){
+      if(d[n*4+3]===0)transparent[n]=1;
+    }
+
+    // 透明部分から3px以内だけを処理する。
+    // 人物内部の色は触らず、背景との境界に残った色かぶりだけを対象にする。
+    let frontier=transparent;
+    for(let pass=0;pass<3;pass++){
+      const next=new Uint8Array(size);
+      for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+          const n=y*w+x;
+          if(transparent[n]||near[n])continue;
+          let hit=false;
+          for(let yy=Math.max(0,y-1);yy<=Math.min(h-1,y+1)&&!hit;yy++){
+            for(let xx=Math.max(0,x-1);xx<=Math.min(w-1,x+1);xx++){
+              if(frontier[yy*w+xx]){hit=true;break}
+            }
+          }
+          if(hit){near[n]=1;next[n]=1}
+        }
+      }
+      frontier=next;
+    }
+
+    const radius=4;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const n=y*w+x;
+        if(!near[n])continue;
+        const i=n*4;
+        if(d[i+3]===0)continue;
+
+        const vr=d[i]-target[0];
+        const vg=d[i+1]-target[1];
+        const vb=d[i+2]-target[2];
+        const vlen=Math.hypot(vr,vg,vb);
+        if(vlen<2)continue;
+
+        let best=-1,bestLen=vlen,bestScore=0;
+
+        // 今の色と「背景色から見た方向」が近く、さらに背景から遠い色を
+        // 周囲から探す。これを本来の前景色として使う。
+        for(let yy=Math.max(0,y-radius);yy<=Math.min(h-1,y+radius);yy++){
+          for(let xx=Math.max(0,x-radius);xx<=Math.min(w-1,x+radius);xx++){
+            const nn=yy*w+xx,ii=nn*4;
+            if(d[ii+3]===0||nn===n)continue;
+
+            const fr=d[ii]-target[0];
+            const fg=d[ii+1]-target[1];
+            const fb=d[ii+2]-target[2];
+            const flen=Math.hypot(fr,fg,fb);
+            if(flen<=vlen+4)continue;
+
+            const cosine=(vr*fr+vg*fg+vb*fb)/(vlen*flen);
+            if(cosine<0.965)continue;
+
+            const dist=Math.hypot(xx-x,yy-y);
+            const score=cosine*1000 + flen - dist*12;
+            if(score>bestScore){
+              bestScore=score;
+              best=ii;
+              bestLen=flen;
+            }
+          }
+        }
+
+        if(best<0)continue;
+
+        const alpha=Math.max(0,Math.min(1,vlen/bestLen));
+        if(alpha>=0.985)continue;
+
+        // 背景色が混ざったRGBを、周囲の前景色へ戻し、
+        // その混ざり具合をPNGのアルファ値へ移す。
+        d[i]=d[best];
+        d[i+1]=d[best+1];
+        d[i+2]=d[best+2];
+        d[i+3]=Math.min(d[i+3],Math.max(0,Math.round(alpha*255)));
+      }
+    }
+  }
+
   function transparentSource(){
     const w=sourceCanvas.width,h=sourceCanvas.height;
     const data=sctx.getImageData(0,0,w,h);
@@ -807,7 +903,10 @@
     const target=bg||[d[0],d[1],d[2]];
 
     if(allSimilar.checked){
-      for(let i=0;i<d.length;i+=4)if(d[i+3]&&colorDistance(d,i,target)<=t)d[i+3]=0;
+      for(let i=0;i<d.length;i+=4){
+        if(d[i+3]&&colorDistance(d,i,target)<=t)d[i+3]=0;
+      }
+      if(decontaminate.checked)removeEdgeSpill(data,w,h,target);
       return data;
     }
 
@@ -830,19 +929,36 @@
 
     const q=new Int32Array(w*h);
     let head=0,tail=0;
+
     function push(x,y){
       const n=y*w+x;
       if(seen[n]||barrier[n])return;
       const i=n*4;
-      if(d[i+3]===0||colorDistance(d,i,target)<=t){seen[n]=1;q[tail++]=n}
+      if(d[i+3]===0||colorDistance(d,i,target)<=t){
+        seen[n]=1;
+        q[tail++]=n;
+      }
     }
-    for(let x=0;x<w;x++){push(x,0);if(h>1)push(x,h-1)}
-    for(let y=1;y<h-1;y++){push(0,y);if(w>1)push(w-1,y)}
+
+    for(let x=0;x<w;x++){
+      push(x,0);
+      if(h>1)push(x,h-1);
+    }
+    for(let y=1;y<h-1;y++){
+      push(0,y);
+      if(w>1)push(w-1,y);
+    }
+
     while(head<tail){
       const n=q[head++],x=n%w,y=(n/w)|0,i=n*4;
       d[i+3]=0;
-      if(x>0)push(x-1,y);if(x<w-1)push(x+1,y);if(y>0)push(x,y-1);if(y<h-1)push(x,y+1);
+      if(x>0)push(x-1,y);
+      if(x<w-1)push(x+1,y);
+      if(y>0)push(x,y-1);
+      if(y<h-1)push(x,y+1);
     }
+
+    if(decontaminate.checked)removeEdgeSpill(data,w,h,target);
     return data;
   }
 
