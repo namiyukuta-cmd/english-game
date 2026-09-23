@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#fff7fb">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>簡易スケルトン歩行差分</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--muted:#7d6e75;--accent:#d97898;--dark:#3e3037}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:10px 10px 30px}
+.top{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;margin-bottom:10px}
+.top h1{margin:0;text-align:center;font-size:19px}
+.back{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:21px;font-weight:900;text-decoration:none}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:9px}
+.title{font-size:14px;font-weight:900;margin:0 0 8px}
+.note{font-size:12px;line-height:1.55;color:var(--muted);margin:6px 0 0}
+.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.btn,.filelabel{min-height:42px;border:1px solid #cdbfc6;border-radius:10px;background:#fff;color:var(--ink);font-weight:800;padding:8px 11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.filelabel input{display:none}
+.btn.primary{background:var(--dark);color:#fff;border-color:var(--dark)}
+.btn.save{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.btn.big{min-height:50px;font-size:15px;flex:1}
+.btn:disabled{opacity:.42}
+.canvasbox{border:1px solid var(--line);border-radius:12px;overflow:auto;padding:8px;background-color:#fff;background-image:linear-gradient(45deg,#e7e7e7 25%,transparent 25%),linear-gradient(-45deg,#e7e7e7 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e7e7e7 75%),linear-gradient(-45deg,transparent 75%,#e7e7e7 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.stage{position:relative;display:inline-block;max-width:none;line-height:0;left:50%;transform:translateX(-50%)}
+#sourceCanvas,#overlayCanvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#overlayCanvas{position:absolute;inset:0;touch-action:none}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+label.field{display:grid;gap:5px;font-size:12px;font-weight:800}
+input[type=range]{width:100%}
+input[type=text],select{width:100%;min-height:40px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:7px;font:inherit}
+.check{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
+.frames{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 3px;-webkit-overflow-scrolling:touch}
+.frame{flex:0 0 86px;border:2px solid var(--line);border-radius:10px;background:#fff;padding:5px;text-align:center}
+.frame.active{border-color:var(--accent)}
+.frame canvas{display:block;width:72px;height:72px;image-rendering:pixelated;background-color:#fff;background-image:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45-gradient,transparent 75%,#eee 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0}
+.frame span{display:block;font-size:10px;font-weight:900;margin-top:3px}
+.previewrow{display:grid;grid-template-columns:132px 1fr;gap:10px;align-items:center}
+.previewbox{border:1px solid var(--line);border-radius:12px;padding:7px;background-color:#fff;background-image:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45-gradient,transparent 75%,#eee 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0}
+#previewCanvas{display:block;width:116px;height:116px;image-rendering:pixelated;margin:auto}
+.status{min-height:18px;margin-top:7px;text-align:center;color:var(--muted);font-size:12px}
+.savegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+#fallback{display:grid;gap:6px;margin-top:7px}
+.joint-help{font-size:12px;line-height:1.55;color:var(--muted)}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#f5dce5;font-size:11px;font-weight:900;color:#8a4f65}
+@media(min-width:600px){.fields{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:480px){.previewrow{grid-template-columns:110px 1fr}.savegrid .btn{font-size:12px;padding:7px 6px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+  <a class="back" href="story-menu.html">←</a>
+  <h1>簡易スケルトン歩行差分</h1>
+  <span></span>
+</header>
+
+<section class="panel">
+  <p class="title">1. 透過PNGを入れる</p>
+  <div class="row">
+    <label class="filelabel">画像を選ぶ<input id="fileInput" type="file" accept="image/png,image/*"></label>
+    <label class="filelabel">作業データ読込<input id="projectInput" type="file" accept=".json,application/json"></label>
+  </div>
+  <p id="sourceInfo" class="note">正面向きのキャラ画像を1枚読み込みます。128pxより大きい画像は内部処理用に縮小します。</p>
+</section>
+
+<section class="panel">
+  <p class="title">2. 骨格を確認</p>
+  <div class="canvasbox">
+    <div id="stage" class="stage">
+      <canvas id="sourceCanvas"></canvas>
+      <canvas id="overlayCanvas"></canvas>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:8px">
+    <button id="autoJointBtn" class="btn primary" type="button" disabled>骨格を自動配置</button>
+    <button id="editJointBtn" class="btn active" type="button" disabled>関節を動かす：ON</button>
+    <button id="resetJointBtn" class="btn" type="button" disabled>骨格を戻す</button>
+  </div>
+
+  <p class="joint-help"><span class="badge">ピンクの丸</span> を指で動かせます。肩・ひじ・手首・腰・ひざ・足首がキャラに合っていれば、そのままでOKです。</p>
+</section>
+
+<section class="panel">
+  <p class="title">3. 歩行差分を自動生成</p>
+  <div class="fields">
+    <label class="field">歩幅 <span id="stepText">4</span>
+      <input id="stepPower" type="range" min="1" max="10" value="4">
+    </label>
+    <label class="field">腕振り <span id="armText">4</span>
+      <input id="armPower" type="range" min="0" max="10" value="4">
+    </label>
+    <label class="field">上下の揺れ <span id="bobText">1</span>
+      <input id="bobPower" type="range" min="0" max="4" value="1">
+    </label>
+    <label class="field">保存名
+      <input id="baseName" type="text" value="walk">
+    </label>
+  </div>
+
+  <div class="row" style="margin-top:9px">
+    <button id="generateBtn" class="btn primary big" type="button" disabled>4コマ歩行を自動生成</button>
+  </div>
+  <p class="note">生成：通常 → 左足前 → 通常 → 右足前。元絵そのものは変更しません。</p>
+</section>
+
+<section class="panel">
+  <p class="title">4. 生成結果</p>
+  <div id="frames" class="frames"></div>
+  <div class="previewrow" style="margin-top:9px">
+    <div class="previewbox"><canvas id="previewCanvas" width="116" height="116"></canvas></div>
+    <div>
+      <div class="row">
+        <button id="playBtn" class="btn primary" type="button" disabled>▶ 再生</button>
+        <button id="stopBtn" class="btn" type="button" disabled>■ 停止</button>
+      </div>
+      <label class="field" style="margin-top:8px">速さ <span id="fpsText">6 fps</span>
+        <input id="fps" type="range" min="2" max="12" value="6">
+      </label>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <p class="title">5. 保存</p>
+  <div class="savegrid">
+    <button id="saveAllBtn" class="btn save" type="button" disabled>4枚PNG</button>
+    <button id="sheetBtn" class="btn primary" type="button" disabled>横スプライトシート</button>
+    <button id="projectBtn" class="btn" type="button" disabled>作業データ保存</button>
+    <button id="saveCurrentBtn" class="btn" type="button" disabled>選択中1枚PNG</button>
+  </div>
+  <div id="fallback"></div>
+  <div id="status" class="status"></div>
+</section>
+</main>
+
+<script>
+(() => {
+const fileInput=document.getElementById('fileInput');
+const projectInput=document.getElementById('projectInput');
+const sourceCanvas=document.getElementById('sourceCanvas');
+const overlayCanvas=document.getElementById('overlayCanvas');
+const sctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
+const octx=overlayCanvas.getContext('2d');
+const previewCanvas=document.getElementById('previewCanvas');
+const pctx=previewCanvas.getContext('2d');
+const sourceInfo=document.getElementById('sourceInfo');
+const framesEl=document.getElementById('frames');
+const status=document.getElementById('status');
+const fallback=document.getElementById('fallback');
+const stepPower=document.getElementById('stepPower');
+const armPower=document.getElementById('armPower');
+const bobPower=document.getElementById('bobPower');
+const stepText=document.getElementById('stepText');
+const armText=document.getElementById('armText');
+const bobText=document.getElementById('bobText');
+const baseName=document.getElementById('baseName');
+const fps=document.getElementById('fps');
+const fpsText=document.getElementById('fpsText');
+
+let sourceImageData=null;
+let W=0,H=0;
+let bounds=null;
+let joints=null;
+let originalJoints=null;
+let editJoints=true;
+let dragging=null;
+let generated=[];
+let selectedFrame=0;
+let timer=null;
+let previewIndex=0;
+
+const jointOrder=[
+  'head',
+  'lShoulder','lElbow','lWrist',
+  'rShoulder','rElbow','rWrist',
+  'lHip','lKnee','lAnkle',
+  'rHip','rKnee','rAnkle'
+];
+const bones=[
+  ['head','lShoulder'],['head','rShoulder'],
+  ['lShoulder','lElbow'],['lElbow','lWrist'],
+  ['rShoulder','rElbow'],['rElbow','rWrist'],
+  ['lShoulder','lHip'],['rShoulder','rHip'],['lHip','rHip'],
+  ['lHip','lKnee'],['lKnee','lAnkle'],
+  ['rHip','rKnee'],['rKnee','rAnkle']
+];
+
+function note(t){status.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>status.textContent='',2200)}
+function safeName(s){return (s||'walk').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'walk'}
+function cloneJoints(j){return JSON.parse(JSON.stringify(j))}
+function cloneImageData(data){return new ImageData(new Uint8ClampedArray(data.data),data.width,data.height)}
+function checker(c,w,h,size=12){
+  c.clearRect(0,0,w,h);c.fillStyle='#fff';c.fillRect(0,0,w,h);c.fillStyle='#e9e9e9';
+  for(let y=0;y<h;y+=size)for(let x=0;x<w;x+=size)if(((x/size)+(y/size))%2===0)c.fillRect(x,y,size,size);
+}
+function alphaBounds(data,w,h){
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+  const d=data.data;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    if(d[(y*w+x)*4+3]>20){
+      if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;
+    }
+  }
+  if(maxX<0)return {x:0,y:0,w,h};
+  return {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
+}
+function autoJoints(){
+  if(!sourceImageData)return;
+  bounds=alphaBounds(sourceImageData,W,H);
+  const b=bounds;
+  const X=t=>b.x+b.w*t,Y=t=>b.y+b.h*t;
+  joints={
+    head:{x:X(.50),y:Y(.28)},
+    lShoulder:{x:X(.36),y:Y(.46)},
+    lElbow:{x:X(.28),y:Y(.56)},
+    lWrist:{x:X(.23),y:Y(.64)},
+    rShoulder:{x:X(.64),y:Y(.46)},
+    rElbow:{x:X(.72),y:Y(.56)},
+    rWrist:{x:X(.77),y:Y(.64)},
+    lHip:{x:X(.44),y:Y(.72)},
+    lKnee:{x:X(.44),y:Y(.83)},
+    lAnkle:{x:X(.44),y:Y(.94)},
+    rHip:{x:X(.56),y:Y(.72)},
+    rKnee:{x:X(.56),y:Y(.83)},
+    rAnkle:{x:X(.56),y:Y(.94)}
+  };
+  originalJoints=cloneJoints(joints);
+  drawSource();
+}
+function drawSource(){
+  if(!sourceImageData)return;
+  sourceCanvas.width=W;sourceCanvas.height=H;
+  sourceCanvas.style.width=Math.min(560,Math.max(260,W*4))+'px';
+  sourceCanvas.style.height='auto';
+  overlayCanvas.width=W;overlayCanvas.height=H;
+  overlayCanvas.style.width=sourceCanvas.style.width;
+  overlayCanvas.style.height='auto';
+  sctx.putImageData(sourceImageData,0,0);
+  drawSkeleton();
+}
+function drawSkeleton(){
+  octx.clearRect(0,0,W,H);
+  if(!joints)return;
+  octx.save();
+  octx.strokeStyle='rgba(217,120,152,.92)';
+  octx.lineWidth=Math.max(1.5,Math.min(W,H)/90);
+  octx.beginPath();
+  bones.forEach(([a,b])=>{
+    octx.moveTo(joints[a].x,joints[a].y);
+    octx.lineTo(joints[b].x,joints[b].y);
+  });
+  octx.stroke();
+
+  const r=Math.max(2.8,Math.min(W,H)/28);
+  jointOrder.forEach(name=>{
+    const p=joints[name];
+    octx.beginPath();
+    octx.fillStyle='rgba(255,255,255,.96)';
+    octx.strokeStyle='#d97898';
+    octx.lineWidth=Math.max(1.5,r*.35);
+    octx.arc(p.x,p.y,r,0,Math.PI*2);
+    octx.fill();octx.stroke();
+  });
+  octx.restore();
+}
+function overlayPoint(e){
+  const r=overlayCanvas.getBoundingClientRect();
+  return {
+    x:(e.clientX-r.left)*W/r.width,
+    y:(e.clientY-r.top)*H/r.height
+  };
+}
+function hitJoint(p){
+  if(!joints)return null;
+  let best=null,bd=Infinity;
+  const hit=Math.max(7,Math.min(W,H)/12);
+  jointOrder.forEach(name=>{
+    const q=joints[name],d=Math.hypot(p.x-q.x,p.y-q.y);
+    if(d<bd&&d<=hit){best=name;bd=d}
+  });
+  return best;
+}
+overlayCanvas.addEventListener('pointerdown',e=>{
+  if(!editJoints||!joints)return;
+  const p=overlayPoint(e),name=hitJoint(p);
+  if(!name)return;
+  e.preventDefault();dragging=name;overlayCanvas.setPointerCapture?.(e.pointerId);
+});
+overlayCanvas.addEventListener('pointermove',e=>{
+  if(!dragging||!joints)return;
+  e.preventDefault();const p=overlayPoint(e);
+  joints[dragging]={x:Math.max(0,Math.min(W-1,p.x)),y:Math.max(0,Math.min(H-1,p.y))};
+  drawSkeleton();
+});
+function endDrag(){dragging=null}
+overlayCanvas.addEventListener('pointerup',endDrag);
+overlayCanvas.addEventListener('pointercancel',endDrag);
+
+function fixedAnchors(){
+  const b=bounds||{x:0,y:0,w:W,h:H};
+  const X=t=>b.x+b.w*t,Y=t=>b.y+b.h*t;
+  return [
+    {x:X(.50),y:Y(.12)},
+    {x:X(.34),y:Y(.30)},
+    {x:X(.66),y:Y(.30)},
+    {x:X(.42),y:Y(.55)},
+    {x:X(.58),y:Y(.55)},
+    {x:X(.50),y:Y(.68)}
+  ];
+}
+function displacedJoints(kind){
+  const p=cloneJoints(joints);
+  const s=Number(stepPower.value),a=Number(armPower.value),bob=Number(bobPower.value);
+
+  if(kind==='left'){
+    p.lKnee.y+=s*.45;p.lAnkle.y+=s;
+    p.lAnkle.x-=s*.22;
+    p.rKnee.y-=s*.28;p.rAnkle.y-=s*.55;
+    p.rAnkle.x+=s*.16;
+    p.lElbow.y-=a*.35;p.lWrist.y-=a*.65;p.lWrist.x+=a*.18;
+    p.rElbow.y+=a*.25;p.rWrist.y+=a*.55;p.rWrist.x-=a*.14;
+    p.head.y+=bob*.35;
+  }else if(kind==='right'){
+    p.rKnee.y+=s*.45;p.rAnkle.y+=s;
+    p.rAnkle.x+=s*.22;
+    p.lKnee.y-=s*.28;p.lAnkle.y-=s*.55;
+    p.lAnkle.x-=s*.16;
+    p.rElbow.y-=a*.35;p.rWrist.y-=a*.65;p.rWrist.x-=a*.18;
+    p.lElbow.y+=a*.25;p.lWrist.y+=a*.55;p.lWrist.x+=a*.14;
+    p.head.y+=bob*.35;
+  }else{
+    p.head.y-=bob*.2;
+  }
+  return p;
+}
+function warpFrame(targetJoints){
+  const src=sourceImageData.data;
+  const out=new ImageData(W,H);
+  const od=out.data;
+
+  const fixed=fixedAnchors().map(q=>({src:q,dst:q}));
+  const controls=jointOrder.map(name=>({src:joints[name],dst:targetJoints[name]})).concat(fixed);
+  const sigma=Math.max(8,Math.min(W,H)*0.15);
+  const sigma2=2*sigma*sigma;
+
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      let wx=0,wy=0,ws=0;
+      for(const c of controls){
+        const dx=x-c.dst.x,dy=y-c.dst.y;
+        const w=Math.exp(-(dx*dx+dy*dy)/sigma2)+0.000001;
+        wx+=(c.dst.x-c.src.x)*w;
+        wy+=(c.dst.y-c.src.y)*w;
+        ws+=w;
+      }
+      const sx=Math.round(x-wx/ws),sy=Math.round(y-wy/ws);
+      const oi=(y*W+x)*4;
+      if(sx>=0&&sy>=0&&sx<W&&sy<H){
+        const si=(sy*W+sx)*4;
+        od[oi]=src[si];od[oi+1]=src[si+1];od[oi+2]=src[si+2];od[oi+3]=src[si+3];
+      }
+    }
+  }
+  return out;
+}
+function generate(){
+  if(!sourceImageData||!joints)return;
+  generated=[
+    warpFrame(displacedJoints('neutral')),
+    warpFrame(displacedJoints('left')),
+    warpFrame(displacedJoints('neutral')),
+    warpFrame(displacedJoints('right'))
+  ];
+  selectedFrame=0;
+  renderFrames();
+  drawPreview(0);
+  [playBtn,stopBtn,saveAllBtn,sheetBtn,projectBtn,saveCurrentBtn].forEach(b=>b.disabled=false);
+  note('4コマ生成しました');
+}
+function imageDataCanvas(data){
+  const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(data,0,0);return c;
+}
+function renderFrames(){
+  framesEl.replaceChildren();
+  const labels=['通常','左足前','通常','右足前'];
+  generated.forEach((g,i)=>{
+    const b=document.createElement('button');b.type='button';b.className='frame'+(i===selectedFrame?' active':'');
+    const c=document.createElement('canvas');c.width=72;c.height=72;
+    const q=c.getContext('2d');checker(q,72,72,8);q.imageSmoothingEnabled=false;
+    const raw=imageDataCanvas(g),scale=Math.min(72/W,72/H),dw=W*scale,dh=H*scale;
+    q.drawImage(raw,0,0,W,H,(72-dw)/2,(72-dh)/2,dw,dh);
+    const sp=document.createElement('span');sp.textContent=(i+1)+' '+labels[i];
+    b.append(c,sp);b.addEventListener('click',()=>{selectedFrame=i;renderFrames();drawPreview(i)});
+    framesEl.appendChild(b);
+  });
+}
+function drawPreview(i){
+  checker(pctx,previewCanvas.width,previewCanvas.height,10);
+  if(!generated.length)return;
+  const raw=imageDataCanvas(generated[i]);pctx.imageSmoothingEnabled=false;
+  const s=Math.min(previewCanvas.width/W,previewCanvas.height/H),dw=W*s,dh=H*s;
+  pctx.drawImage(raw,0,0,W,H,(previewCanvas.width-dw)/2,(previewCanvas.height-dh)/2,dw,dh);
+}
+function startPreview(){
+  stopPreview();if(!generated.length)return;
+  previewIndex=0;drawPreview(0);
+  timer=setInterval(()=>{previewIndex=(previewIndex+1)%generated.length;drawPreview(previewIndex)},1000/Number(fps.value));
+}
+function stopPreview(){if(timer){clearInterval(timer);timer=null}if(generated.length)drawPreview(selectedFrame)}
+
+function enableControls(){
+  ['autoJointBtn','editJointBtn','resetJointBtn','generateBtn','projectBtn'].forEach(id=>document.getElementById(id).disabled=false);
+}
+function loadImage(file){
+  if(!file)return;
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+    let w=img.naturalWidth,h=img.naturalHeight;
+    const max=128;
+    if(Math.max(w,h)>max){
+      const s=max/Math.max(w,h);w=Math.max(1,Math.round(w*s));h=Math.max(1,Math.round(h*s));
+    }
+    W=w;H=h;
+    const c=document.createElement('canvas');c.width=W;c.height=H;
+    const q=c.getContext('2d',{willReadFrequently:true});q.imageSmoothingEnabled=false;q.clearRect(0,0,W,H);q.drawImage(img,0,0,W,H);
+    sourceImageData=q.getImageData(0,0,W,H);
+    baseName.value=(file.name||'walk').replace(/\.[^.]+$/,'')||'walk';
+    generated=[];selectedFrame=0;fallback.replaceChildren();
+    autoJoints();drawSource();enableControls();
+    sourceInfo.textContent='読み込み：'+img.naturalWidth+'×'+img.naturalHeight+' → 内部処理 '+W+'×'+H+'px';
+    URL.revokeObjectURL(url);note('画像を読み込み、骨格を自動配置しました');
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);note('画像を読み込めませんでした')};img.src=url;
+}
+fileInput.addEventListener('change',()=>loadImage(fileInput.files[0]));
+document.getElementById('autoJointBtn').addEventListener('click',()=>{autoJoints();originalJoints=cloneJoints(joints);note('骨格を自動配置しました')});
+document.getElementById('resetJointBtn').addEventListener('click',()=>{if(originalJoints){joints=cloneJoints(originalJoints);drawSkeleton();note('骨格を戻しました')}});
+document.getElementById('editJointBtn').addEventListener('click',e=>{
+  editJoints=!editJoints;e.currentTarget.classList.toggle('active',editJoints);e.currentTarget.textContent='関節を動かす：'+(editJoints?'ON':'OFF');
+});
+document.getElementById('generateBtn').addEventListener('click',generate);
+
+stepPower.addEventListener('input',()=>stepText.textContent=stepPower.value);
+armPower.addEventListener('input',()=>armText.textContent=armPower.value);
+bobPower.addEventListener('input',()=>bobText.textContent=bobPower.value);
+fps.addEventListener('input',()=>{fpsText.textContent=fps.value+' fps';if(timer){stopPreview();startPreview()}});
+document.getElementById('playBtn').addEventListener('click',startPreview);
+document.getElementById('stopBtn').addEventListener('click',stopPreview);
+
+function blobOf(c){return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error()),'image/png'))}
+function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+document.getElementById('saveCurrentBtn').addEventListener('click',async()=>{
+  if(!generated.length)return;
+  saveBlob(await blobOf(imageDataCanvas(generated[selectedFrame])),safeName(baseName.value)+'_'+String(selectedFrame+1).padStart(2,'0')+'.png');note('保存しました');
+});
+document.getElementById('sheetBtn').addEventListener('click',async()=>{
+  if(!generated.length)return;
+  const c=document.createElement('canvas');c.width=W*generated.length;c.height=H;const q=c.getContext('2d');q.imageSmoothingEnabled=false;
+  generated.forEach((g,i)=>q.drawImage(imageDataCanvas(g),i*W,0));
+  saveBlob(await blobOf(c),safeName(baseName.value)+'_sheet.png');note('保存しました');
+});
+document.getElementById('saveAllBtn').addEventListener('click',async()=>{
+  if(!generated.length)return;
+  const files=[],name=safeName(baseName.value);fallback.replaceChildren();
+  for(let i=0;i<generated.length;i++)files.push(new File([await blobOf(imageDataCanvas(generated[i]))],name+'_'+String(i+1).padStart(2,'0')+'.png',{type:'image/png'}));
+  try{
+    if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){await navigator.share({files,title:'歩行差分PNG'});note('4枚を共有しました');return}
+  }catch(e){if(e&&e.name==='AbortError'){note('キャンセルしました');return}}
+  files.forEach(file=>{const u=URL.createObjectURL(file),a=document.createElement('a');a.className='btn';a.href=u;a.download=file.name;a.textContent=file.name;a.addEventListener('click',()=>setTimeout(()=>URL.revokeObjectURL(u),1500),{once:true});fallback.appendChild(a)});
+  note('下から保存してください');
+});
+document.getElementById('projectBtn').addEventListener('click',()=>{
+  if(!sourceImageData||!joints)return;
+  const data={
+    version:1,width:W,height:H,name:safeName(baseName.value),
+    source:Array.from(sourceImageData.data),
+    joints,originalJoints,
+    settings:{step:Number(stepPower.value),arm:Number(armPower.value),bob:Number(bobPower.value)}
+  };
+  saveBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),safeName(baseName.value)+'_skeleton.json');note('作業データを保存しました');
+});
+projectInput.addEventListener('change',async()=>{
+  const file=projectInput.files[0];if(!file)return;
+  try{
+    const d=JSON.parse(await file.text());
+    if(!d||!d.width||!d.height||!Array.isArray(d.source)||!d.joints)throw new Error();
+    W=Number(d.width);H=Number(d.height);
+    sourceImageData=new ImageData(new Uint8ClampedArray(d.source),W,H);
+    joints=d.joints;originalJoints=d.originalJoints||cloneJoints(joints);
+    bounds=alphaBounds(sourceImageData,W,H);
+    if(d.name)baseName.value=d.name;
+    if(d.settings){stepPower.value=d.settings.step??4;armPower.value=d.settings.arm??4;bobPower.value=d.settings.bob??1}
+    stepText.textContent=stepPower.value;armText.textContent=armPower.value;bobText.textContent=bobPower.value;
+    generated=[];drawSource();enableControls();sourceInfo.textContent='作業データ：'+W+'×'+H+'px';note('作業データを読み込みました');
+  }catch(e){note('作業データを読み込めませんでした')}
+});
+
+const playBtn=document.getElementById('playBtn');
+const stopBtn=document.getElementById('stopBtn');
+const saveAllBtn=document.getElementById('saveAllBtn');
+const sheetBtn=document.getElementById('sheetBtn');
+const projectBtn=document.getElementById('projectBtn');
+const saveCurrentBtn=document.getElementById('saveCurrentBtn');
+
+stepText.textContent=stepPower.value;armText.textContent=armPower.value;bobText.textContent=bobPower.value;fpsText.textContent=fps.value+' fps';
+})();
+</script>
+</body>
+</html>
