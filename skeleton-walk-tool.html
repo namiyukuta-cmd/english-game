@@ -391,9 +391,10 @@ function drawSource(){
 function drawSkeleton(){
   octx.clearRect(0,0,W,H);
   if(!joints)return;
+
   octx.save();
   octx.strokeStyle='rgba(217,120,152,.92)';
-  octx.lineWidth=Math.max(1.5,Math.min(W,H)/90);
+  octx.lineWidth=Math.max(1.1,Math.min(W,H)/120);
   octx.beginPath();
   bones.forEach(([a,b])=>{
     octx.moveTo(joints[a].x,joints[a].y);
@@ -401,16 +402,23 @@ function drawSkeleton(){
   });
   octx.stroke();
 
-  const r=Math.max(2.8,Math.min(W,H)/28);
+  const baseR=Math.max(2.2,Math.min(W,H)/40);
+  const normalR=baseR*0.72;
+  const activeR=baseR*0.88;
+
   jointOrder.forEach(name=>{
     const p=joints[name];
+    const rr=name===selectedJoint?activeR:normalR;
+
     octx.beginPath();
     octx.fillStyle=name===selectedJoint?'#d97898':'rgba(255,255,255,.96)';
     octx.strokeStyle=name===selectedJoint?'#7d3f58':'#d97898';
-    octx.lineWidth=Math.max(1.5,r*.35);
-    octx.arc(p.x,p.y,name===selectedJoint?r*1.2:r,0,Math.PI*2);
-    octx.fill();octx.stroke();
+    octx.lineWidth=Math.max(1.1,rr*.28);
+    octx.arc(p.x,p.y,rr,0,Math.PI*2);
+    octx.fill();
+    octx.stroke();
   });
+
   octx.restore();
 }
 function overlayPoint(e){
