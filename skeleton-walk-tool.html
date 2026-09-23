@@ -26,7 +26,17 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Bl
 .btn.big{min-height:50px;font-size:15px;flex:1}
 .btn:disabled{opacity:.42}
 .canvasbox{border:1px solid var(--line);border-radius:12px;overflow:auto;padding:8px;background-color:#fff;background-image:linear-gradient(45deg,#e7e7e7 25%,transparent 25%),linear-gradient(-45deg,#e7e7e7 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e7e7e7 75%),linear-gradient(-45deg,transparent 75%,#e7e7e7 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-.stage{position:relative;display:inline-block;max-width:none;line-height:0;left:50%;transform:translateX(-50%)}
+.stage{position:relative;display:block;width:max-content;max-width:none;line-height:0;margin:0 auto}
+.zoom-tools{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.zoom-tools .btn{min-height:38px;padding:6px 5px;font-size:12px}
+.joint-control{margin-top:9px;padding:9px;border:1px solid var(--line);border-radius:12px;background:#fffafd}
+.joint-control-top{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.joint-name{font-size:12px;font-weight:900;color:#8a4f65;white-space:nowrap}
+.nudge{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,48px);gap:6px;justify-content:center;margin-top:8px}
+.nudge .up{grid-column:2}.nudge .left{grid-column:1;grid-row:2}.nudge .down{grid-column:2;grid-row:2}.nudge .right{grid-column:3;grid-row:2}
+.nudge .btn{font-size:20px;padding:0}
+.joint-shortcuts{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.joint-shortcuts .btn{flex:0 0 auto;min-height:36px;padding:5px 9px;font-size:11px}
 #sourceCanvas,#overlayCanvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
 #overlayCanvas{position:absolute;inset:0;touch-action:none}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -77,13 +87,59 @@ input[type=text],select{width:100%;min-height:40px;border:1px solid #cdbfc6;bord
     </div>
   </div>
 
+  <div class="zoom-tools" aria-label="画像の拡大">
+    <button class="btn zoomBtn active" data-zoom="1" type="button">100%</button>
+    <button class="btn zoomBtn" data-zoom="1.5" type="button">150%</button>
+    <button class="btn zoomBtn" data-zoom="2" type="button">200%</button>
+    <button class="btn zoomBtn" data-zoom="3" type="button">300%</button>
+  </div>
+
+  <div class="joint-control">
+    <div class="joint-control-top">
+      <label class="field">動かす関節
+        <select id="jointSelect" disabled>
+          <option value="head">頭</option>
+          <option value="lShoulder">左肩</option>
+          <option value="lElbow">左ひじ</option>
+          <option value="lWrist">左手首</option>
+          <option value="rShoulder">右肩</option>
+          <option value="rElbow">右ひじ</option>
+          <option value="rWrist">右手首</option>
+          <option value="lHip">左腰</option>
+          <option value="lKnee">左ひざ</option>
+          <option value="lAnkle">左足首</option>
+          <option value="rHip">右腰</option>
+          <option value="rKnee">右ひざ</option>
+          <option value="rAnkle">右足首</option>
+        </select>
+      </label>
+      <div id="jointName" class="joint-name">頭を選択中</div>
+    </div>
+    <div class="nudge">
+      <button id="jointUp" class="btn up" type="button" disabled>↑</button>
+      <button id="jointLeft" class="btn left" type="button" disabled>←</button>
+      <button id="jointDown" class="btn down" type="button" disabled>↓</button>
+      <button id="jointRight" class="btn right" type="button" disabled>→</button>
+    </div>
+    <div class="joint-shortcuts">
+      <button class="btn jointPick" data-joint="lShoulder" type="button" disabled>左肩</button>
+      <button class="btn jointPick" data-joint="lWrist" type="button" disabled>左手</button>
+      <button class="btn jointPick" data-joint="rShoulder" type="button" disabled>右肩</button>
+      <button class="btn jointPick" data-joint="rWrist" type="button" disabled>右手</button>
+      <button class="btn jointPick" data-joint="lKnee" type="button" disabled>左ひざ</button>
+      <button class="btn jointPick" data-joint="lAnkle" type="button" disabled>左足</button>
+      <button class="btn jointPick" data-joint="rKnee" type="button" disabled>右ひざ</button>
+      <button class="btn jointPick" data-joint="rAnkle" type="button" disabled>右足</button>
+    </div>
+  </div>
+
   <div class="row" style="margin-top:8px">
     <button id="autoJointBtn" class="btn primary" type="button" disabled>骨格を自動配置</button>
-    <button id="editJointBtn" class="btn active" type="button" disabled>関節を動かす：ON</button>
+    <button id="editJointBtn" class="btn active" type="button" disabled>直接ドラッグ：ON</button>
     <button id="resetJointBtn" class="btn" type="button" disabled>骨格を戻す</button>
   </div>
 
-  <p class="joint-help"><span class="badge">ピンクの丸</span> を指で動かせます。肩・ひじ・手首・腰・ひざ・足首がキャラに合っていれば、そのままでOKです。</p>
+  <p class="joint-help">骨格がだいたい合っていれば、触らずそのまま「4コマ歩行を自動生成」でOKです。直したい時だけ、関節を選んで大きい矢印で1pxずつ動かしてください。ピンクの丸を直接ドラッグする方法も残しています。</p>
 </section>
 
 <section class="panel">
@@ -162,6 +218,14 @@ const bobText=document.getElementById('bobText');
 const baseName=document.getElementById('baseName');
 const fps=document.getElementById('fps');
 const fpsText=document.getElementById('fpsText');
+const jointSelect=document.getElementById('jointSelect');
+const jointName=document.getElementById('jointName');
+const jointLabels={
+  head:'頭',lShoulder:'左肩',lElbow:'左ひじ',lWrist:'左手首',
+  rShoulder:'右肩',rElbow:'右ひじ',rWrist:'右手首',
+  lHip:'左腰',lKnee:'左ひざ',lAnkle:'左足首',
+  rHip:'右腰',rKnee:'右ひざ',rAnkle:'右足首'
+};
 
 let sourceImageData=null;
 let W=0,H=0;
@@ -174,6 +238,9 @@ let generated=[];
 let selectedFrame=0;
 let timer=null;
 let previewIndex=0;
+let selectedJoint='head';
+let viewZoom=1;
+let baseDisplayWidth=260;
 
 const jointOrder=[
   'head',
@@ -233,15 +300,22 @@ function autoJoints(){
   originalJoints=cloneJoints(joints);
   drawSource();
 }
+function applyZoom(){
+  if(!sourceImageData)return;
+  const width=Math.round(baseDisplayWidth*viewZoom);
+  sourceCanvas.style.width=width+'px';
+  sourceCanvas.style.height='auto';
+  overlayCanvas.style.width=width+'px';
+  overlayCanvas.style.height='auto';
+  document.querySelectorAll('.zoomBtn').forEach(b=>b.classList.toggle('active',Number(b.dataset.zoom)===viewZoom));
+}
 function drawSource(){
   if(!sourceImageData)return;
   sourceCanvas.width=W;sourceCanvas.height=H;
-  sourceCanvas.style.width=Math.min(560,Math.max(260,W*4))+'px';
-  sourceCanvas.style.height='auto';
   overlayCanvas.width=W;overlayCanvas.height=H;
-  overlayCanvas.style.width=sourceCanvas.style.width;
-  overlayCanvas.style.height='auto';
+  baseDisplayWidth=Math.min(560,Math.max(260,W*4));
   sctx.putImageData(sourceImageData,0,0);
+  applyZoom();
   drawSkeleton();
 }
 function drawSkeleton(){
@@ -261,10 +335,10 @@ function drawSkeleton(){
   jointOrder.forEach(name=>{
     const p=joints[name];
     octx.beginPath();
-    octx.fillStyle='rgba(255,255,255,.96)';
-    octx.strokeStyle='#d97898';
+    octx.fillStyle=name===selectedJoint?'#d97898':'rgba(255,255,255,.96)';
+    octx.strokeStyle=name===selectedJoint?'#7d3f58':'#d97898';
     octx.lineWidth=Math.max(1.5,r*.35);
-    octx.arc(p.x,p.y,r,0,Math.PI*2);
+    octx.arc(p.x,p.y,name===selectedJoint?r*1.2:r,0,Math.PI*2);
     octx.fill();octx.stroke();
   });
   octx.restore();
@@ -286,11 +360,26 @@ function hitJoint(p){
   });
   return best;
 }
+function chooseJoint(name){
+  if(!joints||!joints[name])return;
+  selectedJoint=name;
+  jointSelect.value=name;
+  jointName.textContent=(jointLabels[name]||name)+'を選択中';
+  document.querySelectorAll('.jointPick').forEach(b=>b.classList.toggle('active',b.dataset.joint===name));
+  drawSkeleton();
+}
+function nudgeJoint(dx,dy){
+  if(!joints||!selectedJoint||!joints[selectedJoint])return;
+  const p=joints[selectedJoint];
+  p.x=Math.max(0,Math.min(W-1,p.x+dx));
+  p.y=Math.max(0,Math.min(H-1,p.y+dy));
+  drawSkeleton();
+}
 overlayCanvas.addEventListener('pointerdown',e=>{
   if(!editJoints||!joints)return;
   const p=overlayPoint(e),name=hitJoint(p);
   if(!name)return;
-  e.preventDefault();dragging=name;overlayCanvas.setPointerCapture?.(e.pointerId);
+  e.preventDefault();chooseJoint(name);dragging=name;overlayCanvas.setPointerCapture?.(e.pointerId);
 });
 overlayCanvas.addEventListener('pointermove',e=>{
   if(!dragging||!joints)return;
@@ -415,7 +504,10 @@ function startPreview(){
 function stopPreview(){if(timer){clearInterval(timer);timer=null}if(generated.length)drawPreview(selectedFrame)}
 
 function enableControls(){
-  ['autoJointBtn','editJointBtn','resetJointBtn','generateBtn','projectBtn'].forEach(id=>document.getElementById(id).disabled=false);
+  ['autoJointBtn','editJointBtn','resetJointBtn','generateBtn','projectBtn','jointUp','jointDown','jointLeft','jointRight'].forEach(id=>document.getElementById(id).disabled=false);
+  jointSelect.disabled=false;
+  document.querySelectorAll('.jointPick').forEach(b=>b.disabled=false);
+  chooseJoint(selectedJoint);
 }
 function loadImage(file){
   if(!file)return;
@@ -439,11 +531,21 @@ function loadImage(file){
   img.onerror=()=>{URL.revokeObjectURL(url);note('画像を読み込めませんでした')};img.src=url;
 }
 fileInput.addEventListener('change',()=>loadImage(fileInput.files[0]));
-document.getElementById('autoJointBtn').addEventListener('click',()=>{autoJoints();originalJoints=cloneJoints(joints);note('骨格を自動配置しました')});
-document.getElementById('resetJointBtn').addEventListener('click',()=>{if(originalJoints){joints=cloneJoints(originalJoints);drawSkeleton();note('骨格を戻しました')}});
+document.getElementById('autoJointBtn').addEventListener('click',()=>{autoJoints();originalJoints=cloneJoints(joints);chooseJoint(selectedJoint);note('骨格を自動配置しました')});
+document.getElementById('resetJointBtn').addEventListener('click',()=>{if(originalJoints){joints=cloneJoints(originalJoints);chooseJoint(selectedJoint);note('骨格を戻しました')}});
 document.getElementById('editJointBtn').addEventListener('click',e=>{
-  editJoints=!editJoints;e.currentTarget.classList.toggle('active',editJoints);e.currentTarget.textContent='関節を動かす：'+(editJoints?'ON':'OFF');
+  editJoints=!editJoints;e.currentTarget.classList.toggle('active',editJoints);e.currentTarget.textContent='直接ドラッグ：'+(editJoints?'ON':'OFF');
 });
+jointSelect.addEventListener('change',()=>chooseJoint(jointSelect.value));
+document.querySelectorAll('.jointPick').forEach(b=>b.addEventListener('click',()=>chooseJoint(b.dataset.joint)));
+document.getElementById('jointUp').addEventListener('click',()=>nudgeJoint(0,-1));
+document.getElementById('jointDown').addEventListener('click',()=>nudgeJoint(0,1));
+document.getElementById('jointLeft').addEventListener('click',()=>nudgeJoint(-1,0));
+document.getElementById('jointRight').addEventListener('click',()=>nudgeJoint(1,0));
+document.querySelectorAll('.zoomBtn').forEach(b=>b.addEventListener('click',()=>{
+  viewZoom=Number(b.dataset.zoom)||1;
+  applyZoom();
+}));
 document.getElementById('generateBtn').addEventListener('click',generate);
 
 stepPower.addEventListener('input',()=>stepText.textContent=stepPower.value);
@@ -497,7 +599,7 @@ projectInput.addEventListener('change',async()=>{
     if(d.name)baseName.value=d.name;
     if(d.settings){stepPower.value=d.settings.step??4;armPower.value=d.settings.arm??4;bobPower.value=d.settings.bob??1}
     stepText.textContent=stepPower.value;armText.textContent=armPower.value;bobText.textContent=bobPower.value;
-    generated=[];drawSource();enableControls();sourceInfo.textContent='作業データ：'+W+'×'+H+'px';note('作業データを読み込みました');
+    generated=[];drawSource();enableControls();chooseJoint(selectedJoint);sourceInfo.textContent='作業データ：'+W+'×'+H+'px';note('作業データを読み込みました');
   }catch(e){note('作業データを読み込めませんでした')}
 });
 
