@@ -82,8 +82,8 @@
     <label class="check"><input id="connectedOnly" name="removeMode" type="radio" checked>背景につながっている部分だけ透明にする（おすすめ）</label>
     <label class="check"><input id="allSimilar" name="removeMode" type="radio">画像内の同じ色も全部透明にする</label>
     <label class="check"><input id="protectLines" type="checkbox" checked>線画の内側を保護する</label>
-    <label class="check"><input id="decontaminate" type="checkbox" checked>線のふちに残る背景色を除去する</label>
-    <p class="note">通常は上の「おすすめ」のままでOKです。「線のふちに残る背景色を除去する」をONにすると、黒線や白い部分の縁に残った水色・緑色などの背景色を自動で取り除きます。</p>
+    <label class="check"><input id="decontaminate" type="checkbox" checked>線のふちに残る背景色を強力に除去する</label>
+    <p class="note">通常は「背景につながっている部分だけ透明」＋「線のふちを強力に除去」のままでOKです。AI画像の水色・緑色背景が線の縁に混ざっていても、縁だけを補正します。</p>
   </section>
 
   <section class="panel">
@@ -815,14 +815,20 @@
     const near=new Uint8Array(size);
 
     for(let n=0;n<size;n++){
-      if(d[n*4+3]===0)transparent[n]=1;
+      const i=n*4;
+      if(d[i+3]===0){
+        transparent[n]=1;
+        // 完全透明画素に背景色を残さない。縮小時の色にじみ防止。
+        d[i]=0;d[i+1]=0;d[i+2]=0;
+      }
     }
 
-    // 透明部分から3px以内だけを処理する。
-    // 人物内部の色は触らず、背景との境界に残った色かぶりだけを対象にする。
+    // AI画像は見た目が単色でも縁に数px〜十数pxの色混ざりが出る。
+    // 透明部分から最大12pxの帯だけを対象にして人物内部は触らない。
     let frontier=transparent;
-    for(let pass=0;pass<3;pass++){
+    for(let pass=0;pass<12;pass++){
       const next=new Uint8Array(size);
+      let any=false;
       for(let y=0;y<h;y++){
         for(let x=0;x<w;x++){
           const n=y*w+x;
@@ -833,13 +839,14 @@
               if(frontier[yy*w+xx]){hit=true;break}
             }
           }
-          if(hit){near[n]=1;next[n]=1}
+          if(hit){near[n]=1;next[n]=1;any=true}
         }
       }
       frontier=next;
+      if(!any)break;
     }
 
-    const radius=4;
+    const radius=18;
     for(let y=0;y<h;y++){
       for(let x=0;x<w;x++){
         const n=y*w+x;
@@ -853,10 +860,10 @@
         const vlen=Math.hypot(vr,vg,vb);
         if(vlen<2)continue;
 
-        let best=-1,bestLen=vlen,bestScore=0;
+        let best=-1,bestLen=vlen,bestScore=-Infinity;
 
-        // 今の色と「背景色から見た方向」が近く、さらに背景から遠い色を
-        // 周囲から探す。これを本来の前景色として使う。
+        // 背景色→現在色とほぼ同じ方向にある、より濃い前景色を探す。
+        // 黒線なら黒、白い服なら白を拾うので、水色だけをRGBから外せる。
         for(let yy=Math.max(0,y-radius);yy<=Math.min(h-1,y+radius);yy++){
           for(let xx=Math.max(0,x-radius);xx<=Math.min(w-1,x+radius);xx++){
             const nn=yy*w+xx,ii=nn*4;
@@ -866,13 +873,13 @@
             const fg=d[ii+1]-target[1];
             const fb=d[ii+2]-target[2];
             const flen=Math.hypot(fr,fg,fb);
-            if(flen<=vlen+4)continue;
+            if(flen<=vlen+2)continue;
 
             const cosine=(vr*fr+vg*fg+vb*fb)/(vlen*flen);
-            if(cosine<0.965)continue;
+            if(cosine<0.90)continue;
 
             const dist=Math.hypot(xx-x,yy-y);
-            const score=cosine*1000 + flen - dist*12;
+            const score=cosine*1200 + flen - dist*8;
             if(score>bestScore){
               bestScore=score;
               best=ii;
@@ -884,10 +891,8 @@
         if(best<0)continue;
 
         const alpha=Math.max(0,Math.min(1,vlen/bestLen));
-        if(alpha>=0.985)continue;
+        if(alpha>=0.995)continue;
 
-        // 背景色が混ざったRGBを、周囲の前景色へ戻し、
-        // その混ざり具合をPNGのアルファ値へ移す。
         d[i]=d[best];
         d[i+1]=d[best+1];
         d[i+2]=d[best+2];
@@ -932,7 +937,7 @@
 
     function push(x,y){
       const n=y*w+x;
-      if(seen[n]||barrier[n])return;
+      if(seen[n])return;
       const i=n*4;
       if(d[i+3]===0||colorDistance(d,i,target)<=t){
         seen[n]=1;
@@ -951,7 +956,7 @@
 
     while(head<tail){
       const n=q[head++],x=n%w,y=(n/w)|0,i=n*4;
-      d[i+3]=0;
+      d[i]=0;d[i+1]=0;d[i+2]=0;d[i+3]=0;
       if(x>0)push(x-1,y);
       if(x<w-1)push(x+1,y);
       if(y>0)push(x,y-1);
