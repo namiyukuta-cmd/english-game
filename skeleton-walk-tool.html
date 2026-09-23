@@ -9,7 +9,7 @@
 <style>
 *{box-sizing:border-box}
 :root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--muted:#7d6e75;--accent:#d97898;--dark:#3e3037}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
 .wrap{max-width:760px;margin:0 auto;padding:10px 10px 30px}
 .top{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;margin-bottom:10px}
 .top h1{margin:0;text-align:center;font-size:19px}
@@ -18,7 +18,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Bl
 .title{font-size:14px;font-weight:900;margin:0 0 8px}
 .note{font-size:12px;line-height:1.55;color:var(--muted);margin:6px 0 0}
 .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.btn,.filelabel{min-height:42px;border:1px solid #cdbfc6;border-radius:10px;background:#fff;color:var(--ink);font-weight:800;padding:8px 11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn,.filelabel{min-height:42px;border:1px solid #cdbfc6;border-radius:10px;background:#fff;color:var(--ink);font-weight:800;padding:8px 11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .filelabel input{display:none}
 .btn.primary{background:var(--dark);color:#fff;border-color:var(--dark)}
 .btn.save{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -42,7 +42,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Bl
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 label.field{display:grid;gap:5px;font-size:12px;font-weight:800}
 input[type=range]{width:100%}
-input[type=text],select{width:100%;min-height:40px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:7px;font:inherit}
+input[type=text],select{width:100%;min-height:40px;border:1px solid #cdbfc6;border-radius:9px;background:#fff;color:var(--ink);padding:7px;font-size:16px}
 .check{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
 .frames{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 3px;-webkit-overflow-scrolling:touch}
 .frame{flex:0 0 86px;border:2px solid var(--line);border-radius:10px;background:#fff;padding:5px;text-align:center}
