@@ -209,6 +209,7 @@
   let suppressCanvasClick=false;
   let detectedRects=[];
   let roughCutMode=false;
+  let roughBounds=null;
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
@@ -278,6 +279,9 @@
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;detectedRects=[];
+      roughCutMode=false;roughBounds=null;
+      roughCutBtn.classList.remove('active');
+      roughCutBtn.textContent='雑切り抜き（白フチ）';
       detectedInfo.textContent='';
       detectedNames.replaceChildren();
       nameTools.style.display='none';
@@ -479,7 +483,12 @@
     roughMarginText.textContent=roughMargin.value+'px';
     processed=false;
     saveBtn.disabled=true;
-    if(roughCutMode)note('白フチ幅：'+roughMargin.value+'px');
+    if(roughCutMode){
+      const rough=roughCutoutSource();
+      roughBounds=rough._roughBounds;
+      process();
+      note('白フチ幅：'+roughMargin.value+'px');
+    }
   });
 
   roughCutBtn.addEventListener('click',()=>{
@@ -489,6 +498,7 @@
     roughCutBtn.textContent=roughCutMode?'雑切り抜き ON':'雑切り抜き（白フチ）';
 
     if(!roughCutMode){
+      roughBounds=null;
       cropRect=null;
       drawCropOverlay();
       updateCropButtons();
@@ -498,19 +508,19 @@
       return;
     }
 
+    // 雑切り抜きは「四角いトリミング」ではない。
+    // 外周は透明、主役のまわりだけ白い紙を残す。
+    cropRect=null;
+    drawCropOverlay();
+    updateCropButtons();
+
     const rough=roughCutoutSource();
-    const b=rough._roughBounds;
-    if(b){
-      const extra=Math.max(2,Math.round(Number(roughMargin.value)*0.25));
-      setCropRect({
-        x:Math.max(0,b.x-extra),
-        y:Math.max(0,b.y-extra),
-        w:Math.min(sourceCanvas.width-Math.max(0,b.x-extra),b.w+extra*2),
-        h:Math.min(sourceCanvas.height-Math.max(0,b.y-extra),b.h+extra*2)
-      },'ざっくり切り抜き範囲を作りました');
-    }
+    roughBounds=rough._roughBounds;
     process();
-    note('白フチを残して雑に切り抜きました');
+    note('輪郭に沿って白フチを残し、外側を透明にしました');
+
+    // 押した直後に実際の切り抜き結果を見せる。
+    outputCanvas.scrollIntoView({behavior:'smooth',block:'center'});
   });
 
   autoDetectBtn.addEventListener('click',()=>{
@@ -1134,7 +1144,9 @@
     cleanFull.height=sourceCanvas.height;
     cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
 
-    const cr=cropRect||{x:0,y:0,w:sourceCanvas.width,h:sourceCanvas.height};
+    const cr=(roughCutMode&&roughBounds)
+      ? roughBounds
+      : (cropRect||{x:0,y:0,w:sourceCanvas.width,h:sourceCanvas.height});
     const sw=Math.max(1,cr.w);
     const sh=Math.max(1,cr.h);
     const iw=Math.max(1,W-pad*2);
