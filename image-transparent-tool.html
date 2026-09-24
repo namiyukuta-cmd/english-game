@@ -90,11 +90,16 @@
     <p class="title">3. 切り抜く</p>
     <div class="row">
       <button id="autoDetectBtn" class="btn primary" type="button" disabled>人物・物を自動検出</button>
+      <button id="roughCutBtn" class="btn" type="button" disabled>雑切り抜き（白フチ）</button>
       <button id="cropModeBtn" class="btn" type="button" disabled>手動で切り抜く</button>
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
-    <p class="note">通常は「人物・物を自動検出」でOK。複数ある場合は全員・全アイテムを自動で分けます。手動調整は必要な時だけ使います。</p>
+    <label class="field" style="margin-top:8px">
+      雑切り抜きの白フチ幅 <span id="roughMarginText">35px</span>
+      <input id="roughMargin" type="range" min="4" max="120" value="35">
+    </label>
+    <p class="note">「雑切り抜き（白フチ）」は、主役の輪郭から少し離れたところを自動でざっくり切ります。白い紙をハサミで切ったようなフチを残します。</p>
     <div id="detectedInfo" class="crop-info" style="margin-top:8px"></div>
     <div class="row" id="nameTools" style="margin-top:8px;display:none">
       <label class="field" style="min-width:180px;flex:1">一括名前
@@ -177,6 +182,9 @@
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
   const autoDetectBtn=document.getElementById('autoDetectBtn');
+  const roughCutBtn=document.getElementById('roughCutBtn');
+  const roughMargin=document.getElementById('roughMargin');
+  const roughMarginText=document.getElementById('roughMarginText');
   const cropModeBtn=document.getElementById('cropModeBtn');
   const cropClearBtn=document.getElementById('cropClearBtn');
   const cropInfo=document.getElementById('cropInfo');
@@ -200,6 +208,7 @@
   let cropDrag=null;
   let suppressCanvasClick=false;
   let detectedRects=[];
+  let roughCutMode=false;
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
@@ -283,6 +292,7 @@
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
       autoDetectBtn.disabled=false;
+      roughCutBtn.disabled=false;
       batchSaveBtn.disabled=true;
       saveBtn.disabled=true;
       processed=false;
@@ -333,7 +343,7 @@
     const cleanFull=document.createElement('canvas');
     cleanFull.width=sourceCanvas.width;
     cleanFull.height=sourceCanvas.height;
-    cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
+    cleanFull.getContext('2d').putImageData(roughCutMode?roughCutoutSource():transparentSource(),0,0);
     return cleanFull;
   }
 
@@ -463,6 +473,45 @@
     });
     ctx.restore();
   }
+
+
+  roughMargin.addEventListener('input',()=>{
+    roughMarginText.textContent=roughMargin.value+'px';
+    processed=false;
+    saveBtn.disabled=true;
+    if(roughCutMode)note('白フチ幅：'+roughMargin.value+'px');
+  });
+
+  roughCutBtn.addEventListener('click',()=>{
+    if(!img)return;
+    roughCutMode=!roughCutMode;
+    roughCutBtn.classList.toggle('active',roughCutMode);
+    roughCutBtn.textContent=roughCutMode?'雑切り抜き ON':'雑切り抜き（白フチ）';
+
+    if(!roughCutMode){
+      cropRect=null;
+      drawCropOverlay();
+      updateCropButtons();
+      processed=false;
+      saveBtn.disabled=true;
+      note('雑切り抜きを解除しました');
+      return;
+    }
+
+    const rough=roughCutoutSource();
+    const b=rough._roughBounds;
+    if(b){
+      const extra=Math.max(2,Math.round(Number(roughMargin.value)*0.25));
+      setCropRect({
+        x:Math.max(0,b.x-extra),
+        y:Math.max(0,b.y-extra),
+        w:Math.min(sourceCanvas.width-Math.max(0,b.x-extra),b.w+extra*2),
+        h:Math.min(sourceCanvas.height-Math.max(0,b.y-extra),b.h+extra*2)
+      },'ざっくり切り抜き範囲を作りました');
+    }
+    process();
+    note('白フチを残して雑に切り抜きました');
+  });
 
   autoDetectBtn.addEventListener('click',()=>{
     if(!img)return;
@@ -784,7 +833,7 @@
     cropDrag=null;drawCropOverlay();
     setTimeout(()=>{suppressCanvasClick=false},300);
   });
-  tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false});
+  tolerance.addEventListener('input',()=>{tolText.textContent=tolerance.value;processed=false;saveBtn.disabled=true});
   connectedOnly.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
   allSimilar.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
   protectLines.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
@@ -899,6 +948,104 @@
         d[i+3]=Math.min(d[i+3],Math.max(0,Math.round(alpha*255)));
       }
     }
+  }
+
+
+  function roughCutoutSource(){
+    const w=sourceCanvas.width,h=sourceCanvas.height;
+    const data=sctx.getImageData(0,0,w,h);
+    const d=data.data;
+    const t=Number(tolerance.value);
+    const target=bg||[d[0],d[1],d[2]];
+    const size=w*h;
+
+    // 端から背景色だけをたどって「外側の背景」を決める。
+    const outside=new Uint8Array(size);
+    const q=new Int32Array(size);
+    let head=0,tail=0;
+
+    function pushBg(x,y){
+      const n=y*w+x;
+      if(outside[n])return;
+      const i=n*4;
+      if(d[i+3]===0 || colorDistance(d,i,target)<=t){
+        outside[n]=1;
+        q[tail++]=n;
+      }
+    }
+
+    for(let x=0;x<w;x++){
+      pushBg(x,0);
+      if(h>1)pushBg(x,h-1);
+    }
+    for(let y=1;y<h-1;y++){
+      pushBg(0,y);
+      if(w>1)pushBg(w-1,y);
+    }
+
+    while(head<tail){
+      const n=q[head++],x=n%w,y=(n/w)|0;
+      if(x>0)pushBg(x-1,y);
+      if(x<w-1)pushBg(x+1,y);
+      if(y>0)pushBg(x,y-1);
+      if(y<h-1)pushBg(x,y+1);
+    }
+
+    // 主役を起点に、指定pxだけ外へ広げる。
+    // 8方向BFSなので、機械的に綺麗すぎない「ざっくり切り抜き」になる。
+    const margin=Math.max(1,Math.round(Number(roughMargin.value)||35));
+    const dist=new Uint16Array(size);
+    dist.fill(65535);
+    head=0;tail=0;
+
+    let minX=w,minY=h,maxX=-1,maxY=-1;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const n=y*w+x,i=n*4;
+        if(!outside[n] && d[i+3]>0){
+          dist[n]=0;
+          q[tail++]=n;
+        }
+      }
+    }
+
+    while(head<tail){
+      const n=q[head++],dd=dist[n];
+      if(dd>=margin)continue;
+      const x=n%w,y=(n/w)|0;
+      const nd=dd+1;
+      for(let yy=Math.max(0,y-1);yy<=Math.min(h-1,y+1);yy++){
+        for(let xx=Math.max(0,x-1);xx<=Math.min(w-1,x+1);xx++){
+          const nn=yy*w+xx;
+          if(dist[nn]<=nd)continue;
+          dist[nn]=nd;
+          q[tail++]=nn;
+        }
+      }
+    }
+
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const n=y*w+x,i=n*4;
+        if(dist[n]<=margin){
+          if(outside[n]){
+            // 残す余白は元の背景色ではなく白に統一。
+            d[i]=255;d[i+1]=255;d[i+2]=255;d[i+3]=255;
+          }else if(d[i+3]===0){
+            d[i]=255;d[i+1]=255;d[i+2]=255;d[i+3]=255;
+          }
+          if(x<minX)minX=x;if(x>maxX)maxX=x;
+          if(y<minY)minY=y;if(y>maxY)maxY=y;
+        }else{
+          d[i]=0;d[i+1]=0;d[i+2]=0;d[i+3]=0;
+        }
+      }
+    }
+
+    data._roughBounds=(maxX>=minX&&maxY>=minY)
+      ? {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1}
+      : null;
+    return data;
   }
 
   function transparentSource(){
