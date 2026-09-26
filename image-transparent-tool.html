@@ -148,8 +148,8 @@
   <section class="panel">
     <p class="title">完成プレビュー</p>
     <div class="canvasbox"><canvas id="outputCanvas"></canvas></div>
+    <div id="estimatedSize" class="status" style="font-size:16px;font-weight:800;color:var(--ink);margin-top:10px">PNG容量：—</div>
     <div id="status" class="status"></div>
-    <div id="estimatedSize" class="status">推定容量：—</div>
   </section>
 </main>
 
@@ -1136,9 +1136,9 @@
     return (bytes/(1024*1024)).toFixed(2)+' MB';
   }
   function updateEstimatedSize(){
-    estimatedSize.textContent='推定容量：計算中…';
+    estimatedSize.textContent='PNG容量：計算中…';
     outputCanvas.toBlob(blob=>{
-      estimatedSize.textContent=blob?'推定容量：約 '+formatBytes(blob.size):'推定容量：—';
+      estimatedSize.textContent=blob?'PNG容量：約 '+formatBytes(blob.size):'PNG容量：—';
     },'image/png');
   }
 
