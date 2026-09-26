@@ -149,6 +149,7 @@
     <p class="title">完成プレビュー</p>
     <div class="canvasbox"><canvas id="outputCanvas"></canvas></div>
     <div id="status" class="status"></div>
+    <div id="estimatedSize" class="status">推定容量：—</div>
   </section>
 </main>
 
@@ -184,6 +185,7 @@
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
+  const estimatedSize=document.getElementById('estimatedSize');
   const autoDetectBtn=document.getElementById('autoDetectBtn');
   const roughCutBtn=document.getElementById('roughCutBtn');
   const roughMargin=document.getElementById('roughMargin');
@@ -1128,6 +1130,18 @@
   }
 
 
+  function formatBytes(bytes){
+    if(bytes<1024)return bytes+' B';
+    if(bytes<1024*1024)return (bytes/1024).toFixed(bytes<10240?1:0)+' KB';
+    return (bytes/(1024*1024)).toFixed(2)+' MB';
+  }
+  function updateEstimatedSize(){
+    estimatedSize.textContent='推定容量：計算中…';
+    outputCanvas.toBlob(blob=>{
+      estimatedSize.textContent=blob?'推定容量：約 '+formatBytes(blob.size):'推定容量：—';
+    },'image/png');
+  }
+
   function process(){
     if(!img)return;
 
@@ -1182,6 +1196,7 @@
     processed=true;
     saveBtn.disabled=false;
     note('完成：'+W+'×'+H+' PNG（背景透過）');
+    updateEstimatedSize();
   }
 
   processBtn.addEventListener('click',process);
