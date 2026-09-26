@@ -131,7 +131,7 @@
         </select>
       </label>
       <label class="field">余白(px)<input id="padding" type="number" min="0" max="1000" value="0"></label>
-      <label class="field">保存名<input id="fileName" type="text" value="image" placeholder="例：house_poor"></label>
+      <label class="field">保存名<div style="display:flex;gap:6px"><input id="fileName" type="text" value="image" placeholder="例：house_poor" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" style="min-width:0;flex:1"><button id="clearFileName" type="button">クリア</button></div></label>
     </div>
     <div class="row" style="margin-top:9px">
       <label class="check"><input id="keepRatio" type="checkbox">出力サイズの幅・高さを連動</label>
@@ -178,6 +178,9 @@
   const verticalAlign=document.getElementById('verticalAlign');
   const padding=document.getElementById('padding');
   const fileName=document.getElementById('fileName');
+  const clearFileName=document.getElementById('clearFileName');
+  fileName.addEventListener('input',()=>{fileName.value=fileName.value.replace(/[^\x20-\x7E]/g,'')});
+  clearFileName.addEventListener('click',()=>{fileName.value='';fileName.focus()});
   const pixelMode=document.getElementById('pixelMode');
   const processBtn=document.getElementById('processBtn');
   const saveBtn=document.getElementById('saveBtn');
