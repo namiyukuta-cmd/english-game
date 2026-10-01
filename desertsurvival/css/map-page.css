@@ -1,0 +1,147 @@
+.map-screen{
+  background:#17140f;
+}
+
+.map-page{
+  width:100%;
+  height:100dvh;
+  display:grid;
+  grid-template-rows:58px minmax(0,1fr) 94px;
+  overflow:hidden;
+  background:#17140f;
+}
+
+.map-page-head{
+  display:grid;
+  grid-template-columns:48px 1fr 48px;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-bottom:1px solid #3a3022;
+  background:#17140f;
+}
+
+.map-page-head h1{
+  margin:0;
+  text-align:center;
+  font-size:18px;
+  letter-spacing:.12em;
+}
+
+.map-back{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border:1px solid #77664c;
+  border-radius:50%;
+  background:#332a1d;
+  color:#f3ead8;
+  text-decoration:none;
+  font-size:25px;
+  line-height:1;
+}
+
+.map-head-spacer{
+  width:44px;
+  height:44px;
+}
+
+.map-canvas-wrap{
+  min-width:0;
+  min-height:0;
+  padding:10px;
+  background:#17140f;
+}
+
+.travel-map-canvas{
+  width:100%;
+  height:100%;
+  display:block;
+  border:1px solid #77664c;
+  background:#c4ad7f;
+  touch-action:manipulation;
+}
+
+.map-destination{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px max(10px,env(safe-area-inset-bottom));
+  border-top:1px solid #3a3022;
+  background:#17140f;
+}
+
+.map-destination > div{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+
+.map-destination-label{
+  color:#cbbb9c;
+  font-size:10px;
+}
+
+.map-destination strong{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:15px;
+}
+
+.map-destination small{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#cbbb9c;
+  font-size:10px;
+}
+
+#travelStartBtn{
+  min-width:104px;
+  min-height:48px;
+  padding:8px 12px;
+  border-radius:7px;
+  font-weight:900;
+}
+
+#travelStartBtn:disabled{
+  opacity:.38;
+}
+
+@media(max-width:390px){
+  .map-page{
+    grid-template-rows:54px minmax(0,1fr) 88px;
+  }
+
+  .map-page-head{
+    grid-template-columns:44px 1fr 44px;
+    padding:5px 8px;
+  }
+
+  .map-back,
+  .map-head-spacer{
+    width:40px;
+    height:40px;
+  }
+
+  .map-canvas-wrap{
+    padding:7px;
+  }
+
+  .map-destination{
+    padding:8px 9px max(8px,env(safe-area-inset-bottom));
+    gap:7px;
+  }
+
+  #travelStartBtn{
+    min-width:96px;
+    min-height:44px;
+    font-size:12px;
+  }
+}
