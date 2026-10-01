@@ -768,8 +768,26 @@ window.addEventListener('desert:drink-water',drinkFromWaterPoint);
 
 /* ---------- movement: drag + tap-to-walk + double-tap auto-walk ---------- */
 let ix=0,iy=0,pointerId=null,dragStartX=0,dragStartY=0,dragMoved=false,pointerDownAt=0,last=performance.now(),timeAcc=0,saveAcc=0,walkPhase=0;
-let autoTarget=null;
+const savedTravelTarget=game.world?.autoTravelTarget;
+let autoTarget=(
+  savedTravelTarget &&
+  Number.isFinite(Number(savedTravelTarget.x)) &&
+  Number.isFinite(Number(savedTravelTarget.z))
+) ? {
+  x:Number(savedTravelTarget.x),
+  z:Number(savedTravelTarget.z),
+  pickupId:null,
+  action:'travel',
+  markpointId:savedTravelTarget.id||null,
+  stopDistance:Math.max(0,Number(savedTravelTarget.stopDistance||2.2))
+} : null;
 let autoDirection=null;
+
+function clearSavedTravelTarget(){
+  if(!game.world?.autoTravelTarget)return;
+  delete game.world.autoTravelTarget;
+  setActiveGame(game);
+}
 let pointerStartedWithContinuousAuto=false;
 let lastTapAt=0,lastTapX=0,lastTapY=0,pendingTapTimer=null;
 const MOVE_RADIUS=56;
@@ -841,7 +859,7 @@ function applyMovement(nx,nz,speed,dt){
   if(encounter.encountered){
     ix=0;
     iy=0;
-    autoTarget=null;
+    if(autoTarget?.action!=='travel')autoTarget=null;
     autoDirection=null;
     setActiveGame(game);
     return false;
@@ -859,12 +877,17 @@ function finishAutoTarget(){
     const inRange=waterPointInRange(target.markpointId);
     if(inRange)performDrink(inRange);
     else if(point)showFieldToast('水場まで近づけませんでした');
+  }else if(target.action==='travel'){
+    const name=game.world?.autoTravelTarget?.name||'目的地';
+    delete game.world.autoTravelTarget;
+    setActiveGame(game);
+    showFieldToast(`${name} に到着`);
   }
   autoTarget=null;
 }
 
 function updateMovement(dt){
-  if(!overlay.hidden||isEncounterLocked())return;
+  if(!overlay.hidden||isEncounterLocked()||Number(game.player?.health||0)<=0)return;
 
   const manualMag=Math.hypot(ix,iy);
   if(manualMag>=.05){
@@ -907,7 +930,7 @@ function updateMovement(dt){
   const usableDistance=Math.max(0,distance-stopDistance);
   const speed=maxStep>usableDistance&&dt>0?usableDistance/dt:AUTO_WALK_SPEED;
   game.world.running=false;
-  if(!applyMovement(nx,nz,speed,dt))autoTarget=null;
+  if(!applyMovement(nx,nz,speed,dt)&&!isEncounterLocked())autoTarget=null;
 }
 
 function frame(now){
@@ -1071,6 +1094,7 @@ function updateFieldMove(e){
 function beginFieldMove(e){
   if(!fieldStage||pointerId!==null||!overlay.hidden||isFieldUiTarget(e.target))return;
   if(e.pointerType==='mouse'&&e.button!==0)return;
+  clearSavedTravelTarget();
   pointerId=e.pointerId;
   dragStartX=e.clientX;
   dragStartY=e.clientY;
@@ -1138,7 +1162,11 @@ if(fieldStage){
   fieldStage.addEventListener('pointercancel',cancelFieldMove);
 }
 
-miniBtn.addEventListener('click',()=>{cancelFieldMove();overlay.hidden=false;drawWorldMap(worldMap,game.world,markpoints);});
+miniBtn.addEventListener('click',()=>{
+  cancelFieldMove();
+  setActiveGame(game);
+  location.href='./desertsurvival_map.html?v=20261002-map1';
+});
 closeMap.addEventListener('click',()=>{overlay.hidden=true;});
 item.addEventListener('click',()=>{cancelFieldMove();setActiveGame(game);location.href='./desertsurvival_item.html';});
 
