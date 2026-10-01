@@ -1,0 +1,136 @@
+/* Desert Survival: auto battle overlay */
+
+.auto-battle-layer{
+  position:absolute;
+  inset:0;
+  z-index:70;
+  display:grid;
+  place-items:center;
+  padding:14px;
+  background:rgba(18,14,10,.72);
+}
+.auto-battle-layer[hidden]{display:none;}
+
+.auto-battle-card{
+  width:min(360px,100%);
+  max-height:calc(100% - 8px);
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto auto auto minmax(92px,1fr) auto;
+  border:1px solid #6e5d43;
+  border-radius:8px;
+  background:#17140f;
+  color:#f5efe2;
+  box-shadow:0 12px 30px rgba(0,0,0,.34);
+}
+
+.auto-battle-head{
+  min-height:46px;
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid #3a3022;
+}
+.auto-battle-title{
+  margin:0;
+  font-size:16px;
+  letter-spacing:.08em;
+}
+.auto-battle-state{
+  font-size:11px;
+  color:#cbbd9f;
+}
+
+.auto-battle-side{
+  padding:10px 12px 8px;
+}
+.auto-battle-side + .auto-battle-side{
+  padding-top:5px;
+}
+.auto-battle-name-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:5px;
+  font-size:12px;
+  font-weight:800;
+}
+.auto-battle-hp{
+  font-variant-numeric:tabular-nums;
+  color:#d9ccb0;
+}
+.auto-battle-bar{
+  height:12px;
+  overflow:hidden;
+  border:1px solid #77664c;
+  border-radius:3px;
+  background:#2a241c;
+}
+.auto-battle-bar-fill{
+  width:100%;
+  height:100%;
+  background:#b9a36d;
+  transition:width .18s linear;
+}
+.auto-battle-side.enemy .auto-battle-bar-fill{
+  background:#9a6754;
+}
+
+.auto-battle-log{
+  min-height:92px;
+  max-height:150px;
+  overflow:auto;
+  margin:4px 12px 10px;
+  padding:8px 9px;
+  border:1px solid #3a3022;
+  border-radius:4px;
+  background:#211c15;
+  font-size:11px;
+  line-height:1.5;
+  overscroll-behavior:contain;
+}
+.auto-battle-log-row + .auto-battle-log-row{
+  margin-top:3px;
+}
+.auto-battle-log-row.damage{
+  color:#ecd4b7;
+}
+.auto-battle-log-row.result{
+  color:#fff4d6;
+  font-weight:900;
+}
+
+.auto-battle-foot{
+  min-height:52px;
+  padding:8px 12px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  border-top:1px solid #3a3022;
+}
+.auto-battle-close{
+  min-width:92px;
+  min-height:38px;
+  padding:7px 14px;
+  border:1px solid #77664c;
+  border-radius:4px;
+  background:#d9ccb0;
+  color:#17130e;
+  font-weight:900;
+}
+.auto-battle-close:disabled{
+  opacity:.38;
+}
+
+@media(max-width:390px){
+  .auto-battle-layer{padding:10px;}
+  .auto-battle-card{width:100%;}
+  .auto-battle-log{max-height:126px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .auto-battle-bar-fill{transition:none;}
+}
