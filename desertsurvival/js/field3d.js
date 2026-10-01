@@ -10,6 +10,7 @@ import {moveWorldPosition} from './world.js';
 import {markpoints,findDrinkableWaterAt,findOasisWaterAt} from './markpoints.js?v=20260911-waterarea1';
 import {drawMiniMap,drawWorldMap} from './map.js';
 import {drawClock} from './clock.js';
+import {processEncounterDistance,isEncounterLocked} from './encounter.js?v=20261001-encounter1';
 
 const $=id=>document.getElementById(id);
 const canvas=$('worldCanvas');
@@ -835,6 +836,17 @@ function applyMovement(nx,nz,speed,dt){
   discoverNearbyMarkpoints();
   maps();
   updateCamera();
+
+  const encounter=processEncounterDistance(game,moved.moved);
+  if(encounter.encountered){
+    ix=0;
+    iy=0;
+    autoTarget=null;
+    autoDirection=null;
+    setActiveGame(game);
+    return false;
+  }
+
   return true;
 }
 
@@ -852,7 +864,7 @@ function finishAutoTarget(){
 }
 
 function updateMovement(dt){
-  if(!overlay.hidden)return;
+  if(!overlay.hidden||isEncounterLocked())return;
 
   const manualMag=Math.hypot(ix,iy);
   if(manualMag>=.05){
