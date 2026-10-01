@@ -9,4 +9,5 @@ if (!game) {
   await import('./field-ui.js?v=20260910-fieldlayout1');
   await import('./map-ui.js?v=20260910-worldmap1');
   await import('./hotbar.js?v=20260911-waterworld1');
+  await import('./auto-battle.js?v=20261001-autobattle1');
 }
