@@ -5,6 +5,7 @@
   'use strict';
 
   const EVENT_ID = 'cabin_grant_first_meeting';
+  const QUEST_ID = 'grant_first_aid';
   const EVENT_STATE_KEY = 'survival_event_state_v1';
   const ROOM_FLAGS_KEY = 'survival_room_flags_v1';
 
@@ -17,6 +18,9 @@
         transform: 'scaleY(1.05)',
         transformOrigin: 'top center'
       },
+      actors: [
+        { id: 'grant', label: 'G', name: 'グラント', left: 28, top: 20.5 }
+      ],
       hotspots: [
         { action: 'bed', label: 'ベッド', left: 11, top: 11, width: 34, height: 19 },
         { action: 'wardrobe', label: '洋服箪笥', left: 54, top: 12, width: 29, height: 13 },
@@ -303,6 +307,69 @@
     });
   }
 
+  function renderActors(floor) {
+    const config = FLOOR_CONFIGS[floor];
+    const layer = $('roomActors');
+    if (!layer) return;
+
+    layer.replaceChildren();
+
+    const actors = config && Array.isArray(config.actors) ? config.actors : [];
+    const canShowGrant = window.SURVIVAL_EVENTS && SURVIVAL_EVENTS.isCompleted(EVENT_ID);
+
+    actors.forEach(def => {
+      if (def.id === 'grant' && !canShowGrant) return;
+
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'room-actor-marker';
+      marker.textContent = def.label;
+      marker.setAttribute('aria-label', def.name);
+      marker.title = def.name;
+      marker.style.left = def.left + '%';
+      marker.style.top = def.top + '%';
+
+      marker.addEventListener('click', event => {
+        event.stopPropagation();
+        if (def.id === 'grant') {
+          showRoomMessage('グラントがいます。怪我の手当てに使える物を探す必要があります。');
+        }
+      });
+
+      layer.appendChild(marker);
+    });
+  }
+
+  function ensureGrantQuestActive() {
+    if (!window.SURVIVAL_QUESTS) return;
+    SURVIVAL_QUESTS.ensureActive(QUEST_ID);
+  }
+
+  function renderQuestBadge() {
+    const badge = $('questBadge');
+    const text = $('questBadgeText');
+    if (!badge || !text || !window.SURVIVAL_QUESTS) return;
+
+    const quest = SURVIVAL_QUESTS.get(QUEST_ID);
+    const visible = !!quest && quest.status === 'active';
+
+    badge.classList.toggle('hidden', !visible);
+    text.textContent = visible ? quest.title + '：' + quest.objective : '';
+  }
+
+  function bindQuestBadge() {
+    const badge = $('questBadge');
+    if (!badge) return;
+
+    badge.addEventListener('click', event => {
+      event.stopPropagation();
+      if (!window.SURVIVAL_QUESTS) return;
+      const quest = SURVIVAL_QUESTS.get(QUEST_ID);
+      if (!quest || quest.status !== 'active') return;
+      showRoomMessage('クエスト：' + quest.title + '\n' + quest.objective);
+    });
+  }
+
   function showEventMode() {
     currentFloor = 'first';
 
@@ -317,6 +384,8 @@
 
     applyFloorplanView('first');
     renderHotspots('first');
+    renderActors('first');
+    if ($('questBadge')) $('questBadge').classList.add('hidden');
 
     if (roomBackground && window.SURVIVAL_EVENTS) {
       roomBackground.style.backgroundImage = `url("${SURVIVAL_EVENTS.assets.cabinInterior}")`;
@@ -348,6 +417,8 @@
 
     applyFloorplanView(floor);
     renderHotspots(floor);
+    renderActors(floor);
+    renderQuestBadge();
 
     if (floorplanLayer) floorplanLayer.classList.add('visible');
   }
@@ -407,6 +478,8 @@
 
       case 'completeEvent':
         SURVIVAL_EVENTS.markCompleted(EVENT_ID);
+        ensureGrantQuestActive();
+        renderQuestBadge();
         showFloorplan();
         break;
 
@@ -643,6 +716,7 @@
     bindBackButton();
     bindMessageEvents();
     bindRoomHotspots();
+    bindQuestBadge();
 
     if (!window.SURVIVAL_EVENTS) {
       console.error('[survival-room-ui] survival-events.js が読み込まれていません。');
@@ -651,7 +725,9 @@
     }
 
     if (SURVIVAL_EVENTS.isCompleted(EVENT_ID)) {
+      ensureGrantQuestActive();
       showFloorplan();
+      renderQuestBadge();
       return;
     }
 
