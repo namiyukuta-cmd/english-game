@@ -280,14 +280,14 @@
       return;
     }
 
-    const existing = document.querySelector('script[src="data/survival-inventory.js"]');
+    const existing = document.querySelector('script[src^="data/survival-inventory.js"]');
     if (existing) {
       existing.addEventListener('load', installOutdoorInventoryBridge, { once: true });
       return;
     }
 
     const script = document.createElement('script');
-    script.src = 'data/survival-inventory.js';
+    script.src = 'data/survival-inventory.js?v=20261004-inventory2';
     script.addEventListener('load', installOutdoorInventoryBridge, { once: true });
     script.addEventListener('error', function () {
       console.error('[survival-events] survival-inventory.js could not be loaded.');
