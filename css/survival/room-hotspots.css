@@ -1,0 +1,30 @@
+.room-hotspots{
+  position:absolute;
+  inset:0;
+  z-index:6;
+  pointer-events:none;
+}
+
+.room-hotspot{
+  position:absolute;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:10px;
+  background:rgba(255,255,255,.001);
+  pointer-events:auto;
+}
+
+.room-hotspot:active{
+  background:rgba(111,170,200,.18);
+  outline:2px solid rgba(62,121,151,.55);
+}
+
+.hotspot-bed{left:11%;top:11%;width:34%;height:19%}
+.hotspot-wardrobe{left:54%;top:12%;width:29%;height:13%}
+.hotspot-kitchen{left:66%;top:29%;width:20%;height:20%}
+.hotspot-fridge{left:67%;top:49%;width:19%;height:14%}
+.hotspot-stove{left:62%;top:64%;width:27%;height:17%}
+.hotspot-attic{left:16%;top:39%;width:22%;height:18%}
+.hotspot-basement{left:10%;top:61%;width:22%;height:20%}
+.hotspot-entry{left:27%;top:81%;width:42%;height:18%}
