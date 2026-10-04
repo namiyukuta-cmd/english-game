@@ -1,0 +1,141 @@
+.game-menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:calc(15px + env(safe-area-inset-top)) 12px calc(15px + env(safe-area-inset-bottom));
+  background:rgba(30,30,30,.54);
+}
+
+.game-menu-overlay.open{display:flex}
+
+.game-menu-window{
+  position:relative;
+  width:min(500px,100%);
+  height:min(620px,78dvh);
+  display:flex;
+  flex-direction:column;
+  border:1px solid #7f8386;
+  border-radius:15px;
+  background:#f7f7f7;
+  overflow:hidden;
+}
+
+.menu-tabs-area{
+  position:relative;
+  flex:0 0 auto;
+  min-height:54px;
+  padding:10px 48px 0 8px;
+  display:flex;
+  align-items:flex-end;
+  overflow-x:auto;
+  background:#dfe2e4;
+  border-bottom:1px solid #969a9d;
+}
+
+.menu-tab{
+  position:relative;
+  min-width:94px;
+  height:38px;
+  margin-right:-1px;
+  padding:0 12px;
+  border:1px solid #969a9d;
+  border-bottom:0;
+  border-radius:10px 10px 0 0;
+  background:#cfd3d5;
+  color:#333;
+  font-size:14px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.menu-tab.active{
+  z-index:2;
+  height:42px;
+  background:#fff;
+  color:#111;
+}
+
+.menu-tab.hidden{display:none}
+
+.menu-close{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:5;
+  width:36px;
+  height:36px;
+  border:1px solid #888;
+  border-radius:9px;
+  background:#fff;
+  font-size:20px;
+  font-weight:900;
+}
+
+.menu-content{
+  flex:1 1 auto;
+  min-height:0;
+  padding:15px;
+  overflow:auto;
+  background:#fff;
+}
+
+.menu-panel{display:none}
+.menu-panel.active{display:block}
+.menu-panel-title{margin:0 0 12px;font-size:21px}
+
+.placeholder,.empty-message{
+  padding:18px 8px;
+  text-align:center;
+  font-size:17px;
+  line-height:1.6;
+  color:#555;
+}
+
+.item-row{
+  min-height:52px;
+  padding:10px 4px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid #ddd;
+}
+
+.item-name,.item-count{font-size:17px;font-weight:800}
+
+.dead-modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.84);
+}
+
+.dead-modal.open{display:flex}
+
+.dead-card{
+  width:min(400px,100%);
+  padding:24px 18px;
+  border-radius:17px;
+  background:#f6f6f6;
+  text-align:center;
+}
+
+.dead-title{margin:0;font-size:34px}
+.dead-reason{margin:15px 0 20px;font-size:17px;line-height:1.5}
+
+.restart-button{
+  width:100%;
+  min-height:52px;
+  border:1px solid #777;
+  border-radius:13px;
+  background:#fff;
+  font-size:17px;
+  font-weight:900;
+}
