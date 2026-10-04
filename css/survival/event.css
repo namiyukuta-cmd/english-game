@@ -1,0 +1,36 @@
+.event-stage{
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  border:1px solid #8c9296;
+  border-radius:13px;
+  background:#050505;
+}
+
+.event-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  opacity:0;
+  transition:opacity .35s ease;
+  display:block;
+}
+
+.event-stage.image-visible .event-image{opacity:1}
+
+.event-blackout{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  background:#000;
+  opacity:1;
+  pointer-events:none;
+  transition:opacity .65s ease;
+}
+
+.event-blackout.fade-out{opacity:0}
