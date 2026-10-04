@@ -155,20 +155,61 @@
     return map;
   }
 
+  function copyEquipment(target, source) {
+    const incoming = source && typeof source === 'object' ? source : {};
+    Object.keys(EQUIPMENT_SLOTS).forEach(slotId => {
+      const itemId = incoming[slotId];
+      target[slotId] = itemId ? String(itemId) : null;
+    });
+  }
+
   function migrateLegacyState(raw) {
     const next = makeDefaultState();
     if (!raw || typeof raw !== 'object') return next;
 
+    const rawPlayer = raw.player && typeof raw.player === 'object'
+      ? raw.player
+      : {};
     const containers = raw.containers && typeof raw.containers === 'object'
       ? raw.containers
       : {};
+    const storages = raw.storages && typeof raw.storages === 'object'
+      ? raw.storages
+      : {};
 
-    if (containers.player) {
+    if (rawPlayer.items && typeof rawPlayer.items === 'object') {
+      next.player.items = normalizeItemMap(rawPlayer.items);
+    } else if (containers.player) {
       next.player.items = slotsToItemMap(containers.player.slots);
     }
 
+    if (rawPlayer.equipment && typeof rawPlayer.equipment === 'object') {
+      copyEquipment(next.player.equipment, rawPlayer.equipment);
+    }
+
+    if (Number(rawPlayer.baseMaxWeight) > 0) {
+      next.player.baseMaxWeight = normalizeWeight(rawPlayer.baseMaxWeight);
+    }
+    next.player.bonusMaxWeight = normalizeWeight(rawPlayer.bonusMaxWeight);
+
+    Object.entries(storages).forEach(([id, storage]) => {
+      if (!storage || typeof storage !== 'object') return;
+
+      if (!next.storages[id]) {
+        next.storages[id] = {
+          id,
+          name: String(storage.name || id),
+          items: {}
+        };
+      }
+
+      next.storages[id].name = String(storage.name || next.storages[id].name || id);
+      next.storages[id].items = normalizeItemMap(storage.items);
+    });
+
     Object.entries(containers).forEach(([id, container]) => {
       if (id === 'player' || !container || typeof container !== 'object') return;
+      if (storages[id]) return;
 
       if (!next.storages[id]) {
         next.storages[id] = {
@@ -202,14 +243,7 @@
     next.player.bonusMaxWeight = normalizeWeight(raw.player.bonusMaxWeight);
     next.player.items = normalizeItemMap(raw.player.items);
 
-    const incomingEquipment = raw.player.equipment && typeof raw.player.equipment === 'object'
-      ? raw.player.equipment
-      : {};
-
-    Object.keys(EQUIPMENT_SLOTS).forEach(slotId => {
-      const itemId = incomingEquipment[slotId];
-      next.player.equipment[slotId] = itemId ? String(itemId) : null;
-    });
+    copyEquipment(next.player.equipment, raw.player.equipment);
 
     Object.entries(raw.storages).forEach(([id, storage]) => {
       if (!storage || typeof storage !== 'object') return;
@@ -240,6 +274,14 @@
   }
 
   let state = readState();
+
+  // 読み込み時に旧形式を正規化した結果も保存する。
+  // これにより装備データがページをまたいだときに旧形式へ戻らない。
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('[survival-inventory] 正規化した保存データを書き戻せませんでした。', error);
+  }
 
   function emit() {
     const snapshot = getState();
