@@ -9,8 +9,10 @@
   <link rel="stylesheet" href="css/survival/status.css?v=20261004-css-split-1">
   <link rel="stylesheet" href="css/survival/message.css?v=20261004-css-split-1">
   <link rel="stylesheet" href="css/survival/character.css?v=20261004-css-split-1">
-  <link rel="stylesheet" href="css/survival/room.css?v=20261004-css-split-1">
-  <link rel="stylesheet" href="css/survival/room-hotspots.css?v=20261004-css-split-1">
+  <link rel="stylesheet" href="css/survival/room.css?v=20261004-room2">
+  <link rel="stylesheet" href="css/survival/room-hotspots.css?v=20261004-room2">
+  <link rel="stylesheet" href="css/survival/room-markers.css?v=20261004-room2">
+  <link rel="stylesheet" href="css/survival/quest.css?v=20261004-room2">
 </head>
 
 
@@ -273,6 +275,12 @@
         alt=""
       >
 
+      <div
+        id="roomActors"
+        class="room-actors"
+        aria-label="人物"
+      ></div>
+
 
       <!-- タップ領域 -->
 
@@ -342,6 +350,17 @@
     </div>
 
 
+    <button
+      id="questBadge"
+      class="quest-badge hidden"
+      type="button"
+      aria-label="現在のクエスト"
+    >
+      <span class="quest-badge-label">QUEST</span>
+      <span id="questBadgeText" class="quest-badge-text"></span>
+    </button>
+
+
     <!-- =========================
          会話・メッセージ
     ========================== -->
@@ -386,28 +405,30 @@
      アイテムデータ
 ========================= -->
 
-<script src="data/survival-items.js"></script>
+<script src="data/survival-items.js?v=20261004-room2"></script>
 
 
 <!-- =========================
      インベントリ本体
 ========================= -->
 
-<script src="data/survival-inventory.js"></script>
+<script src="data/survival-inventory.js?v=20261004-room2"></script>
 
 
 <!-- =========================
      イベントデータ
 ========================= -->
 
-<script src="data/survival-events.js"></script>
+<script src="data/survival-events.js?v=20261004-room2"></script>
+
+<script src="data/survival-quests.js?v=20261004-room2"></script>
 
 
 <!-- =========================
      山小屋画面の処理
 ========================= -->
 
-<script src="data/survival-room-ui.js"></script>
+<script src="data/survival-room-ui.js?v=20261004-room2"></script>
 
 
 </body>
