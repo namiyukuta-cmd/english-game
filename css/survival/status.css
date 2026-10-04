@@ -1,0 +1,134 @@
+.topbar{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:36px 52px 80px minmax(0,1fr);
+  gap:4px;
+  align-items:center;
+}
+
+.back,
+.back-button{
+  width:36px;
+  height:36px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #999;
+  border-radius:9px;
+  background:#fff;
+  font-size:22px;
+  font-weight:900;
+  line-height:1;
+}
+
+.back{
+  color:#222;
+  text-decoration:none;
+}
+
+.top-small{
+  height:36px;
+  padding:0 5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #aaa;
+  border-radius:9px;
+  background:#fff;
+  font-size:13px;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.place{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.environment-bar{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+}
+
+.environment-card{
+  height:32px;
+  padding:0 9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:1px solid #aaa;
+  border-radius:9px;
+  background:#f8f8f8;
+  white-space:nowrap;
+}
+
+.environment-label{
+  font-size:13px;
+  color:#555;
+  font-weight:800;
+}
+
+.environment-value{
+  font-size:15px;
+  color:#222;
+  font-weight:900;
+}
+
+.meters{
+  flex:0 0 auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+}
+
+.meter{
+  height:32px;
+  min-width:0;
+  padding:2px 5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  border:1px solid #aaa;
+  border-radius:9px;
+  background:#fff;
+}
+
+.meter-icon{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+}
+
+.meter-outline{
+  fill:none;
+  stroke:#262626;
+  stroke-width:1.5;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+
+.meter-value{
+  min-width:0;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+@media(max-width:390px){
+  .topbar{grid-template-columns:34px 48px 76px minmax(0,1fr)}
+  .back,.back-button{width:34px;height:34px}
+  .top-small{height:34px;font-size:12px}
+  .environment-card{height:30px}
+  .environment-label{font-size:12px}
+  .environment-value{font-size:14px}
+  .meter{height:30px}
+  .meter-value{font-size:12px}
+}
