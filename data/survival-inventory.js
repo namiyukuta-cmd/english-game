@@ -275,36 +275,6 @@
 
   let state = readState();
 
-  const DEFAULT_WARDROBE_EQUIPMENT_IDS = Object.freeze([
-    'winter_coat_old_01',
-    'wool_sweater_01',
-    'winter_gloves_01',
-    'knit_cap_01'
-  ]);
-
-  function repairMissingWardrobeEquipment() {
-    const wardrobe = state.storages.wardrobe;
-    if (!wardrobe) return;
-
-    const equipped = new Set(
-      Object.values(state.player.equipment || {}).filter(Boolean)
-    );
-
-    DEFAULT_WARDROBE_EQUIPMENT_IDS.forEach(itemId => {
-      if (equipped.has(itemId)) return;
-
-      const existsInStorage = Object.values(state.storages).some(storage => {
-        return storage && normalizeQty(storage.items && storage.items[itemId]) > 0;
-      });
-
-      if (!existsInStorage) {
-        addToItemMap(wardrobe.items, itemId, 1);
-      }
-    });
-  }
-
-  repairMissingWardrobeEquipment();
-
   // 読み込み時に旧形式を正規化した結果も保存する。
   // これにより装備データがページをまたいだときに旧形式へ戻らない。
   try {
