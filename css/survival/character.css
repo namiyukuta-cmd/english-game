@@ -1,0 +1,52 @@
+.character-layer{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+}
+
+.character-sprite{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(66%,340px);
+  height:min(82%,470px);
+  padding:0;
+  display:none;
+  pointer-events:none;
+  border:3px solid #87652c;
+  border-radius:3px;
+  outline:1px solid #c7a253;
+  outline-offset:-8px;
+  background:#f5f0e2;
+  box-shadow:0 7px 18px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,255,255,.85);
+  overflow:hidden;
+}
+
+.character-sprite.visible{display:block}
+
+.character-sprite::before{
+  content:"";
+  position:absolute;
+  inset:5px;
+  z-index:3;
+  border:1px solid rgba(111,77,24,.62);
+  pointer-events:none;
+}
+
+.character-sprite img{
+  position:absolute;
+  left:50%;
+  top:53%;
+  width:142%;
+  height:142%;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  object-position:center;
+  pointer-events:none;
+}
+
+@media(max-width:390px){
+  .character-sprite{width:68%;height:80%}
+}
