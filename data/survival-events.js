@@ -116,7 +116,7 @@
           request: {
             type: 'dialogue',
             speaker: 'グラント',
-            text: '悪いが、この小屋の中を探してきてくれないか。',
+            text: '悪いが、怪我を手当てしたい。この小屋に薬や包帯がないか探してきてくれないか。',
             next: 'unlock_exploration'
           },
 
