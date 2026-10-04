@@ -1,0 +1,86 @@
+.message-panel{
+  position:absolute;
+  left:9px;
+  top:calc(100% - 258px);
+  z-index:30;
+  width:calc(100% - 18px);
+  height:120px;
+  padding:13px 14px 42px;
+  overflow:hidden;
+  border:1px solid #979797;
+  border-radius:14px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 4px 12px rgba(0,0,0,.10);
+  transition:width .20s ease,height .20s ease,top .20s ease;
+  cursor:pointer;
+}
+
+.message-panel.closed{
+  width:60px;
+  height:54px;
+  top:calc(100% - 180px);
+  padding:0;
+}
+
+.message-panel.hidden{display:none}
+
+.message-panel.closed .message-text,
+.message-panel.closed .message-progress,
+.message-panel.closed .message-choices{
+  display:none;
+}
+
+.message-text{
+  height:64px;
+  overflow:hidden;
+  font-size:17px;
+  line-height:1.42;
+  font-weight:650;
+  white-space:pre-wrap;
+  word-break:break-word;
+  pointer-events:none;
+}
+
+.message-progress{
+  position:absolute;
+  left:62px;
+  bottom:13px;
+  font-size:12px;
+  line-height:1;
+  color:#666;
+  font-weight:700;
+  pointer-events:none;
+}
+
+.message-choices{
+  position:absolute;
+  right:12px;
+  bottom:8px;
+  left:62px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.message-choices.hidden{display:none}
+
+.message-toggle{
+  position:absolute;
+  left:10px;
+  bottom:8px;
+  z-index:3;
+  width:40px;
+  height:36px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #888;
+  border-radius:8px;
+  background:#d7d8d9;
+  color:#222;
+  font-size:18px;
+  line-height:1;
+  font-weight:900;
+}
