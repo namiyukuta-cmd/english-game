@@ -219,7 +219,7 @@
     const slotIds = Object.keys(EQUIPMENT_SLOT_LABELS);
     const equippedCount = slotIds.filter(slotId => !!equipment[slotId]).length;
 
-    els.playerTitle.textContent = '装備';
+    els.playerTitle.textContent = '装備中';
     els.playerSub.textContent = `着用中 ${equippedCount} / ${slotIds.length}`;
     els.playerList.replaceChildren();
 
@@ -241,7 +241,7 @@
       itemName.className = 'equipment-item-name';
 
       if (itemId) {
-        itemName.textContent = getItemName(itemId);
+        itemName.textContent = '装備中：' + getItemName(itemId);
       } else {
         itemName.textContent = 'なし';
         itemName.classList.add('equipment-empty');
