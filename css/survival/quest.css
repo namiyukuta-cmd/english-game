@@ -1,0 +1,38 @@
+.quest-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  z-index:18;
+  max-width:calc(100% - 20px);
+  min-height:38px;
+  padding:6px 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid rgba(42,42,42,.62);
+  border-radius:10px;
+  background:rgba(255,255,255,.94);
+  color:#222;
+  box-shadow:0 2px 8px rgba(0,0,0,.16);
+  text-align:left;
+}
+
+.quest-badge.hidden{
+  display:none;
+}
+
+.quest-badge-label{
+  flex:0 0 auto;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.quest-badge-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:800;
+}
