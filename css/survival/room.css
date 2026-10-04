@@ -1,0 +1,64 @@
+html,body{font-size:17px}
+
+.room-stage{
+  position:relative;
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  overflow:hidden;
+  border:1px solid #8c9296;
+  border-radius:13px;
+  background:#ddd;
+}
+
+.room-background{
+  position:absolute;
+  inset:-8px;
+  z-index:1;
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  filter:blur(5px) brightness(.90);
+  transform:scale(1.035);
+}
+
+.floorplan-layer{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#fff;
+}
+
+.floorplan-layer.visible{display:flex}
+
+.floorplan-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center top;
+  background:#fff;
+  transform:scaleY(1.05);
+  transform-origin:top center;
+}
+
+.message-choice{
+  min-width:132px;
+  min-height:42px;
+  padding:7px 14px;
+  border:2px solid #93651f;
+  border-radius:10px;
+  background:#fff3d2;
+  color:#3b2506;
+  font-size:17px;
+  font-weight:900;
+}
+
+@media(max-width:390px){
+  .message-choice{min-width:118px;font-size:17px}
+}
