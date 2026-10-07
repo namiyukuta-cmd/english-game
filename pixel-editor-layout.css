@@ -25,3 +25,5 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 @media(max-height:540px){.editor-sheet{max-height:calc(100dvh - 24px);margin:auto}.editor-footer{padding-top:2px}.dock-btn{min-height:46px;gap:0}}
 
 .sheet-message{flex:none;margin:0;padding:8px 12px;font-size:13px;line-height:1.5;background:var(--ink);color:white}.sheet-message:empty{display:none}
+
+.outline-controls .toolbtn{width:100%;margin-bottom:8px}.outline-controls label{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.5;margin-top:10px;min-height:44px}.outline-controls input{width:20px;height:20px;flex:none;accent-color:#a95173}

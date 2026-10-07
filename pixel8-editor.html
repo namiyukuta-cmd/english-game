@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <title>8×8 ドット絵メーカー</title>
-  <link rel="stylesheet" href="pixel-editor-base.css?v=20261007-6">
-  <link rel="stylesheet" href="pixel-editor.css?v=20261007-6">
-  <link rel="stylesheet" href="pixel-editor-layout.css?v=20261007-6">
+  <link rel="stylesheet" href="pixel-editor-base.css?v=20261007-7">
+  <link rel="stylesheet" href="pixel-editor.css?v=20261007-7">
+  <link rel="stylesheet" href="pixel-editor-layout.css?v=20261007-7">
 </head>
 <body data-size="8">
   <main class="wrap editor-workspace">
@@ -95,6 +95,10 @@
         <button class="toolbtn" type="button" data-mirror="right">右半分を左へコピー</button>
       </div>
       <p class="sub">中心線を境に反転してコピーします。コピー先は透明部分も含めて置き換わります。中心線は保存画像には入りません。</p>
+    </section><section class="panel outline-controls"><h3>人型の囲み</h3>
+      <button id="outlineBtn" class="toolbtn" type="button">黒い囲みを付ける</button>
+      <p class="sub">外周の外側に #111111 を1ドット足します。「1つ戻る」で取り消せます。</p>
+      <label><input id="outlineBackground" type="checkbox" checked>画像の外側の背景を透明にする</label>
     </section><section class="panel"><h3>表示</h3><button id="gridBtn" class="toolbtn" type="button">格子：ON</button><p class="sub">表示用の線は保存画像には入りません。</p></section></div><p class="sheet-message" role="status"></p>
   </dialog>  <dialog id="savePanel" class="editor-sheet" aria-labelledby="savePanelTitle">
     <header class="sheet-header"><h2 id="savePanelTitle">保存</h2><button type="button" class="sheet-close" data-close-panel aria-label="閉じる">×</button></header>
@@ -108,9 +112,10 @@
       <button id="saveJsonBtn" class="action" type="button">座標保存</button>
     </section></div><p class="sheet-message" role="status"></p>
   </dialog>
-<script src="js/pixel-cloud.js?v=20261007-6"></script>
-<script src="js/pixel-align.js?v=20261007-6"></script>
-<script src="js/pixel-editor-ui.js?v=20261007-6"></script>
-<script src="pixel-editor.js?v=20261007-6"></script>
+<script src="js/pixel-cloud.js?v=20261007-7"></script>
+<script src="js/pixel-align.js?v=20261007-7"></script>
+<script src="js/pixel-editor-ui.js?v=20261007-7"></script>
+<script src="js/pixel-outline.js?v=20261007-7"></script>
+<script src="pixel-editor.js?v=20261007-7"></script>
 </body>
 </html>

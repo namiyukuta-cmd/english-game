@@ -148,6 +148,12 @@
   document.querySelectorAll('[data-mirror]').forEach(button=>button.addEventListener('click',()=>{
     transformPixels(source=>PixelAlign.mirror(source,button.dataset.mirror),'左右コピーしました。「1つ戻る」で取り消せます');
   }));
+  document.getElementById('outlineBtn').addEventListener('click',()=>{
+    endDraw();const result=PixelOutline.add(pixels,{removeBackground:document.getElementById('outlineBackground').checked});
+    if(result.empty){note('囲む絵が見つかりませんでした');return}
+    if(!result.added){note('外周に囲みを付ける空きがありません');return}
+    PixelEditorUI.closePanels();transformPixels(()=>result.pixels,'#111111で外周を囲みました。「1つ戻る」で取り消せます');
+  });
   function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return false;pixels[y][x]=selected;renderCell(x,y);return true}
   function commitSingle(cell){const before=clone();if(!paint(cell))return;undoHistory.push(before);redoHistory=[];if(undoHistory.length>100)undoHistory.shift();saveWorking();updatePreview()}
   function startDraw(cell){drawing=true;beforeStroke=clone();paint(cell)}
