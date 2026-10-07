@@ -23,3 +23,10 @@
 #hexColor{width:108px;min-height:44px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px}#paletteCount{margin:0 0 8px}.palette{max-height:300px}
 
 .cloud-status{font-size:14px;overflow-wrap:anywhere;margin:12px 0;min-height:24px}.cloud-settings summary{cursor:pointer;min-height:44px;font-weight:bold}.cloud-settings p{font-size:13px;line-height:1.6}.cloud-settings input{display:block;width:100%;min-height:44px;margin:8px 0;padding:8px;border:1px solid #dccfd6;border-radius:8px}.cloud-settings button{min-height:44px;border:1px solid #dccfd6;border-radius:8px;padding:8px 16px}
+
+#grid{position:relative}
+#grid.center-guide::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:0;border-left:2px dashed #d51a72;filter:drop-shadow(1px 0 0 white);pointer-events:none;z-index:2}
+.alignment-panel h2{font-size:16px;margin:0 0 12px}
+.alignment-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.alignment-buttons .toolbtn{flex:1 1 140px;font-size:14px}
+.alignment-panel .sub{line-height:1.6}

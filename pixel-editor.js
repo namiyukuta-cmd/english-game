@@ -129,6 +129,25 @@
   }
   function renderCell(x,y){grid.children[y*SIZE+x].style.background=pixels[y][x]||'transparent'}
   function render(){for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)renderCell(x,y);updatePreview()}
+  grid.classList.add('center-guide');
+  document.getElementById('centerGuideBtn').addEventListener('click',e=>{
+    const enabled=grid.classList.toggle('center-guide');
+    e.currentTarget.textContent='中心線：'+(enabled?'ON':'OFF');
+    e.currentTarget.setAttribute('aria-pressed',String(enabled));
+  });
+  function transformPixels(transform,message){
+    endDraw();const before=clone(),next=transform(before);
+    if(JSON.stringify(before)===JSON.stringify(next)){note('絵は変わりませんでした');return}
+    undoHistory.push(before);if(undoHistory.length>100)undoHistory.shift();redoHistory=[];
+    pixels=next;render();saveWorking();note(message);
+  }
+  document.querySelectorAll('[data-shift]').forEach(button=>button.addEventListener('click',()=>{
+    const [dx,dy]=button.dataset.shift.split(',').map(Number);
+    transformPixels(source=>PixelAlign.shift(source,dx,dy),'絵を1ドット移動しました');
+  }));
+  document.querySelectorAll('[data-mirror]').forEach(button=>button.addEventListener('click',()=>{
+    transformPixels(source=>PixelAlign.mirror(source,button.dataset.mirror),'左右コピーしました。「1つ戻る」で取り消せます');
+  }));
   function paint(cell){const x=+cell.dataset.x,y=+cell.dataset.y;if(pixels[y][x]===selected)return false;pixels[y][x]=selected;renderCell(x,y);return true}
   function commitSingle(cell){const before=clone();if(!paint(cell))return;undoHistory.push(before);redoHistory=[];if(undoHistory.length>100)undoHistory.shift();saveWorking();updatePreview()}
   function startDraw(cell){drawing=true;beforeStroke=clone();paint(cell)}

@@ -43,7 +43,7 @@
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
     @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(3,1fr)}.canvas-shell{max-height:620px}}
   </style>
-  <link rel="stylesheet" href="pixel-editor.css?v=20261007-4">
+  <link rel="stylesheet" href="pixel-editor.css?v=20261007-5">
 </head>
 <body data-size="16">
   <main class="wrap">
@@ -87,6 +87,24 @@
       <input id="zoomRange" type="range" min="0" max="9" value="2" step="1" aria-label="表示倍率">
       <button id="gridBtn" class="toolbtn" type="button">格子：ON</button>
     </div>
+    <section class="panel alignment-panel" aria-label="位置と左右対称の調整">
+      <h2>位置・左右対称</h2>
+      <button id="centerGuideBtn" class="toolbtn" type="button" aria-pressed="true">中心線：ON</button>
+      <p class="sub">絵全体を1ドットずつ動かします。</p>
+      <div class="alignment-buttons">
+        <button class="toolbtn" type="button" data-shift="0,-1">↑ 上へ1ドット</button>
+        <button class="toolbtn" type="button" data-shift="-1,0">← 左へ1ドット</button>
+        <button class="toolbtn" type="button" data-shift="1,0">右へ1ドット →</button>
+        <button class="toolbtn" type="button" data-shift="0,1">↓ 下へ1ドット</button>
+      </div>
+      <p class="sub">端から出た部分は切れます。「1つ戻る」で取り消せます。</p>
+      <div class="alignment-buttons">
+        <button class="toolbtn" type="button" data-mirror="left">左半分を右へコピー</button>
+        <button class="toolbtn" type="button" data-mirror="right">右半分を左へコピー</button>
+      </div>
+      <p class="sub">中心線を境に反転してコピーします。コピー先は透明部分も含めて置き換わります。中心線は保存画像には入りません。</p>
+    </section>
+
     <div class="preview-row"><span>仕上がり</span><canvas id="preview" aria-label="格子なしのプレビュー"></canvas><span>50〜800％で表示</span></div>
 
     <section class="canvas-shell" id="canvasShell"><div id="grid" class="tap-mode" aria-label="16×16キャンバス"></div></section>
@@ -118,7 +136,8 @@
     <div id="message" class="message" aria-live="polite"></div>
   </main>
 
-<script src="js/pixel-cloud.js?v=20261007-4"></script>
-<script src="pixel-editor.js?v=20261007-4"></script>
+<script src="js/pixel-cloud.js?v=20261007-5"></script>
+<script src="js/pixel-align.js?v=20261007-5"></script>
+<script src="pixel-editor.js?v=20261007-5"></script>
 </body>
 </html>
