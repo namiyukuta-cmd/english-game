@@ -41,7 +41,9 @@
   let zoomIndex=2;
   let moveMode=false, tool='pen', redoHistory=[], lastCell=null, dragOrigin=null;
   let pointerStart=null;
-  let currentSaveId=null;
+  let currentSaveId=null,currentRemote=null,cloudBusy=false;
+  PixelCloud.mount(document.getElementById("cloudSettingsMount"));
+  const cloudStatus=document.getElementById("cloudStatus");
 
   function blankPixels(){return Array.from({length:SIZE},()=>Array(SIZE).fill(null))}
   function decodeArtParam(value){
@@ -58,10 +60,12 @@
   function readSaveData(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.slots&&typeof d.slots==='object')return {next:Number(d.next)||1,slots:d.slots}}catch(e){}return {next:1,slots:{}}}
   function writeSaveData(d){localStorage.setItem(SAVE_KEY,JSON.stringify(d))}
   function saveWorking(){try{localStorage.setItem(WORK_KEY,JSON.stringify(pixels))}catch(e){}}
-  function updateProjectLabel(){projectLabel.textContent=currentSaveId?'ドット絵セーブ'+currentSaveId:'新しいドット絵'}
+  function updateProjectLabel(){projectLabel.textContent=currentRemote?'GitHubセーブ：'+currentRemote.name:currentSaveId?'この端末の旧セーブ'+currentSaveId:'新しいドット絵'}
 
   async function loadInitial(){
     const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),art=q.get('art'),artName=q.get('name'),ai=q.get('ai');
+    const remote=q.get('remote');
+    if(remote){try{const result=await PixelCloud.read(SIZE,remote);pixels=result.data.pixels.map(r=>r.slice());currentRemote={id:remote,sha:result.sha,name:result.data.name||remote};currentSaveId=null;saveWorking();updateProjectLabel();cloudStatus.textContent='非公開GitHubから読み込みました。'}catch(error){cloudStatus.textContent=error.message;document.getElementById('gameSaveBtn').disabled=true;document.getElementById('saveNewBtn').disabled=true}return}
     if(ai==='1'&&SIZE===8){
       try{
         const res=await fetch('pixel8-ai.json?t='+Date.now(),{cache:'no-store'});
@@ -94,11 +98,14 @@
     updateProjectLabel();
   }
 
-  function saveGame(){
-    const data=readSaveData();
-    if(!currentSaveId){let n=Math.max(1,Number(data.next)||1),id=String(n).padStart(3,'0');while(data.slots[id]){n++;id=String(n).padStart(3,'0')}currentSaveId=id;data.next=n+1}
-    data.slots[currentSaveId]={id:currentSaveId,name:'ドット絵セーブ'+currentSaveId,width:SIZE,height:SIZE,pixels:clone(),updatedAt:new Date().toISOString()};
-    writeSaveData(data);saveWorking();updateProjectLabel();window.history.replaceState(null,'',PREFIX+'-editor.html?'+(SIZE>24?'size='+SIZE+'&':'')+'save='+encodeURIComponent(currentSaveId));note('ドット絵セーブ'+currentSaveId+'に保存しました');
+  async function saveGame(asNew=false){
+    if(cloudBusy)return;cloudBusy=true;const buttons=[document.getElementById('gameSaveBtn'),document.getElementById('saveNewBtn')];buttons.forEach(b=>b.disabled=true);cloudStatus.textContent='GitHubへ保存しています…';
+    try{const id=!asNew&&currentRemote?currentRemote.id:PixelCloud.newId(),sha=!asNew&&currentRemote?currentRemote.sha:null;
+      const name=!asNew&&currentRemote?currentRemote.name:SIZE+'×'+SIZE+' '+new Date().toLocaleString('ja-JP');
+      const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});
+      const data={game:'pixel-art',version:1,id,name,width:SIZE,height:SIZE,pixels:clone(),coordinates,updatedAt:new Date().toISOString()};
+      const result=await PixelCloud.write(SIZE,id,data,sha);currentRemote={...result,name};currentSaveId=null;updateProjectLabel();saveWorking();window.history.replaceState(null,'',PREFIX+'-editor.html?'+(SIZE>24?'size='+SIZE+'&':'')+'remote='+encodeURIComponent(id));cloudStatus.textContent='非公開GitHubに保存しました：pixel-art/'+SIZE+'x'+SIZE+'/'+id+'.json';
+    }catch(error){cloudStatus.textContent=error.message}finally{cloudBusy=false;buttons.forEach(b=>b.disabled=false)}
   }
 
   function updateTool(){
@@ -158,7 +165,8 @@
   document.getElementById('customColor').addEventListener('input',e=>{document.getElementById('hexColor').value=e.target.value.toUpperCase()});
   document.getElementById('hexColor').addEventListener('input',e=>{if(/^#[0-9A-F]{6}$/i.test(e.target.value))document.getElementById('customColor').value=e.target.value});
   document.getElementById('useCustom').addEventListener('click',()=>{const hex=document.getElementById('hexColor').value.trim();if(!/^#[0-9A-F]{6}$/i.test(hex)){note('色コードは # と6桁の英数字で入力してください');return}selected=hex.toUpperCase();document.getElementById('customColor').value=selected;customColors=[selected,...customColors.filter(c=>c!==selected)].slice(0,32);try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(customColors))}catch(e){}tool='pen';moveMode=false;renderPalette();syncTools();note('好きな色に追加しました')});
-  document.getElementById('gameSaveBtn').addEventListener('click',saveGame);
+  document.getElementById('gameSaveBtn').addEventListener('click',()=>saveGame());
+  document.getElementById('saveNewBtn').addEventListener('click',()=>saveGame(true));
   document.getElementById('undoBtn').addEventListener('click',()=>{if(!undoHistory.length){note('戻せる操作がありません');return}redoHistory.push(clone());pixels=undoHistory.pop();render();saveWorking();updatePreview()});
   document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());redoHistory=[];pixels=blankPixels();render();saveWorking();updatePreview()});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href=PREFIX+'-start.html'});
@@ -211,5 +219,6 @@
   document.getElementById('savePngBtn').addEventListener('click',()=>{download(makeCanvas(Number(document.getElementById('exportScale').value)).toDataURL('image/png'),(currentSaveId?'pixel_'+currentSaveId:'pixel_'+SIZE+'x'+SIZE)+'.png');note('PNGを保存しました')});
   document.getElementById('saveJsonBtn').addEventListener('click',()=>{const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});const data={width:SIZE,height:SIZE,pixels,coordinates};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_'+SIZE+'x'+SIZE)+'.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')});
 
+  window.addEventListener('pixel-cloud-connected',()=>{if(new URLSearchParams(location.search).get('remote')&&!currentRemote)loadInitial().then(()=>{render();document.getElementById('gameSaveBtn').disabled=false;document.getElementById('saveNewBtn').disabled=false})});
   loadInitial().then(()=>{render();updateTool();updateDrawMode();updateZoom(false)});
 })();

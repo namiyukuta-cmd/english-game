@@ -43,7 +43,7 @@
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
     @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(3,1fr)}.canvas-shell{max-height:620px}}
   </style>
-  <link rel="stylesheet" href="pixel-editor.css?v=20261007-3">
+  <link rel="stylesheet" href="pixel-editor.css?v=20261007-4">
 </head>
 <body data-size="24">
   <main class="wrap">
@@ -104,7 +104,8 @@
 
     <section class="panel export-options"><label for="exportScale">PNGの大きさ</label><select id="exportScale"><option value="1">元のドット数</option><option value="10">10倍</option><option value="20" selected>20倍</option></select></section>
     <section class="panel actions">
-      <button id="gameSaveBtn" class="action save" type="button">セーブ</button>
+      <button id="gameSaveBtn" class="action save" type="button">GitHubへセーブ</button>
+      <button id="saveNewBtn" class="action" type="button">別のセーブに保存</button>
       <button id="undoBtn" class="action" type="button">1つ戻る</button>
       <button id="redoBtn" class="action" type="button">やり直す</button>
       <button id="clearBtn" class="action" type="button">全消去</button>
@@ -112,9 +113,12 @@
       <button id="saveJsonBtn" class="action" type="button">座標保存</button>
       <button id="saveListBtn" class="action" type="button">セーブ一覧</button>
     </section>
+    <div id="cloudStatus" class="cloud-status" role="status"></div>
+    <div id="cloudSettingsMount"></div>
     <div id="message" class="message" aria-live="polite"></div>
   </main>
 
-<script src="pixel-editor.js?v=20261007-3"></script>
+<script src="js/pixel-cloud.js?v=20261007-4"></script>
+<script src="pixel-editor.js?v=20261007-4"></script>
 </body>
 </html>

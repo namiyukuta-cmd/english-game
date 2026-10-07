@@ -21,6 +21,7 @@
     .empty{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 16px;text-align:center;color:#977582}
     .new-link{display:inline-flex;margin-top:14px;min-height:44px;align-items:center;justify-content:center;padding:0 18px;border-radius:12px;background:#3e3037;color:#fff;text-decoration:none;font-weight:800}
   </style>
+<link rel="stylesheet" href="pixel-editor.css?v=20261007-4">
 </head>
 <body>
   <main class="app-shell">
@@ -31,57 +32,12 @@
     </header>
 
     <p class="note">保存したドット絵を選んでください。</p>
+<div id="cloudSettingsMount"></div><p id="cloudListStatus" role="status"></p><button id="refreshCloud" type="button" class="new-link">GitHubの一覧を更新</button><h2>GitHubのセーブ</h2>
     <div id="saveList" class="save-list"></div>
+    <h2>この端末の旧セーブ</h2><p class="note">開いて「GitHubへセーブ」を押すと新しい保存先へ移せます。</p><div id="legacyList" class="save-list"></div>
   </main>
 
-<script>
-(() => {
-  const KEY='englishGamePixelSaves16V1';
-  const list=document.getElementById('saveList');
-  function readData(){
-    try{
-      const d=JSON.parse(localStorage.getItem(KEY));
-      if(d&&d.slots&&typeof d.slots==='object')return d;
-    }catch(e){}
-    return {next:1,slots:{}};
-  }
-  function drawPreview(canvas,pixels){
-    const ctx=canvas.getContext('2d');
-    ctx.clearRect(0,0,72,72);
-    const s=4.5;
-    if(!Array.isArray(pixels))return;
-    for(let y=0;y<16;y++)for(let x=0;x<16;x++){
-      const c=pixels[y]&&pixels[y][x];
-      if(c){ctx.fillStyle=c;ctx.fillRect(x*s,y*s,s,s);}
-    }
-  }
-  const data=readData();
-  const ids=Object.keys(data.slots).sort((a,b)=>Number(a)-Number(b));
-  if(!ids.length){
-    list.innerHTML='<div class="empty">まだセーブデータがありません。<br><a class="new-link" href="pixel16-editor.html?mode=new">初めから描く</a></div>';
-    return;
-  }
-  ids.forEach(id=>{
-    const save=data.slots[id];
-    const a=document.createElement('a');
-    a.className='save-card';
-    a.href='pixel16-editor.html?save='+encodeURIComponent(id);
-    const canvas=document.createElement('canvas');
-    canvas.width=72;canvas.height=72;canvas.className='preview';
-    drawPreview(canvas,save.pixels);
-    const copy=document.createElement('div');copy.className='save-copy';
-    const strong=document.createElement('strong');strong.textContent=save.name||('ドット絵セーブ'+id);
-    const small=document.createElement('small');
-    if(save.updatedAt){
-      const d=new Date(save.updatedAt);
-      small.textContent='最終セーブ '+d.toLocaleString('ja-JP');
-    }else small.textContent='保存データ';
-    copy.append(strong,small);
-    const arrow=document.createElement('span');arrow.className='arrow';arrow.textContent='›';
-    a.append(canvas,copy,arrow);
-    list.appendChild(a);
-  });
-})();
-</script>
+<script src="js/pixel-cloud.js?v=20261007-4"></script>
+<script src="js/pixel-save-list.js?v=20261007-4" data-size="16"></script>
 </body>
 </html>
