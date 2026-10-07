@@ -36,7 +36,11 @@
 
 <script>
 (() => {
-  const KEY='englishGamePixelSavesV1';
+  const n=Number(new URLSearchParams(location.search).get('size'));
+  const SIZE=[32,48,64,96,128].includes(n)?n:24;
+  const KEY=SIZE===24?'englishGamePixelSavesV1':'englishGamePixelSaves'+SIZE+'V1';
+  const query=SIZE===24?'':'size='+SIZE+'&';
+  document.querySelector('h1').textContent=SIZE+'×'+SIZE+' 続きから';
   const list=document.getElementById('saveList');
   function readData(){
     try{
@@ -48,9 +52,9 @@
   function drawPreview(canvas,pixels){
     const ctx=canvas.getContext('2d');
     ctx.clearRect(0,0,72,72);
-    const s=3;
+    const s=72/SIZE;
     if(!Array.isArray(pixels))return;
-    for(let y=0;y<24;y++)for(let x=0;x<24;x++){
+    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
       const c=pixels[y]&&pixels[y][x];
       if(c){ctx.fillStyle=c;ctx.fillRect(x*s,y*s,s,s);}
     }
@@ -58,14 +62,14 @@
   const data=readData();
   const ids=Object.keys(data.slots).sort((a,b)=>Number(a)-Number(b));
   if(!ids.length){
-    list.innerHTML='<div class="empty">まだセーブデータがありません。<br><a class="new-link" href="pixel-editor.html?mode=new">初めから描く</a></div>';
+    list.innerHTML='<div class="empty">まだセーブデータがありません。<br><a class="new-link" href="pixel-editor.html?'+query+'mode=new">初めから描く</a></div>';
     return;
   }
   ids.forEach(id=>{
     const save=data.slots[id];
     const a=document.createElement('a');
     a.className='save-card';
-    a.href='pixel-editor.html?save='+encodeURIComponent(id);
+    a.href='pixel-editor.html?'+query+'save='+encodeURIComponent(id);
     const canvas=document.createElement('canvas');
     canvas.width=72;canvas.height=72;canvas.className='preview';
     drawPreview(canvas,save.pixels);

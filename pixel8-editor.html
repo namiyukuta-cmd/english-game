@@ -43,7 +43,7 @@
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
     @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(3,1fr)}.canvas-shell{max-height:620px}}
   </style>
-  <link rel="stylesheet" href="pixel-editor.css?v=20261007-1">
+  <link rel="stylesheet" href="pixel-editor.css?v=20261007-2">
 </head>
 <body data-size="8">
   <main class="wrap">
@@ -56,6 +56,18 @@
       </div>
     </div>
 
+<section class="panel image-import">
+      <h2>画像からドット絵</h2>
+      <label class="file-label">画像を選ぶ<input id="imageFile" type="file" accept="image/*"></label>
+      <div class="import-controls">
+        <label>収め方<select id="imageFit"><option value="contain">全体を収める</option><option value="cover">中央を切り抜く</option><option value="stretch">キャンバスいっぱい</option></select></label>
+        <label>色数<select id="imageColors"><option value="0">元の色</option><option value="16">4096色</option><option value="8" selected>512色</option><option value="4">64色</option><option value="palette">パレットの色</option></select></label>
+      </div>
+      <div id="imageResult" hidden><div class="import-preview"><figure><img id="imageOriginal" alt="取り込む画像"><figcaption>元の画像</figcaption></figure><figure><canvas id="imageConverted"></canvas><figcaption>変換結果</figcaption></figure></div>
+      <button id="applyImage" class="action primary" type="button">このドット絵をキャンバスに入れる</button><p class="sub">今の絵を置き換えます。「1つ戻る」で取り消せます。</p></div>
+      <p id="importMessage" class="sub" aria-live="polite">画像を選ぶと変換結果を確認できます。透明部分は残ります。</p>
+    </section>
+    <section class="panel size-controls"><label for="canvasSize">キャンバスの大きさ</label><select id="canvasSize"><option value="8">8×8</option><option value="16">16×16</option><option value="24">24×24</option><option value="32">32×32</option><option value="48">48×48</option><option value="64">64×64</option><option value="96">96×96</option><option value="128">128×128</option></select><button id="newSizeBtn" class="toolbtn" type="button">このサイズで新規作成</button></section>
     <section class="panel toolrow">
       <div id="currentColor" class="current" aria-hidden="true"></div>
       <div class="status"><strong id="currentLabel">#2B2118</strong><span>選択中の色</span></div>
@@ -103,6 +115,6 @@
     <div id="message" class="message" aria-live="polite"></div>
   </main>
 
-<script src="pixel-editor.js?v=20261007-1"></script>
+<script src="pixel-editor.js?v=20261007-2"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 (() => {
-  const SIZE=Number(document.body.dataset.size);
-  const PREFIX=SIZE===24?'pixel':'pixel'+SIZE;
+  const requestedSize=Number(new URLSearchParams(location.search).get('size'));
+  const SIZE=[8,16,24,32,48,64,96,128].includes(requestedSize)?requestedSize:Number(document.body.dataset.size);
+  const PREFIX=SIZE>=24?'pixel':'pixel'+SIZE;
   const SAVE_KEY=SIZE===24?'englishGamePixelSavesV1':'englishGamePixelSaves'+SIZE+'V1';
   const WORK_KEY='englishGamePixel'+SIZE;
   const COLORS=[
@@ -28,6 +29,9 @@
   const message=document.getElementById('message');
   const projectLabel=document.getElementById('projectLabel');
 
+  document.title=SIZE+'×'+SIZE+' ドット絵メーカー';document.querySelector('h1').textContent=document.title;grid.style.gridTemplateColumns='repeat('+SIZE+',1fr)';grid.setAttribute('aria-label',SIZE+'×'+SIZE+'キャンバス');
+  document.getElementById('canvasSize').value=SIZE;
+  document.getElementById('newSizeBtn').addEventListener('click',()=>{const n=Number(document.getElementById('canvasSize').value);location.href='pixel-editor.html?mode=new&size='+n});
   let selected=COLORS[8];
   let pixels=blankPixels();
   let undoHistory=[];
@@ -94,7 +98,7 @@
     const data=readSaveData();
     if(!currentSaveId){let n=Math.max(1,Number(data.next)||1),id=String(n).padStart(3,'0');while(data.slots[id]){n++;id=String(n).padStart(3,'0')}currentSaveId=id;data.next=n+1}
     data.slots[currentSaveId]={id:currentSaveId,name:'ドット絵セーブ'+currentSaveId,width:SIZE,height:SIZE,pixels:clone(),updatedAt:new Date().toISOString()};
-    writeSaveData(data);saveWorking();updateProjectLabel();window.history.replaceState(null,'',PREFIX+'-editor.html?save='+encodeURIComponent(currentSaveId));note('ドット絵セーブ'+currentSaveId+'に保存しました');
+    writeSaveData(data);saveWorking();updateProjectLabel();window.history.replaceState(null,'',PREFIX+'-editor.html?'+(SIZE>24?'size='+SIZE+'&':'')+'save='+encodeURIComponent(currentSaveId));note('ドット絵セーブ'+currentSaveId+'に保存しました');
   }
 
   function updateTool(){
@@ -152,7 +156,7 @@
   document.getElementById('undoBtn').addEventListener('click',()=>{if(!undoHistory.length){note('戻せる操作がありません');return}redoHistory.push(clone());pixels=undoHistory.pop();render();saveWorking();updatePreview()});
   document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());redoHistory=[];pixels=blankPixels();render();saveWorking();updatePreview()});
   document.getElementById('backBtn').addEventListener('click',()=>{location.href=PREFIX+'-start.html'});
-  document.getElementById('saveListBtn').addEventListener('click',()=>{location.href=PREFIX+'-saves.html'});
+  document.getElementById('saveListBtn').addEventListener('click',()=>{location.href=PREFIX+'-saves.html'+(SIZE>24?'?size='+SIZE:'')});
   document.getElementById('zoomInBtn').addEventListener('click',()=>{if(zoomIndex<ZOOMS.length-1){zoomIndex++;updateZoom()}else note('これ以上拡大できません')});
   document.getElementById('zoomOutBtn').addEventListener('click',()=>{if(zoomIndex>0){zoomIndex--;updateZoom()}else note('これ以上縮小できません')});
   document.getElementById('zoomResetBtn').addEventListener('click',()=>{zoomIndex=2;updateZoom(false);canvasShell.scrollLeft=0;canvasShell.scrollTop=0});
@@ -166,6 +170,35 @@
   document.getElementById('zoomRange').addEventListener('input',e=>{zoomIndex=Number(e.target.value);updateZoom()});
   let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>updateZoom(),120)});
   function updatePreview(){const p=document.getElementById('preview'),ctx=p.getContext('2d');p.width=SIZE;p.height=SIZE;ctx.drawImage(makeCanvas(1),0,0)}
+  let importImage=null, importedPixels=null, importUrl=null, importRequest=0;
+  const importMessage=document.getElementById('importMessage');
+  function updateImport(){
+    if(!importImage)return;
+    const c=document.getElementById('imageConverted');c.width=SIZE;c.height=SIZE;const ctx=c.getContext('2d');ctx.clearRect(0,0,SIZE,SIZE);
+    const fit=document.getElementById('imageFit').value,w=importImage.naturalWidth,h=importImage.naturalHeight;
+    if(fit==='stretch')ctx.drawImage(importImage,0,0,SIZE,SIZE);
+    else{const scale=fit==='cover'?Math.max(SIZE/w,SIZE/h):Math.min(SIZE/w,SIZE/h);ctx.drawImage(importImage,(SIZE-w*scale)/2,(SIZE-h*scale)/2,w*scale,h*scale)}
+    const data=ctx.getImageData(0,0,SIZE,SIZE),level=document.getElementById('imageColors').value;
+    importedPixels=blankPixels();
+    for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
+      const i=(y*SIZE+x)*4;if(data.data[i+3]<128){data.data[i+3]=0;continue}
+      let rgb=[data.data[i],data.data[i+1],data.data[i+2]];
+      if(level==='palette'){let best=Infinity,chosen=rgb;for(const hex of allColors){const candidate=hex.slice(1).match(/../g).map(v=>parseInt(v,16));const dist=candidate.reduce((sum,v,k)=>sum+(v-rgb[k])**2,0);if(dist<best){best=dist;chosen=candidate}}rgb=chosen}
+      else if(Number(level)>0){const count=Number(level);rgb=rgb.map(v=>Math.round(Math.round(v*(count-1)/255)*255/(count-1)))}
+      importedPixels[y][x]='#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+      for(let k=0;k<3;k++)data.data[i+k]=rgb[k];data.data[i+3]=255;
+    }
+    ctx.putImageData(data,0,0);document.getElementById('imageResult').hidden=false;
+    importMessage.textContent=SIZE+'×'+SIZE+'に変換しました。収め方・色数を調整してから入れられます。';
+  }
+  document.getElementById('imageFile').addEventListener('change',e=>{
+    const file=e.target.files[0];if(!file)return;const request=++importRequest,url=URL.createObjectURL(file),img=new Image();
+    importMessage.textContent='画像を読み込んでいます…';document.getElementById('imageResult').hidden=true;
+    img.onload=()=>{if(request!==importRequest){URL.revokeObjectURL(url);return}if(importUrl)URL.revokeObjectURL(importUrl);importUrl=url;importImage=img;document.getElementById('imageOriginal').src=url;updateImport()};
+    img.onerror=()=>{URL.revokeObjectURL(url);if(request!==importRequest)return;importImage=null;importedPixels=null;importMessage.textContent='この画像は読み込めませんでした。PNG・JPEGなどを選んでください。'};img.src=url;
+  });
+  for(const id of ['imageFit','imageColors'])document.getElementById(id).addEventListener('change',updateImport);
+  document.getElementById('applyImage').addEventListener('click',()=>{if(!importedPixels)return;endDraw();undoHistory.push(clone());redoHistory=[];pixels=importedPixels.map(r=>r.slice());render();saveWorking();note('画像をドット絵にしました。続けて描き直せます')});
   syncTools();
   function makeCanvas(scale){const c=document.createElement('canvas');c.width=SIZE*scale;c.height=SIZE*scale;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){const col=pixels[y][x];if(col){ctx.fillStyle=col;ctx.fillRect(x*scale,y*scale,scale,scale)}}return c}
   function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
