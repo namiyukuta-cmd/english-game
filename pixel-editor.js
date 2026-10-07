@@ -144,14 +144,20 @@
   const CUSTOM_KEY='englishGamePixelCustomColorsV1';let customColors=[];
   try{customColors=JSON.parse(localStorage.getItem(CUSTOM_KEY))||[]}catch(e){}
   if(!Array.isArray(customColors))customColors=[];customColors=customColors.filter(c=>/^#[0-9A-F]{6}$/i.test(c)).slice(0,32);
-  const allColors=[...new Set([...COLORS,...EXTRA])];let colorGroup='all';
-  function colorMatches(c){const [r,g,b]=c.slice(1).match(/../g).map(x=>parseInt(x,16));if(colorGroup==='gray')return Math.max(r,g,b)-Math.min(r,g,b)<24;if(colorGroup==='skin')return r>g&&g>=b&&r-g<95&&g-b<80;if(colorGroup==='warm')return r>g&&r>b;if(colorGroup==='cool')return g>=r||b>=r;return true}
-  function renderPalette(){palette.replaceChildren();const colors=colorGroup==='custom'?customColors:allColors.filter(colorMatches);for(const color of [null,...colors]){const b=document.createElement('button');b.type='button';b.className='swatch'+(color===null?' transparent':'');b.dataset.color=color||'transparent';if(color)b.style.background=color;b.title=color||'透明';b.setAttribute('aria-label',color||'透明');b.addEventListener('click',()=>{selected=color;tool='pen';moveMode=false;updateTool();syncTools()});palette.appendChild(b)}updateTool()}
+  function hslHex(h,s,l){s/=100;l/=100;const a=s*Math.min(l,1-l);return '#'+[0,8,4].map(n=>{const k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1)))).toString(16).padStart(2,'0')}).join('').toUpperCase()}
+  const shades=[];for(let h=0;h<360;h+=10)for(const sat of [100,75,50,25])for(const light of [15,25,35,50,65,80,92])shades.push(hslHex(h,sat,light));
+  for(let i=0;i<32;i++)shades.push('#'+Math.round(i*255/31).toString(16).padStart(2,'0').repeat(3).toUpperCase());
+  const allColors=[...new Set([...COLORS,...EXTRA,...shades])];let colorGroup='all';
+  const paletteRGB=allColors.map(hex=>hex.slice(1).match(/../g).map(v=>parseInt(v,16)));
+  function colorMatches(c){const [r,g,b]=c.slice(1).match(/../g).map(x=>parseInt(x,16));const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;if(colorGroup==='gray')return d<24;if(colorGroup==='skin')return r>g&&g>=b&&r-g<95&&g-b<80;if(colorGroup==='warm')return r>g&&r>b;if(colorGroup==='cool')return g>=r||b>=r;const ranges={red:[345,20],orange:[20,45],yellow:[45,75],green:[75,165],cyan:[165,205],blue:[205,255],purple:[255,290],pink:[290,345]};if(ranges[colorGroup]){if(d<24)return false;let h=(max===r?(g-b)/d+(g<b?6:0):max===g?(b-r)/d+2:(r-g)/d+4)*60;const [lo,hi]=ranges[colorGroup];return lo>hi?h>=lo||h<hi:h>=lo&&h<hi}return true}
+  function renderPalette(){palette.replaceChildren();const colors=colorGroup==='custom'?customColors:allColors.filter(colorMatches);document.getElementById('paletteCount').textContent=colors.length+'色から選べます（全'+allColors.length+'色）';for(const color of [null,...colors]){const b=document.createElement('button');b.type='button';b.className='swatch'+(color===null?' transparent':'');b.dataset.color=color||'transparent';if(color)b.style.background=color;b.title=color||'透明';b.setAttribute('aria-label',color||'透明');b.addEventListener('click',()=>{selected=color;tool='pen';moveMode=false;updateTool();syncTools();if(color){document.getElementById('customColor').value=color;document.getElementById('hexColor').value=color}});palette.appendChild(b)}updateTool()}
   document.getElementById('paletteGroups').addEventListener('click',e=>{const b=e.target.closest('[data-group]');if(!b)return;colorGroup=b.dataset.group;document.querySelectorAll('[data-group]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPalette()});
   renderPalette();
   eraserBtn.addEventListener('click',()=>{selected=null;tool='pen';moveMode=false;updateTool();syncTools()});
   drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;tool='pen';moveMode=false;syncTools();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
-  document.getElementById('useCustom').addEventListener('click',()=>{selected=document.getElementById('customColor').value.toUpperCase();customColors=[selected,...customColors.filter(c=>c!==selected)].slice(0,32);try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(customColors))}catch(e){}tool='pen';moveMode=false;renderPalette();syncTools();note('好きな色に追加しました')});
+  document.getElementById('customColor').addEventListener('input',e=>{document.getElementById('hexColor').value=e.target.value.toUpperCase()});
+  document.getElementById('hexColor').addEventListener('input',e=>{if(/^#[0-9A-F]{6}$/i.test(e.target.value))document.getElementById('customColor').value=e.target.value});
+  document.getElementById('useCustom').addEventListener('click',()=>{const hex=document.getElementById('hexColor').value.trim();if(!/^#[0-9A-F]{6}$/i.test(hex)){note('色コードは # と6桁の英数字で入力してください');return}selected=hex.toUpperCase();document.getElementById('customColor').value=selected;customColors=[selected,...customColors.filter(c=>c!==selected)].slice(0,32);try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(customColors))}catch(e){}tool='pen';moveMode=false;renderPalette();syncTools();note('好きな色に追加しました')});
   document.getElementById('gameSaveBtn').addEventListener('click',saveGame);
   document.getElementById('undoBtn').addEventListener('click',()=>{if(!undoHistory.length){note('戻せる操作がありません');return}redoHistory.push(clone());pixels=undoHistory.pop();render();saveWorking();updatePreview()});
   document.getElementById('clearBtn').addEventListener('click',()=>{undoHistory.push(clone());redoHistory=[];pixels=blankPixels();render();saveWorking();updatePreview()});
@@ -183,7 +189,7 @@
     for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++){
       const i=(y*SIZE+x)*4;if(data.data[i+3]<128){data.data[i+3]=0;continue}
       let rgb=[data.data[i],data.data[i+1],data.data[i+2]];
-      if(level==='palette'){let best=Infinity,chosen=rgb;for(const hex of allColors){const candidate=hex.slice(1).match(/../g).map(v=>parseInt(v,16));const dist=candidate.reduce((sum,v,k)=>sum+(v-rgb[k])**2,0);if(dist<best){best=dist;chosen=candidate}}rgb=chosen}
+      if(level==='palette'){let best=Infinity,chosen=rgb;for(const candidate of paletteRGB){const dist=candidate.reduce((sum,v,k)=>sum+(v-rgb[k])**2,0);if(dist<best){best=dist;chosen=candidate}}rgb=chosen}
       else if(Number(level)>0){const count=Number(level);rgb=rgb.map(v=>Math.round(Math.round(v*(count-1)/255)*255/(count-1)))}
       importedPixels[y][x]='#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
       for(let k=0;k<3;k++)data.data[i+k]=rgb[k];data.data[i+3]=255;

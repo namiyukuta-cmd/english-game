@@ -43,7 +43,7 @@
     .message{min-height:18px;text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
     @media(min-width:560px){.palette{grid-template-columns:repeat(12,1fr)}.actions{grid-template-columns:repeat(3,1fr)}.canvas-shell{max-height:620px}}
   </style>
-  <link rel="stylesheet" href="pixel-editor.css?v=20261007-2">
+  <link rel="stylesheet" href="pixel-editor.css?v=20261007-3">
 </head>
 <body data-size="8">
   <main class="wrap">
@@ -61,7 +61,7 @@
       <label class="file-label">画像を選ぶ<input id="imageFile" type="file" accept="image/*"></label>
       <div class="import-controls">
         <label>収め方<select id="imageFit"><option value="contain">全体を収める</option><option value="cover">中央を切り抜く</option><option value="stretch">キャンバスいっぱい</option></select></label>
-        <label>色数<select id="imageColors"><option value="0">元の色</option><option value="16">4096色</option><option value="8" selected>512色</option><option value="4">64色</option><option value="palette">パレットの色</option></select></label>
+        <label>色数<select id="imageColors"><option value="0" selected>元の色（減らさない）</option><option value="16">4096色</option><option value="8">512色</option><option value="4">64色</option><option value="palette">パレットの色</option></select></label>
       </div>
       <div id="imageResult" hidden><div class="import-preview"><figure><img id="imageOriginal" alt="取り込む画像"><figcaption>元の画像</figcaption></figure><figure><canvas id="imageConverted"></canvas><figcaption>変換結果</figcaption></figure></div>
       <button id="applyImage" class="action primary" type="button">このドット絵をキャンバスに入れる</button><p class="sub">今の絵を置き換えます。「1つ戻る」で取り消せます。</p></div>
@@ -93,12 +93,12 @@
 
     <section class="panel">
       <div id="paletteGroups" class="palette-groups" aria-label="色の種類">
-        <button type="button" data-group="all" aria-pressed="true">全色</button><button type="button" data-group="skin" aria-pressed="false">肌・茶</button><button type="button" data-group="warm" aria-pressed="false">暖色</button><button type="button" data-group="cool" aria-pressed="false">寒色</button><button type="button" data-group="gray" aria-pressed="false">白黒</button><button type="button" data-group="custom" aria-pressed="false">好きな色</button>
-      </div><div id="palette" class="palette"></div>
+        <button type="button" data-group="all" aria-pressed="true">全色</button><button type="button" data-group="skin" aria-pressed="false">肌・茶</button><button type="button" data-group="warm" aria-pressed="false">暖色</button><button type="button" data-group="cool" aria-pressed="false">寒色</button><button type="button" data-group="red" aria-pressed="false">赤</button><button type="button" data-group="orange" aria-pressed="false">橙</button><button type="button" data-group="yellow" aria-pressed="false">黄</button><button type="button" data-group="green" aria-pressed="false">緑</button><button type="button" data-group="cyan" aria-pressed="false">水色</button><button type="button" data-group="blue" aria-pressed="false">青</button><button type="button" data-group="purple" aria-pressed="false">紫</button><button type="button" data-group="pink" aria-pressed="false">桃</button><button type="button" data-group="gray" aria-pressed="false">白黒</button><button type="button" data-group="custom" aria-pressed="false">好きな色</button>
+      </div><p id="paletteCount" class="sub"></p><div id="palette" class="palette"></div>
       <div class="custom">
         <label for="customColor">好きな色</label>
         <input id="customColor" type="color" value="#8B5A3C">
-        <button id="useCustom" class="toolbtn" type="button">この色を追加</button>
+        <input id="hexColor" type="text" value="#8B5A3C" maxlength="7" spellcheck="false" aria-label="色コード" placeholder="#RRGGBB"><button id="useCustom" class="toolbtn" type="button">この色を追加</button>
       </div>
     </section>
 
@@ -115,6 +115,6 @@
     <div id="message" class="message" aria-live="polite"></div>
   </main>
 
-<script src="pixel-editor.js?v=20261007-2"></script>
+<script src="pixel-editor.js?v=20261007-3"></script>
 </body>
 </html>
