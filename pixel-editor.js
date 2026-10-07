@@ -29,10 +29,10 @@
   const message=document.getElementById('message');
   const projectLabel=document.getElementById('projectLabel');
 
-  document.title=SIZE+'×'+SIZE+' ドット絵メーカー';document.querySelector('h1').textContent=document.title;grid.style.gridTemplateColumns='repeat('+SIZE+',1fr)';grid.setAttribute('aria-label',SIZE+'×'+SIZE+'キャンバス');
+  document.title=SIZE+'×'+SIZE+' ドット絵メーカー';document.querySelector('h1').textContent=SIZE+'×'+SIZE+' ドット絵';grid.style.gridTemplateColumns='repeat('+SIZE+',1fr)';grid.setAttribute('aria-label',SIZE+'×'+SIZE+'キャンバス');
   document.getElementById('canvasSize').value=SIZE;
   document.getElementById('newSizeBtn').addEventListener('click',()=>{const n=Number(document.getElementById('canvasSize').value);location.href='pixel-editor.html?mode=new&size='+n});
-  let selected=COLORS[8];
+  let selected=COLORS[8],lastPaintColor=COLORS[8];
   let pixels=blankPixels();
   let undoHistory=[];
   let drawing=false;
@@ -56,7 +56,7 @@
   }
   function validPixels(p){return Array.isArray(p)&&p.length===SIZE&&p.every(r=>Array.isArray(r)&&r.length===SIZE)}
   function clone(){return pixels.map(r=>r.slice())}
-  function note(t){message.textContent=t;clearTimeout(note.t);note.t=setTimeout(()=>message.textContent='',1800)}
+  function note(t){message.textContent=t;PixelEditorUI.notify(t);clearTimeout(note.t);note.t=setTimeout(()=>{message.textContent='';PixelEditorUI.notify('')},1800)}
   function readSaveData(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.slots&&typeof d.slots==='object')return {next:Number(d.next)||1,slots:d.slots}}catch(e){}return {next:1,slots:{}}}
   function writeSaveData(d){localStorage.setItem(SAVE_KEY,JSON.stringify(d))}
   function saveWorking(){try{localStorage.setItem(WORK_KEY,JSON.stringify(pixels))}catch(e){}}
@@ -65,7 +65,7 @@
   async function loadInitial(){
     const q=new URLSearchParams(location.search),requested=q.get('save'),mode=q.get('mode'),art=q.get('art'),artName=q.get('name'),ai=q.get('ai');
     const remote=q.get('remote');
-    if(remote){try{const result=await PixelCloud.read(SIZE,remote);pixels=result.data.pixels.map(r=>r.slice());currentRemote={id:remote,sha:result.sha,name:result.data.name||remote};currentSaveId=null;saveWorking();updateProjectLabel();cloudStatus.textContent='非公開GitHubから読み込みました。'}catch(error){cloudStatus.textContent=error.message;document.getElementById('gameSaveBtn').disabled=true;document.getElementById('saveNewBtn').disabled=true}return}
+    if(remote){try{const result=await PixelCloud.read(SIZE,remote);pixels=result.data.pixels.map(r=>r.slice());currentRemote={id:remote,sha:result.sha,name:result.data.name||remote};currentSaveId=null;saveWorking();updateProjectLabel();cloudStatus.textContent='非公開GitHubから読み込みました。'}catch(error){cloudStatus.textContent=error.message;PixelEditorUI.openPanel('savePanel');document.getElementById('gameSaveBtn').disabled=true;document.getElementById('saveNewBtn').disabled=true}return}
     if(ai==='1'&&SIZE===8){
       try{
         const res=await fetch('pixel8-ai.json?t='+Date.now(),{cache:'no-store'});
@@ -110,7 +110,7 @@
 
   function updateTool(){
     if(selected===null){currentColor.className='current transparent';currentColor.style.background='';currentLabel.textContent='消しゴム';eraserBtn.classList.add('active')}
-    else{currentColor.className='current';currentColor.style.background=selected;currentLabel.textContent=selected;eraserBtn.classList.remove('active')}
+    else{lastPaintColor=selected;currentColor.className='current';currentColor.style.background=selected;currentLabel.textContent=selected;eraserBtn.classList.remove('active')}
     document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===(selected===null?'transparent':selected)));
   }
   function updateDrawMode(){drawModeBtn.textContent='なぞり塗り：'+(drawMode?'ON':'OFF');drawModeBtn.classList.toggle('active',drawMode);grid.classList.toggle('draw-mode',drawMode);grid.classList.toggle('tap-mode',!drawMode)}
@@ -179,6 +179,7 @@
   function renderPalette(){palette.replaceChildren();const colors=colorGroup==='custom'?customColors:allColors.filter(colorMatches);document.getElementById('paletteCount').textContent=colors.length+'色から選べます（全'+allColors.length+'色）';for(const color of [null,...colors]){const b=document.createElement('button');b.type='button';b.className='swatch'+(color===null?' transparent':'');b.dataset.color=color||'transparent';if(color)b.style.background=color;b.title=color||'透明';b.setAttribute('aria-label',color||'透明');b.addEventListener('click',()=>{selected=color;tool='pen';moveMode=false;updateTool();syncTools();if(color){document.getElementById('customColor').value=color;document.getElementById('hexColor').value=color}});palette.appendChild(b)}updateTool()}
   document.getElementById('paletteGroups').addEventListener('click',e=>{const b=e.target.closest('[data-group]');if(!b)return;colorGroup=b.dataset.group;document.querySelectorAll('[data-group]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPalette()});
   renderPalette();
+  document.getElementById('penBtn').addEventListener('click',()=>{endDraw();if(selected===null)selected=lastPaintColor;tool='pen';moveMode=false;updateTool();syncTools()});
   eraserBtn.addEventListener('click',()=>{selected=null;tool='pen';moveMode=false;updateTool();syncTools()});
   drawModeBtn.addEventListener('click',()=>{drawMode=!drawMode;tool='pen';moveMode=false;syncTools();note(drawMode?'指でなぞって連続で塗れます':'1マスずつタップするモードです')});
   document.getElementById('customColor').addEventListener('input',e=>{document.getElementById('hexColor').value=e.target.value.toUpperCase()});
@@ -194,7 +195,7 @@
   document.getElementById('zoomOutBtn').addEventListener('click',()=>{if(zoomIndex>0){zoomIndex--;updateZoom()}else note('これ以上縮小できません')});
   document.getElementById('zoomResetBtn').addEventListener('click',()=>{zoomIndex=2;updateZoom(false);canvasShell.scrollLeft=0;canvasShell.scrollTop=0});
 
-  function syncTools(){document.getElementById('moveBtn').classList.toggle('active',moveMode);document.getElementById('pickBtn').classList.toggle('active',tool==='pick');document.getElementById('fillBtn').classList.toggle('active',tool==='fill');updateDrawMode();grid.classList.toggle('draw-mode',drawMode||moveMode);grid.classList.toggle('tap-mode',!drawMode&&!moveMode);grid.style.cursor=moveMode?'grab':'crosshair';document.getElementById('modeHelp').textContent=moveMode?'絵を動かさず、表示位置をドラッグで移動します':tool==='pick'?'絵をタップして、その色を選びます':tool==='fill'?'同じ色でつながった範囲を一度に塗ります':drawMode?'なぞって連続で描けます':'1マスずつタップ。拡大時は「移動」で見たい所へ';}
+  function syncTools(){const pen=document.getElementById('penBtn');pen.classList.toggle('active',tool==='pen'&&!moveMode&&selected!==null);pen.setAttribute('aria-pressed',String(tool==='pen'&&!moveMode&&selected!==null));document.getElementById('moveBtn').setAttribute('aria-pressed',String(moveMode));document.getElementById('moveBtn').classList.toggle('active',moveMode);document.getElementById('pickBtn').classList.toggle('active',tool==='pick');document.getElementById('fillBtn').classList.toggle('active',tool==='fill');updateDrawMode();grid.classList.toggle('draw-mode',drawMode||moveMode);grid.classList.toggle('tap-mode',!drawMode&&!moveMode);grid.style.cursor=moveMode?'grab':'crosshair';document.getElementById('modeHelp').textContent=moveMode?'絵を動かさず、表示位置をドラッグで移動します':tool==='pick'?'絵をタップして、その色を選びます':tool==='fill'?'同じ色でつながった範囲を一度に塗ります':drawMode?'なぞって連続で描けます':'1マスずつタップ。拡大時は「移動」で見たい所へ';}
   function fillCell(cell){const x=+cell.dataset.x,y=+cell.dataset.y,old=pixels[y][x];if(old===selected)return;const before=clone(),queue=[[x,y]];pixels[y][x]=selected;while(queue.length){const [cx,cy]=queue.pop();for(const [nx,ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]])if(nx>=0&&ny>=0&&nx<SIZE&&ny<SIZE&&pixels[ny][nx]===old){pixels[ny][nx]=selected;queue.push([nx,ny])}}undoHistory.push(before);redoHistory=[];render();saveWorking()}
   document.getElementById('moveBtn').addEventListener('click',()=>{endDraw();moveMode=!moveMode;tool='pen';syncTools()});
   for(const [id,name] of [['pickBtn','pick'],['fillBtn','fill']])document.getElementById(id).addEventListener('click',()=>{moveMode=false;tool=tool===name?'pen':name;syncTools()});
@@ -239,5 +240,5 @@
   document.getElementById('saveJsonBtn').addEventListener('click',()=>{const coordinates=[];for(let y=0;y<SIZE;y++)for(let x=0;x<SIZE;x++)if(pixels[y][x])coordinates.push({x,y,color:pixels[y][x]});const data={width:SIZE,height:SIZE,pixels,coordinates};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));download(url,(currentSaveId?'pixel_'+currentSaveId:'pixel_'+SIZE+'x'+SIZE)+'.json');setTimeout(()=>URL.revokeObjectURL(url),1000);note('座標データを保存しました')});
 
   window.addEventListener('pixel-cloud-connected',()=>{if(new URLSearchParams(location.search).get('remote')&&!currentRemote)loadInitial().then(()=>{render();document.getElementById('gameSaveBtn').disabled=false;document.getElementById('saveNewBtn').disabled=false})});
-  loadInitial().then(()=>{render();updateTool();updateDrawMode();updateZoom(false)});
+  loadInitial().then(()=>{render();updateTool();syncTools();updateZoom(false)});
 })();

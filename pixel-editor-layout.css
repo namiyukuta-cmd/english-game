@@ -1,0 +1,27 @@
+/* The canvas stays on screen; secondary controls open as sheets. */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+.editor-workspace{width:100%;max-width:960px;height:100vh;height:100dvh;margin:0 auto;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.editor-header{display:flex;align-items:center;gap:6px;padding:calc(4px + env(safe-area-inset-top)) 8px 4px;flex:none;border-bottom:1px solid var(--line);background:var(--bg)}
+.editor-title{min-width:0;flex:1}.editor-title h1{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.editor-title .save-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.editor-header .back,.history-btn{width:44px;height:44px;min-height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;flex:none;color:var(--ink);font-size:24px;touch-action:manipulation}
+.editor-workspace .canvas-shell{flex:1;min-height:0;height:auto;max-height:none;margin:0;border:0;border-radius:0;padding:8px;background:#ece9ed;overflow:auto;overscroll-behavior:contain}
+.editor-footer{flex:none;padding:4px 8px max(4px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
+.editor-footer .zoomrow{position:static;display:flex;flex-wrap:nowrap;gap:6px;margin:0;padding:0 0 4px;border:0}
+.editor-footer .zoomrow .toolbtn{padding:4px;min-width:44px;min-height:44px}
+.editor-footer #zoomRange{width:auto;min-width:0;flex:1;margin:0}.editor-footer .zoom-reset{min-width:60px}#zoomLabel{display:block;min-width:50px;font-size:13px}
+.editor-dock{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.dock-btn{min-width:0;min-height:56px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;padding:3px 1px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);font-size:11px;font-weight:700;touch-action:manipulation}
+.dock-btn.active{background:var(--ink);color:white;border-color:var(--ink)}.dock-icon{height:25px;line-height:25px;font-size:24px;font-weight:normal}
+.dock-btn .current{width:25px;height:25px;border-radius:6px;border:1px solid var(--line)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.editor-sheet{width:min(100% - 16px,640px);max-width:640px;max-height:78vh;max-height:78dvh;padding:0;margin:auto auto calc(124px + env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:16px;background:var(--bg);color:var(--ink);box-shadow:0 8px 35px #23131a33;overflow:hidden}
+.editor-sheet[open]{display:flex;flex-direction:column}.editor-sheet::backdrop{background:#26192145}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;gap:8px;border-bottom:1px solid var(--line);flex:none;background:var(--card)}
+.sheet-header h2{margin:0;font-size:17px}.sheet-close{width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);font-size:25px;touch-action:manipulation}
+.sheet-body{padding:12px;overflow-y:auto;min-height:0;overscroll-behavior:contain}.sheet-body h3{font-size:15px;margin:0 0 12px}.sheet-body .panel:last-child{margin-bottom:0}
+.sheet-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sheet-actions .toolbtn{min-width:0;font-size:14px}.sheet-body .mode-help{margin:12px 0 0}.sheet-body .sub{line-height:1.6}
+.sheet-body .palette{max-height:min(38vh,340px);max-height:min(38dvh,340px)}.sheet-body .actions{grid-template-columns:repeat(2,minmax(0,1fr))}.sheet-body .action{min-width:0;font-size:14px}
+.editor-toast{position:fixed;bottom:calc(125px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);margin:0;padding:8px 12px;min-height:0;border-radius:9px;background:var(--ink);color:white;z-index:10;pointer-events:none;box-shadow:0 2px 6px #0002;font-size:13px}.editor-toast:empty{display:none}
+@media(max-height:540px){.editor-sheet{max-height:calc(100dvh - 24px);margin:auto}.editor-footer{padding-top:2px}.dock-btn{min-height:46px;gap:0}}
+
+.sheet-message{flex:none;margin:0;padding:8px 12px;font-size:13px;line-height:1.5;background:var(--ink);color:white}.sheet-message:empty{display:none}

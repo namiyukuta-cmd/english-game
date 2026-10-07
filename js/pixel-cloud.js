@@ -3,7 +3,7 @@
   const ROOT='https://api.github.com/repos/namiyukuta-cmd/private-game-data';
   const TOKEN_KEY='englishGamePixelGithubToken';
   function token(){return localStorage.getItem(TOKEN_KEY)||localStorage.getItem('desertSurvivalGithubToken')||''}
-  function requireToken(){if(!token()){const panel=document.getElementById('pixelCloudSettings');if(panel){panel.open=true;panel.scrollIntoView({block:'center'});document.getElementById('pixelCloudToken').focus()}throw new Error('保存設定にGitHubトークンを登録してください。private-game-data の Contents 読み書き権限が必要です。')}}
+  function requireToken(){if(!token()){window.dispatchEvent(new Event('pixel-cloud-settings-required'));const panel=document.getElementById('pixelCloudSettings');if(panel){panel.open=true;panel.scrollIntoView({block:'center'});document.getElementById('pixelCloudToken').focus()}throw new Error('保存設定にGitHubトークンを登録してください。private-game-data の Contents 読み書き権限が必要です。')}}
   async function request(path,options={}){requireToken();const response=await fetch(ROOT+path,{...options,cache:'no-store',headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',Authorization:'Bearer '+token(),...options.headers}});if(response.status===401||response.status===403)throw new Error('GitHub接続を確認してください。private-game-data の Contents 読み書き権限が必要です。');return response}
   function dir(size){return 'pixel-art/'+size+'x'+size}
   function safeId(id){if(!/^[a-zA-Z0-9_-]+$/.test(id))throw new Error('保存名が正しくありません。');return id}
