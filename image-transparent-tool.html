@@ -56,6 +56,23 @@
   </header>
 
   <section class="panel">
+    <details id="webpPanel">
+      <summary class="title" style="cursor:pointer;min-height:42px;display:flex;align-items:center">PNG → WebPに変換</summary>
+      <p class="note">保存済みのPNGを選ぶだけで変換できます。透明部分・画像サイズ・余白をそのまま保ちます。</p>
+      <div class="row" style="margin-top:8px">
+        <label class="filelabel">PNGを選ぶ<input id="webpInput" type="file" accept="image/png,.png"></label>
+        <button id="webpSave" class="btn save" type="button" disabled>WebPを保存</button>
+      </div>
+      <label class="field" style="margin-top:10px">画質 <span id="webpQualityText">90%</span>
+        <input id="webpQuality" type="range" min="10" max="100" value="90">
+      </label>
+      <p class="note">画質を下げると軽くなりますが、色や輪郭が変わることがあります。100%でも可逆圧縮ではありません。</p>
+      <div class="canvasbox" style="margin-top:8px" hidden id="webpPreviewBox"><img id="webpPreview" alt="変換後のWebP" style="display:block;max-width:100%;height:auto;margin:auto"></div>
+      <div id="webpStatus" class="status" role="status">PNGを選んでください。</div>
+    </details>
+  </section>
+
+  <section class="panel">
     <p class="title">1. AI画像を貼り付ける</p>
     <div id="pasteArea" class="drop" contenteditable="true" inputmode="none">ここをタップして「ペースト」<br>または画像ファイルを選ぶ</div>
     <div class="row" style="margin-top:8px">
@@ -1214,6 +1231,69 @@
       document.body.appendChild(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),1000);
     },'image/png');
+  });
+})();
+</script>
+
+<script>
+(() => {
+  const input=document.getElementById('webpInput');
+  const save=document.getElementById('webpSave');
+  const quality=document.getElementById('webpQuality');
+  const qualityText=document.getElementById('webpQualityText');
+  const status=document.getElementById('webpStatus');
+  const preview=document.getElementById('webpPreview');
+  const previewBox=document.getElementById('webpPreviewBox');
+  let canvas=null, original=null, result=null, previewUrl=null, revision=0;
+  function bytes(n){return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(2)+' MB'}
+  function clearPreview(){
+    preview.removeAttribute('src');previewBox.hidden=true;
+    if(previewUrl)URL.revokeObjectURL(previewUrl);
+    previewUrl=null;
+  }
+  async function convert(){
+    const current=++revision;
+    result=null;save.disabled=true;
+    if(!canvas)return;
+    status.textContent='WebPに変換中…';
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',Number(quality.value)/100));
+    if(current!==revision)return;
+    clearPreview();
+    if(!blob||blob.type!=='image/webp'){
+      status.textContent='このブラウザはWebPの作成に対応していません。別のブラウザで開いてください。';return;
+    }
+    result=blob;
+    previewUrl=URL.createObjectURL(blob);preview.src=previewUrl;previewBox.hidden=false;
+    save.disabled=false;
+    const change=original.size?Math.round((1-blob.size/original.size)*100):0;
+    status.textContent=canvas.width+'×'+canvas.height+' / PNG：'+bytes(original.size)+' → WebP：'+bytes(blob.size)+(change>0?'（'+change+'%軽量化）':change<0?'（PNGより大きくなりました）':'');
+  }
+  input.addEventListener('change',async()=>{
+    const file=input.files[0];if(!file)return;
+    const current=++revision;
+    canvas=null;original=null;result=null;save.disabled=true;clearPreview();
+    status.textContent='PNGを読み込み中…';
+    const url=URL.createObjectURL(file);
+    try{
+      const header=new Uint8Array(await file.slice(0,8).arrayBuffer());
+      if(![137,80,78,71,13,10,26,10].every((n,i)=>header[i]===n))throw new Error('PNGファイルを選んでください。');
+      const image=new Image();image.src=url;await image.decode();
+      if(current!==revision)return;
+      const next=document.createElement('canvas');
+      next.width=image.naturalWidth;next.height=image.naturalHeight;
+      next.getContext('2d').drawImage(image,0,0);
+      canvas=next;original=file;await convert();
+    }catch(e){if(current===revision)status.textContent=e.message||'PNGを読み込めませんでした。'}
+    finally{URL.revokeObjectURL(url);input.value='';}
+  });
+  quality.addEventListener('input',()=>{qualityText.textContent=quality.value+'%';convert()});
+  save.addEventListener('click',()=>{
+    if(!result||!original)return;
+    const base=original.name.replace(/\.png$/i,'').replace(/[\\/:*?"<>|]+/g,'_')||'image';
+    const url=URL.createObjectURL(result);
+    const a=document.createElement('a');a.href=url;a.download=base+'.webp';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
   });
 })();
 </script>
