@@ -8,6 +8,7 @@
   <title>画像透過・サイズ変更</title>
   <style>
     *{box-sizing:border-box}
+    [hidden]{display:none!important}
     :root{--bg:#fff7fb;--card:#fff;--ink:#3e3037;--line:#dccfd6;--muted:#7d6e75;--accent:#d97898}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
     .wrap{max-width:760px;margin:0 auto;padding:12px 12px 32px}
@@ -63,10 +64,13 @@
         <label class="filelabel">PNGを選ぶ<input id="webpInput" type="file" accept="image/png,.png"></label>
         <button id="webpSave" class="btn save" type="button" disabled>WebPを保存</button>
       </div>
-      <label class="field" style="margin-top:10px">画質 <span id="webpQualityText">90%</span>
+      <label class="field" style="margin-top:10px">圧縮方式
+        <select id="webpMode"><option value="lossless">可逆圧縮（色・輪郭を保つ）</option><option value="lossy">非可逆圧縮（画質を調整）</option></select>
+      </label>
+      <label id="webpQualityField" class="field" style="margin-top:10px" hidden>画質 <span id="webpQualityText">90%</span>
         <input id="webpQuality" type="range" min="10" max="100" value="90">
       </label>
-      <p class="note">画質を下げると軽くなりますが、色や輪郭が変わることがあります。100%でも可逆圧縮ではありません。</p>
+      <p class="note">可逆圧縮は画質を落としません。非可逆圧縮を選んだ場合だけ画質を調整できます。</p>
       <div class="canvasbox" style="margin-top:8px" hidden id="webpPreviewBox"><img id="webpPreview" alt="変換後のWebP" style="display:block;max-width:100%;height:auto;margin:auto"></div>
       <div id="webpStatus" class="status" role="status">PNGを選んでください。</div>
     </details>
@@ -1240,6 +1244,19 @@
   const input=document.getElementById('webpInput');
   const save=document.getElementById('webpSave');
   const quality=document.getElementById('webpQuality');
+  const mode=document.getElementById('webpMode');
+  const qualityField=document.getElementById('webpQualityField');
+  let worker=null, requestId=0;
+  const pending=new Map();
+  async function encodeLossless(file){
+    const buffer=await file.arrayBuffer();
+    if(!worker){
+      worker=new Worker('js/webp-lossless-worker.js?v=20261008-1',{type:'module'});
+      worker.onmessage=({data})=>{const task=pending.get(data.id);if(!task)return;pending.delete(data.id);data.error?task.reject(new Error(data.error)):task.resolve(new Blob([data.buffer],{type:'image/webp'}));};
+      worker.onerror=()=>{for(const task of pending.values())task.reject(new Error('可逆圧縮の読み込みに失敗しました。ページを再読み込みしてください。'));pending.clear();worker.terminate();worker=null;};
+    }
+    return new Promise((resolve,reject)=>{const id=++requestId;pending.set(id,{resolve,reject});worker.postMessage({id,buffer},[buffer]);});
+  }
   const qualityText=document.getElementById('webpQualityText');
   const status=document.getElementById('webpStatus');
   const preview=document.getElementById('webpPreview');
@@ -1256,7 +1273,13 @@
     result=null;save.disabled=true;
     if(!canvas)return;
     status.textContent='WebPに変換中…';
-    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',Number(quality.value)/100));
+    let blob;
+    const lossless=mode.value==='lossless';
+    try{
+      blob=lossless
+        ? await encodeLossless(original)
+        : await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',Number(quality.value)/100));
+    }catch(e){if(current===revision){clearPreview();status.textContent=e.message||'可逆圧縮に失敗しました。';}return;}
     if(current!==revision)return;
     clearPreview();
     if(!blob||blob.type!=='image/webp'){
@@ -1266,7 +1289,7 @@
     previewUrl=URL.createObjectURL(blob);preview.src=previewUrl;previewBox.hidden=false;
     save.disabled=false;
     const change=original.size?Math.round((1-blob.size/original.size)*100):0;
-    status.textContent=canvas.width+'×'+canvas.height+' / PNG：'+bytes(original.size)+' → WebP：'+bytes(blob.size)+(change>0?'（'+change+'%軽量化）':change<0?'（PNGより大きくなりました）':'');
+    status.textContent=(lossless?'可逆圧縮 / ':'非可逆圧縮 / ')+canvas.width+'×'+canvas.height+' / PNG：'+bytes(original.size)+' → WebP：'+bytes(blob.size)+(change>0?'（'+change+'%軽量化）':change<0?'（PNGより大きくなりました）':'');
   }
   input.addEventListener('change',async()=>{
     const file=input.files[0];if(!file)return;
@@ -1286,6 +1309,7 @@
     }catch(e){if(current===revision)status.textContent=e.message||'PNGを読み込めませんでした。'}
     finally{URL.revokeObjectURL(url);input.value='';}
   });
+  mode.addEventListener('change',()=>{qualityField.hidden=mode.value==='lossless';convert()});
   quality.addEventListener('input',()=>{qualityText.textContent=quality.value+'%';convert()});
   save.addEventListener('click',()=>{
     if(!result||!original)return;
