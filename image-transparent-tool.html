@@ -229,8 +229,6 @@
 
   let img=null;
   let bg=null;
-  let sourceHasTransparency=false;
-  let bgChosen=false;
   let outputRatio=512/768;
   let syncing=false;
   let processed=false;
@@ -245,13 +243,30 @@
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
+  function detectBackgroundColor(d,w,h){
+    const counts=new Map();
+    const sample=(x,y)=>{
+      const i=(y*w+x)*4;
+      if(d[i+3]!==255)return;
+      const rgb=[d[i],d[i+1],d[i+2]];
+      const key=rgb.map(v=>Math.round(v/8)).join(',');
+      const entry=counts.get(key)||{count:0,rgb};
+      entry.count++;counts.set(key,entry);
+    };
+    const depth=Math.min(4,w,h);
+    for(let y=0;y<depth;y++)for(let x=0;x<depth;x++){
+      sample(x,y);sample(w-1-x,y);sample(x,h-1-y);sample(w-1-x,h-1-y);
+    }
+    let best=null;
+    for(const entry of counts.values())if(!best||entry.count>best.count)best=entry;
+    return best?best.rgb:null;
+  }
   function colorDistance(d,i,c){
     const dr=d[i]-c[0],dg=d[i+1]-c[1],db=d[i+2]-c[2];
     return Math.sqrt(dr*dr+dg*dg+db*db);
   }
   function setBg(r,g,b){
     bg=[r,g,b];
-    bgChosen=true;
     bgChip.style.background='rgb('+r+','+g+','+b+')';
     bgText.textContent='背景色：rgb('+r+', '+g+', '+b+')';
     processed=false;
@@ -326,12 +341,15 @@
       updateCropButtons();
       sctx.clearRect(0,0,sourceCanvas.width,sourceCanvas.height);
       sctx.drawImage(image,0,0);
-      const p=sctx.getImageData(0,0,1,1).data;
-      setBg(p[0],p[1],p[2]);
       const originalPixels=sctx.getImageData(0,0,sourceCanvas.width,sourceCanvas.height).data;
-      sourceHasTransparency=false;
-      for(let i=3;i<originalPixels.length;i+=4){if(originalPixels[i]<255){sourceHasTransparency=true;break}}
-      bgChosen=false;
+      const detectedBg=detectBackgroundColor(originalPixels,sourceCanvas.width,sourceCanvas.height);
+      if(detectedBg){
+        setBg(...detectedBg);
+      }else{
+        bg=null;
+        bgChip.style.background='transparent';
+        bgText.textContent='背景色：未選択（必要な場合は背景色を選んでください）';
+      }
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
@@ -824,6 +842,7 @@
       const x=Math.max(0,Math.min(sourceCanvas.width-1,pnt.x));
       const y=Math.max(0,Math.min(sourceCanvas.height-1,pnt.y));
       const p=sctx.getImageData(x,y,1,1).data;
+      if(p[3]===0){note('ここはすでに透明です。残っている背景色を選んでください');return}
       setBg(p[0],p[1],p[2]);
       bgPickMode=false;updateCropButtons();
       note('背景色を選びました');
@@ -1144,9 +1163,10 @@
     const w=sourceCanvas.width,h=sourceCanvas.height;
     const data=sctx.getImageData(0,0,w,h);
     const d=data.data,t=Number(tolerance.value);
-    // Already transparent inputs need no automatic colour removal.
-    if(sourceHasTransparency&&!bgChosen)return data;
-    const target=bg||[d[0],d[1],d[2]];
+    // Partial transparency does not mean that the remaining background is gone.
+    // Ignore RGB stored under fully transparent pixels when selecting a colour.
+    if(!bg)return data;
+    const target=bg;
 
     if(allSimilar.checked){
       for(let i=0;i<d.length;i+=4){
@@ -1160,15 +1180,26 @@
     const barrier=new Uint8Array(w*h);
 
     if(protectLines.checked){
-      const radius=Math.max(1,Math.round(Math.min(w,h)/500));
+      const radius=Math.min(3,Math.max(1,Math.round(Math.min(w,h)/500)));
+      const foreground=new Uint8Array(w*h);
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){
         const n=y*w+x,i=n*4;
-        if(d[i+3]!==0 && colorDistance(d,i,target)>t){
-          for(let yy=Math.max(0,y-radius);yy<=Math.min(h-1,y+radius);yy++){
-            for(let xx=Math.max(0,x-radius);xx<=Math.min(w-1,x+radius);xx++){
-              barrier[yy*w+xx]=1;
-            }
+        foreground[n]=d[i+3]!==0&&colorDistance(d,i,target)>t?1:0;
+      }
+      // Seal only tiny gaps between opposing foreground pixels. Expanding
+      // a barrier around every line leaves a band of opaque background.
+      const directions=[[1,0],[0,1],[1,1],[1,-1]];
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+        const n=y*w+x;
+        if(foreground[n]||d[n*4+3]===0)continue;
+        for(const [vx,vy] of directions){
+          let a=false,b=false;
+          for(let step=1;step<=radius;step++){
+            const ax=x-vx*step,ay=y-vy*step,bx=x+vx*step,by=y+vy*step;
+            if(ax>=0&&ax<w&&ay>=0&&ay<h&&foreground[ay*w+ax])a=true;
+            if(bx>=0&&bx<w&&by>=0&&by<h&&foreground[by*w+bx])b=true;
           }
+          if(a&&b){barrier[n]=1;break}
         }
       }
     }
