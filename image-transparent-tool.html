@@ -103,8 +103,8 @@
     <label class="check"><input id="connectedOnly" name="removeMode" type="radio" checked>背景につながっている部分だけ透明にする（おすすめ）</label>
     <label class="check"><input id="allSimilar" name="removeMode" type="radio">画像内の同じ色も全部透明にする</label>
     <label class="check"><input id="protectLines" type="checkbox" checked>線画の内側を保護する</label>
-    <label class="check"><input id="decontaminate" type="checkbox" checked>線のふちに残る背景色を強力に除去する</label>
-    <p class="note">通常は「背景につながっている部分だけ透明」＋「線のふちを強力に除去」のままでOKです。AI画像の水色・緑色背景が線の縁に混ざっていても、縁だけを補正します。</p>
+    <label class="check"><input id="decontaminate" type="checkbox">ふちの背景色を補正する（輪郭の色・透明度が変わります）</label>
+    <p class="note">初期設定では背景だけを消し、残す画素の色・透明度は変更しません。ふちの補正は、背景色が残った場合にだけ使用してください。</p>
   </section>
 
   <section class="panel">
@@ -134,6 +134,8 @@
 
   <section class="panel">
     <p class="title">4. PNGサイズ</p>
+    <button id="originalSizeBtn" class="btn" type="button" disabled>元画像のサイズに戻す</button>
+    <p id="resizeInfo" class="note">読み込み時は元画像と同じサイズに設定します。縮小すると細部は減り、拡大しても元にない細部は増えません。</p>
     <div class="fields">
       <label class="field">幅(px)<input id="outW" type="number" min="1" max="8192" value="512"></label>
       <label class="field">高さ(px)<input id="outH" type="number" min="1" max="8192" value="768"></label>
@@ -193,6 +195,8 @@
   const allSimilar=document.getElementById('allSimilar');
   const protectLines=document.getElementById('protectLines');
   const decontaminate=document.getElementById('decontaminate');
+  const originalSizeBtn=document.getElementById('originalSizeBtn');
+  const resizeInfo=document.getElementById('resizeInfo');
   const outW=document.getElementById('outW');
   const outH=document.getElementById('outH');
   const keepRatio=document.getElementById('keepRatio');
@@ -225,6 +229,8 @@
 
   let img=null;
   let bg=null;
+  let sourceHasTransparency=false;
+  let bgChosen=false;
   let outputRatio=512/768;
   let syncing=false;
   let processed=false;
@@ -245,6 +251,7 @@
   }
   function setBg(r,g,b){
     bg=[r,g,b];
+    bgChosen=true;
     bgChip.style.background='rgb('+r+','+g+','+b+')';
     bgText.textContent='背景色：rgb('+r+', '+g+', '+b+')';
     processed=false;
@@ -302,6 +309,9 @@
       img=image;
       sourceCanvas.width=image.naturalWidth;
       sourceCanvas.height=image.naturalHeight;
+      outW.value=image.naturalWidth;outH.value=image.naturalHeight;
+      outputRatio=image.naturalWidth/image.naturalHeight;
+      originalSizeBtn.disabled=false;
       cropOverlay.width=image.naturalWidth;
       cropOverlay.height=image.naturalHeight;
       cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;detectedRects=[];
@@ -318,6 +328,10 @@
       sctx.drawImage(image,0,0);
       const p=sctx.getImageData(0,0,1,1).data;
       setBg(p[0],p[1],p[2]);
+      const originalPixels=sctx.getImageData(0,0,sourceCanvas.width,sourceCanvas.height).data;
+      sourceHasTransparency=false;
+      for(let i=3;i<originalPixels.length;i+=4){if(originalPixels[i]<255){sourceHasTransparency=true;break}}
+      bgChosen=false;
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
       cropModeBtn.disabled=false;
@@ -599,6 +613,36 @@
   });
 
 
+  function drawResized(ctx,source,cr,dx,dy,dw,dh){
+    ctx.imageSmoothingEnabled=!pixelMode.checked;
+    ctx.imageSmoothingQuality='high';
+    // At 1:1, copy pixels without resampling, including partial transparency.
+    if(dw===cr.w && dh===cr.h && Number.isInteger(dx) && Number.isInteger(dy)){
+      const pixels=source.getContext('2d').getImageData(cr.x,cr.y,cr.w,cr.h);
+      ctx.putImageData(pixels,dx,dy);
+      return;
+    }
+    if(pixelMode.checked){
+      ctx.drawImage(source,cr.x,cr.y,cr.w,cr.h,dx,dy,dw,dh);
+      return;
+    }
+    let current=document.createElement('canvas');
+    current.width=cr.w;current.height=cr.h;
+    current.getContext('2d').putImageData(source.getContext('2d').getImageData(cr.x,cr.y,cr.w,cr.h),0,0);
+    // Halve large reductions before the final high-quality resampling.
+    // Transparent pixels stay transparent throughout; no background is composited.
+    while(current.width>dw*2 && current.height>dh*2){
+      const next=document.createElement('canvas');
+      next.width=Math.max(1,Math.ceil(current.width/2));
+      next.height=Math.max(1,Math.ceil(current.height/2));
+      const nextCtx=next.getContext('2d');
+      nextCtx.imageSmoothingEnabled=true;nextCtx.imageSmoothingQuality='high';
+      nextCtx.drawImage(current,0,0,next.width,next.height);
+      current=next;
+    }
+    ctx.drawImage(current,0,0,current.width,current.height,dx,dy,dw,dh);
+  }
+
   function renderRectToCanvas(cleanFull,cr){
     const W=clampSize(outW.value),H=clampSize(outH.value);
     const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),Number(padding.value)||0));
@@ -618,7 +662,7 @@
     let dy=(H-dh)/2;
     if(verticalAlign.value==='top')dy=pad;
     if(verticalAlign.value==='bottom')dy=H-pad-dh;
-    ctx.drawImage(cleanFull,cr.x,cr.y,cr.w,cr.h,dx,dy,dw,dh);
+    drawResized(ctx,cleanFull,cr,dx,dy,dw,dh);
     return out;
   }
 
@@ -875,6 +919,17 @@
   protectLines.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
   decontaminate.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
 
+  originalSizeBtn.addEventListener('click',()=>{
+    if(!img)return;
+    outW.value=img.naturalWidth;outH.value=img.naturalHeight;
+    outputRatio=img.naturalWidth/img.naturalHeight;
+    processed=false;saveBtn.disabled=true;
+  });
+  for(const control of [outW,outH,padding,fitMode,verticalAlign,pixelMode]){
+    control.addEventListener('input',()=>{processed=false;saveBtn.disabled=true});
+    control.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
+  }
+
   keepRatio.addEventListener('change',()=>{
     if(keepRatio.checked){
       outputRatio=clampSize(outW.value)/clampSize(outH.value);
@@ -895,6 +950,7 @@
 
   function removeEdgeSpill(data,w,h,target){
     const d=data.data;
+    const original=new Uint8ClampedArray(d);
     const size=w*h;
     const transparent=new Uint8Array(size);
     const near=new Uint8Array(size);
@@ -939,9 +995,9 @@
         const i=n*4;
         if(d[i+3]===0)continue;
 
-        const vr=d[i]-target[0];
-        const vg=d[i+1]-target[1];
-        const vb=d[i+2]-target[2];
+        const vr=original[i]-target[0];
+        const vg=original[i+1]-target[1];
+        const vb=original[i+2]-target[2];
         const vlen=Math.hypot(vr,vg,vb);
         if(vlen<2)continue;
 
@@ -954,9 +1010,9 @@
             const nn=yy*w+xx,ii=nn*4;
             if(d[ii+3]===0||nn===n)continue;
 
-            const fr=d[ii]-target[0];
-            const fg=d[ii+1]-target[1];
-            const fb=d[ii+2]-target[2];
+            const fr=original[ii]-target[0];
+            const fg=original[ii+1]-target[1];
+            const fb=original[ii+2]-target[2];
             const flen=Math.hypot(fr,fg,fb);
             if(flen<=vlen+2)continue;
 
@@ -978,9 +1034,9 @@
         const alpha=Math.max(0,Math.min(1,vlen/bestLen));
         if(alpha>=0.995)continue;
 
-        d[i]=d[best];
-        d[i+1]=d[best+1];
-        d[i+2]=d[best+2];
+        d[i]=original[best];
+        d[i+1]=original[best+1];
+        d[i+2]=original[best+2];
         d[i+3]=Math.min(d[i+3],Math.max(0,Math.round(alpha*255)));
       }
     }
@@ -1088,6 +1144,8 @@
     const w=sourceCanvas.width,h=sourceCanvas.height;
     const data=sctx.getImageData(0,0,w,h);
     const d=data.data,t=Number(tolerance.value);
+    // Already transparent inputs need no automatic colour removal.
+    if(sourceHasTransparency&&!bgChosen)return data;
     const target=bg||[d[0],d[1],d[2]];
 
     if(allSimilar.checked){
@@ -1140,6 +1198,7 @@
     while(head<tail){
       const n=q[head++],x=n%w,y=(n/w)|0,i=n*4;
       d[i]=0;d[i+1]=0;d[i+2]=0;d[i+3]=0;
+      if(barrier[n])continue;
       if(x>0)push(x-1,y);
       if(x<w-1)push(x+1,y);
       if(y>0)push(x,y-1);
@@ -1180,7 +1239,7 @@
     const cleanFull=document.createElement('canvas');
     cleanFull.width=sourceCanvas.width;
     cleanFull.height=sourceCanvas.height;
-    cleanFull.getContext('2d').putImageData(transparentSource(),0,0);
+    cleanFull.getContext('2d').putImageData(roughCutMode?roughCutoutSource():transparentSource(),0,0);
 
     const cr=(roughCutMode&&roughBounds)
       ? roughBounds
@@ -1208,11 +1267,12 @@
 
     // 重要：選択した切り抜き枠を、そのまま出力へ描く。
     // 透明化後の人物境界を再計算して、勝手に拡大・縮小しない。
-    octx.drawImage(
-      cleanFull,
-      cr.x,cr.y,cr.w,cr.h,
-      dx,dy,dw,dh
-    );
+    drawResized(octx,cleanFull,cr,dx,dy,dw,dh);
+    resizeInfo.textContent=dw===sw&&dh===sh
+      ? '等倍：残す画素をそのまま配置します。'
+      : (dw<sw||dh<sh
+        ? '縮小：滑らかな輪郭で保存しますが、出力サイズに収まらない細部は減ります。'
+        : '拡大：滑らかに拡大します。元画像にない細部は増えません。');
 
     processed=true;
     saveBtn.disabled=false;
@@ -1323,3 +1383,4 @@
 </script>
 </body>
 </html>
+
