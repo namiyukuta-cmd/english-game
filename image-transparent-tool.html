@@ -160,7 +160,7 @@
       <label class="check"><input id="keepRatio" type="checkbox">出力サイズの幅・高さを連動</label>
       <label class="check"><input id="pixelMode" type="checkbox">ドット絵（ぼかさない）</label>
     </div>
-    <p class="note">切り抜き枠は、その枠のままPNGへ配置します。人物や物だけを勝手に再拡大しません。iPhoneでは「個別PNGをまとめて保存」→共有シートの「ファイルに保存」で、別々のPNGを1回で保存できます。</p>
+    <p class="note">個別PNGはサイズ未指定なら検出枠の元サイズで保存します。幅・高さを変更した場合だけ指定サイズに合わせます。切り抜き枠の余白も保持します。iPhoneでは「個別PNGをまとめて保存」→共有シートの「ファイルに保存」で、別々のPNGを1回で保存できます。</p>
     <div class="row" style="margin-top:10px">
       <button id="processBtn" class="btn primary" type="button" disabled>透過してプレビュー</button>
       <button id="saveBtn" class="btn save" type="button" disabled>この1枚を保存</button>
@@ -240,6 +240,11 @@
   let detectedRects=[];
   let roughCutMode=false;
   let roughBounds=null;
+  let outputSizeChanged=false;
+  let individualPngFiles=[];
+  let individualPngRevision=0;
+  let individualPngTimer=null;
+  let individualPngUrls=[];
 
   function note(t){status.textContent=t}
   function clampSize(v){return Math.max(1,Math.min(8192,Number(v)||1))}
@@ -269,7 +274,7 @@
     bg=[r,g,b];
     bgChip.style.background='rgb('+r+','+g+','+b+')';
     bgText.textContent='背景色：rgb('+r+', '+g+', '+b+')';
-    processed=false;
+    processed=false;refreshIndividualPngs();
   }
   function updateCropButtons(){
     cropModeBtn.classList.toggle('active',!!cropRect);
@@ -324,6 +329,9 @@
       img=image;
       sourceCanvas.width=image.naturalWidth;
       sourceCanvas.height=image.naturalHeight;
+      outputSizeChanged=false;
+      individualPngRevision++;individualPngFiles=[];
+      clearTimeout(individualPngTimer);clearIndividualLinks();
       outW.value=image.naturalWidth;outH.value=image.naturalHeight;
       outputRatio=image.naturalWidth/image.naturalHeight;
       originalSizeBtn.disabled=false;
@@ -628,6 +636,7 @@
     batchSaveBtn.disabled=false;
     cropRect=null;
     drawDetectedOverlay();
+    prepareIndividualPngs();
   });
 
 
@@ -662,8 +671,10 @@
   }
 
   function renderRectToCanvas(cleanFull,cr){
-    const W=clampSize(outW.value),H=clampSize(outH.value);
-    const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),Number(padding.value)||0));
+    const requestedPad=Math.max(0,Number(padding.value)||0);
+    const W=outputSizeChanged?clampSize(outW.value):clampSize(cr.w+requestedPad*2);
+    const H=outputSizeChanged?clampSize(outH.value):clampSize(cr.h+requestedPad*2);
+    const pad=Math.max(0,Math.min(Math.floor(Math.min(W,H)/2),requestedPad));
     const out=document.createElement('canvas');
     out.width=W;out.height=H;
     const ctx=out.getContext('2d');
@@ -688,6 +699,9 @@
     [...detectedNames.querySelectorAll('[data-detected-name]')].forEach((input,i)=>{
       if(names[i])input.value=names[i];
     });
+    if(individualPngFiles.length){
+      showIndividualLinks(individualPngFiles.map((file,i)=>new File([file],individualName(i),{type:'image/png'})));
+    }
   }
 
   applySequentialNames.addEventListener('click',()=>{
@@ -714,79 +728,94 @@
     note('8人分のNPC名を自動入力しました');
   });
 
-  batchSaveBtn.addEventListener('click',async()=>{
-    if(!img||!detectedRects.length)return;
+  function individualName(i){
+    const input=detectedNames.querySelector('[data-detected-name="'+i+'"]');
+    const base=(fileName.value||'image').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'image';
+    const raw=(input&&input.value)||base+'_'+String(i+1).padStart(2,'0');
+    return (raw.trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\.png$/i,'')||'image_'+String(i+1).padStart(2,'0'))+'.png';
+  }
+
+  function clearIndividualLinks(){
+    const fallback=document.getElementById('batchFallback');
+    if(fallback)fallback.remove();
+    for(const url of individualPngUrls)URL.revokeObjectURL(url);
+    individualPngUrls=[];
+  }
+
+  function showIndividualLinks(files){
+    clearIndividualLinks();
+    const fallback=document.createElement('div');
+    fallback.id='batchFallback';fallback.className='row';fallback.style.marginTop='8px';
+    batchSaveBtn.parentElement.after(fallback);
+    for(const file of files){
+      const url=URL.createObjectURL(file);individualPngUrls.push(url);
+      const link=document.createElement('a');
+      link.className='btn';link.href=url;link.download=file.name;link.textContent=file.name;
+      fallback.appendChild(link);
+    }
+  }
+
+  function refreshIndividualPngs(){
+    individualPngRevision++;individualPngFiles=[];
+    clearTimeout(individualPngTimer);clearIndividualLinks();
     batchSaveBtn.disabled=true;
+    if(img&&detectedRects.length)individualPngTimer=setTimeout(prepareIndividualPngs,150);
+  }
+
+  async function prepareIndividualPngs(){
+    const revision=++individualPngRevision;
+    individualPngFiles=[];batchSaveBtn.disabled=true;
+    if(!img||!detectedRects.length)return;
     note('個別PNGを準備中…');
-
+    let cleanFull;
     try{
-      const cleanFull=getCleanCanvas();
-      const base=(fileName.value||'image')
-        .trim()
-        .replace(/[\\/:*?"<>|]+/g,'_')
-        .replace(/\.png$/i,'') || 'image';
-
+      cleanFull=getCleanCanvas();
       const files=[];
       for(let i=0;i<detectedRects.length;i++){
+        if(revision!==individualPngRevision)return;
         const canvas=renderRectToCanvas(cleanFull,detectedRects[i]);
         const blob=await new Promise((resolve,reject)=>{
           canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG作成失敗')),'image/png');
         });
-
-        const nameInput=detectedNames.querySelector('[data-detected-name="'+i+'"]');
-        const rawName=(nameInput&&nameInput.value
-          ? nameInput.value
-          : base+'_'+String(i+1).padStart(2,'0'));
-        const safeName=rawName
-          .trim()
-          .replace(/[\\/:*?"<>|]+/g,'_')
-          .replace(/\.png$/i,'') || ('image_'+String(i+1).padStart(2,'0'));
-
-        files.push(new File([blob],safeName+'.png',{type:'image/png'}));
+        canvas.width=1;canvas.height=1;
+        files.push(new File([blob],individualName(i),{type:'image/png'}));
       }
-
-      // iPhone/Safariでは、複数の自動ダウンロードは1枚しか保存されないことがある。
-      // そのため、全PNGを1回の共有シートにまとめて渡し、
-      // 「ファイルに保存」で別々のPNGとして一括保存する。
-      if(navigator.share && (!navigator.canShare || navigator.canShare({files}))){
-        await navigator.share({
-          files,
-          title:'背景透過PNG'
-        });
-        note(files.length+'枚の個別PNGを共有しました');
-        return;
-      }
-
-      // 共有APIが使えない端末では、黙って失敗させず保存リンクを並べる。
-      let fallback=document.getElementById('batchFallback');
-      if(!fallback){
-        fallback=document.createElement('div');
-        fallback.id='batchFallback';
-        fallback.className='row';
-        fallback.style.marginTop='8px';
-        batchSaveBtn.parentElement.after(fallback);
-      }
-      fallback.replaceChildren();
-      for(const file of files){
-        const url=URL.createObjectURL(file);
-        const a=document.createElement('a');
-        a.className='btn';
-        a.href=url;
-        a.download=file.name;
-        a.textContent=file.name;
-        a.addEventListener('click',()=>setTimeout(()=>URL.revokeObjectURL(url),2000),{once:true});
-        fallback.appendChild(a);
-      }
-      note('この端末は複数ファイル共有に非対応です。下のPNGを保存してください');
+      if(revision!==individualPngRevision)return;
+      individualPngFiles=files;batchSaveBtn.disabled=false;
+      showIndividualLinks(files);
+      note(files.length+'枚の個別PNGを準備しました。まとめて保存、または下のリンクから1枚ずつ保存できます');
     }catch(e){
-      if(e && e.name==='AbortError'){
-        note('保存をキャンセルしました');
-      }else{
-        note('個別PNGの保存準備に失敗しました');
-      }
+      if(revision===individualPngRevision)note('個別PNGを準備できませんでした：'+(e.message||'処理エラー'));
     }finally{
-      batchSaveBtn.disabled=false;
+      if(cleanFull){cleanFull.width=1;cleanFull.height=1}
     }
+  }
+
+  // Generate files before the save click so iPhone sharing starts during
+  // that click's user activation, without awaiting asynchronous PNG encoding.
+  batchSaveBtn.addEventListener('click',async()=>{
+    if(!img||!individualPngFiles.length)return;
+    const files=individualPngFiles.map((file,i)=>new File([file],individualName(i),{type:'image/png'}));
+    showIndividualLinks(files);
+    batchSaveBtn.disabled=true;
+    try{
+      if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){
+        await navigator.share({files,title:'背景透過PNG'});
+        note(files.length+'枚の個別PNGを共有しました');
+      }else{
+        note('下のPNGリンクから1枚ずつ保存できます');
+      }
+    }catch(e){
+      note(e&&e.name==='AbortError'
+        ? '共有をキャンセルしました。下のPNGリンクからも保存できます'
+        : '共有を開けませんでした。下のPNGリンクから1枚ずつ保存できます');
+    }finally{
+      batchSaveBtn.disabled=!individualPngFiles.length;
+    }
+  });
+
+  detectedNames.addEventListener('input',()=>{
+    if(individualPngFiles.length)showIndividualLinks(individualPngFiles.map((file,i)=>new File([file],individualName(i),{type:'image/png'})));
   });
 
   function setCropRect(r,label='切り抜き範囲を設定しました'){
@@ -942,12 +971,23 @@
     if(!img)return;
     outW.value=img.naturalWidth;outH.value=img.naturalHeight;
     outputRatio=img.naturalWidth/img.naturalHeight;
+    outputSizeChanged=false;refreshIndividualPngs();
     processed=false;saveBtn.disabled=true;
   });
   for(const control of [outW,outH,padding,fitMode,verticalAlign,pixelMode]){
-    control.addEventListener('input',()=>{processed=false;saveBtn.disabled=true});
-    control.addEventListener('change',()=>{processed=false;saveBtn.disabled=true});
+    const changed=()=>{
+      if(control===outW||control===outH)outputSizeChanged=true;
+      processed=false;saveBtn.disabled=true;refreshIndividualPngs();
+    };
+    control.addEventListener('input',changed);
+    control.addEventListener('change',changed);
   }
+
+  for(const control of [tolerance,connectedOnly,allSimilar,protectLines,decontaminate,roughMargin]){
+    control.addEventListener('input',refreshIndividualPngs);
+    control.addEventListener('change',refreshIndividualPngs);
+  }
+  roughCutBtn.addEventListener('click',refreshIndividualPngs);
 
   keepRatio.addEventListener('change',()=>{
     if(keepRatio.checked){
