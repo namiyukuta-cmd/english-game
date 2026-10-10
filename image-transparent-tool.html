@@ -31,6 +31,9 @@
     #sourceCanvas{cursor:crosshair}
     .source-stage{position:relative;display:inline-block;max-width:100%;line-height:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     .source-stage canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .source-stage.erase-zoom{max-width:none}
+    .source-stage.erase-zoom #sourceCanvas{width:100%}
+    .canvasbox.erase-scroll{max-height:65vh}
     #cropOverlay{position:absolute;inset:0;width:100%;height:100%;margin:0;touch-action:none;cursor:crosshair}
     .btn.active{background:#3e3037;color:#fff;border-color:#3e3037}
     .crop-info{font-size:12px;font-weight:700;color:var(--muted)}
@@ -95,7 +98,13 @@
     </div>
     <div class="row" style="margin-top:8px">
       <button id="bgPickBtn" class="btn" type="button" disabled>背景色を選ぶ</button>
+      <button id="tapEraseBtn" class="btn" type="button" aria-pressed="false" disabled>タップした部分だけ消す</button>
+      <button id="tapEraseUndoBtn" class="btn" type="button" disabled>部分消しを1つ戻す</button>
     </div>
+    <label id="tapEraseZoomField" class="field" style="margin-top:8px" hidden>作業用の表示倍率
+      <select id="tapEraseZoom"><option value="1">1倍</option><option value="2">2倍</option><option value="4">4倍</option><option value="8">8倍</option></select>
+    </label>
+    <p id="tapEraseInfo" class="note" role="status">残った背景は「タップした部分だけ消す」を押してからタップ。同じ色でつながった部分だけ消します。離れた場所の同じ色は消しません。</p>
     <label class="field" style="margin-top:10px">
       色の許容範囲 <span id="tolText">35</span>
       <input id="tolerance" type="range" min="0" max="150" value="35">
@@ -185,10 +194,18 @@
   const cropOverlay=document.getElementById('cropOverlay');
   const outputCanvas=document.getElementById('outputCanvas');
   const sctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
+  const originalCanvas=document.createElement('canvas');
+  const originalCtx=originalCanvas.getContext('2d',{willReadFrequently:true});
   const octx=outputCanvas.getContext('2d');
   const bgChip=document.getElementById('bgChip');
   const bgText=document.getElementById('bgText');
   const bgPickBtn=document.getElementById('bgPickBtn');
+  const tapEraseBtn=document.getElementById('tapEraseBtn');
+  const tapEraseUndoBtn=document.getElementById('tapEraseUndoBtn');
+  const tapEraseInfo=document.getElementById('tapEraseInfo');
+  const tapEraseZoomField=document.getElementById('tapEraseZoomField');
+  const tapEraseZoom=document.getElementById('tapEraseZoom');
+  const sourceStage=sourceCanvas.parentElement;
   const tolerance=document.getElementById('tolerance');
   const tolText=document.getElementById('tolText');
   const connectedOnly=document.getElementById('connectedOnly');
@@ -234,6 +251,9 @@
   let processed=false;
   let cropMode=false;
   let bgPickMode=false;
+  let tapEraseMode=false;
+  let erasedPixels=null;
+  let eraseHistory=[];
   let cropRect=null;
   let cropDrag=null;
   let suppressCanvasClick=false;
@@ -279,6 +299,12 @@
   function updateCropButtons(){
     cropModeBtn.classList.toggle('active',!!cropRect);
     bgPickBtn.classList.toggle('active',bgPickMode);
+    tapEraseBtn.classList.toggle('active',tapEraseMode);
+    tapEraseBtn.setAttribute('aria-pressed',String(tapEraseMode));
+    tapEraseBtn.textContent=tapEraseMode?'部分消しを終了':'タップした部分だけ消す';
+    tapEraseUndoBtn.disabled=!eraseHistory.length;
+    tapEraseZoomField.hidden=!tapEraseMode;
+    cropOverlay.style.touchAction=tapEraseMode?'pan-x pan-y':'none';
     cropModeBtn.textContent=cropRect?'切り抜き枠を調整中':'切り抜き枠を出す';
     bgPickBtn.textContent=bgPickMode?'背景をタップしてください':'背景色を選ぶ';
     cropClearBtn.disabled=!img||!cropRect;
@@ -318,6 +344,71 @@
     const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y);
     return {x,y,w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)};
   }
+  function applyErasedPixels(data){
+    if(erasedPixels){
+      for(let n=0;n<erasedPixels.length;n++){
+        if(!erasedPixels[n])continue;
+        const i=n*4;
+        data.data[i]=0;data.data[i+1]=0;data.data[i+2]=0;data.data[i+3]=0;
+      }
+    }
+    return data;
+  }
+  function redrawSource(){
+    if(!img)return;
+    const data=tapEraseMode
+      ? (roughCutMode?roughCutoutSource():transparentSource())
+      : applyErasedPixels(originalCtx.getImageData(0,0,sourceCanvas.width,sourceCanvas.height));
+    sctx.putImageData(data,0,0);
+  }
+  function updateEraseZoom(){
+    sourceStage.classList.remove('erase-zoom');
+    sourceStage.style.width='';
+    sourceStage.parentElement.classList.remove('erase-scroll');
+    if(!tapEraseMode)return;
+    const scale=Number(tapEraseZoom.value);
+    if(scale>1){
+      const width=sourceCanvas.getBoundingClientRect().width;
+      sourceStage.style.width=(width*scale)+'px';
+      sourceStage.classList.add('erase-zoom');
+      sourceStage.parentElement.classList.add('erase-scroll');
+    }
+  }
+  function eraseConnectedAt(x,y){
+    const w=sourceCanvas.width,h=sourceCanvas.height;
+    const data=sctx.getImageData(0,0,w,h).data;
+    const start=y*w+x,i=start*4;
+    if(data[i+3]===0){tapEraseInfo.textContent='ここはすでに透明です。残っている部分をタップしてください。';return}
+    const target=[data[i],data[i+1],data[i+2]];
+    const limit=Number(tolerance.value);
+    const seen=new Uint8Array(w*h),queue=new Int32Array(w*h);
+    let head=0,tail=0;
+    function push(n){
+      if(seen[n])return;
+      seen[n]=1;
+      const index=n*4;
+      // Transparent gaps must not connect separate areas of the same colour.
+      if(data[index+3]!==0&&colorDistance(data,index,target)<=limit)queue[tail++]=n;
+    }
+    push(start);
+    while(head<tail){
+      const n=queue[head++],px=n%w,py=(n/w)|0;
+      if(px>0)push(n-1);
+      if(px<w-1)push(n+1);
+      if(py>0)push(n-w);
+      if(py<h-1)push(n+w);
+    }
+    if(!erasedPixels)erasedPixels=new Uint8Array(w*h);
+    const removed=queue.slice(0,tail);
+    for(const n of removed)erasedPixels[n]=1;
+    eraseHistory.push(removed);
+    // Bound undo memory while always retaining the most recent operation.
+    let bytes=eraseHistory.reduce((sum,item)=>sum+item.byteLength,0);
+    while(eraseHistory.length>1&&(eraseHistory.length>20||bytes>32*1024*1024))bytes-=eraseHistory.shift().byteLength;
+    redrawSource();updateCropButtons();
+    process();refreshIndividualPngs();
+    tapEraseInfo.textContent=tail+'画素を透明にしました。続けて消す場所をタップできます。「部分消しを1つ戻す」で戻せます。';
+  }
   function loadBlob(blob){
     if(!blob || !blob.type || !blob.type.startsWith('image/'))return;
     if(blob.name){
@@ -329,6 +420,12 @@
       img=image;
       sourceCanvas.width=image.naturalWidth;
       sourceCanvas.height=image.naturalHeight;
+      originalCanvas.width=image.naturalWidth;
+      originalCanvas.height=image.naturalHeight;
+      originalCtx.drawImage(image,0,0);
+      tapEraseMode=false;erasedPixels=null;eraseHistory=[];
+      tapEraseZoom.value='1';updateEraseZoom();
+      tapEraseInfo.textContent='残った背景は「タップした部分だけ消す」を押してからタップ。同じ色でつながった部分だけ消します。離れた場所の同じ色は消しません。';
       outputSizeChanged=false;
       individualPngRevision++;individualPngFiles=[];
       clearTimeout(individualPngTimer);clearIndividualLinks();
@@ -360,6 +457,7 @@
       }
       processBtn.disabled=false;
       bgPickBtn.disabled=false;
+      tapEraseBtn.disabled=false;
       cropModeBtn.disabled=false;
       autoDetectBtn.disabled=false;
       roughCutBtn.disabled=false;
@@ -835,14 +933,34 @@
   bgPickBtn.addEventListener('click',()=>{
     if(!img)return;
     bgPickMode=!bgPickMode;
+    tapEraseMode=false;updateEraseZoom();redrawSource();
     cropMode=false;cropDrag=null;
     updateCropButtons();drawCropOverlay();
     note(bgPickMode?'消したい背景を画像上で1回タップしてください':'背景色選択を終了しました');
   });
 
+  tapEraseBtn.addEventListener('click',()=>{
+    if(!img)return;
+    tapEraseMode=!tapEraseMode;
+    bgPickMode=false;cropDrag=null;suppressCanvasClick=false;
+    redrawSource();updateEraseZoom();updateCropButtons();drawCropOverlay();
+    tapEraseInfo.textContent=tapEraseMode
+      ? '上の画像で、消したい背景をタップしてください。小さい部分は表示倍率を上げてください。消す範囲は「色の許容範囲」で調整できます。'
+      : '部分消しを終了しました。消した結果はPNGと個別PNGに反映されます。';
+  });
+  tapEraseZoom.addEventListener('change',updateEraseZoom);
+  tapEraseUndoBtn.addEventListener('click',()=>{
+    if(!eraseHistory.length)return;
+    const removed=eraseHistory.pop();
+    for(const n of removed)erasedPixels[n]=0;
+    redrawSource();updateCropButtons();process();refreshIndividualPngs();
+    tapEraseInfo.textContent='直前の部分消しを戻しました。';
+  });
+
   cropModeBtn.addEventListener('click',()=>{
     if(!img)return;
     bgPickMode=false;
+    tapEraseMode=false;updateEraseZoom();redrawSource();
     if(!cropRect){
       const mx=Math.round(sourceCanvas.width*0.12);
       const my=Math.round(sourceCanvas.height*0.12);
@@ -859,6 +977,7 @@
 
   cropClearBtn.addEventListener('click',()=>{
     cropRect=null;cropMode=false;bgPickMode=false;cropDrag=null;
+    tapEraseMode=false;updateEraseZoom();redrawSource();
     drawCropOverlay();updateCropButtons();
     processed=false;saveBtn.disabled=true;
     note('切り抜きを解除しました');
@@ -866,6 +985,11 @@
 
   cropOverlay.addEventListener('click',e=>{
     if(!img||suppressCanvasClick)return;
+    if(tapEraseMode){
+      const p=overlayPoint(e);
+      eraseConnectedAt(Math.min(sourceCanvas.width-1,p.x),Math.min(sourceCanvas.height-1,p.y));
+      return;
+    }
     if(bgPickMode){
       const pnt=overlayPoint(e);
       const x=Math.max(0,Math.min(sourceCanvas.width-1,pnt.x));
@@ -895,7 +1019,7 @@
   }
 
   cropOverlay.addEventListener('pointerdown',e=>{
-    if(!img||!cropRect||bgPickMode)return;
+    if(!img||!cropRect||bgPickMode||tapEraseMode)return;
     const p=overlayPoint(e);
     const hit=cropHit(p);
     e.preventDefault();
@@ -986,8 +1110,12 @@
   for(const control of [tolerance,connectedOnly,allSimilar,protectLines,decontaminate,roughMargin]){
     control.addEventListener('input',refreshIndividualPngs);
     control.addEventListener('change',refreshIndividualPngs);
+    const redraw=()=>{if(tapEraseMode)redrawSource()};
+    control.addEventListener('input',redraw);
+    control.addEventListener('change',redraw);
   }
   roughCutBtn.addEventListener('click',refreshIndividualPngs);
+  roughCutBtn.addEventListener('click',()=>{if(tapEraseMode)redrawSource()});
 
   keepRatio.addEventListener('change',()=>{
     if(keepRatio.checked){
@@ -1104,7 +1232,7 @@
 
   function roughCutoutSource(){
     const w=sourceCanvas.width,h=sourceCanvas.height;
-    const data=sctx.getImageData(0,0,w,h);
+    const data=originalCtx.getImageData(0,0,w,h);
     const d=data.data;
     const t=Number(tolerance.value);
     const target=bg||[d[0],d[1],d[2]];
@@ -1196,16 +1324,16 @@
     data._roughBounds=(maxX>=minX&&maxY>=minY)
       ? {x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1}
       : null;
-    return data;
+    return applyErasedPixels(data);
   }
 
   function transparentSource(){
     const w=sourceCanvas.width,h=sourceCanvas.height;
-    const data=sctx.getImageData(0,0,w,h);
+    const data=originalCtx.getImageData(0,0,w,h);
     const d=data.data,t=Number(tolerance.value);
     // Partial transparency does not mean that the remaining background is gone.
     // Ignore RGB stored under fully transparent pixels when selecting a colour.
-    if(!bg)return data;
+    if(!bg)return applyErasedPixels(data);
     const target=bg;
 
     if(allSimilar.checked){
@@ -1213,7 +1341,7 @@
         if(d[i+3]&&colorDistance(d,i,target)<=t)d[i+3]=0;
       }
       if(decontaminate.checked)removeEdgeSpill(data,w,h,target);
-      return data;
+      return applyErasedPixels(data);
     }
 
     const seen=new Uint8Array(w*h);
@@ -1277,7 +1405,7 @@
     }
 
     if(decontaminate.checked)removeEdgeSpill(data,w,h,target);
-    return data;
+    return applyErasedPixels(data);
   }
 
 
