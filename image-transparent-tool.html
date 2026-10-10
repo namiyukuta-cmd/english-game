@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fff7fb">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>画像透過・サイズ変更</title>
@@ -46,7 +46,7 @@
     body.erase-editing #tapEraseInfo{order:4;margin:0;flex-shrink:0;color:#3e3037}
     body.erase-editing #tapEraseActions{order:5;flex-shrink:0}
     body.erase-editing .source-stage canvas{image-rendering:pixelated}
-    #cropOverlay{position:absolute;inset:0;width:100%;height:100%;margin:0;touch-action:none;cursor:crosshair}
+    #cropOverlay{position:absolute;inset:0;width:100%;height:100%;margin:0;touch-action:pinch-zoom;cursor:crosshair}
     .btn.active{background:#3e3037;color:#fff;border-color:#3e3037}
     .crop-info{font-size:12px;font-weight:700;color:var(--muted)}
     .detected-name-row{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:center}
@@ -337,7 +337,7 @@
     tapEraseBtn.textContent=tapEraseMode?'部分消しを終了':'タップした部分だけ消す';
     tapEraseUndoBtn.disabled=!eraseHistory.length;
     tapEraseZoomField.hidden=!tapEraseMode;
-    cropOverlay.style.touchAction=tapEraseMode?'pan-x pan-y':'none';
+    cropOverlay.style.touchAction=tapEraseMode?'pan-x pan-y pinch-zoom':'pinch-zoom';
     cropModeBtn.textContent=cropRect?'切り抜き枠を調整中':'切り抜き枠を出す';
     bgPickBtn.textContent=bgPickMode?'背景をタップしてください':'背景色を選ぶ';
     cropClearBtn.disabled=!img||!cropRect;
