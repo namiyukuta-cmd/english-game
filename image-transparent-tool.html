@@ -145,6 +145,7 @@
       <button id="cropModeBtn" class="btn" type="button" disabled>手動で切り抜く</button>
       <button id="cropClearBtn" class="btn" type="button" disabled>切り抜きを解除</button>
     </div>
+    <p class="note">自動検出は横・縦の透明な隙間で区切ります。複数段のアイテムも、上の段から左→右の順に切り抜きます。</p>
     <div id="cropInfo" class="crop-info" style="margin-top:8px">画像全体</div>
     <label class="field" style="margin-top:8px">
       雑切り抜きの白フチ幅 <span id="roughMarginText">35px</span>
@@ -584,53 +585,42 @@
     const ctx=cleanFull.getContext('2d',{willReadFrequently:true});
     const p=ctx.getImageData(0,0,w,h).data;
 
-    // まず列ごとの透明/不透明で分割する。
-    // 横に複数並んだ人物・アイテムは、互いの隙間を境界として別々に検出する。
-    const col=new Uint8Array(w);
-    for(let y=0;y<h;y++){
-      let i=(y*w)*4+3;
-      for(let x=0;x<w;x++,i+=4){
-        if(p[i]>12) col[x]=1;
+    // Split on both axes. A column can contain several separate rows;
+    // detecting horizontal gaps must not stop the vertical search.
+    const minPixels=Math.max(20,w*h*0.00002);
+    const gapX=Math.max(1,Math.round(w*0.002));
+    const gapY=Math.max(2,Math.round(h*0.015));
+    function bands(values,tinyGap){
+      const result=[];
+      let start=-1,last=-1;
+      for(let i=0;i<values.length;i++){
+        if(!values[i])continue;
+        if(start<0)start=i;
+        else if(i-last-1>tinyGap){result.push([start,last]);start=i;}
+        last=i;
       }
+      if(start>=0)result.push([start,last]);
+      return result;
     }
-
-    // 服や腕の中のごく小さい隙間だけ埋める。人物同士の隙間は埋めない。
-    const tinyGap=Math.max(1,Math.round(w*0.002));
-    let last=-1;
-    for(let x=0;x<w;x++){
-      if(!col[x]) continue;
-      if(last>=0 && x-last-1>0 && x-last-1<=tinyGap){
-        for(let k=last+1;k<x;k++) col[k]=1;
-      }
-      last=x;
-    }
-
-    const segments=[];
-    let x=0;
-    while(x<w){
-      while(x<w&&!col[x])x++;
-      if(x>=w)break;
-      const x1=x;
-      while(x<w&&col[x])x++;
-      const x2=x-1;
-
-      let minY=h,maxY=-1,pixels=0;
-      for(let yy=0;yy<h;yy++){
-        let idx=(yy*w+x1)*4+3;
-        for(let xx=x1;xx<=x2;xx++,idx+=4){
-          if(p[idx]>12){
-            pixels++;
-            if(yy<minY)minY=yy;
-            if(yy>maxY)maxY=yy;
-          }
+    function splitRegion(x1,y1,x2,y2){
+      const cols=new Uint8Array(x2-x1+1),rows=new Uint8Array(y2-y1+1);
+      let count=0;
+      for(let y=y1;y<=y2;y++){
+        let i=(y*w+x1)*4+3;
+        for(let x=x1;x<=x2;x++,i+=4){
+          if(p[i]>12){cols[x-x1]=1;rows[y-y1]=1;count++;}
         }
       }
-      if(maxY>=minY && pixels>Math.max(20,w*h*0.00002)){
-        segments.push({x:x1,y:minY,w:x2-x1+1,h:maxY-minY+1,count:pixels});
-      }
+      if(count<=minPixels)return [];
+      const horizontal=bands(rows,gapY);
+      // Rows first gives top-to-bottom, then left-to-right numbering.
+      if(horizontal.length>1)return horizontal.flatMap(([a,b])=>splitRegion(x1,y1+a,x2,y1+b));
+      const vertical=bands(cols,gapX);
+      if(vertical.length>1)return vertical.flatMap(([a,b])=>splitRegion(x1+a,y1,x1+b,y2));
+      const [left,right]=vertical[0], [top,bottom]=horizontal[0];
+      return [{x:x1+left,y:y1+top,w:right-left+1,h:bottom-top+1}];
     }
-
-    // 横並び画像なら、この分割をそのまま採用する。
+    const segments=splitRegion(0,0,w-1,h-1);
     if(segments.length>=2){
       const marginX=Math.max(4,Math.round(w*0.006));
       const marginY=Math.max(6,Math.round(h*0.012));
@@ -643,7 +633,7 @@
       });
     }
 
-    // 横の隙間が無い画像だけ、連結成分で補助検出する。
+    // 縦横の隙間が無い画像は、連結成分で補助検出する。
     const mask=new Uint8Array(w*h);
     for(let i=0,n=0;i<p.length;i+=4,n++) mask[n]=p[i+3]>12?1:0;
 
@@ -651,7 +641,7 @@
     const qx=new Int32Array(w*h);
     const qy=new Int32Array(w*h);
     const comps=[];
-    const minPixels=Math.max(30,Math.round(w*h*0.00008));
+    const minComponentPixels=Math.max(30,Math.round(w*h*0.00008));
 
     for(let yy=0;yy<h;yy++){
       for(let xx=0;xx<w;xx++){
@@ -673,7 +663,7 @@
             }
           }
         }
-        if(count>=minPixels) comps.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,count});
+        if(count>=minComponentPixels) comps.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,count});
       }
     }
 
